@@ -4,10 +4,8 @@
 \usepackage{rotating}
 \usepackage{graphicx}
 
-% Document starts
 \begin{document}
 
-% Title portion
 \title{Local Tuning in Multilevel Scheme of Parallel Global Optimization}
 
 \author[aff1]{Konstantin Barkalov\corref{cor1}}
@@ -40,17 +38,16 @@ Second, we shall assume that $\phi(y)$ satisfies Lipschitz condition
 \begin{displaymath}
 |\phi(y_1)-\phi(y_2)|\leqslant L\Vert y_1-y_2\Vert,y_1,y_2\in D,0<L<\infty
 \end{displaymath}
-that is typical for the applied problems [1–4].
+that is typical for the applied problems \citep{automaticaAppl,svmAppl,recogAppl,determApproaches}.
 
-Solving the multiextremal optimization problems is significantly more computationally intensive as compared with other types of optimization problems, since the global optimum is an integral characteristic of the problem solved and requires an analysis of the whole search domain. The efficient algorithms for solving the problems of this kind have been developed in Lobachevsky State University of Nizhnii Novgorod within the framework of the information-statistical approach [5, 6]. At present, the parallelization of the algorithms is the main direction of further development of these ones since the use of the supercomputer systems and of the parallel computing technologies allows expanding the field of application of the global optimization algorithms essentially [7 – 12].
+Solving the multiextremal optimization problems is significantly more computationally intensive as compared with other types of optimization problems, since the global optimum is an integral characteristic of the problem solved and requires an analysis of the whole search domain. The efficient algorithms for solving the problems of this kind have been developed in Lobachevsky State University of Nizhnii Novgorod within the framework of the information-statistical approach \citep{strongSerg,strongSergLera}. At present, the parallelization of the algorithms is the main direction of further development of these ones since the use of the supercomputer systems and of the parallel computing technologies allows expanding the field of application of the global optimization algorithms essentially \citep{parAlg,parAlg2,gergelLNCS,gergelStrParComputing,mixedAlgLNCS,barkXeon}.
 
-This paper continues the series of studies the initial results of which were provided in [13,14].
+This paper continues the series of studies the initial results of which were provided in \citep{barkGergNestedScheme,localTuning}.
 
 \section{PARALLEL ALGORITHM FOR SOLVING THE MULTIDIMENSIONAL PROBLEMS}
 
-% Head 2
 \subsection{DIMENSION REDUCTION}
-There is a number of ways to adapt effective one-dimensional algorithms for solving multidimensional problems; see, for example, the diagonal partitions method in [15,16] or the simplicial partitions method in [17]. 
+There is a number of ways to adapt effective one-dimensional algorithms for solving multidimensional problems; see, for example, the diagonal partitions method in \citep{sergKvaDiagNew,kvasovDiag} or the simplicial partitions method in \citep{DISIMPL}. 
 
 In the present study, we will use a mixed scheme of the dimension reduction utilizing Peano curve and the nested optimization scheme. Such schemes (used separately) allow reducing the solving of the multidimensional optimization problems to the solving of one or several linked one-dimensional optimization problems.
 
@@ -70,7 +67,7 @@ y=(y_1, y_2, \dots ,y_N)=(u_1,u_2,\dots,u_M),
 \end{equation}
 
 In scheme (\ref{nestedScheme}), the nested subproblems are the multidimensional ones, and the dimension reduction method based on Peano curves can be applied for solving of these ones. The number of vectors $u_i$ and the quantity of components in each vector are the parameters of the block recursion scheme and can be utilized for the forming of the subproblems with necessary properties. For example, if $M=N$ i. e. $u_i=u_i,1\leqslant i\leqslant N$ , then each nested subproblem is a one-dimesional one. If $M=1$ i. e. $u=u_1=y$ , then solving the problem is an equivalent to its solving using a single evolvent mapping $[0,1]$ onto $D$; the nested subproblems are absent.
-The issues of the numerical construction of the Peano curve approximations and of using the nested optimization scheme are considered in details in [3,4].
+The issues of the numerical construction of the Peano curve approximations and of using the nested optimization scheme are considered in details in \citep{recogAppl,determApproaches}.
 
 \subsection{PARALLEL GLOBAL SEARCH ALGORITHM}
 To solve the one-dimensional subproblems in the nested optimization scheme, we will use characteristical global search algorithm (GSA).
@@ -83,7 +80,7 @@ The first iteration $x^1$ is executed in an arbitrary internal point of the sear
 \item To compute the next iteration point $x^{k+1}$ in the interval with the maximum characteristic i. e. $x^{k+1}\in (x_{t-1},x_t)$.
 \end{enumerate}
 
-A detailed description of various variants of this algorithm is presented in [5, 18, 19, 20].
+A detailed description of various variants of this algorithm is presented in \cite{strongSerg,gergelDerivMethod,branchBoundAlg,barkAdaptConstr}.
 
 One of the methods of the parallelization of the characteristic algorithms is based on the following consideration. The characteristic of an interval $R(t)$ can be considered as a measure of importance of this interval for the following search for the solution in this one. Therefore, after the selection of the trial point for the first processor in full accordance with the sequential algorithm. It is reasonable to choose the trial point for the second processor from the next interval in importance (i. e. from the interval with the next value of characteristic in the decreasing order), etc. A parallel algorithm constructed in such a way would differ from its sequential prototype by rules 3 and 4 only, namely:
 \begin{enumerate}
@@ -96,11 +93,11 @@ x^{k+j} \in (x_{t_j - 1}, x_{t_j}),1\leqslant j \leqslant p
 
 in the intervals corresponding to these characteristics.
 
-Various variants of the parallel algorithms based on this idea are presented in [7-12].
+Various variants of the parallel algorithms based on this idea are presented in \citep{parAlg,parAlg2,gergelLNCS,gergelStrParComputing,mixedAlgLNCS,barkXeon}.
 
 % Head 3
 \subsubsection{MIXED LOCAL-GLOBAL ALGORITHM}
-A scheme aimed at the acceleration of the search process is outlined in this subsection. The idea of acceleration is to magnify the characteristics of the intervals containing the best current estimates by introducing some factor depending on the function values estimated at the end points of the corresponding interval. Following this idea, the “local” characteristics of the intervals can be introduced [5, 21].
+A scheme aimed at the acceleration of the search process is outlined in this subsection. The idea of acceleration is to magnify the characteristics of the intervals containing the best current estimates by introducing some factor depending on the function values estimated at the end points of the corresponding interval. Following this idea, the “local” characteristics of the intervals can be introduced \citep{strongSerg,indexMethod}.
 
 Next, it is possible to build a scheme mixing the 'global' and the 'local' decision rules, i. e. switching between these ones in some systematic way. In our experiments, we use global-to-local ratio q, specifying the number of global trials preceding each local trial.
 
@@ -114,7 +111,7 @@ The mixed strategy has the following features:
 \section{NUMERICAL EXPERIMENTS}
 Computing experiments were carried out on Lobachevsky supercomputer. Each supercomputer node included two Intel Sandy Bridge E5-2660 2.2 GHz CPU and 64 Gb RAM. Each CPU had 8 cores (total 16 cores per a node). For the implementation of the parallel algorithm, Intel C++ Compiler 14.0.2 was used.
 
-The problems generated by GKLS generator [22] were used as the test ones. This generator allows generating the multiextremal optimization problems with the properties known in advance: number of local minima, size of attraction domains, global minimum point, function values, etc. The experiment included solving a series of 200 problems with $N=4$ and $N=5$. The global minimum $y^*$ was considered to be found, if the algorithm generates a trial point $y^k$ in its $\delta$-vicinity $\Vert y^k-y^*\Vert\leqslant \delta$. The size of the vicinity was selected as $\delta=0.01\Vert b- a\Vert$ where $a$ and $b$ were the borders of the search domain $D$. The maximum allowable number of trials was $K_{max} = 10^6$.
+The problems generated by GKLS generator \citep{GKLS} were used as the test ones. This generator allows generating the multiextremal optimization problems with the properties known in advance: number of local minima, size of attraction domains, global minimum point, function values, etc. The experiment included solving a series of 200 problems with $N=4$ and $N=5$. The global minimum $y^*$ was considered to be found, if the algorithm generates a trial point $y^k$ in its $\delta$-vicinity $\Vert y^k-y^*\Vert\leqslant \delta$. The size of the vicinity was selected as $\delta=0.01\Vert b- a\Vert$ where $a$ and $b$ were the borders of the search domain $D$. The maximum allowable number of trials was $K_{max} = 10^6$.
 
 First, let us consider the results of experiments corresponding to the sequential algorithm. Let us compare initial GSA and mixed local-global algorithm. The CPU time consumption for the solving of four series of problems from Simple and Hard classes are presented in Table \ref{tab:mixedResults}(a) and the numbers of the executed search trials subject to global-to-local ratio $q$ are presented in Table \ref{tab:mixedResults}(b). The row denoted as "---" corresponds to the algorithm without the local refining. The results demonstrate the reduction of the computation time as well as of the number of iterations when using the local-global search strategy. Also, it is seen that the best results have been achieved at the mixing parameters $q=2$ and $q=4$. The less and greater values of this parameter were insufficient. Therefore, the results of investigation of the mixed parallel algorithm will be presented for the value of parameter $q=4$.
 
