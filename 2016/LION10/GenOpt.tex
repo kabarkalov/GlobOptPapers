@@ -23,7 +23,16 @@
 \mainmatter 
 
 \title{Solving GENOPT problems \newline with the use of ExaMin solver}
-\author{Konstantin Barkalov (\email{konstantin.barkalov@itmm.unn.ru}[\Letter]) \and Alexander Sysoyev (\email{sysoyev@vmk.unn.ru})  \and Ilya Lebedev \email{lebedev.ilya.g@gmail.com } \and Vladislav Sovrasov (\email{sovrasov.vlad@gmail.com}) }
+\author{Konstantin Barkalov \Letter \and Alexander Sysoyev \and \\ Ilya Lebedev \and Vladislav Sovrasov \\
+\email{ \{konstantin.barkalov,alexander.sysoyev,ilya.lebedev,\\vladislav.sovrasov\}@itmm.unn.ru}}
+
+%\author{Konstantin Barkalov \Letter \and Alexander Sysoyev \and \newline Ilya Lebedev \and Vladislav Sovrasov \email{[konstantin.barkalov,alexander.sysoyev,ilya.lebedev,\newline vladislav.sovrasov]@itmm.unn.ru}}
+
+
+
+%\author{Konstantin Barkalov \Letter \and Alexander Sysoyev \and Ilya Lebedev \and Vladislav Sovrasov \email{[konstantin.barkalov,alexander.sysoyev,ilya.lebedev,\newline vladislav.sovrasov]@itmm.unn.ru}}
+
+%\author{Konstantin Barkalov ( \Letter~\email{konstantin.barkalov@itmm.unn.ru})  \and \\ Alexander Sysoyev (\email{alexander.sysoyev@itmm.unn.ru}) \and \\ Ilya Lebedev (\email{ilya.lebedev@itmm.unn.ru})  \and \\ Vladislav Sovrasov (\email{vladislav.sovrasov@itmm.unn.ru}) }
 
 \institute{Lobachevsky State University of Nizhny Novgorod, Nizhny Novgorod, Russia}
 
@@ -47,7 +56,7 @@ Among such generators for the one-dimensional problems, there are samples from F
 
 A generator for a random sampling of two-dimensional test functions has been proposed in \cite{Grishagin1978}. A generator for the functions of arbitrary dimensionality with known positions of the local and global minima (GKLS generator) has been proposed in \cite{Gaviano}. Its application for the studying of some multidimensional algorithms has been described in \cite{Kvasov2003,Sergeyev2013}.
 
-This approach to the comparison of the algorithms has been used by the organizers of GENeralization-based contest in global OPTimization (GENOPT). The functions to be optimized are broadly divided into three function families: GKLS, conditioned transforms of classical benchmarks (Rosenbrock (unimodal, narrowing bending valley), Rastrigin (strongly multimodal), Zakharov (unimodal)), and a composition of classical benchmarks. In their turn, each family is subdivided into six function types, which differ by their analytical definition and by the number of dimensions. The functions belonging to the same type share the majority of properties and can be assumed to have the same difficulty. Finally, every function type of every family is realized into an unlimited number of function instances which differ by some randomly generated parameters. In particular, every instance will have a randomly generated offset $c\in[-1,1]$ added to the function’s output in order to make the global minimum value unpredictable. A detailed description of the competition problems can be found at the website \url{http://genopt.org}.
+Approach to the comparison of the algorithms by solving a set of test problems has been used by the organizers of GENeralization-based contest in global OPTimization (GENOPT). The functions to be optimized are broadly divided into three function families: GKLS, conditioned transforms of classical benchmarks (Rosenbrock (unimodal, narrowing bending valley), Rastrigin (strongly multimodal), Zakharov (unimodal)), and a composition of classical benchmarks. In their turn, each family is subdivided into six function types, which differ by their analytical definition and by the number of dimensions. The functions belonging to the same type share the majority of properties and can be assumed to have the same difficulty. Finally, every function type of every family is realized into an unlimited number of function instances which differ by some randomly generated parameters. In particular, every instance will have a randomly generated offset $c\in[-1,1]$ added to the function’s output in order to make the global minimum value unpredictable. A detailed description of the competition problems can be found at the website \url{http://genopt.org}.
 
 An efficient approach for solving global optimization problems has been developed under the supervision by prof. R.G. Strongin at Lobachevsky State University of Nizhni Novgorod \cite{Sergeyev1994} -- \cite{Barkalov2016}. Within the framework of this approach, solving multidimensional global optimization problems is reduced to solving a set of the corresponding one-dimensional ones. The corresponding dimension reduction is based on the use of Peano space-filling curves (also called \textit{evolvents}), unambiguously mapping the unit interval of the real axis onto a hypercube, as well as the generalization of these ones, which can be applied to solving the problems using the multiprocessor systems. The proposed algorithms have been implemented in ExaMin solver applied to solving the problems within GENOPT competition. In the present work, a brief description of the global optimization algorithm applied and of its modifications are given, and the results of the computational experiments with the problems of the competition are presented.
 
@@ -172,7 +181,11 @@ and the vector
 y_k^\ast=\arg \min_{y \in \{ y^1,...,y^k\} }\varphi(y).
 \]
 
-Let us illustrate the work of this \textit{global search algorithm} (GSA) for minimization of a multiextremal function of two variables generated by GKLS generator \cite{Gaviano}. %function No 4, simple
+%new
+This \textit{global search algorithm} (GSA) was developed in the framework of information - statistical approach (see \cite{Strongin2000}). From this point of view the normalized characteristics $R(i)$ from (\ref{eq:14}) can be considered as probabilities of locating the global minimum within the interval  $(x_{i-1},x_i), 1\leq i \leq k+1$. Thus, at each iteration a new trial point is selected inside the interval, which has the greatest probability of finding the global minimum.
+At the same time, use of running estimates (\ref{eq:11}) of Lipschitz constant $L$ allows us to apply GSA to the problems with a priori unknown values of $L$. 
+
+Let us illustrate the work of GSA for minimization of a multiextremal function of two variables generated by GKLS generator \cite{Gaviano}. %function No 4, simple
 The experiment used the method parameters $r=3$, $\epsilon=10^{-3}$, and the evolvent construction parameter $m=10$. Fig.~\ref{fig:1} shows the level lines of the function and the points of 421 trials carried out by the method before the required accuracy was obtained.
 \begin{figure}
 	\center
@@ -200,7 +213,8 @@ than $\overline{y}$ is a global minimizer of the function $\varphi (y)$ over $D$
 
 \section{Tuning the method for GENOPT problems}\label{sec:3}
 
-The organizers of GENOPT competition have offered 18 classes of problems ($n=0,1,2$, see table \ref{tab:problems}). In each class, 100 functions have been given.
+The organizers of GENOPT competition have offered 18 classes of problems (see table \ref{tab:problems}, %new
+where last two rows correspond to six classes of composite functions with $n=0,1,2$). In each class, 100 functions have been given.
 
 \begin{table}
 	\caption{The classes of problems to be solved within the competition}
@@ -230,11 +244,13 @@ The organizers of GENOPT competition have offered 18 classes of problems ($n=0,1
 	\end{tabular}
 \end{table}
 
-The limit of 1 million computations of the function (trials) imposed by the organizers is essential for finding the global minimum of the functions with given dimensionalities. Thus, even for the 10-dimensional problems, having built a uniform grid with four points in each dimension, one goes already out of the 1 million points limit. The efficient algorithms, building the grids not dense everywhere, place the trials much more efficiently. However, for the 30-dimensional problems such an efficiency appears to be not enough as well. In this section, we describe four modifications of the core method used in solving various problems within the competition. The first two modifications have been applied to all problems, the third one – to the problems of GKLS class, and the last one has been used for solving the problems with Rastrigin, Rosenbrock, and Zakharov functions.
+The limit of 1 million computations of the function (trials) imposed by the organizers is essential for finding the global minimum of the functions with given dimensionalities. Thus, even for the 10-dimensional problems, having built a uniform grid with four points in each dimension, one goes already out of the 1 million points limit. %new
+The global optimization algorithms that build non-uniform grid in the search domain put the points more efficiently. %new
+However, for the 30-dimensional problems such an efficiency appears to be not enough as well. In this section, we describe four modifications of the core method used in solving various problems within the competition. The first two modifications have been applied to all problems, the third one – to the problems of GKLS class, and the last one has been used for solving the problems with Rastrigin, Rosenbrock, and Zakharov functions.
 
 \subsection{Mixed global-local algorithm}\label{mixed}
 
-One scheme aiming to accelerate the search process is to be outlined in this subsection (other schemes described in \cite{Kvasov2006,Kvasov2015} ). The idea of acceleration is to magnify the characteristics of the intervals containing the best current estimates by introducing some factor depending on the function values estimated at the end-points of the corresponding interval. Following this idea, we introduce the modified characteristics 
+One scheme aiming to accelerate the search process is to be outlined in this subsection (other schemes are described, for example, in \cite{Kvasov2006,Kvasov2015} ). The idea of acceleration is to magnify the characteristics of the intervals containing the best current estimates by introducing some factor depending on the function values estimated at the end-points of the corresponding interval. Following this idea, we introduce the modified characteristics 
 \begin{equation}\label{eq:localR}
   R_\alpha(i) = \frac{R(i)}{\sqrt{(z_i-\varphi_k^\ast)(z_{i-1}-\varphi_k^\ast)}+\mu (1.5)^{-\alpha}},
 \end{equation}
@@ -353,7 +369,8 @@ In the final stage of the competition, ExaMin solver has taken the 3rd prize in 
 	\end{tabular}
 \end{table}
 
-The modification with the separable stage with the precision $0.02$ for the stop condition of one-dimensional GSA was used for all classes except GKLS. When solving the GKLS problems, the modifications from subsections \ref{mixed} and \ref{hooke} have been used first, then modification from subsection \ref{random} was applied. The distribution of the number of the solved tasks with the use of random search and without the one is presented in table \ref{tab:randsolved}.
+The modification with the separable stage with the precision $0.02$ for the stop condition of one-dimensional GSA was used for all classes except GKLS. When solving the GKLS problems, the modifications from subsections \ref{mixed} and \ref{hooke} have been used first, then modification from subsection \ref{random} was applied. %new
+The number of the solved problems with and without random search is presented in table \ref{tab:randsolved}.%new
 
 \begin{table}
 	\caption{Total number of solved tasks from different classes}
@@ -361,7 +378,7 @@ The modification with the separable stage with the precision $0.02$ for the stop
 	\center
 	\begin{tabular}{ccc}
 		\hline\noalign{\smallskip}
-	Class &  \parbox[c]{3cm}{ \centering  Solved without\\random mod}   & \parbox[c]{3cm}{ \centering Solved with\\random mod}    \\
+	Class &  \parbox[c]{3cm}{ \centering  Solved without\\random mode}   & \parbox[c]{3cm}{ \centering Solved with\\random mode}    \\
 	\noalign{\smallskip} \hline \noalign{\smallskip}		
 		GKLS--nd--10 & 78 & 99 \\
 		GKLS--nd--30 & 0 & 15 \\
@@ -375,11 +392,11 @@ The modification with the separable stage with the precision $0.02$ for the stop
 
 
 \section{Conclusion}
-In this work, the results of solving of the 10- and 30-dimensional problems of the unconditional global optimization from GenOpt 2016 competition are presented. The optimization methods used and the modifications of these ones directed onto the obtaining of a solution at given limitation of 1 million trials (computations of the objective function) are described. All the modifications considered are implemented in ExaMin solver employed in the conducting of the experiments. The numerical experiments have been carried out using Lobachevsky supercomputer \cite{Lobach}.\\
+In this work, the results of solving of the 10- and 30-dimensional problems of the unconditional global optimization from GenOpt 2016 competition are presented. The optimization methods used and the modifications of these ones directed onto the obtaining of a solution at given limitation of 1 million trials (computations of the objective function) are described. All the modifications considered are implemented in ExaMin solver employed in the conducting of the experiments. The numerical experiments have been carried out using Lobachevsky supercomputer \cite{Lobach}.
 
 %\subsection{Acknowledgements}
 
-\textbf{Acknowledgements.}This study was supported by the Russian Science Foundation, project No 15-11-30022 ``Global optimization, supercomputing computations, and applications''.
+\textbf{Acknowledgements.} This study was supported by the Russian Science Foundation, project No 15-11-30022 ``Global optimization, supercomputing computations, and applications''.
 
 \begin{thebibliography}{99}
 \bibitem{Hill}
