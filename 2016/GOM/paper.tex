@@ -54,6 +54,7 @@ computer systems, supercomputer technologies
 \end{keywords}
 
 \section{Introduction}
+\label{sec:intro}
 Global (or multiextremal) optimization problems are among the most complex problems
 in both theory and practice for optimal decision making. In these kinds of problems,
 the criterion to be optimized has several local optima within the search domain,
@@ -303,8 +304,8 @@ presented as follows --- see (Strongin, R. G., 1978), (Strongin, R. G., Sergeyev
 \par
 Let us introduce a simpler notation for the problem being solved on a computing node
 \begin{equation}
-\label{eq:oneDimTask}
-f(x) = \varphi(y(x)):x\in [0;1]\}
+\label{eq:oneDimFunc}
+f(x) = \varphi(y(x)):x\in [0,1]\}
 \end{equation}
 \par
 The initial iteration of the algorithm is performed at an arbitrary point \(x^1(0,1)\).
@@ -318,6 +319,74 @@ The selection of the trial point \(k+1\) for the next iteration is performed acc
 
 \section{Globalizer System Architecture}
 \label{sec:arch}
+As previously mentioned in Section \ref{sec:intro}, the development of software systems
+for global optimization is complex professional work. The optimization systems should
+include advanced optimization methods, provide for the accumulation and efficient
+processing of search information, include various forms of visualization for the results,
+provide tools for interacting with users, etc. All the features pointed out above
+become much more complicated when organizing parallel computations using high-performance
+multiprocessor systems of varying architectures.
+\par
+The Globalizer considered in this paper expands the family of global optimization
+software systems successively developed by the authors during the past several years.
+One of the first developments was the SYMOP multiextremal optimization system (see Gergel, V. P., 1993),
+which has been successfully applied for solving many optimization problems. A special
+place is occupied by the ExaMin system (see, for example, (Barkalov, K., Gergel V., 2015)),
+which was developed and used extensively to investigate the application of novel parallel
+algorithms to solve global optimization problems using high-performance multiprocessor computing systems.
+
+\begin{figure}[h!]
+    \centering
+		\includegraphics[width=0.75\textwidth]{pictures/globalizerScheme.eps}
+		\caption{The Globalizer system architecture (Blocks 1-2, 5-7 have been implemented; Blocks 3-4 and 8-11 are under development)}
+    \label{fig:globalizerScheme}
+\end{figure}
+
+\par
+The Globalizer system architecture is presented in Figure \ref{fig:globalizerScheme}. The structural components are:
+\begin{itemize}
+  \item Block 0 consists of the procedures for computing the function values (criteria
+  and constraints) for the optimization problem being solved; this is an external
+  block with respect to the Globalizer system and is provided by the user per a predefined interface.
+  \item Blocks 1-4 form the optimization subsystem and solve the global optimization
+  problems (Block 1), nonlinear programming (Block 2), multicriterial optimization (Block 3),
+  and general decision making problems (Block 4). It is worth noting the sequential
+  scheme of interaction between these components --- the decision making problems are
+  solved using the multicriterial optimization block, which, in turn, uses the nonlinear programming block, etc.
+  \item Block 5 is a subsystem for accumulating and processing the search information;
+  this is one of the basic subsystems --- the amount of search information for complex
+  optimization problems may appear to be quite large on the one hand, but, on the other
+  hand, the efficiency of the global optimization methods depends to a great extent on how
+  completely all of the available search data is utilized.
+  \item Block 6 contains the dimensional reduction procedures based on Peano evolvents;
+  the optimization blocks solve the reduced (one-dimensional) optimization problems;
+  Block 6 provides interaction between the optimization blocks and the initial
+  multidimensional optimization problem.
+  \item Block 7 organizes the choice of parallel computation schemes in the Globalizer
+  system subject to the computing system architecture employed (the numbers of cores in the
+  processors, the availability of shared and distributed memory, the availability of
+  accelerators for computations, etc.) and the global optimization methods applied.
+  \item Block 8 is responsible for managing the parallel processes when performing the
+  global search (determining the optimal configuration of parallel processes, distributing
+  the processes between computer elements, balancing computational loads, etc.).
+  \item Block 9 is a common managing subsystem, which fully controls the whole
+  computational process when solving global optimization problems.
+  \item Block 10 is responsible for organizing the dialog interaction with users for
+  stating the optimization problem, adjusting system parameters (if necessary), and
+  visualizing and presenting the global search results.
+  \item Block 11 is a set of tools for visualizing and presenting the global search results;
+  the availability of tools for visually presenting the computational results enables
+  the user to provide efficient control over the global optimization process.
+\end{itemize}
+%Figure 3. The Globalizer system architecture (Blocks 1-2, 5-7 have been implemented; Blocks 3-4 and 8-11 are under development)
+\par
+The Globalizer system comes in two different options:
+\begin{itemize}
+  \item Globalizer Pro is a research version of the system providing a full set of
+  capabilities that are oriented toward solving of the most complicated global optimization problems.
+  \item Globalizer Lite is a limited version of the Globalizer system accessible for free for
+  solving global optimization problems with a medium level of difficulty, and is accessible free of charge.
+\end{itemize}
 \section{Results of Numerical Experiments}
 \label{sec:experiments}
 \subsection{Parallel Computations Using Intel Xeon Phi processors}
