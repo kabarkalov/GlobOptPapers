@@ -14,6 +14,7 @@
 
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
+\DeclareMathOperator{\sign}{sign}
 
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}
@@ -357,7 +358,7 @@ at the point \(x^{k+1}\) located within the interval with the maximum characteri
 \begin{equation}
 \label{step5}
 \begin{array}{cr}\\
-  x_{k+1}=\dfrac{x_t+x_{t-1}}{2}-sign(z_{t}-z_{t-1})\dfrac{1}{2r}\left[\dfrac{|z_{t}-z_{t-1}|}{\mu}\right]^N,\quad 1<t<k+1 \\
+  x_{k+1}=\dfrac{x_t+x_{t-1}}{2}-\sign(z_{t}-z_{t-1})\dfrac{1}{2r}\left[\dfrac{|z_{t}-z_{t-1}|}{\mu}\right]^N,\quad 1<t<k+1 \\
   x_{k+1}=\dfrac{x_t+x_{t-1}}{2},\quad t=k+1
 \end{array}
 \end{equation}
@@ -419,7 +420,7 @@ intervals with the highest characteristics from (\ref{step4par})
 \begin{equation}
 \label{step5par}
 \begin{array}{cr}\\
-x_{k+j}=\dfrac{x_{t_j}+x_{t_j-1}}{2}-sign(z_{t_j}-z_{t_j-1})\dfrac{1}{2r}\left[\dfrac{|z_{t_j}-z_{t_j-1}|}{\mu}\right]^N,\quad 1<t_j<k+1 \\
+x_{k+j}=\dfrac{x_{t_j}+x_{t_j-1}}{2}-\sign(z_{t_j}-z_{t_j-1})\dfrac{1}{2r}\left[\dfrac{|z_{t_j}-z_{t_j-1}|}{\mu}\right]^N,\quad 1<t_j<k+1 \\
 x_{k+j}=\dfrac{x_{t_j}+x_{t_j-1}}{2},\quad t_j=1,t_j=k+1
 \end{array}
 \end{equation}
@@ -637,15 +638,50 @@ and then were reproduced using the Globalizer system.
 
 \subsection{Parallel Computations Using Intel Xeon Phi processors}
 The results of the numerical experiments with GPMAGS on an Intel Xeon Phi are provided in Table 1.
-The computations were performed using the Simple and Hard function classes with the dimensions equal to 4 and 5. The parameters  at  and  at  were used. When using the GPMAGS method, the parameter  was selected for the Simple class, and  was selected for the Hard class.
+The computations were performed using the Simple and Hard function classes with the
+dimensions equal to 4 and 5. The parameters \(\Delta=10^{-6}\) at \(N=4\) and \(\Delta=10^{-6}\) at \(N=5\)
+were used. When using the GPMAGS method, the parameter \(r=4.5\) was selected for the
+Simple class, and \(r=5.6\) was selected for the Hard class.
 \par
-In the first series of experiments, serial computations using MAGS were executed. The average number of iterations performed by the method for solving a series of problems for each of these classes is shown in row I. The symbol “>” reflects the situation where not all problems of a given class were solved by a given method. It means that the algorithm was stopped once the maximum allowable number of iterations Kmax was achieved. In this case, the Kmax value was used for calculating the average number of iterations corresponding to the lower estimate of this average value. The number of unsolved problems is specified in brackets.
+In the first series of experiments, serial computations using MAGS were executed.
+The average number of iterations performed by the method for solving a series of
+problems for each of these classes is shown in row I. The symbol ``\(>\)'' reflects the
+situation where not all problems of a given class were solved by a given method.
+It means that the algorithm was stopped once the maximum allowable number of
+iterations \(K_{max}\) was achieved. In this case, the \(K_{max}\) value was used for
+calculating the average number of iterations corresponding to the lower estimate of
+this average value. The number of unsolved problems is specified in brackets.
 \par
-In the second series of experiments, parallel computations were executed on a CPU. The relative “speedup” in iterations achieved is shown in row II; the speedup of parallel computations was measured in relation to the sequential computations (p=1).
+In the second series of experiments, parallel computations were executed on a CPU.
+The relative ``speedup'' in iterations achieved is shown in row II; the speedup of
+parallel computations was measured in relation to the sequential computations (\(p=1\)).
 
 
+
+\par
+The final series of experiments was executed using a Xeon Phi. The results of these
+computations are shown in row III; in this case, the speedup factor is calculated in
+relation to the PMAGS results on a CPU using eight cores (\(p=8\)). It can be noted that
+relatively high speedup was achieved. For example, solving a problem from the 5-Hard class
+required on average only 633 parallel iterations on the Xeon Phi, whereas the number of
+iterations was more than 37 thousand when using all of the CPU’s computing cores.
 
 \subsection{Parallel Computations Using General Purpose Graphic Processors}
+In the first series of experiments, only one graphic accelerator was used for solving
+100 6-diminsional problems. The method’s reliability parameter \(r=4.5\) was selected.
+\par
+The average problem solving time using a GPU was 10.78 sec. whereas the averaged problem
+solving time using all of the node’s 16 CPU cores was 53.8 sec.; an almost 5-fold improvement was observed.
+\par
+A larger scale computational experiment was carried out for the problems with
+dimensions of \(N=8\) and \(N=10\): a total of 12 nodes within a cluster with 36
+graphic accelerators (three accelerators per node) were employed, therefore, a total
+of 96768 CUDA-cores were employed.
+\par
+The average time to solve the 8-dimensional problem was 405.6 seconds, 5.9 times
+faster than the CPU version of the algorithm. The average time to solve the
+10-dimensional problem was 2,055.8 sec. The CPU was not used to solve the 10-dimensional
+problem because of the high degree of complexity in the computations.
 
 \section{Conclusions}
 \label{sec:concl}
