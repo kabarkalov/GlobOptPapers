@@ -97,18 +97,18 @@
 \keywords{advanced numerical methods, deterministic global optimization, speedup of convergence, derivative-free algorithms}
 
 \begin{abstract}
-  In the present paper, one of the methods of accounting for the local information on
-  the objective function in the Lipschitz global optimization problems has been considered.
-  In the course of solving such problems, a problem of estimating Lipschitz constant of the
-  objective function arises. According to the classic scheme, such an estimate is a single one
-  for the whole search domain. The method of accounting for the local properties is based on
-  the building of the estimates of Lipschitz constants for the search subdomains and has been
-  investigated earlier for the one-dimensional case. For solving the multidimensional problems,
-  the dimension reduction is applied. A multidimensional optimization problem is reduced to
-  a one-dimensional problem, which the objective function satisfy Hölder condition in.
-  In this paper, the application of building the local estimates of Hölder constant in the
-  reduced multidimensional optimization problems using the same scheme to the one used
-  in the one-dimensional Lipschitzian problems is considered.
+This paper considers one of the methods to account for the local information on the
+objective function in  Lipschitz global optimization problems. In the course of solving
+such problems, an issue arises regarding estimating the Lipschitz constant of the
+objective function arises. According to the classic scheme, this constant is a single
+estimate for the whole search domain. The method of accounting for local properties
+is based on building estimates of Lipschitz constants for the search subdomains,
+and has previously been investigated for the one-dimensional case. For solving
+multidimensional problems, dimension reduction is applied. A multidimensional
+optimization problem is reduced to a one-dimensional problem, for which the objective
+function satisfies the Hölder condition. In this paper, the application of building
+local Hölder constant estimates in reduced multidimensional optimization problems using
+the same scheme as is used in one-dimensional Lipschitzian problems is considered.
 \end{abstract}
 
 %\setcounter{tocdepth}{2}
@@ -127,84 +127,84 @@
 \section{Introduction}
 \label{sect:introduction}
 
-The one-dimensional characteristical algorithms represent one of the classes of the
-optimization algorithms used widely \cite{optHandbook}. A number of schemes of reduction of the
-multidimensional problems to one or several one-dimensional ones, i. e. the \textit{dimension
-reduction} schemes have been developed \cite{evolvents2013}, \cite{gergelGrishaginStringin2013}.
+One-dimensional-characteristical algorithms represent one class of widely-used
+optimization algorithms \cite{optHandbook}. A number of schemes to reduce multidimensional problems
+to one or more one-dimensional problems, i.e. the \textit{dimension-reduction} schemes
+have been developed \cite{evolvents2013}, \cite{gergelGrishaginStringin2013}.
 All these schemes can be efficiently parallelized \cite{optParallelBook}.
 \par
-In recent years, when building the global optimization algorithms, an increased attention
-is paid to accounting for the local properties of the objective function. In the
-case of the characteristical schemes, this approach allows developing a mixed algorithm
-\cite{mixedAlg} as well as using different estimates of Lipschitz constant in different search
-domain \cite{sergLocalTuningFirst}. Originally, the latter approach has been proposed for the one-dimensional
-problems, also the investigation of this one when using the nested optimization scheme
-has been carried out \cite{nestedLocal}. In all these cases, this approach have demonstrated itself to
-be an efficient one, having allowed accelerating the convergence of the
-optimization methods essentially. In the present paper, a generalization of the method
-for building of the local estimates of Lipschitz constants onto the case of Hölder
-functions obtained when reducing the multidimensional optimization problems is considered.
+In recent years, when building global optimization algorithms, increased attention
+has been paid to accounting for the local properties of the objective function.
+In the case of characteristical schemes, this approach allows a mixed algorithm
+to be developed \cite{mixedAlg} and different estimates of Lipschitz constants to
+be used in different search domains \cite{sergLocalTuningFirst}. Originally, the
+latter approach had been proposed for one-dimensional problems, and this has also
+been examined when carrying out a nested optimization scheme \cite{nestedLocal}.
+In all these cases, this approach has proven to be efficient, having essentially
+accelerated the convergence of the optimization methods. This paper considers generalizing
+the method for building local estimates of Lipschitz constants in the case of Hölder
+functions obtained when reducing multidimensional optimization problems.
 
 %------------------------------------------------------------------------------
 \section{Problem Statement}
 \label{sect:problem}
 
-The global optimization problem can be formulated as follows:
-to find the global minimum of an \(N\)-dimensional function \(\varphi(y)\) in a hyperinterval
+The global optimization problem can be formulated as follows: to find the global minimum of an
+\(N\)-dimensional function \(\varphi(y)\) in a hyperinterval
 \(D=\{y\in R^N:a_i\leqslant x_i\leqslant{b_i}, 1\leqslant{i}\leqslant{N}\}\): \(\varphi(y^*)=\min\{\varphi(y):y\in D\}\).
-In order to obtain an estimate of the global minimum from a finite number of computations
-of the function values, \(\varphi(y)\) is required to satisfy Lipschitz condition.
+In order to obtain an estimate of the global minimum from a finite number of function value computations,
+ \(\varphi(y)\) is required to satisfy Lipschitz condition.
 \begin{displaymath}
 \label{lip}
 |\varphi(y_1)-\varphi(y_2)|\leqslant L\Vert y_1-y_2\Vert,y_1,y_2\in D,0<L<\infty
 \end{displaymath}
 \par
-The use of the evolvents \(y(x)\) i. e. the curves filling the space is a classic scheme
-for the dimension reduction for the global optimization algorithms \cite{strOptBook}.
+The use of the evolvents \(y(x)\) i.e. the curves filling the space are a classic
+dimension-reduction scheme for global optimization algorithms \cite{strOptBook}.
 \begin{displaymath}
 \label{cube}
 \lbrace y\in R^N:-2^{-1}\leqslant y_i\leqslant 2^{-1},1\leqslant i\leqslant N\rbrace=\{y(x):0\leqslant x\leqslant 1\}
 \end{displaymath}
 \par
-Such a mapping allows reducing a problem stated in a multidimensional space to solving
-a one-dimensional one at the expense of worsening its properties. In particular,
-the one-dimensional function \(\varphi(y(x))\) is not a Lipschitz one but is a Hölder one:
+Such a mapping allows the reduction of a problem stated in a multidimensional space
+to solving a one-dimensional problem at the expense of degrading its properties.
+In particular, the one-dimensional function \(\varphi(y(x))\) is not a Lipschitzian but a Hölderian function:
 \begin{displaymath}
 \label{holder}
 |\varphi(y(x_1))-\varphi(y(x_2))|\leqslant H{|x_1-x_2|}^{\frac{1}{N}},x_1,x_2\in[0,1]
 \end{displaymath}
-where Hölder constant \(H\) is related to Lipschitz constant \(L\) by the relation
+where the Hölder constant \(H\) is related to the Lipschitz constant \(L\) by the relation
 \begin{displaymath}
 H=4Ld\sqrt{N},d=\max\{b_i-a_i:1\leqslant i\leqslant N\}
 \end{displaymath}
 \par
 Therefore, not limiting the generality, one can consider the minimization of the
-one-dimensional function \(f(x)=\varphi(y(x))\), \(x\in[0;1]\) satisfying Hölder condition.
-The issues of numerical building of the mapping like Peano curve and the corresponding
-theory have been considered in details in \cite{strOptBook}. Here we would note that an evolvent
-built numerically is an approximation to the theoretical Peano curve with the precision
+one-dimensional function \(f(x)=\varphi(y(x))\), with \(x\in[0;1]\) satisfying Hölder condition.
+The issues of numerically building the mapping like a Peano curve and the corresponding
+theory have been considered in detail in \cite{strOptBook}. Here we would note that an evolvent
+built numerically is an approximation to the theoretical Peano curve with a precision
 of the order \(2^{-m}\) where \(m\) is the building parameter of the evolvent.
 
 %------------------------------------------------------------------------------
 \section{Description of the Algorithm}
 \label{sect:algorithm}
 
-The considered algorithm of solving the stated problem implies the building of
-a sequence of points \(x_k\), which the values of the minimized function \(z_k = f(x_k)\)
-are computed in. Let us call the process of computation of the function value
-(including the building of an image \(y_k=y(x_k)\)) a trial, and the pair \((x_k,z_k)\) ---
+The algorithm considered for solving the stated problem implies building
+a sequence of points \(x_k\), in which the values of the minimized function \(z_k = f(x_k)\)
+are computed. Let us call the process of computating the function value
+(including building an image \(y_k=y(x_k)\)) a trial, and the pair \((x_k,z_k)\) ---
 the result of the trial. A set of the pairs \(\{(x_k,z_k)\}, 1\leqslant k\leqslant n\)
-makes the search information accumulated by the method after executing \(n\) steps.
+makes up the search information accumulated by the method after executing \(n\) steps.
 \par
-At the first iteration of the method, a trial is executed in an arbitrary internal
-point \(x_1\) of the interval \([0,1]\). Let us assume \(n \geqslant 1\) iterations
-of the method to be completed, in the course of which the iterations in \(k = k(n)\)
+At the first iteration of the method, a trial is executed at an arbitrary internal
+point \(x_1\) within the interval \([0,1]\). Let us assume \(n \geqslant 1\) iterations
+of the method to be completed, during the course of which the iterations in \(k = k(n)\)
 points \(x_i, 1\leqslant i\leqslant k\) have been performed. Then, the point \(x^{k+1}\)
-of the search trial of the next \((k+1)\)th iteration is determined in accordance with the rules:
+of the search trial for the next \((k+1)\)th iteration is determined in accordance with the rules:
 \par
-Step 1. Renumber the points of the set \(X_k=\{x^1,\dotsc,x^k\}\cup\{0\}\cup\{1\}\),
+Step 1. Renumber the points in the set \(X_k=\{x^1,\dotsc,x^k\}\cup\{0\}\cup\{1\}\),
 which includes the boundary points of the interval \([0,1]\) as well as the points of
-preceding trials, by the lower indices in the order of increasing the values of coordinate i. e.
+preceding trials, by the lower indices in order of increasing coordinate values  i.e.
 \begin{displaymath}
 0=x_0<x_1<\dotsc<x_{k+1}=1
 \end{displaymath}
@@ -222,7 +222,7 @@ Step 2. Assuming \(z_i=f(x_i),1\leqslant i\leqslant k\), compute the quantities
     \end{matrix} \right.
     \end{matrix}
 \end{equation}
-where \(r\) is a predefined parameter of the method, and \(\Delta_i=(x_i-x_{i-1})^\frac{1}{N}\).
+where \(r>1\) is a predefined parameter for the method, and \(\Delta_i=(x_i-x_{i-1})^\frac{1}{N}\).
 \par
 Step 3. For each interval \((x_{i-1},x_i),1\leqslant i\leqslant k+1\), compute the
 characteristics according to the formulae
@@ -242,7 +242,7 @@ t=\argmax_{1\leqslant i \leqslant k+1}R(i),
 \end{equation}
 i.e., the interval with the maximal characteristic.
 \par
-Step 5. Execute new trial in the point \(x_{k+1}\) computed according to the formulae
+Step 5. Execute a new trial at point \(x_{k+1}\) computed according to the formulae
 \begin{displaymath}
 x_{k+1}=\dfrac{x_{t}+x_{t-1}}{2},t=1,t=k+1
 \end{displaymath}
@@ -252,7 +252,7 @@ x_{k+1}=\dfrac{x_{t}+x_{t-1}}{2}-\sign(z_{t}-z_{t-1})\dfrac{1}{2r}\left[\dfrac{|
 \end{equation}
 \par
 The algorithm is terminated if the condition \(\Delta_{t}\leqslant \varepsilon\) is fulfilled;
-here \(\varepsilon>0\) is a predefined precision. As an estimate of the global optimum solution of the problem the values
+here \(\varepsilon>0\) is the predefined precision. As an estimate of the global optimum solution of the problem the values
 \begin{equation}
 f_k^*=\min_{1\leqslant i \leqslant k}f(x_i), x_k^*=\argmin_{1\leqslant i \leqslant k}f(x_i)
 \end{equation}
@@ -261,15 +261,16 @@ are selected. The theoretical substantiation of this method is presented in \cit
 %------------------------------------------------------------------------------
 \section{Local Adaptive Estimate of Hölder Constant}
 %\label{sect:algorithm}
-At it is seen from the scheme of the algorithm, regardless to the local properties
-of the optimized one-dimensional function, the same values of estimate of Hölder
+As it is seen from the scheme of the algorithm, regardless of the local properties
+of the optimized one-dimensional function, the same estimate of the Hölder
 constant (\ref{step2}) is used to compute the characteristic of all intervals (\ref{step3_1}), (\ref{step3_2}).
 In \cite{sergLocalTuning}, it has been proposed to use different values of \(M\) for each interval,
-and also the efficiency of this approach in the case of the optimization of the
-one-dimensional functions satisfying Lipschitz condition has been shown. In \cite{nestedLocal},
+and also the efficiency of this approach has been shown in the case of optimizing
+one-dimensional functions that satisfy the Lipschitz condition. In \cite{nestedLocal},
 the application of the adaptive estimates of Lipschitz constants in the multidimensional
 nested optimization scheme has been considered. For each interval, the local estimate of the
-constant is an additive convolution of the ``global'' and ``local'' ones (\(\gamma\) and \(\lambda\), correspondingly):
+constant is an additive convolution of the ``global'' and ``local'' constants
+(\(\gamma\) and \(\lambda\), correspondingly):
 \begin{displaymath}
   \begin{array}{lr}
     \lambda_i=\max\{H_{i-1},H_i,H_{i+1}\} \\
@@ -283,7 +284,7 @@ constant is an additive convolution of the ``global'' and ``local'' ones (\(\gam
 \label{additiveConv}
 M_i=r\cdot \max\{H_i, \frac{1}{2}(\lambda_i+\gamma_i),\xi\}
 \end{equation}
-\(\xi\) is chosen small to prevent the case of the function being constant over search interval.
+A small \(\xi\) is chosen to preventthe function from being constant over the search interval.
 This variant of convolution does not depend on the parameter \(r\), however, the adaptive convolution:
 \begin{equation}
 \label{additiveAdaptiveConv}
@@ -291,65 +292,68 @@ M_i=r\cdot \max\{H_i, \frac{\lambda_i}{r}+\frac{r-1}{r}\gamma_i,\xi\}
 \end{equation}
 has been considered in \cite{sergLocalTuning} as well.
 If it is known a priori that the optimized function has a complex shape with multiple
-local minima, then the initial value of \(r\) is specified to be large enough that
-results in the dominance of the ``global'' component \(\gamma\) in the adaptive convolution.
+local minima, then the initial value of \(r\) is specified to be large enough to
+result in the dominance of the ``global'' component \(\gamma\) in the adaptive convolution.
 
 %------------------------------------------------------------------------------
 \section{Hypothesis about Convergence}
 %\label{sect:algorithm}
-In \cite{sergLocalTuning}, a theorem on the convergence of the method in the case if the objective
-function is Lipschitz one is given. However, as a rule, such statements are true in
-Hölder metrics as well, therefore, presumably, the following hypothesis is true:
+In \cite{sergLocalTuning}, a theorem is given on the convergence of the method in the
+case of a Lipschitz objective function. However, as a rule, such statements are
+true for Hölder metrics as well. Therefore, the following hypothesis is presumably true:
 
 \begin{hypothesis}
 Assume the objective function \(f(x)\) to  satisfy Hölder condition with finite
 constant \(H > 0\), and let x be a limit point of \(\{x_k\}\) generated by the algorithm.
 Then, the following assertions hold:
 \begin{enumerate}
-  \item If \(x\in(0;1)\), then convergence to \(x\) is a bilateral one i. e. there
-  exist two infinite subsequences of \(\{x_k\}\) converging to \(x\): one from the
+  \item If \(x\in(0;1)\), then convergence to \(x\) is a bilateral one i.e. there
+  exists two infinite subsequences of \(\{x_k\}\) converging to \(x\): one from the
   left, the other from the right;
   \item \(f(x_k) \geqslant f(x)\) for all trial points \(x_k, k \geqslant 1\);
   \item If there exists another limit point \(x^* = x\), then \(f(x) = f(x^*)\);
   \item If the function \(f(x)\) has a finite number of local minima in \([0, 1]\),
-  then the point \(x\) is a local optimum one;
+  then the point \(x\) is a local optimum;
   \item (Sufficient conditions for convergence to a global minimizer). Let \(x^*\)
   be a global minimizer of \(f(x)\). If there exists an iteration number \(k^*\)
   such that for all \(k > k^*\) the inequality
-  \(M_j(k) > H_j(k)\) holds, where \(H_j(k)\) is Hölder constant for the interval
+  \(M_j(k) > H_j(k)\) holds, where \(H_j(k)\) is the Hölder constant for the interval
   \([x_{j(k)-1}, x_{j(k)}]\) containing \(x^*\), and \(M_{j(k)}\) is its estimate.
-  Then, the set of limit points of the sequence \(\{x_k\}\) coincides with the set
-  of global minimizers of the function \(f(x)\).
+  Then, the set of limit points for the sequence \(\{x_k\}\) coincides with the set
+  of global minimizers for the function \(f(x)\).
 \end{enumerate}
 \end{hypothesis}
 
-The proof of this hypothesis requires further theoretical studies. Within the frames of
-the present work, it is not performed. The convergence has been established numerically only.
+The proof of this hypothesis requires further theoretical studies. It was not performed
+as part of this present work. The convergence has only been established numerically.
 
 %------------------------------------------------------------------------------
-\section{Results of Experiments}
+\section{Experimental Results}
 \label{sect:experiments}
 
-The experiments on the evaluation of the efficiency of the method with the local
-adaptive estimate of Hölder constant have been carried out using the two-dimensional
-classes of Grishagin problems (\(F_{GR}\)) \cite{grishaginClass} and GKLS ones \cite{gklsClass}. Each class
-includes 100 multiextremal functions. In all experiments, the evolvent was built
-with the density \(m = 12\), parameter \(\varepsilon\) in the termination criterion was equal \(10^{-3}\).
-The parameter \(r\) was selected as low as possible, allowing to solve all the
-problems. The search step for \(r\) was \(0.1\).
+The experiments to evaluate the efficiency of the method with a local adaptive
+estimate of the Hölder constant have been carried out using the two-dimensional
+classes of Grishagin (\(F_{GR}\)) \cite{grishaginClass} and GKLS problems \cite{gklsClass}.
+Each class includes 100 multiextremal functions. In all experiments, the evolvent was
+built with the density \(m = 12\), the parameter \(\varepsilon\) in the termination criterion
+was set to \(10^{-3}\). The parameter \(r\) was selected as low as possible, at which
+the given method solves all problems of the class. The search step for \(r\) was \(0.1\).
+
 \par
-For clarity of illustration of the advantages of the local adaptive scheme of estimating
+For clarity in illustrating the advantages of the local adaptive scheme for estimating
 the constant \(H\), let us consider a particular example of the results obtained by the method.
-In Fig. \ref{fig:grish_isolines}, the level lines of a function from \(F_{GR}\) class and the trial
-points executed by the method with the global estimate of Hölder constant and with
-the one estimated according to formula (\ref{additiveConv}) are shown. As it is
-seen from the figures, the method with global estimate of the constant executes a
-large number of trials in the nearness of the global minimizer (total 1086 trials
-have been executed) before the termination condition is satisfied, whereas the method
-with the local adaptive estimate converges much faster (total 385 trials have been executed).
-The same situation takes place when optimizing a function from GKLS class (Fig. \ref{fig:gkls_isolines}).
-The method with the global estimate of the constant had executed 2600 trials while
-the method with the local adaptive estimate had executed 1190 trials only.
+In Figure \ref{fig:grish_isolines}, the level lines of a function from the \(F_{GR}\) class and
+ the trial points executed by the method with a global estimate of the Hölder constant, and with
+ the one estimated according to formula (\ref{additiveConv}) are shown. As can be seen from
+ the figures, the method using a global estimate of the constant executed a large
+ number of trials in the vicinity of the global minimizer (a total of 1,086 trials
+ were executed) before the termination condition was satisfied, whereas the method
+ with the local adaptive estimate converged much faster (a total of 385 trials
+ were executed). The same situation occurs when optimizing a function from the
+ GKLS class (Fig. \ref{fig:gkls_isolines}). The method using the global estimate of
+ the constant executed 2,600 trials while the method using the local adaptive estimate only
+ executed 1,190 trials.
+
 \begin{figure}[ht]
     \centering
     \subfloat[global \(H\) estimation]{{\includegraphics[width=0.45\textwidth]{images/gs_glob.png} }}
@@ -364,33 +368,37 @@ the method with the local adaptive estimate had executed 1190 trials only.
     \subfloat[global \(H\) estimation]{{\includegraphics[width=0.45\textwidth]{images/gkls_glob.png} }}
     \qquad
     \subfloat[local-adaptive \(H\) estimation]{{\includegraphics[width=0.45\textwidth]{images/gkls_loc.png} }}
-    \caption{The contour plots of a function from GKLS class}
+    \caption{The level lines of a function from GKLS class}
     \label{fig:gkls_isolines}
 \end{figure}
 \par
-Next, let us go to the comparison of various variants of the method for the problem
-classes considered. In order to evaluate the efficiency of an algorithm, we will use
-the operating characteristics \cite{grishaginClass}, which is defined by a set of points on the \((K, P)\)
-plane where \(K\) is the averaged number of the search trials carried out before the satisfaction
-of the termination condition when minimizing a function from given class, and \(P\)
-is portion of problems solved successfully. If at given \(K\) the operating characteristic
-of a method goes higher than the one of another method, it means that at fixed costs
-of the search the former method will find the solution with a greater probability.
-If some value of \(P\) is fixed, and the characteristic of a method goes to the left from
-the one of another method, the former method requires fewer resources to achieve the same reliability.
-\par
+Next, let’s compare the various alternatives for the method in the problem classes
+considered. In order to evaluate the efficiency of an algorithm, we will use the
+operating characteristics \cite{grishaginClass}, which are defined by a set of
+points on the \((K, P)\) plane where \(K\) is the average number of search trials
+conducted before satisfying the termination condition when minimizing a function
+from a given class, and \(P\) is the proportion of problems solved successfully.
+If at a given \(K\), the operating characteristic of a method goes higher than one
+from another method, it means that at fixed search costs, the former method has a
+greater probability of finding the solution. If some value of \(P\) is fixed, and the
+characteristic of a method goes to the left from that of another method, the former
+method requires fewer resources to achieve the same reliability.
+
 \begin{figure}[ht]
   	\center
     \includegraphics[width=0.75\textwidth]{images/grishagin.png}
     \caption{Operating characteristics of the methods compared on \(F_{GR}\) problems class}
     \label{fig:grishh_op}
-  \end{figure}
-As it is seen from the operating characteristics in Fig. \ref{fig:grishh_op}, \ref{fig:gkls_op}, both methods with the
-local adaptive estimate of Hölder constant have demonstrated an essential advantage.
-However, both methods require setting a higher value of the parameter \(r\). If one compares the
-methods with the adaptive convolution and  with the non-adaptive one (\ref{additiveConv})(\ref{additiveAdaptiveConv}), the advantage
-of the latter is seen clearly, although it requires a higher value of the reliability
-parameter \(r\) to solve the problems form GKLS class.
+\end{figure}
+\par
+As can be seen from the operating characteristics in Figures \ref{fig:grishh_op}
+and \ref{fig:gkls_op}, both methods using a local adaptive estimate of the Hölder
+constant have demonstrated an essential advantage. However, both methods require setting
+a higher value for the parameter \(r\). If one compares the methods with both the
+adaptive and non-adaptive convolution (\ref{additiveConv})(\ref{additiveAdaptiveConv}),
+the advantage of the latter can clearly be seen, although it requires a higher value
+for the reliability parameter \(r\) to solve problems from the GKLS class.
+
   \begin{figure}[ht]
   	\center
     \includegraphics[width=0.75\textwidth]{images/gkls-s.png}
@@ -399,35 +407,35 @@ parameter \(r\) to solve the problems form GKLS class.
   \end{figure}
 %------------------------------------------------------------------------------
 \section{Conclusions}
-In the present work, the global optimization problems and the deterministic methods
-for solving these ones are considered. The relevance of solving the problems of this
-class is defined by the importance of the applications (optimal design, problems of
-parameter identification, pattern recognition, signa processing, etc.). The multiextremal
-(global) optimization methods are extremely computation costly since these ones require
-the constructing and using of the adaptive models of the objective function behavior
-according to the trial results accumulated during the algorithm execution.
+This present work considers global optimization problems and the deterministic methods
+for solving them. The relevance of solving this class of problems is defined by the
+importance of the applications (optimal design, problems of parameter identification,
+pattern recognition, signal processing, etc.). The multiextremal (global) optimization
+methods are extremely computationally costly, since these require constructing and using
+adaptive models of the objective function behavior according to the trial results
+accumulated while executing the algorithm.
 \par
-In this work, the application of the method of accounting for the local behavior of
-the optimized function within the multidimensional multiextremal optimization method
-has been considered. Earlier, this method has been applied to the one-dimensional
-problems only. Taking into account the local properties is implemented in the use of
-different estimates of Hölder constant in different search domains. Thus, the process
-of solving the problem is accelerated significantly by means of reducing the number of
-the search trials.
+This paper considers the application of a method to account for the local behavior
+of the objective function within the multidimensional multiextremal optimization method.
+This method has previously been applied to one-dimensional problems only. Taking into
+account the local properties are implemented in using different estimates of Hölder
+constant within different search domains. Thus, the process of solving the problem is
+accelerated significantly by means of reducing the number of search trials.
 \par
-The comparison of two different schemes of constructing the estimates of Hölder constant
-(\ref{additiveConv}), (\ref{additiveAdaptiveConv}) has revealed the advantage of scheme (\ref{additiveConv}).
-However, a larger value of the reliability parameter of the search method \(r\) might be required
-to use this scheme for solving some problems. When solving the complex problems with a small
-area of attraction of the global extremum, scheme (\ref{additiveAdaptiveConv}) is preferable for
-more reliability of the method. The efficiency of the considered approach has been confirmed
-by solving the series of multidimensional problems form two classes.
+The comparison of two different schemes for constructing estimates of the Hölder
+constant (\ref{additiveConv}), (\ref{additiveAdaptiveConv}) has revealed the advantage
+of scheme (\ref{additiveConv}). However, a larger value for the reliability parameter \(r\)
+in the search method might be required to use this scheme for solving certain problems.
+When solving complex problems with a small area of attraction for the global extremum,
+scheme (\ref{additiveAdaptiveConv}) is preferable for the greater reliability of this method.
+The efficiency of the considered approach has been confirmed by solving the series of
+multidimensional problems from two classes.
 
 %------------------------------------------------------------------------------
 \section{Acknowledgements}
 This research was supported by the Russian Science Foundation, project No 16-11-10150
-``Novel efficient methods and software tools for the time consuming decision making problems
-with using supercomputers of superior performance''.
+``Novel efficient methods and software tools for the time consuming decision- making problems
+with using supercomputers of superior performance.''
 
 %------------------------------------------------------------------------------
 % Refs:
