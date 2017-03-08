@@ -8,7 +8,7 @@ texfirst: ${IMAGES} | builddir
 
 refs: texfirst
 	cp ./bibliography.bib ./build
-	cd ./build ; pwd ; bibtex poster.aux
+	cd ./build ; pwd ; biber poster.bcf
 
 texsecond: refs
 	xelatex -output-directory=build poster.tex
