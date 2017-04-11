@@ -50,6 +50,7 @@
 \usepackage[superscript]{cite}
 \usepackage{titlesec}
 \usepackage[none]{hyphenat}
+\usepackage{enumitem}
 %________________________________________________________________________________
 \titleformat*{\section}{\normalfont\normalsize\bfseries}
 \titleformat*{\subsection}{\normalfont\normalsize\em}
@@ -82,7 +83,7 @@
 %Article data entry_____________________________________________________________
 
 
-\title{\vspace{-5ex}\textbf{Instructions to Authors for the Preparation of Extended Abstract}}
+\title{\vspace{-5ex}\textbf{Multipoint Approximation Method for Large Scale Design Optimization Problems Under Uncertainty}}
 \author{
   \authorname{First I. Author*}\\
   \authorgroup{International Center for Numerical Methods in Engineering (CIMNE)}\\
@@ -138,39 +139,117 @@ The purpose of this document is to provide an example of how authors must format
 
 \section{Introduction}
 
-Extended abstracts must be delivered through the web submission page, completely “camera-ready” (postscript file or PDF).
+In industrial design optimization problems, random inaccuracies of the production process may lead to the designer’s inability to fully control the design variables. Therefore, there can be a discrepancy between the products \textit{as designed} and \textit{as produced} that results in actual performance being different from the performance expected at the design stage. Possible discrepancy between the design and the manufactured product becomes even more important if the latter violates some critical constraints, e.g. safety regulations.
 
-\section{General specifications}
+In addition, the system’s performance may depend on parameters of random nature that are beyond the designer’s control, e.g. the operation conditions. Therefore,  accounting for both of these types of uncertainties  is crucial for achieving robust and reliable performance.
 
-The extended abstract must be written in English within a printing box of 17cmx23.7cm, centered in the page. The paper including figures, tables and reference mast have a minimum length of 4 pages and must not exceed 8 pages. Any processing systems can be used (Tex, Latex, Word….).
+Optimisation under uncertainty deals with responses $F(\pmb x,\pmb y)$ that depend on deterministic design variables $\pmb x$ and random ‘environmental’ variables $\pmb y$. Uncertainty in the design variables can also be modelled by introducing additional random variables, e.g. as additive or multiplicative noise. In this case, the responses $F(\pmb x,\pmb y)$ receive as input the sum $\pmb x+\pmb u$ (if the noise is additive), where $\pmb u$ is a random variable with a known probability distribution, yielding responses depending on $\pmb x,\; \pmb u$ and $\pmb y$. Randomness in $\pmb u$ and $\pmb y$ induces randomness in the responses $F(\pmb x+\pmb u,\pmb y)$. To convert them into deterministic functions, that can be optimised, a mapping $R$, called the \textit{risk measure}[2] or \textit{robustness measure}[3], is applied to the responses. The result is then a deterministic function of the design variables: $\widetilde{F}(\pmb x)=R(F(\pmb x+\pmb u, \pmb y))$. The choice of a particular risk measure $R$ reflects the designer's attitude towards the risk of sub-optimal performance or constraint violation. For example, $R$ can be a combination of the mean and standard deviation of $F(\pmb x+ \pmb u,\pmb y)$ with respect to the joint probability distribution of $\pmb u$ and $\pmb y$ or a quantile of the distribution of $F(\pmb x+ \pmb u,\pmb y)$, i.e. such a value that the random variable of $F(\pmb x+\pmb u,\pmb y)$ exceeds it with a given, typically small, probability.
 
-\section{Title, Authors, Affiliation}
+Computations of the risk measures typically involve evaluation of high-dimensional integrals, which becomes a challenging task if the number of design variables and/or environmental variables is large. The problem becomes even more difficult if the original responses are computationally expensive, which is the case, for example, in computational fluid dynamics (CFD), where one function evaluation may take hours of even days. Therefore, direct computation of the risk measures using original responses becomes infeasible and therefore approximations of responses, also referred to as metamodels, need to be used.
 
-\subsection{Title}
+In problems with a large (in the order of hundreds) number of design variables, the multipoint approximation method (MAM4,5,6) proved to be efficient, e.g. in turbomachinery applications7,8,9. This method is an iterative optimization technique based on mid-range approximations built in trust regions. A trust region is a sub-domain of the design space in which a set of design points, produced according to a small-scale design of experiments (DoE), are evaluated. These and a subset of previously evaluated design points are used to build metamodels of the objective and constraint functions that are considered to be valid within a current trust region. The trust region will then translate and change size as optimization progresses. The trust region strategy has gone through several stages of development to account for the presence of numerical noise in the response function values10,11 and occasional simulation failures12. The mid-range approximations used in the trust regions, as originally suggested in Ref. 4 for structural optimization problems, are intrinsically linear functions (i.e. nonlinear functions that can be led to a linear form by a simple transformation) for individual sub-structures, and assembly of them for the whole structure. This was enhanced by the use of gradient-assisted metamodels,6 use of simplified numerical models that is also termed a multi-fidelity approach,13 and the use of analytical models derived by Genetic Programming14. One of the recent developments15 involved the use of approximation assemblies, i.e. a two stage approximation building process that is conceptually similar to the original one used in Ref. 4 but is free from the limitation that lower level approximations are linked to individual substructures.
 
-The title should be written centered, in 14pt, boldface Roman. It should be single spaced if the title is more than one line long.
+This paper presents a new development in the Multipoint Approximation Method that makes it capable of handling problems with uncertainty in design variables as well as in additional ‘environmental’ variables. The approach relies on approximations built in the combined space of design variables and environmental variables, and subsequent application of a risk measure and optimization with respect to the deterministic design variables, all within the iterative trust-region-based framework of MAM.
 
-\subsection{Author}
+\section{The Multipoint Approximation Method}
 
-The author's name should include first name, middle initial and surname. It should be written centered, (as shown in the first page of these instructions) in 10pt boldface Roman. The presenting author should be marked with an asterisk.
+It is useful to start with a brief description of the deterministic version of MAM. A typical formulation of a constrained optimization problem that MAM works with is as follows:
+\begin{equation}
+  \label{eq:problem}
+  \begin{array}{c}
+  \min_{a_i \le x_i \le b_i}F_0(\pmb x) \\
+  s.t.\; F_j(\pmb x) \le 1,\; j=1,\dots ,M,
+  \end{array}
+\end{equation}
+where $\pmb x$ is the vector of design variables, $\pmb a$ and $\pmb b$ are the lower and upper bounds for the design variables, respectively, $F_0(\pmb x)$ is the objective function, and $F_j(\pmb x)$ are the constraints. The numbers of design variables and constraints are $n$ and $M$, respectively. MAM attempts to solve this problem by using approximations of the objective function and constraints in a series of trust regions. The trust region strategy seeks to zoom in on the region where the constrained minimum is achieved. It aims at finding a trust region that is sufficiently small for the approximations to be of sufficiently good quality to improve the design, and that contains the point of the constrained minimum as its interior point. The main loop of the MAM is organized as follows.
 
-\subsection{Affiliation}
+Algorithm 1 (deterministic MAM).
+\begin{enumerate}
+\item Initialization: choose a starting point $\pmb x^0$ and initial trust region $[\pmb a^0, \pmb b^0]$ such that $\pmb x^0 \in [\pmb a^0, \pmb b^0]$.
+\item At the $k$-th iteration the current approximation to the constrained minimum is $\pmb x^k$, the current trust region is $[\pmb a^k, \pmb b^k] \subset [\pmb a^0, \pmb b^0]$.
+  \begin{enumerate}[label=(\alph*)]
+    \item Design of Experiments (DoE): a set of points $\pmb x_k^i \in [\pmb a^k, \pmb b^k]$ is chosen to be used for approximation building. Responses are evaluated at the DoE points and approximations are built using the obtained values. Currently, the pool of approximation methods available in MAM consists of a metamodel assemblies15 and the moving least-squares metamodels16-19. Other metamodel types could be used as well.
 
-Author's affiliation should be written centered, (as shown in the first page of these instructions) in 10pt italic Roman.
+    Denote the approximate objective function and constraints by $\widetilde{F}_0(\pmb x)$ and $\widetilde{F}_j(\pmb x)$, respectively.
+    \item The original optimization problem (\ref{eq:problem}) is replaced by the following problem:
+    \begin{equation}
+      \label{eq:problem_approx}
+      \begin{array}{c}
+      \min_{a_i^k \le x_i ^k\le b_i}\widetilde{F}_0(\pmb x) \\
+      s.t.\; \widetilde{F}_j(\pmb x) \le 1,\; j=1,\dots ,M,
+      \end{array}
+    \end{equation}
+    The approximate problem (\ref{eq:problem_approx}) is solved using Sequential Quadratic Programming (SQP) and the solution of this problem   determines the centre of the next trust region.
+    \item The size of the next trust region is determined depending on the quality of approximations at the previous iteration, on the history of the points $\pmb x^k$, and on the size of the current trust region10.
+    \item The termination criterion is checked (it is a part of the trust region strategy and depends on the position of the point $\pmb x^{k+1}$ in the current trust region, the size of the current trust region and the quality of approximations). If the termination criterion is satisfied, the algorithm proceeds to step 3. Otherwise, it returns to step 2.
+  \end{enumerate}
+  \item Optimization terminates. The obtained approximation to the solution of the problem (\ref{eq:problem}) is $\pmb x^{k+1}$.
+\end{enumerate}
 
+\section{Optimization Under Uncertainty}
 
-\section{Text}
+The presence of uncertainties in the responses requires certain reformulations in the problem statement (\ref{eq:problem}). Informally, the optimization problem with uncertainty can be written as follows:
+\begin{equation}
+  \label{eq:problem_unc}
+  \begin{array}{c}
+  \min_{a_i \le x_i \le b_i}F_0(\pmb x + \pmb u, \pmb y) \\
+  s.t.\; F_j(\pmb x + \pmb u, \pmb y) \le 1,\; j=1,\dots ,M,
+  \end{array}
+\end{equation}
+where the random variable $\pmb u$ represents (additive) noise in the design variables and $\pmb y$ is the environmental variable, representing input to the responses that cannot be influenced by the designer. This problem statement is not precise since the random responses $F_0 (\pmb x+\pmb u,\pmb y),\; F_j (\pmb x+\pmb u,\pmb y)$ cannot be directly optimized. Therefore, a risk measure $R$ needs to be applied to the objective and the constraints:
+\begin{equation}
+  \label{eq:problem_unc_r}
+  \begin{array}{c}
+  \min_{a_i \le x_i \le b_i}R_{u,y}(F_0)(\pmb x) \\
+  s.t.\; R_{u,y}(F_j)(\pmb x) \le 1,\; j=1,\dots ,M,
+  \end{array}
+\end{equation}
+where the subscript in $R_{\pmb u,\pmb y}$ indicates that the variables $\pmb u$ and $\pmb y$ ‘collapse’ when the risk measure is applied and the result only depends on $\pmb x$. The choices of risk measure will be discussed in Section \ref{sec:risk}. Here the changes in the Algorithm 1 that are necessary to solve the problem (\ref{eq:problem_unc_r}) are discussed.
 
-The normal text should be written single-spaced, justified, using 10pt (Times New) Roman in two columns.
+First, it needs to be decided on whether to build metamodels for the risk measure $R_{u,y}(F_j)(\pmb x)$ or for the original responses $F_j (\pmb x+ \pmb u,\pmb y)$. The first option may seem attractive due to the simplicity of its implementation in Algorithm 1 but the deciding argument has to be that of the computational cost associated with the evaluation of either function. On the one hand, one evaluation of the function $R_{u,y}(F_j)(\pmb x)$ involves computing one or several integrals of the original response $F_j(\pmb x+ \pmb u,\pmb y)$ over the distribution of $\pmb u$ and $\pmb y$, which requires many evaluations of the original response. On the other hand, the dimensionality of the argument of $R_{u,y}(F_j)(\pmb x)$ is less than that of the argument of $F_j(\pmb x+ \pmb u,\pmb y)$, therefore, in principle, fewer function evaluations are needed to approximate the former than the latter. In practice, this may be a matter of a trade-off between the two abovementioned effects that depends on the proportion between the numbers of design variables $n$ and the environmental variables $n_e$ and on the complexity of the integration method and metamodeling method used. If the number if design variables is significantly larger than the number of environmental variables, which is often the case and which is assumed in this paper, building metamodels for the original responses $F_j(\pmb x+ \pmb u,\pmb y)$ is preferred.
 
-The first line of each paragraph must be indented 0.5cm (except the first paragraph after a heading). There is not inter-paragraph spacing.
+This choice requires some changes in the MAM algorithm, since metamodels are now built in a larger space than the one where optimisation is performed in. The changes are summarised below.
 
-\section{Format of references}
+Algorithm 2 (MAM under uncertainty).
+\begin{enumerate}
+  \item Initialization: choose a starting point $\pmb x_0 \in {\Bbb R}^n$. Choose an initial trust region $[\pmb a^0,\pmb b^0]$ in the combined space of design variables and environmental variables. Ensure that the initial guess $\pmb x_0$ belongs to the projection of the initial trust region onto the subspace of design variables. The projection of the initial trust region onto the subspace of environmental variables must cover the region where the realisations of the random variable y are likely to be. The coordinates of the trust region corresponding to the environmental variables will not be changed in the course of optimisation. Typically, the trust region along the coordinates corresponding to the $i$-th environmental variable is centred at the mean of the $i$-th environmental variable and has the width of six of its standard deviations.
+  \item At the $k$-th iteration the current approximation to the constrained minimum is $\pmb x^k$, the current trust region is $[\pmb a^k,\pmb b^k]$.
+  \begin{enumerate}[label=(\alph*)]
+    \item Design of Experiments (DoE): a set of points $(x_i^k,y_i^k)\in [\pmb a^k,\pmb b^k]$ is chosen that will be used to build approximations. Responses are evaluated at the DoE points and approximations are built using the obtained values.
+    Denote the approximate objective function and constraints by $\widetilde{F}_0(\pmb x, \pmb y)$ and $\widetilde{F}_j(\pmb x, \pmb y)$, respectively.
+    \item The original optimization problem is replaced by the following problem:
+    \begin{equation}
+      \label{eq:problem_u_tilde}
+      \begin{array}{c}
+      \min_{a_i \le x_i \le b_i}R_{u,y}(\widetilde{F}_0)(\pmb x) \\
+      s.t.\; R_{u,y}(\widetilde{F}_j)(\pmb x) \le 1,\; j=1,\dots ,M,
+      \end{array}
+    \end{equation}
+    The risk measures are calculated using the metamodels obtained in the previous step. Integrals that arise during this process are calculated with respect to the joint distribution of $\pmb u$ and $\pmb y$. This distribution is assumed to be fixed.
+    The approximate problem (\ref{eq:problem_u_tilde}) is solved using Sequential Quadratic Programming (SQP) and the centre of the next trust region $\pmb x^{k+1}$ is determined as the solution of this problem. The optimisation runs in a subspace of the space where metamodels are built: metamodels are defined in the combined space of design variables and environmental variables, whilst optimisation runs in the subspace of the design variables.
+    \item The trust region is updated. The size of the trust region along the dimensions corresponding to the environmental variables is unchanged. The size of the next trust region along the dimensions corresponding to the design variables is determined depending on the quality of approximations at the previous iteration, on the history of the points $\pmb x^k$, and on the size of the current trust region according to the trust region strategy explained in Ref. 10.
+    \item The termination criterion is checked. If the termination criterion is satisfied, the algorithm proceeds to step 3. Otherwise, it returns to step 2
+  \end{enumerate}
+  \item Optimization terminates. The obtained approximation to the optimum is $\pmb x^{k+1}$.
+\end{enumerate}
 
-References should be quoted in the text by superscript numbers\cite{Baeck:92, Deb:2002}, and grouped together at the end of the paper in numerical order as shown in these instructions.
+Summarising, the key changes introduced to account for uncertainties are (i) metamodels built in the combined space of design variables and environmental variables; (ii) optimisation performed in a subspace of the space where metamodels are defined; (iii) additive noise in the design variables; (iv) application of risk measures to transform random responses into deterministic functions.
 
-The entire list of references at the end of the paper should not be longer than 1/8 of the paper (i.e., 1 full column if the paper is 4 pages long, and 2 columns if the paper is 8 pages long).
+\section{Risk Measures}
+\label{sec:risk}
 
+As it has been already said, a risk measure is a mapping that transforms a random response $F(\pmb x+ \pmb u,\pmb y)$  into a deterministic function that can be optimized. Next we provide some examples of risk measures2,3.
+
+\begin{itemize}
+  \item $R(F)=\mu(F)$
+\end{itemize}
+
+\section{Conclusion}
+
+Recent developments in the Multipoint Approximation Method made it capable of solving large scale problems with uncertainty in parameters modelled as additional (‘environmental’) random variables and uncertainty in the design variables modelled as additive noise. The approach taken combines metamodels built in the combined space of design variables and environmental variables, application of risk measures that map random responses to deterministic functions, and optimisation in a subspace of the space where metamodels are defined, all within the iterative and trust-region-based framework of MAM. Performance is demonstrated on a benchmark example of structural optimisation known as the scalable cantilevered beam.
+
+\section*{Acknowledgement}
+The authors are grateful for the support provided by the Russian Science Foundation, project No. 16-11-10150.
 
 \bibliography{bibliography}{}
 \bibliographystyle{nature}
