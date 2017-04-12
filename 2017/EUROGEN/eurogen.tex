@@ -156,6 +156,8 @@ Computations of the risk measures typically involve evaluation of high-dimension
 
 In problems with a large (in the order of hundreds) number of design variables, the multipoint approximation method (MAM\cite{Toropov1989,Toropov1992,ToropovFilatov1993}) proved to be efficient, e.g. in turbomachinery applications\cite{ShahparPolynkinToropov2008,PolynkinToropovShahpar2008,PolynkinToropovShahpar2010}. This method is an iterative optimization technique based on mid-range approximations built in trust regions. A trust region is a sub-domain of the design space in which a set of design points, produced according to a small-scale design of experiments (DoE), are evaluated. These and a subset of previously evaluated design points are used to build metamodels of the objective and constraint functions that are considered to be valid within a current trust region. The trust region will then translate and change size as optimization progresses. The trust region strategy has gone through several stages of development to account for the presence of numerical noise in the response function values\cite{KeulenToropovMarkine1996,ToropovKeulenMarkine1996} and occasional simulation failures\cite{ToropovMarkineHolden1999}. The mid-range approximations used in the trust regions, as originally suggested in Ref. \cite{Toropov1989} for structural optimization problems, are intrinsically linear functions (i.e. nonlinear functions that can be led to a linear form by a simple transformation) for individual sub-structures, and assembly of them for the whole structure. This was enhanced by the use of gradient-assisted metamodels,\cite{ToropovFilatov1993} use of simplified numerical models that is also termed a multi-fidelity approach,\cite{ToropovMarkine1996} and the use of analytical models derived by Genetic Programming\cite{ToropovAlvarez1998}. One of the recent developments\cite{PolynkinToropov2012} involved the use of approximation assemblies, i.e. a two stage approximation building process that is conceptually similar to the original one used in Ref. \cite{Toropov1989} but is free from the limitation that lower level approximations are linked to individual substructures.
 
+The Moving Least Squares Method (MLSM) was proposed in Ref. \cite{LancasterSalkauskas1981} for smoothing and interpolation of scattered data and later used in the mesh-free form of the FEM\cite{Liszka1984}. As suggested in Ref.\cite{ChoiYounYang2001}, it can be used as a technique for metamodelling and used in MDO frameworks. The MLSM is a weighted least squares method where the weights depend on the Euclidian distance from a sample point to where the surrogate model is to be evaluated. The weight value for a certain sample point decays as the distance increases. Describing the weight decay with a Gaussian function tends to be the most useful option even though many others have been evaluated in Ref. \cite{ToropovSchrammSahaiJones2005}. As demonstrated in Ref. \cite{PolynkinToropov2010}, the cross-validated MLSM can be used both for design variable screening and for surrogate modelling. In order to create an efficient MDO framework for problems with disparate discipline attributes Ref. \cite{OllarToropovJones2014} extended the optimization approach of MAM to the use of local DOEs and MLS approximations built in different subspaces of the total design variable space corresponding to the individual disciplines. The subspaces are finally combined into the total design variable space in which the resulting MDO problem is solved.
+
 This paper presents a new development in the Multipoint Approximation Method that makes it capable of handling problems with uncertainty in design variables as well as in additional ‘environmental’ variables. The approach relies on approximations built in the combined space of design variables and environmental variables, and subsequent application of a risk measure and optimization with respect to the deterministic design variables, all within the iterative trust-region-based framework of MAM.
 
 \section{The Multipoint Approximation Method}
@@ -176,7 +178,7 @@ Algorithm 1 (deterministic MAM).
 \item Initialization: choose a starting point $\pmb x^0$ and initial trust region $[\pmb a^0, \pmb b^0]$ such that $\pmb x^0 \in [\pmb a^0, \pmb b^0]$.
 \item At the $k$-th iteration the current approximation to the constrained minimum is $\pmb x^k$, the current trust region is $[\pmb a^k, \pmb b^k] \subset [\pmb a^0, \pmb b^0]$.
   \begin{enumerate}[label=(\alph*)]
-    \item Design of Experiments (DoE): a set of points $\pmb x_k^i \in [\pmb a^k, \pmb b^k]$ is chosen to be used for approximation building. Responses are evaluated at the DoE points and approximations are built using the obtained values. Currently, the pool of approximation methods available in MAM consists of a metamodel assemblies15 and the moving least-squares metamodels16-19. Other metamodel types could be used as well.
+    \item Design of Experiments (DoE): a set of points $\pmb x_k^i \in [\pmb a^k, \pmb b^k]$ is chosen to be used for approximation building. Responses are evaluated at the DoE points and approximations are built using the obtained values. Currently, the pool of approximation methods available in MAM consists of a metamodel assemblies\cite{PolynkinToropov2012} and the moving least-squares metamodels\cite{LancasterSalkauskas1981,Liszka1984,ChoiYounYang2001,ToropovSchrammSahaiJones2005}. Other metamodel types could be used as well.
 
     Denote the approximate objective function and constraints by $\widetilde{F}_0(\pmb x)$ and $\widetilde{F}_j(\pmb x)$, respectively.
     \item The original optimization problem (\ref{eq:problem}) is replaced by the following problem:
@@ -188,7 +190,7 @@ Algorithm 1 (deterministic MAM).
       \end{array}
     \end{equation}
     The approximate problem (\ref{eq:problem_approx}) is solved using Sequential Quadratic Programming (SQP) and the solution of this problem   determines the centre of the next trust region.
-    \item The size of the next trust region is determined depending on the quality of approximations at the previous iteration, on the history of the points $\pmb x^k$, and on the size of the current trust region10.
+    \item The size of the next trust region is determined depending on the quality of approximations at the previous iteration, on the history of the points $\pmb x^k$, and on the size of the current trust region\cite{KeulenToropovMarkine1996}.
     \item The termination criterion is checked (it is a part of the trust region strategy and depends on the position of the point $\pmb x^{k+1}$ in the current trust region, the size of the current trust region and the quality of approximations). If the termination criterion is satisfied, the algorithm proceeds to step 3. Otherwise, it returns to step 2.
   \end{enumerate}
   \item Optimization terminates. The obtained approximation to the solution of the problem (\ref{eq:problem}) is $\pmb x^{k+1}$.
@@ -246,13 +248,13 @@ Summarising, the key changes introduced to account for uncertainties are (i) met
 \section{Risk Measures}
 \label{sec:risk}
 
-As it has been already said, a risk measure is a mapping that transforms a random response $F(\pmb x+ \pmb u,\pmb y)$  into a deterministic function that can be optimized. Next we provide some examples of risk measures2,3.
+As it has been already said, a risk measure is a mapping that transforms a random response $F(\pmb x+ \pmb u,\pmb y)$  into a deterministic function that can be optimized. Next we provide some examples of risk measures\cite{RockafellarUryasev2000,SchillingsSchulz2015}.
 
 \begin{itemize}
   \item $R(F)=\mu(F)$ where $\mu(F)$ is the mean of $F$. This choice corresponds to optimising average performance of the system. In typical engineering applications, however, this is not sufficient and more conservative risk measures need to be chosen.
   \item $R(F)=\sup(F)$. This is the most conservative case, in which one is concerned with the worst case performance of the system. The expression $\sup(F)$ stands for the least of all values that are greater than the random response $F$ with probability 1. If the support of the probability density function (PDF) of $F$ is not compact (i.e. $F$ can take arbitrary large values with non-zero probability) than $\sup(F)$ will be infinite.
-  \item $R(F)=\mu(F)+k\sigma(F)$, where $\sigma(F)$ is the standard deviation of $F$ and $k>0$ is a constant. This risk measure is sometimes referred to as the safety margin. Optimisation using this risk measure is referred to as robust design optimisation22,23,24 and reflects the paradigms of a ‘$3\sigma$-design’, a ‘$6\sigma$-design’, etc.
-  \item $R(F)=q_F(\alpha)$, where $q_F(\alpha)$ is the value of the quantile function, or simply the quantile, corresponding to a given probability $\alpha\in (0,1)$. This choice corresponds to the paradigm of reliability-based design optimization25,23,26. In this approach, one wants to keep the probability of the system failing (i.e. violating the constraint or underperforming, depending on the context) below a given threshold. The value $1-\alpha$ is the desired probability of failure. Although rather intuitive, this choice has known computational issues which are discussed by Rockafellar and Royset27.
+  \item $R(F)=\mu(F)+k\sigma(F)$, where $\sigma(F)$ is the standard deviation of $F$ and $k>0$ is a constant. This risk measure is sometimes referred to as the safety margin. Optimisation using this risk measure is referred to as robust design optimisation\cite{KochYangGu2004,Yao2011,ZhangZhuChenArendt2013} and reflects the paradigms of a ‘$3\sigma$-design’, a ‘$6\sigma$-design’, etc.
+  \item $R(F)=q_F(\alpha)$, where $q_F(\alpha)$ is the value of the quantile function, or simply the quantile, corresponding to a given probability $\alpha\in (0,1)$. This choice corresponds to the paradigm of reliability-based design optimization\cite{AouesChateauneuf2010,Yao2011,YounChoi2004}. In this approach, one wants to keep the probability of the system failing (i.e. violating the constraint or underperforming, depending on the context) below a given threshold. The value $1-\alpha$ is the desired probability of failure. Although rather intuitive, this choice has known computational issues which are discussed by Rockafellar and Royset\cite{RockafellarRoyset2010}.
 \end{itemize}
 
 For this study, we chose as risk measure the safety margin $R(F)=\mu(F)+k\sigma(F)$, aiming at covering both robust design optimisation and reliability design optimisation. Let us briefly discuss its computation.
@@ -265,12 +267,12 @@ To compute the safety margin risk measure, one needs to compute two integrals:
   \end{array}
 \end{displaymath}
 
-The dimension of these integrals is $n+n_e$. To compute them efficiently, methods of high-dimensional integration must be employed. Here, quasi-Monte-Carlo integration30 based on Niederreiter sequences31 is used.
+The dimension of these integrals is $n+n_e$. To compute them efficiently, methods of high-dimensional integration must be employed. Here, quasi-Monte-Carlo integration\cite{Caflisch1998} based on Niederreiter sequences\cite{Niederreiter1992} is used.
 
 \section{Numerical Example}
 \label{sec:num_example}
 
-The example considered in this study is a classical engineering optimisation problem known as the scalable cantilevered beam34. The engineering object to be optimised is shown in Fig. \ref{fig:beam} taken from Ref. 34.
+The example considered in this study is a classical engineering optimisation problem known as the scalable cantilevered beam\cite{Vanderpllaats2001}. The engineering object to be optimised is shown in Fig. \ref{fig:beam} taken from Ref. \cite{Vanderpllaats2001}.
 
 \begin{figure}[ht]
     \centering
