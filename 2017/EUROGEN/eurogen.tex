@@ -241,8 +241,55 @@ Summarising, the key changes introduced to account for uncertainties are (i) met
 As it has been already said, a risk measure is a mapping that transforms a random response $F(\pmb x+ \pmb u,\pmb y)$  into a deterministic function that can be optimized. Next we provide some examples of risk measures2,3.
 
 \begin{itemize}
-  \item $R(F)=\mu(F)$
+  \item $R(F)=\mu(F)$ where $μ(F)$ is the mean of $F$. This choice corresponds to optimising average performance of the system. In typical engineering applications, however, this is not sufficient and more conservative risk measures need to be chosen.
+  \item $R(F)=\sup(F)$. This is the most conservative case, in which one is concerned with the worst case performance of the system. The expression $\sup(F)$ stands for the least of all values that are greater than the random response $F$ with probability 1. If the support of the probability density function (PDF) of $F$ is not compact (i.e. $F$ can take arbitrary large values with non-zero probability) than $\sup(F)$ will be infinite.
+  \item $R(F)=\mu(F)+k\sigma (F)$, where $\sigma(F)$ is the standard deviation of $F$ and $k>0$ is a constant. This risk measure is sometimes referred to as the safety margin. Optimisation using this risk measure is referred to as robust design optimisation22,23,24 and reflects the paradigms of a ‘$3\sigmaσ$-design’, a ‘$6\sigmaσ$-design’, etc.
+  \item $R(F)=q_F(\alpha)$, where $q_F(\alpha)$ is the value of the quantile function, or simply the quantile, corresponding to a given probability $\alpha\in (0,1)$. This choice corresponds to the paradigm of reliability-based design optimization25,23,26. In this approach, one wants to keep the probability of the system failing (i.e. violating the constraint or underperforming, depending on the context) below a given threshold. The value $1−\alpha$ is the desired probability of failure. Although rather intuitive, this choice has known computational issues which are discussed by Rockafellar and Royset27.
 \end{itemize}
+
+For this study, we chose as risk measure the safety margin $R(F)=\mu(F)+k\sigma(F)$, aiming at covering both robust design optimisation and reliability design optimisation. Let us briefly discuss its computation.
+
+To compute the safety margin risk measure, one needs to compute two integrals:
+\begin{displaymath}
+  \mu (F)=E[F]=
+\end{displaymath}
+
+The dimension of these integrals is $n+n_e$. To compute them efficiently, methods of high-dimensional integration must be employed. Here, quasi-Monte-Carlo integration30 based on Niederreiter sequences31 is used.
+
+\section{Numerical Example}
+
+The example considered in this study is a classical engineering optimisation problem known as the scalable cantilevered beam34. The engineering object to be optimised is shown in Fig. 2 taken from Ref. 34.
+
+%picture
+
+The design variables are the widths $b_i$ and heights $h_i$ of the segments. The number of segments $N$ can be chosen abitrary. The total length of the beam is 500 cm, the lenghths of the segments are $l_i=500/N$  cm. There are $N$ geometric constraints (the aspect ratios of each block (i.e. heights divided by widths) should not exceed 20) and $N$ constraints on the stress, calculated at the left end of each segment (stresses should not exceed  $\sigma=14000 N/cm^2$). There is also also a constraint on the displacement at the tip, which should not exceed 2.5 cm. The load is $P = 50 000 N$, the Young's modulus is $E=2\cdot 10^7  N/cm^2$.
+
+The deflection $y_i$ at the right hand of the $i$-th segment is given by the following recursive formulas:
+\begin{displaymath}
+  \mu (F)=E[F]=
+\end{displaymath}
+The moment of inertia of a segment is $I_i=\frac{b_i h_i^3}{12}$ and the bending moment at the left end is $M_i=P[L+l_i- \sum_{j=1}^{i}  l_j ]$. The maximum bending stress in the segment $i$ is then given by the following formula:
+\begin{displaymath}
+  \mu (F)=E[F]=
+\end{displaymath}
+
+We are looking for a design with smallest volume $V = \sum_{i=1}^N b_i h_i l_i$. The widths $b_i$ vary from 1.0 to 10.0 cm and the heights $h_i$ from 5.0 to 100.0 cm. The optimisation problem is formulated as follows:
+\begin{displaymath}
+  \mu (F)=E[F]=
+\end{displaymath}
+
+With $N=50$ segments (corresponding to 100 design variables) the SQP solution of this problem is $V = 63704.598 cm^3$. MAM obtained the solution $V = 63935.360 cm^3$, using 1500 function evaluations (as compared to almost 8000 evaluations used by SQP). The number of points in a trust region used to build approximations was 150. The solution obtained by MAM is very close to the reference solution obtained by SQP, except for the last design variable (the height of the last segment), which indicates that the problem is insensitive to this variable near the optimum, making it hard for the metamodels to capture this dependence. Both SQP and MAM solutions are, however, feasible and differ only slightly in the value of the objective function.
+
+Now let us add uncertainty to the problem, adding Gaussian noise with zero mean and variance 0.1 to each design variable. Using the μ(F) + kσ(F) risk measure, we obtain the following problem statement:
+\begin{displaymath}
+  \mu (F)=E[F]=
+\end{displaymath}
+
+The notation $\sigma$ was used to denote the variance of a response, but it also stands for the maximum bending stresses $\sigma_i$, resulting in somewhat confusing notation $\sigma(\sigma_i )$. Hopefully, this explanation eliminates the confusion. Optimising $\mu(F) + k\sigma(F)$ with $k = 3.0$ using SQP on original functions, we obtain the value of the deterministic objective (volume of the structure) at the robust optimum $V = 67598.049 cm^3$. To compute $\mu(F)$ and $\sigma(F)$ at each iteration, 1000 points were used. Multiplied by the number of evaluations of the robust objective $\mu(F) + k\sigma(F)$ (approximately 8000), we get a rough estimate of $8\cdot 10^6$ of the total number of points that SQP used to find this solution.
+
+Solving the same problem using the new version of MAM suitable for problems with uncertainty, we obtain the value of the deterministic objective (volume of the structure) at the robust optimum $V = 67799.335 cm^3$. To obtain this result, MAM again used 150 points per trust region to build metamodels, which resulted in a total of 1500 function evaluations, which is orders of magnitude smaller than the number of points required if no metamodels are used.
+
+The $\mu(F ) + k\sigma(F)$ risk measure uses quantities that are estimated in the middle of the distribution --- the mean and the standard deviation. On the one hand, this has the advantage that samples drawn directly from the distribution of the random variables $\pmb u$ and $\pmb y$ are well suited to approximately compute this risk measure. On the other hand, probabilistic interpretation of the obtained results in this case is only possible under the normality assumption for the distribution of $F$; if the actual distribution of $F$ has heavier tails than the normal one, the actual probability of failure will be higher than the one  the system was designed for.
 
 \section{Conclusion}
 
