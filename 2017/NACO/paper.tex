@@ -224,7 +224,7 @@ is highly important, since an estimate of the global minimum can be constructed 
 base a finite number of computed values of the optimized function only in this case .
 \par
 As it has been shown earlier by many researchers
-(see, for instance, [12], [25], [38], [51]),
+(see, for instance, \cite{floudasPardalosGOState}, \cite{horstTuyGO}, \cite{pinterGO}, \cite{strSergGO}),
 finding the numerical estimate of the global optimum implies constructing a coverage of
 the search domain \(D\). As a result, the computational costs of solving the global
 optimization problems are readily very high even for a small number of varied parameters
@@ -237,12 +237,12 @@ trial points and the values of the minimized function at these points) obtained 
 of computations. This necessary condition complicates considerably the computational schemes
 for global optimization methods since it implies a complex analysis of a large amount
 of multidimensional search information. As a result, many optimization algorithms use
-various approaches to the dimensional reduction [38], [46], [48], [50], [51].
+various approaches to the dimensional reduction \cite{pinterGO}, \cite{sergeyevStronginLera2013}, \cite{strongin1978}, \cite{stronginGergelBarkalovParGO}, \cite{strSergGO}.
 \par
 Within the framework of the information-statistical global optimization theory,
 the Peano space-filling curves (or evolvents) \(y(x)\) mapping the interval \([0,1]\)
 onto an \(N\)-dimensional hypercube \(D\) unambiguously are used for the dimensionality
-reduction [46], [48], [50], [51].
+reduction \cite{sergeyevStronginLera2013}, \cite{strongin1978}, \cite{stronginGergelBarkalovParGO}, \cite{strSergGO}.
 \par
 As a result of the reduction, the initial multidimensional global optimization
 problem (\ref{eq:task}) is reduced to the following one-dimensional problem:
@@ -294,68 +294,53 @@ The computational scheme obtained as a result of the dimensionality reduction co
 
 \section{Parallel Computations for Solving Global Optimization Problems}
 \label{sec:parallel}
-Let us consider the parallelization methods used widely in the theoretical and
-practical application of parallel computing within the context of global optimization problems:
+Let us consider the parallelization approaches used widely in the theoretical and
+practical applications of parallel computing within the context of global optimization problems:
 \begin{itemize}
-  \item The distribution of the search domain \(D\) among the available computing units
-  (data parallelization scheme). In the case of optimization problems, this approach is
-  insufficient, since in organizing such computations the subdomain, which contain the
-  sought global minimum, will be processed by only one processor, and, therefore,
-  all of the remaining processors would perform the excess computations.
-  \item The parallelization of the computational schemes for optimization algorithms
-  (task parallelization scheme). This approach is also insufficient since the direct
-  computational costs for executing optimization algorithms are relatively low
-  (the majority of computations in the course of a global search are represented by
-  calculations of the optimized function values due to the initial assumption of
-  considerable computational costs for such calculations).
-  \item The parallelization of the computations executed in order to obtain values
-  for the optimized function. This approach can be applied since the most computationally
-  costly part of the global search process will be parallelized. However, this method is not
-  featured by the generality (the development of parallelization methods is to be performed
-  every time from scratch while solving each particular optimization problem).
+  \item The distribution of the search domain \(D\) among the available computational units (data parallelization scheme). This approach is insufficient in the case of optimization problems since in such computations the subdomain, which contain the sought global minimum, will only be processed by one processor, and, therefore, all the remaining processors would perform the excess computations.
+  \item The parallelization of the optimization algorithms (task parallelization scheme). This approach is also insufficient since the direct computational costs for executing the optimization algorithms are relatively low (the majority of computations are represented by the calculations of the optimized function values due to the initial assumption of considerable computational costs of such calculations).
+  \item The parallelization of the computations executed in order to obtain the values of the optimized function. This approach is applicable since the most time-consuming part of the global optimization will be parallelized. However, this method is not featured by the generality (the development of parallelization methods is to be performed every time from the very beginning while solving each particular optimization problem).
 \end{itemize}
 \par
-Within the framework of information-statistical theory, a general approach to
-parallelization computations when solving global optimization problems has been
-proposed --- \textit{the parallelism of computations is provided by means of simultaneously
-computing the values of the minimized function \(\varphi(y)\) at several different
-points within the search domain \(D\)} – see, for example, \cite{stronginGergelBarkalovParGO}, \cite{strSergGO}.
-This approach provides parallelizaion for the most costly part of computations in the global search process.
+Within the framework of the information-statistical theory, a general parallelization
+approach for solving the global optimization problems has been proposed [\cite{stronginGergelBarkalovParGO}, \cite{strSergGO} --- \textit{the
+parallel computations are provided by means of simultaneous computing the values of the
+minimized function \(\varphi(y)\) at several different points within the search domain \(D\)}.
+This approach provides the parallelization for the most time-consuming part of the optimization computations.
 \par
-The global optimization algorithms implemented in Globalizer will be described step-by-step below.
-In Subsection \ref{subsec:corepar}, the core sequential multidimensional algorithm of global search (MAGS) will be presented.
-In Subsection \ref{subsec:sharedpar}, a parallel generalization of the MAGS algorithm for parallel computations on
-computer systems with shared memory will be described. In Subsection \ref{subsec:distribpar}, the scheme
-for parallel computations by multiprocessor systems with distributed memory will be provided.
-
+The global optimization algorithms implemented in Globalizer will be described step-by-step.
+In Subsection \ref{subsec:corepar}, the core serial Multidimensional Algorithm of Global
+Search (MAGS) is presented. In Subsection \ref{subsec:sharedpar}, a parallel generalization
+of the MAGS algorithm for the parallel computations on the multiprocessor computational
+nodes with shared memory is described. In Subsection \ref{subsec:distribpar}, the scheme
+for the parallel computations on the high-performance computational systems with distributed memory is given.
 \subsection{Core Multidimensional Generalized Algorithm of Global Search}
 \label{subsec:corepar}
-The information-statistical theory of global search formulated in \cite{strongin1978}, \cite{strSergGO}
-has served as a basis for the development of a large number of efficient multiextremal optimization methods --- see, for example, \cite{barkalovGergel2014}, \cite{Pizzuti}, \cite{gergel1996}, \cite{gergel1997}, \cite{grishaginStrongin1984}, \cite{sergeyev1995}, \cite{sergeyev1999}, \cite{sergeyevGrishagin1994}, \cite{sergeyevGrishagin2001}, \cite{sergeyevStronginLera2013}, \cite{Famularo2001} etc.
+The information-statistical theory of global optimization formulated in \cite{strongin1978}, \cite{strSergGO} has
+served as a basis for the development of a large number of efficient multiextremal optimization
+methods \cite{barkalovGergel2014}, \cite{Pizzuti}, \cite{gergel1996}, \cite{gergel1997}, \cite{grishaginStrongin1984}, \cite{sergeyev1995}, \cite{sergeyev1999}, \cite{sergeyevGrishagin2001}, \cite{sergeyevStronginLera2013}, \cite{Famularo2001}.
 \par
-Multidimensional Algorithm of Global Search (MAGS) established the basis for the
-methods applied in Globalizer. The general computational scheme of MAGS can be
-presented as follows --- see \cite{strongin1978}, \cite{strSergGO}.
+The optimization methods applied in Globalizer are based on the MAGS method, which can be presented as follows --- see \cite{strongin1978}, \cite{strSergGO}.
 \par
-Let us introduce a simpler notation for the problem being solved on a computing node
+Let us introduce a simpler notation for the optimization problem being solved
 \begin{equation}
 \label{eq:oneDimFunc}
 f(x) = \varphi(y(x)):x\in [0,1].
 \end{equation}
 \par
 The initial iteration of the algorithm is performed at an arbitrary point \(x^1(0,1)\).
-Let us assume further \(k\), \(k>1\), iterations of a global search are to be completed.
+Then, let us suppose that \(k\), \(k\ge 1\), optimization iterations have been completed already.
 The selection of the trial point \(k+1\) for the next iteration is performed according to the following rules.
 \par
-\textit{Rule 1}. To renumber the points for the preceding trials by the lower indices in order of increasing value of coordinates
+\textit{Rule 1}. Renumber the points of the preceding trials by the lower indices in order of increasing value of coordinates
 \begin{equation}
   \label{step1}
 0=x_0<x_1<...<x_{k+1}=1.
 \end{equation}
-The points \(x_0\), \(x_k\) were introduced additionally for convenience in further explanation,
-the values of the minimized function \(z_0\), \(z_k\) at these points are undefined.
+the points \(x_0\), \(x_k\) were introduced additionally for the convenience of further
+explanation, the values of the minimized function \(z_0\), \(z_k\) at these points are undefined.
 \par
-\textit{Rule 2}. To compute a current estimate of the H{\"o}lder constant \(H\) from (\ref{eq:holder})
+\textit{Rule 2}. Compute current estimate of the H{\"o}lder constant \(H\) from (\ref{eq:holder})
 \begin{equation} \label{step2}
 m=\max_{1\leq i\leq k}\frac{|z_i-z_{i-1}|}{\rho_i}, \;
 M = \left\{
@@ -365,11 +350,12 @@ M = \left\{
    \end{array}
   \right.
 \end{equation}
-as the maximum of the relative differences of the minimized function \(f(x)\) from (\ref{eq:oneDimFunc})
-on the set of executed trial points \(x_i,1\leq i\leq k\) from (\ref{step1}). Further, \(\rho_i=(x_i-x_{i-1})^\frac{1}{N},1\leq i\leq k+1\).
-The constant \(r\), \(r>1\), is the \textit{parameter} for the algorithm.
+as the maximum of the relative differences of the minimized function values on the
+set of previously executed trial points \(x_i,1\leq i\leq k\) from (\ref{step1}).
+Hereafter, \(\rho_i=(x_i-x_{i-1})^\frac{1}{N},1\leq i\leq k+1\). The
+constant \(r\), \(r>1\), is the reliability parameter of the algorithm.
 \par
-\textit{Rule 3}. For each interval \((x_{i-1},x_i),1\leq i\leq k+1\), compute the characteristics \(R(i)\) where
+\textit{Rule 3}. Compute the characteristics \(R(i)\) for each interval \((x_{i-1},x_i),1\leq i\leq k+1\), where
 \[
 R(i)=2\rho_i-4\frac{z_i}{M},\quad i=1,
 \]
@@ -381,13 +367,13 @@ R(i)=2\rho_{i}-4\frac{z_{i-1}}{M},\quad i=k+1.
 \]
 
 \par
-\textit{Rule 4}. To determine the interval with the maximum characteristic
+\textit{Rule 4}. Determine the interval with the maximum characteristic
 \begin{equation} \label{step4}
 R(t)=\max_{1\leq i \leq k+1}R(i).
 \end{equation}
 \par
-\textit{Rule 5}. To execute a new trial (computation of the minimized function value \(f(x)\))
-at the point \(x^{k+1}\) located within the interval with the maximum characteristic from (\ref{step4})
+\textit{Rule 5}. Execute a new trial at the point \(x^{k+1}\) located within the interval
+with the maximum characteristic from (\ref{step4})
 \begin{equation} \label{step5}
   x_{k+1}=\frac{x_t+x_{t-1}}{2}-\mathrm{sign}(z_{t}-z_{t-1})\frac{1}{2r}\left[\frac{|z_{t}-z_{t-1}|}{M}\right]^N,\; \textrm{ if } 1<t<k+1,
 \end{equation}
@@ -396,60 +382,59 @@ at the point \(x^{k+1}\) located within the interval with the maximum characteri
 \]
 
 \par
-The stop condition by which the trials are terminated, is defined by the inequality
+The stop condition, which terminated the trials, is defined by the inequality
 \begin{equation}
   \label{eq:stop_1}
 \rho_t<\varepsilon
 \end{equation}
 for the interval with the maximum characteristic from (\ref{step4}) and \(\varepsilon >0\) is the predefined
-accuracy of the problem solution. If the stop condition is not satisfied, the index \(k\) is incremented by unity,
-and a new global search iteration is executed.
+accuracy of the optimization problem solution. If the stop condition is not satisfied,
+the index \(k\) is incremented by 1, and new global optimization iteration is executed.
 \par
 In order to explain the algorithm presented above, let us note the following.
-The characteristics \(R(i), 1\leq i\leq k+1\), calculated according to (\ref{step3})
-could be interpreted as some measures of importance to the intervals with respect to
-location of the global minimum point. Thus, the scheme for selecting the interval
-for executing the next trial described in (\ref{step4}), (\ref{step5}) becomes more clear --- the point of every next
-global search iteration is selected within the interval where the global minimum point can most likely be found.
+The characteristics \(R(i), 1\leq i\leq k+1\), calculated according to (\ref{step3}) could
+be interpreted as some measures of importance of the intervals with respect to the
+expected location of the global minimum point. Thus, the rules (\ref{step4}) and (\ref{step5}) for selecting
+the interval for executing the next trial become more clear --- the point of every next
+global optimization iteration is selected within the interval, where the global minimum
+point can be found most likely.
 \par
-The conditions for the algorithm’s convergence described above were examined, for example, in \cite{strSergGO}.
+The convergence conditions for the described algorithm are given, for example, in \cite{strSergGO}.
 
 \subsection{Parallel Computations for Systems with Shared Memory}
 \label{subsec:sharedpar}
-Modern supercomputer computational systems consist of plenty of computer nodes,
-which include several multicore processors. At that, random access memory is
-shared for the computing nodes --- the content of any memory element can be read (written)
-by any computer cores available at any arbitrary moment. In most cases, shared memory is
-uniform --- the time characteristics for accessing memory are the same for all computer
-cores and for all memory elements.
+Modern supercomputer computational systems consist of plenty of computational nodes,
+which include several multicore processors. In this case, random access memory is
+shared among the computational nodes --- the content of any memory location can be read
+(written) by any computational core at any arbitrary moment. In most cases, shared memory is
+uniform --- the time characteristics for accessing the memory are the same for all
+computational cores and for all memory locations.
 \par
-The following speculations can form the basis for selecting parallel computation
-organization methods. As was mentioned above when describing the MAGS algorithm,
-the characteristics \(R(i),1\leq i\leq k+1\), calculated according to (\ref{step3})
-can be interpreted as some measures of the importance of intervals with respect to the location of
-the global minimum point. Following this understanding, each successive global search
-iteration is executed within the most important interval with the maximum value of the
-characteristic. So far, in this case it is obvious how to select the other intervals for
-organizing simultaneous computations of the minimized function values at several different
-points within the search domain as well --- these should be the intervals with the next
-magnitudes of characteristics.
+The following approach can be applied to provide the parallel computations with the MAGS method.
+As it was mentioned above, the characteristics \(R(i),1\leq i\leq k+1\) calculated
+according to (\ref{step3}) can be interpreted as some measures of importance of the
+intervals with respect to the expected location of the global minimum point.
+Following this understanding, every next global optimization iteration is executed within
+the most important interval with the maximum characteristic. As a result, it becomes
+evident how to select the other intervals for simultaneous computations of the minimized
+function values at several different points within the search domain --- these ones
+should be the intervals with the next magnitudes of characteristics.
 \par
-The computational scheme of the Parallel Multidimensional Algorithm of Global Search for
-computer systems with shared memory (PMAGS) was developed based the approach considered
-above and is practically identical to the MAGS scheme --- the differences consist just in the
-following set of rules --- see \cite{strSergGO}, \cite{stronginGergelBarkalovParGO}.
+The computational scheme of the Parallel Multidimensional Algorithm of Global Search (PMAGS)
+for the computational systems with shared memory can be developed based on the approach
+described above. This scheme is almost identical to the MAGS one --- the differences
+consist just in the following set of rules.
 \par
-\textit{Rule 4'}. To arrange the characteristics of the intervals obtained according to (\ref{step3}) in decreasing order
+\textit{Rule 4'}. Arrange the characteristics of the intervals computed according to (\ref{step3}) in the decreasing order
 \begin{equation}
 \label{step4par}
 R(t_1)\geq R(t_2)\geq \dots \geq R(t_{k})\geq R(t_{k+1})
 \end{equation}
-and to select \(p\) intervals with the indices \(t_j,1\leq j\leq p\), with
-the highest values of characteristics (\(p\) is the number of processors/cores used for the parallel computations).
+and select \(p\) intervals with the indices \(t_j,1\leq j\leq p\), with the maximum
+values of characteristics (\(p\) is the number of processors/cores used for the parallel computations).
 \par
-\textit{Rule 5'}. To execute new trials (computations of values for the minimized
-function \(f(x)\)) at the points \(x_{k+j},1\leq j\leq p\), located in the
-intervals with the highest characteristics from (\ref{step4par})
+\textit{Rule 5'}. Execute new trials at the points \(x_{k+j},1\leq j\leq p\) located
+in the intervals with the maximum characteristics from (\ref{step4par})
 
 \begin{equation} \label{step5par}
 x_{k+j}=\frac{x_{t_j}+x_{t_j-1}}{2}-\mathrm{sign}(z_{t_j}-z_{t_j-1})\frac{1}{2r}\left[\frac{|z_{t_j}-z_{t_j-1}|}{M}\right]^N,\; \textrm{ if } 1<t_j<k+1,
@@ -458,220 +443,207 @@ x_{k+j}=\frac{x_{t_j}+x_{t_j-1}}{2}-\mathrm{sign}(z_{t_j}-z_{t_j-1})\frac{1}{2r}
 x_{k+j}=\frac{x_{t_j}+x_{t_j-1}}{2},\; \textrm{ if } t_j=1 \textrm{ or } t_j=k+1.
 \]
 \par
-The stop condition for the algorithm (\ref{eq:stop}) should be checked for all
-intervals from (\ref{step4par}), in which the scheduled trials are executed
+The stop condition (\ref{eq:stop_1}) should be checked for all intervals from (\ref{step4par}),
+where the scheduled trials are executed
 \begin{equation}
   \label{eq:stop}
 \rho_{t_j}<\varepsilon,1\leq j\leq p.
 \end{equation}
-As before, if the stop condition is not fulfilled, the index \(k\) is
-incremented by \(p\), and a new global search iteration is executed.
+If the stop condition is satisfied at least for one interval \(t_j, 1\le j\le p\), the calculations
+are terminated. Otherwise, the index \(k\) is incremented by \(p\), and new global optimization iteration is executed.
 \par
-The conditions for the developed parallel algorithm’s convergence and for the
-non-redundancy of parallel computations have been examined in \cite{strSergGO}.
-Thus, in particular, when the conditions for convergence are satisfied, the parallel
-computations are non-redundant as compared to the sequential method when using up to
-\(2^N\) processors/cores (where \(N\) is the dimensionality of the global optimization problem being solved).
+The convergence conditions for the developed parallel algorithm are considered
+in \cite{stronginGergelBarkalovParGO}, \cite{strSergGO}. Thus, in particular, when the convergence conditions are
+satisfied, the parallel computations are non-redundant as compared to the serial method
+when using up to \(2^N\) processors/cores (\(N\) is the dimensionality of the global optimization problem).
 
 \subsection{Parallel Computations for Systems with Distributed Memory}
 \label{subsec:distribpar}
-The next level of parallel computations in high-performance computer systems consists of
-using several computational nodes. For that, each computational node has its own separate
-memory and, in this case, the interaction between different nodes can be provided by
-means of data transfer only via the computer communication network.
+The next level of parallel computations on the high-performance computational systems
+consists in using several computational nodes. In this case, each computational node has
+its own separate memory and the interaction between different nodes can be provided by
+means of data transfer via the computer communication network.
 \par
-To organize parallel computations for multiprocessor systems with distributed memory, using a set of mappings
+To provide parallel computations on high-performance computational systems with the distributed memory, it is proposed to use a set of mappings
 \begin{equation}
   \label{eq:maps}
 Y_s(x)=\{y^1(x),\dots,y^s(x)\}
 \end{equation}
-instead of applying a single Peano curve \(y(x)\) has been proposed in \cite{strongin1992}, \cite{strSergGO}.
-In order to build the set \(Y_s(x)\), several different approaches can be applied.
-Thus, for example, in \cite{strongin1992} a scheme has been applied by which each
-mapping \(y_i(x)\) from \(Y_s(x)\) is built as the result of some shift along the main
-diagonal of the hypercube \(D\). This way, the set of constructed Peano curves enables the
-close prototypes \(x'\), \(x''\)  to be obtained from the interval \([0,1]\) for any close
-multidimensional images \(y'\), \(y''\) from \(D\) differing in one coordinate,
-only for some mapping \(y_k(x), 1\leq k\leq s\).
+instead of applying a single Peano curve \(y(x)\) --- see, for instance,
+\cite{strongin1992}, \cite{stronginGergelBarkalovParGO}, \cite{strSergGO}.
+In order to construct the set \(Y_s(x)\), several different approaches can be applied.
+Thus, for example, in \cite{strongin1992} each mapping \(y^i(x)\) from \(Y_s(x)\) is constructed
+as the result of some shift along the main diagonal of the hypercube \(D\). This way,
+the set of the constructed Peano curves enables the close prototypes \(x'\), \(x''\)
+to be obtained from the interval \([0, 1]\) for any close multidimensional images
+\(y'\), \(y''\) from \(D\) differing in one coordinate only.
 \par
-Some other methods for constructing multiple mappings have been examined in \cite{stronginGergelBarkalovParGO}.
+Some other methods for constructing the multiple mappings were considered in \cite{stronginGergelBarkalovParGO}.
 \par
-The set of mappings \(Y_s(x)\) from (\ref{eq:maps}), for multidimensional problem (\ref{eq:task})
-generates \(s\) subsidiary information-linked one-dimensional problems of the kind (\ref{eq:oneDimTask}):
+The set of mappings \(Y_s(x)\) from (\ref{eq:maps}) generates \(s\) information-linked one-dimensional
+problems of the kind (\ref{eq:oneDimTask}):
 \begin{equation}
   \label{eq:oneDimProblemSerie}
   \varphi(y^l(x^*))=\min\{\varphi(y^l(x)):x\in [0,1]\},1\leq l\leq s.
 \end{equation}
 \par
-It is important to note that the family of one-dimensional problems
-\[
-\varphi(y^l(x)),1 \leq l \leq s,
-\]
-obtained as a result of the dimensional reduction is information-linked --- the function
-values computed for any problem \(\varphi(y^l(x))\) from the family (\ref{eq:oneDimProblemSerie}) can be used for all
-of the remaining problems of this family.
+It is important to note that the family of the one-dimensional problems
+\(\varphi(y^l(x)),1 \leq l \leq s\) obtained as a result of the dimensionality
+reduction is an information-linked one --- the function values computed for any
+problem \(\varphi(y^l(x))\) from the family (\ref{eq:oneDimProblemSerie}) can be used for all rest problems of this family.
 \par
-The information compatibility of the problems from the family (\ref{eq:oneDimProblemSerie}) allows the parallel
-computations to be organized in an obvious enough way. Thus, each particular problem can
-be solved by a separate processor in the computing system; the exchange of search information
-between the processors should be performed during the course of the computations.
-As a result of using such a parallelization method, a unified approach for organizing parallel
-computations for a multiprocessor computer systems with distributed, as well as shared
-memory can be developed. This method consists of the following.
+The information compatibility of the optimization problems from the family (\ref{eq:oneDimProblemSerie})
+allows executing the parallel computations in the following way. Each particular
+problem can be solved by a separate processor of the computational system; the exchange
+of search information between the processors should be performed during the computations.
+As a result, a unified approach for the parallel computations on the high-performance
+computational systems with distributed and shared memory can be developed. This method consists in the following.
 \begin{enumerate}
-  \item The family of reduced one-dimensional information-linked problems (\ref{eq:oneDimProblemSerie}) is
-  distributed among the computational nodes of a multiprocessor system. One problem,
-  as well as several others from within the family, can be allocated to each particular computational node.
-  \item The Parallel Multidimensional Algorithm of Global Search (PMAGS, see Subsection \ref{subsec:sharedpar})
-  is applied to solve the allocated problems from the family (\ref{eq:oneDimProblemSerie})
-  at each computational node, supplemented by the following rules of information interaction.
+  \item The family of the reduced one-dimensional information-linked optimization
+  problems (\ref{eq:oneDimProblemSerie}) is distributed among the computational nodes of the multi-node computational system.
+  \item Each optimization problem from the family (\ref{eq:oneDimProblemSerie}) is solved on the
+  corresponding computational node using the PMAGS method (described above in Subsection \ref{subsec:sharedpar})
+  supplemented by the following rules of the information interaction.
   \begin{enumerate}
-    \item Prior to beginning a new trial at any point \(x'\in [0,1]\) for any problem \(\varphi(y_l(x)),1\leq l\leq s\),
-    the following should be performed:
+    \item Prior to beginning new trial at any point \(x'\in [0,1]\) for any problem \(\varphi(y^l(x)),1\leq l\leq s\), the following should be performed:
     \begin{itemize}
-      \item compute the image \(y'\in D\) for the point \(x'\in [0, 1]\) according to the mapping \(y_l(x)\),
-      \item determine  the prototypes \(x_i',1\leq i\leq s\), for each
-      problem from the family (\ref{eq:oneDimProblemSerie}),
-      \item send the prototypes \(x_i',1\leq i\leq s\) to all computational
-      nodes employed in order to exclude the repeated selection of the intervals in
-      which the prototypes fall, for using them to determine the points for new trials.
-      To organize the data transfer, a queue can be formed at each computational
-      node for sending the trial points and receiving the minimized function values at these points.
+      \item compute the image \(y'\in D\) for the point \(x'\in [0, 1]\) according to the mapping \(y^l(x)\),
+      \item determine  the preimages\footnote{All preimages have the same
+      image \(y'\); the preimages are calculated by the inverse mappings \((y^i)^{-1}\), \(1\le i\le s\);
+      the number of the preimages coincides with the number of the mappings.}
+      \begin{displaymath}
+        x_i':y'=y^i(x_i'),1\le i\le s,
+      \end{displaymath}
+      in accordance with the set of mappings \(y^l(x), 1\le l\le s\) for each problem from the family (\ref{eq:oneDimProblemSerie}),
+      \item send the prototypes \(x_i',1\leq i\leq s\) to all computational nodes in order
+      to exclude the repeated selection of the intervals, which the prototypes fall in,
+      for using these ones to determine the points of new trials. To perform the data transfer,
+      a queue can be created at each computational node for sending the trial points and
+      receiving the minimized function values at these points.
     \end{itemize}
-    \item After completing any trial for any problem \(\varphi(y_l(x)),1\leq l\leq s\), at any point
-    \(x'\in[0,1]\), it is necessary:
+    \item After completing any trial for any problem \(\varphi(y_l(x)),1\leq l\leq s\),
+    at any point \(x'\in[0,1]\), it is necessary:
     \begin{itemize}
-      \item to determine all prototypes \(x_i',1\leq i\leq s\), for the point of the completed trial
-      for each problem from the family (\ref{eq:oneDimProblemSerie}),
-      \item to send the prototypes \(x_i',1\leq i\leq s\), and the result of the
-      trial \(z'=\varphi(y_l(x'))\) to all computational nodes employed to include the
-      obtained data into the search information processed within the rules of the parallel global search algorithm.
+      \item to determine all prototypes \(x_i',1\leq i\leq s\) for the point of the
+      completed trial for each problem from the family (\ref{eq:oneDimProblemSerie}),
+      \item to send the prototypes \(x_i',1\leq i\leq s\) and the result of the trial
+      \(z'=\varphi(y_l(x'))\) to all computational nodes to include the obtained data into
+      the search information processed according to the rules of the parallel global optimization algorithm.
     \end{itemize}
-    \item Prior to starting the next global search iteration, the algorithm should
-    check the queue of the received data; if there are some data in the queue,
-    they should be included in the search information.
+    \item Prior to starting the next global optimization iteration, the algorithm
+    should check the queue of the received data; if there are any data in the queue,
+    these should be included into the search information. The MAGS algorithm uses these
+    accumulated data for the adaptive computing of the optimization iteration points (see Section \ref{subsec:corepar}).
 \end{enumerate}
 \end{enumerate}
 \par
-The possibility of asynchronous data transfer (the computational nodes process received
-data only upon receipt) is a meaningful feature of such a scheme for organizing parallel computations.
-\par
-In addition, there is no single managing node within this scheme. The number of
-computational nodes can vary during the course of the global search, and excluding any
-node does not result in the loss of the sought global minimum of the minimized multiextremal function.
+The possibility of asynchronous data transfer (the computational nodes process the received
+data upon receipt only) is an important feature of the proposed parallel computation scheme.
+In addition, there is no any selected managing node within this scheme. The number of
+computational nodes can vary during the global optimization, and excluding any node does not result
+in the loss of the sought global minimum of the minimized multiextremal function.
 \par
 This computational scheme generates the Generalized Parallel Multidimensional Algorithm of
-Global Search (GPMAGS) for high-performance computing systems, which may include many
-multiprocessor (multicore) computational nodes with distributed memory as well as
-accelerators for computations based on Intel Xeon Phi processors and on general purpose graphic processors.
+Global Search (GPMAGS) for high-performance computational systems, which may include many
+multiprocessor (multicore) computational nodes with distributed memory as well as the
+computational accelerators based on Intel Xeon Phi processors and on the general purpose graphic processors (GPUs).
 \par
-Additional information on organizing such parallel computation schemes is provided in \cite{gergelSidorov2015}.
-
+Additional information on such parallel computation schemes can be found in \cite{gergelSidorov2015}.
 
 \section{Globalizer System Architecture}
 \label{sec:arch}
-As previously mentioned in Section \ref{sec:intro}, the development of software systems
-for global optimization is complex professional work. The optimization systems should
-include advanced optimization methods, provide for the accumulation and efficient
-processing of search information, include various forms of visualization for the results,
-provide tools for interacting with users, etc. All the features pointed out above
-become much more complicated when organizing parallel computations using high-performance
-multiprocessor systems of varying architectures.
-\par
-The Globalizer considered in this paper expands the family of global optimization
-software systems successively developed by the authors during the past several years.
-One of the first developments was the SYMOP multiextremal optimization system \cite{gergel1993},
-which has been successfully applied for solving many optimization problems. A special
-place is occupied by the ExaMin system (see, for example, \cite{barkalovGergel2015}),
-which was developed and used extensively to investigate the application of novel parallel
-algorithms to solve global optimization problems using high-performance multiprocessor computing systems.
+Globalizer expands the family of the global optimization software systems developed
+by the authors during the past several years. One of the first developments was the
+SYMOP multiextremal optimization system \cite{gergel1993}, which has been applied for solving
+many optimization problems. The ExaMin system \cite{barkalovGergel2015}, [3], [4], [16] was developed
+and used to investigate various parallel algorithms for solving the global
+optimization problems on the high-performance computational systems.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.75\textwidth]{pictures/globalizerScheme.eps}
-    \caption{The Globalizer system architecture (Blocks 1-2, 5-7 have been implemented; Blocks 3-4 and 8-11 are under development)}
+    \caption{The architecture of the Globalizer system}
     \label{fig:globalizerScheme}
 \end{figure}
 
 \par
-The Globalizer system architecture is presented in Figure \ref{fig:globalizerScheme}. The structural components are:
+The architecture of the Globalizer system is presented in Figure \ref{fig:globalizerScheme}.
+The system components are:
 \begin{itemize}
-  \item Block 0 consists of the procedures for computing the function values (criteria
-  and constraints) for the optimization problem being solved; this is an external
-  block with respect to the Globalizer system and is provided by the user per a predefined interface.
+  \item Block 0 consists of the procedures for computing the function values
+  (criteria and constraints) of the optimization problem being solved; it is an external
+  block with a predefined interface with respect to the Globalizer system and is provided by the user.
   \item Blocks 1-4 form the optimization subsystem and solve the global optimization
-  problems (Block 1), nonlinear programming (Block 2), multicriterial optimization (Block 3),
-  and general decision making problems (Block 4). It is worth noting the sequential
-  scheme of interaction between these components --- the decision making problems are
-  solved using the multicriterial optimization block, which, in turn, uses the nonlinear programming block, etc.
-  \item Block 5 is a subsystem for accumulating and processing the search information;
-  this is one of the basic subsystems --- the amount of search information for complex
-  optimization problems may appear to be quite large on the one hand, but, on the other
-  hand, the efficiency of the global optimization methods depends to a great extent on how
-  completely all of the available search data is utilized.
-  \item Block 6 contains the dimensional reduction procedures based on Peano evolvents;
-  the optimization blocks solve the reduced (one-dimensional) optimization problems;
-  Block 6 provides interaction between the optimization blocks and the initial
-  multidimensional optimization problem.
-  \item Block 7 organizes the choice of parallel computation schemes in the Globalizer
-  system subject to the computing system architecture employed (the numbers of cores in the
-  processors, the availability of shared and distributed memory, the availability of
-  accelerators for computations, etc.) and the global optimization methods applied.
-  \item Block 8 is responsible for managing the parallel processes when performing the
-  global search (determining the optimal configuration of parallel processes, distributing
-  the processes between computer elements, balancing computational loads, etc.).
-  \item Block 9 is a common managing subsystem, which fully controls the whole
-  computational process when solving global optimization problems.
-  \item Block 10 is responsible for organizing the dialog interaction with users for
-  stating the optimization problem, adjusting system parameters (if necessary), and
-  visualizing and presenting the global search results.
-  \item Block 11 is a set of tools for visualizing and presenting the global search results;
-  the availability of tools for visually presenting the computational results enables
-  the user to provide efficient control over the global optimization process.
+  problems (Block 1), nonlinear programming ones (Block 2), multicriterial optimization problems
+  (Block 3), and general decision making problems (Block 4). The interaction between these
+  components is organized in a hierarchical order --- the decision making problems are
+  solved using the multicriterial optimization block, which, in turn, uses the nonlinear programming block, and so on.
+  \item Block 5 is a subsystem for accumulating and processing the search information; it is one of the main subsystems – the size of search information may appear to be quite large and the efficiency of the global optimization methods depends on how completely the available search data are utilized.
+  \item Block 6 contains the dimensionality reduction procedures based on the Peano space-filling curves; the reduced (one-dimensional) optimization problems are solved by the optimization blocks. This block also provides the interaction between the optimization blocks and the multidimensional optimization problem being solved.
+  \item Block 7 provides tuning the parallel computation schemes in the Globalizer system subject to the employed computational system architecture (the number of the computational cores, the availability of shared and/or distributed memory, the availability of computational accelerators, etc.) and the applied global optimization methods.
+  \item Block 8 is responsible for managing the parallel processes when performing the global optimization (determining the optimal configuration of parallel processes, distributing the processes between the computational unit, balancing the computational loads, etc.).
+  \item Block 9 is a managing subsystem, which controls the parallel computations when solving the global optimization problems.
+  \item Block 10 provides the dialog interaction with the users for stating the optimization problem, adjusting the system parameters (if necessary), and visualizing and presenting the global optimization results.
+  \item Block 11 is a set of tools for visualizing and presenting the global optimization results; the availability of the tools for visual demonstration of the computational results enables the user to perform an efficient control over the global optimization process.
 \end{itemize}
 \par
-The Globalizer system comes in two different options:
+The Globalizer system comes in two different versions:
 \begin{itemize}
-  \item Globalizer Pro is a research version of the system providing a full set of
-  capabilities that are oriented toward solving of the most complicated global optimization problems.
-  \item Globalizer Lite is a limited version of the Globalizer system accessible for free for
-  solving global optimization problems with a medium level of difficulty, and is accessible free of charge.
+  \item Globalizer Pro is a research version for making various large-scale numerical experiments on the high-performance computational systems to investigate the new parallel global optimization methods being developed.
+  \item Globalizer Lite is a limited version for solving the global optimization problems with a medium complexity level, and is accessible free of charge.
 \end{itemize}
-
 
 \section{Results of Numerical Experiments}
 \label{sec:experiments}
-In order to confirm the operability of the Globalizer system, results from two
-series of computational experiments are presented in this section.
+The numerical experiments were carried out using the Lobachevsky supercomputer at
+the State University of Nizhni Novgorod (the operation system – CentOS 6.4, the
+supercomputer management system – SLURM). Each supercomputer node had 2 Intel Sandy Bridge
+E5-2660 processors, 2.2 GHz, with 64 GB RAM. Each processor had 8 cores (i. e. total
+16 CPU cores were available at each node). In order to generate the executable program code, the Intel C++ 14.0.2 compiler was used.
 \par
-The computational experiments were conducted using the Lobachevsky supercomputer at the
-State University of Nizhny Novgorod (operation system --- CentOS 6.4, management system --- SLURM).
-Each supercomputer node had 2 Intel Sandy Bridge E5-2660 processors, 2.2 GHz, with 64 GB RAM.
-Each processor had 8 cores (i.e. a total of 16 CPU cores were available at each node).
-In order to generate the executable program code, the Intel C++ 14.0.2 compiler was used.
+A number of computational nodes had Intel Xeon Phi 5110P processors, each containing 60 cores
+(total 240 threads). In addition, the supercomputer included the computational nodes equipped
+with two NVIDIA Kepler K20X GPUs, each providing 14 stream multiprocessors (total 2688 CUDA-cores). In order to generate the executable code, the CUDA Toolkit 6.0 was used.
 \par
-A number of nodes in the computer system utilized Intel Xeon Phi 5110P processors,
-each containing 60 cores (a total of 240 threads). In addition, the supercomputer also
-included computer nodes equipped with two GPU NVIDIA Kepler K20X, each providing 14
-stream multiprocessors (a total of 2688 CUDA-cores). In order to generate the executable
-code, the CUDA Toolkit 6.0 was used.
+In the performed experiments the optimization problems generated by the GKLS-generator
+\cite{gavianoKvasovLeraSergeev2003} were used. This generator allows obtaining the multiextremal optimization
+problems with \textit{a priori} known properties: the number of local minima, the sizes of the attractors of these ones, the global minimum point, the function value at this point, etc. In order to simulate the computational costs inherent to the applied optimization problems, in all experiments computing the objective function was intentionally complicated by the auxiliary computations not altering the form of the function and the position of its minima.
 \par
-The problems generated by the GKLS-generator \cite{gavianoKvasovLeraSergeev2003}
-were selected for the test problems. This generator allowed for obtaining the multiextremal
-optimization problems with \textit{a priori} known properties: the number of local minima,
-the sizes of their attractors, the global minimum point, the function value at this point, etc.
-In order to simulate the computation costs inherent in the applied optimization problems (see, for example, \cite{Barkalov2013}, \cite{gergel2013}, \cite{gergel2015}), in all of the experiments computing the objective function was complicated by auxiliary computations, not altering the form of the function and the position of its minima.
-\par
-The computational experiments considered below were first carried out using the ExaMin system (see \cite{barkalovGergel2015}, \cite{barkalovGergelLebedev2015}, \cite{barkalovGergelLebedevSysoev2015}, \cite{gergelLebedev2015}) and then were reproduced using the Globalizer system.
+The numerical experiments were carried out first using the ExaMin system and then were reproduced using the Globalizer system. In all the executed experiments, 100 global optimization problems generated randomly by the GKLS-generator were solved. The results of experiments were averaged over the number of the solved optimization problems.
 
 \subsection{Comparison with over methods}
+The results of numerical comparison of three sequential algorithms --- DIRECT
+\cite{Jones}, DIRECT\textit{l} \cite{Gablonsky}, and MAGS from Section \ref{subsec:corepar} --- are presented below.
 
-The results of numerical comparison of three sequential algorithms -- DIRECT \cite{Jones}, DIRECT\textit{l} \cite{Gablonsky} and core global search algorithm (GSA) from section \ref{subsec:corepar} -- are provided below (results of the work of the first two algorithms are given in paper \cite{gavianoKvasovLeraSergeev2003}). Numerical comparison was carried out on function classes \textit{Simple} and \textit{Hard} of dimension 4 and 5 from \cite{gavianoKvasovLeraSergeev2003} since solving a problems of dimension 2 and 3 demands a small number of iterations. Global minimizer $y^\ast$ was considered to be found, if the algorithm generated trial point $y^k$ in $\delta$-vicinity of the global minimum, i.e., $\left\|y^k-y^\ast\right\|\leq\delta$. The size of the vicinity was selected (according to \cite{gavianoKvasovLeraSergeev2003}) as $\delta = \left\|b-a\right\|\sqrt[N]{\Delta}$, $N$ -- problem dimension, $a$ and $b$ -- borders of search domain $D$, parameter $\Delta=10^{-6}$ at $N=4$ and $\Delta=10^{-7}$ at $N=5$. When using the GSA for the class \textit{Simple} parameter $r=4.5$ was selected, for the class \textit{Hard} $r=5.6$ was selected; evolvent construction parameter was fixed as $m=10$. The maximum allowable number of iterations was $K_{max} = 10^6$.
+The numerical comparison was carried out by using the function classes Simple and Hard
+of the dimensions 4 and 5. The results of numerical experiments for DIRECT and
+DIRECT\textit{l} are taken from \cite{sergeyevKvasov2006}. According to \cite{sergeyevKvasov2006}, the global minimizer \(y^*\)
+was considered to be found if the algorithm generated a trial point \(y^k\) inside
+a hyperinterval with a vertex \(y^*\) and
+\begin{displaymath}
+    |y^k(i)-y^*(i)|\le \sqrt[N]{\Delta}(b(i)-a(i)), i\le i\le N
+\end{displaymath}
+where \(N\) is the problem dimensionality, a and b are the borders of the search domain \(D\)
+\footnote{In the case of MAGS, the stop condition was different slightly --- the
+global minimizer \(y^*\) was considered to be found, if MAGS generates a trial
+point \(y^k\)  in the \(\delta\)-vicinity of the global minimum, i. e. \(||y^k-y^*||\le\delta\).
+The size of the vicinity was selected  as \(\delta=\left\|b-a\right\|\sqrt[N]{\Delta}\).}.
 
-The average number of iterations $k_{av}$ performed by the method for solving a series of problems from these classes is shown in table \ref{tab:3}. Symbol ''$>$''  reflects a situation in which not all problems of the class were solved by the method. This means that the algorithm was stopped as the maximum allowable number of iterations $K_{max}$ was achieved. In this case, value $K_{max}=10^6$ was used for calculating the average value of the number of iterations $k_{av}$ that corresponds to the lower estimate of this average value. The number of unsolved problems is specified in brackets.
+The values of the parameter \(\Delta = 10^{-6}\) at \(N = 4\) and \(\Delta = 10^{-7}\)
+at \(N = 5\) were used. When using MAGS, the reliability parameter was selected as
+follows: \(r = 4.5\) for the Simple class and \(r = 5.6\) for the Hard class.
+The density level parameter of the Peano curve approximation was fixed as \(m = 10\).
+
+The averaged numbers of iterations $k_{av}$ executed by the global optimization methods
+for solving the optimization problems are shown in Table \ref{tab:3}. The symbol ''$>$''
+denotes the situation, when not all problems of the class are solved by the optimization
+method. This means that the algorithm was stopped as the maximum allowed number of
+iterations $K_{max}$ was achieved. In this case, the value $K_{max}= 10^6$  was used to
+calculate the averaged number of iterations kav that corresponds to the lower estimate
+of this averaged value. The number of the unsolved problems is specified in the brackets.
 
 \begin{table}
-  \caption{Average number of iterations $k_{av}$}
+  \caption{Averaged number of executed iterations of the compared global optimization methods}
   \label{tab:3}
   \center
   \begin{tabular}{lllll}
@@ -686,33 +658,36 @@ The average number of iterations $k_{av}$ performed by the method for solving a 
   \end{tabular}
 \end{table}
 
-Table \ref{tab:3} shows that GSA outperforms DIRECT and DIRECT\textit{l} methods on all classes of problems in terms of average number of iterations. In class 5-\textit{Hard} all three methods failed to solve all problems: DIRECT did not solve 16 problems, DIRECT\textit{l} and GSA, 4 problems.
-
+Table \ref{tab:3} demonstrates that MAGS overcomes the DIRECT and DIRECT\textit{l} methods
+on all classes of problems in terms of the averaged number of iterations.
+In the 5-Hard class, all three methods failed to solve some problems: DIRECT did not
+solve 16 problems, DIRECT\textit{l} and MAGS --- 4 problems each.
 
 \subsection{Parallel Computations Using Intel Xeon Phi processors}
-The results of the numerical experiments with GPMAGS on an Intel Xeon Phi are provided in Table \ref{tab:exResults}.
-The computations were performed using the \textit{Simple} and \textit{Hard} function classes with the
-dimensions equal to 4 and 5. The parameters \(\Delta=10^{-6}\) at \(N=4\) and \(\Delta=10^{-6}\) at \(N=5\)
-were used. When using the GPMAGS method, the parameter \(r=4.5\) was selected for the
-\textit{Simple} class, and \(r=5.6\) was selected for the \textit{Hard} class.
-\par
-In the first series of experiments, serial computations using MAGS were executed.
-The average number of iterations performed by the method for solving a series of
-problems for each of these classes is shown in row I. The symbol ``\(>\)'' reflects the
-situation where not all problems of a given class were solved by a given method.
-It means that the algorithm was stopped once the maximum allowable number of
-iterations \(K_{max}\) was achieved. In this case, the \(K_{max}\) value was used for
-calculating the average number of iterations corresponding to the lower estimate of
-this average value. The number of unsolved problems is specified in brackets.
-\par
-In the second series of experiments, parallel computations were executed on a CPU.
-The relative ``speedup'' in iterations achieved is shown in row II; the speedup of
-parallel computations was measured in relation to the sequential computations (\(p=1\)).
+As in the previous case, the numerical experiments were performed by using the Simple
+and Hard function classes with the dimensions equal to 4 and 5. The values of the
+parameter \(\Delta=10^{-6}\) at \(N=5\) and \(\Delta=10^{-7}\) at \(N=5\) were used.
+When using the GPMAGS method, the values of the reliability parameter \(r=4.5\) was
+selected for the Simple class and \(r=5.6\) was selected for the Hard class.
+
+The results of the numerical experiments with GPMAGS with Intel Xeon Phi processors are presented in Tables \ref{tab:exResults} and \ref{tab:exResults2}.
+
+In the first series of experiments, the serial computations using MAGS were executed.
+The average numbers of iterations performed by the method for solving the series of optimization problems
+for each class are shown in row I.
+
+In the second series of experiments, the parallel computations were executed using the CPUs.
+The achieved relative speedup in iterations is shown in row II; the speedup of the
+parallel computations is shown relative to the serial computations \((p=1)\).
+
+The final series of experiments was executed using Xeon Phi processors. The results
+of these experiments are shown in row III. In this case, the speedup factors were
+calculated relative to the results of the PMAGS method executed on the CPU using eight cores \((p=8)\).
 
 \begin{table}
   \centering
   \label{tab:exResults}
-  \caption{Results of numerical experiments}
+  \caption{Averaged numbers of iterations executed by GPMAGS for solving the test optimization problems}
   \begin{tabular}{cccccccc}
     \cline{3-8}\noalign{\smallskip}
     \multicolumn{2}{c}{  } & \textit{p} & \multicolumn{2}{c}{$N=4$} & & \multicolumn{2}{c}{$N=5$}   \\
@@ -722,48 +697,70 @@ parallel computations was measured in relation to the sequential computations (\
     I &
     \parbox{0.25\textwidth}{
     \begin{center}
-    \textbf{Serial computations.}\\ \textit{Average number} \\ \textit{of iterations.}
+    \textbf{Seriquential trial computations}
     \end{center}		}
       & 1 & 11953 & 25263 & & 15920 & \(>\)148342 (4)  \\
     \hline \noalign{\smallskip}
 II  & \textbf{Parallel computations}  %\multirow{3}{*}{}
-  & 2 & 2.51 & 2.26 & & 1.19 & 1.36 \\
-& \textbf{of CPU}. & 4 & 5.04 & 4.23 & & 3.06 & 2.86 \\
-& \textit{Speedup} & 8 & 8.58 & 8.79 & & 4.22 & 6.56 \\
+  & 2 & 4762 & 11178 & & 13378 & 109075 \\
+& on CPU & 4 & 2372 & 5972 & & 5203 & 51868 \\
+&  & 8 & 1393 & 2874 & & 3773 & 51868 \\
     \noalign{\smallskip}\hline	\noalign{\smallskip}
 III & \textbf{Parallel computations} %\multirow{3}{*}{}
-  & 60  & 8.13 & 7.32 & & 9.87 & 6.55  \\
-&  o\textbf{f Xeon Phi}. & 120 & 16.33 & 15.82 & & 15.15 & 17.31 \\
-& \textit{Speedup} & 240 & 33.07 & 27.79 & & 38.80 & 59.31 \\
+  & 60  & 171 & 393 & & 382 & 3452  \\
+& on Xeon Phi  & 120 & 85 & 182 & & 249 & 1306 \\
+&  & 240 & 42 & 103 & & 97 & 381 \\
 
     \noalign{\smallskip}\hline
   \end{tabular}
 \end{table}
 
-\par
-The final series of experiments was executed using a Xeon Phi. The results of these
-computations are shown in row III; in this case, the speedup factor is calculated in
-relation to the PMAGS results on a CPU using eight cores (\(p=8\)). It can be noted that
-relatively high speedup was achieved. For example, solving a problem from the 5-\textit{Hard} class
-required on average only 633 parallel iterations on the Xeon Phi, whereas the number of
-iterations was more than 37 thousand when using all of the CPU’s computing cores.
+\begin{table}
+  \centering
+  \label{tab:exResults2}
+  \caption{Speedup of parallel computations executed by GMAGS}
+  \begin{tabular}{cccccccc}
+    \cline{3-8}\noalign{\smallskip}
+    \multicolumn{2}{c}{  } & \textit{p} & \multicolumn{2}{c}{$N=4$} & & \multicolumn{2}{c}{$N=5$}   \\
+    \noalign{\smallskip} \cline{4-5} \cline{7-8}  \noalign{\smallskip}
+    \multicolumn{2}{c}{  } & & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard}  \\
+    \noalign{\smallskip}\hline
+    I &
+    \parbox{0.25\textwidth}{
+    \begin{center}
+    \textbf{Serquential trial computations.}\\ \textit{Average number} \\ \textit{of iterations.}
+    \end{center}		}
+      & 1 & 11953 & 25263 & & 15920 & \(>\)148342 (4)  \\
+    \hline \noalign{\smallskip}
+II  & \textbf{Parallel computations}  %\multirow{3}{*}{}
+  & 2 & 2.52 & 2.32 & & 1.21 & 1.41 \\
+& of CPU. & 4 & 5.05 & 4.24 & & 3.13 & 2.92 \\
+& \textit{Speedup} & 8 & 8.68 & 8.88 & & 4.24 & 6.66 \\
+    \noalign{\smallskip}\hline	\noalign{\smallskip}
+III & \textbf{Parallel computations} %\multirow{3}{*}{}
+  & 60  & 8.18 & 7.37 & & 9.99 & 6.66  \\
+&  of Xeon Phi. & 120 & 16.316 & 15.815 & & 15.215 & 17.317 \\
+& \textit{Speedup} & 240 & 33.133 & 27.827 & & 38.838 & 59.359 \\
+
+    \noalign{\smallskip}\hline
+  \end{tabular}
+\end{table}
 
 \subsection{Parallel Computations Using General Purpose Graphic Processors}
-In the first series of experiments, only one graphic accelerator was used for solving
-100 6-diminsional problems. The method’s reliability parameter \(r=4.5\) was selected.
+In the first series of experiments, single graphic accelerator was used for solving 100
+6-dimensional optimization problems. The reliability parameter \(r=4.5\) was selected.
 \par
-The average problem solving time using a GPU was 10.78 sec. whereas the averaged problem
-solving time using all of the node’s 16 CPU cores was 53.8 sec.; an almost 5-fold improvement was observed.
+The averaged execution time using GPU was 10.78 sec whereas the averaged execution
+time using all 16 CPU cores of the computational node was 53.8 sec; almost 5-fold improvement was observed.
 \par
-A larger scale computational experiment was carried out for the problems with
-dimensions of \(N=8\) and \(N=10\): a total of 12 nodes within a cluster with 36
-graphic accelerators (three accelerators per node) were employed, therefore, a total
-of 96768 CUDA-cores were employed.
+A larger scale computational experiment was carried out for the global optimization
+problems with the dimensions of \(N = 8\) and \(N = 10\): total 12 nodes with 36 graphic
+accelerators (three accelerators per the computational node) were employed (total 96,768 CUDA-cores were used).
 \par
-The average time to solve the 8-dimensional problem was 405.6 seconds, 5.9 times
-faster than the CPU version of the algorithm. The average time to solve the
-10-dimensional problem was 2,055.8 sec. The CPU was not used to solve the 10-dimensional
-problem because of the high degree of complexity in the computations.
+The averaged execution time using the GPUs to solve the 8-dimensional problem was
+405,6 sec that was 5.9 times less than the execution time for CPU. The averaged time
+of solving the 10-dimensional problem was 2,055.8 sec. (in this case, the execution time for CPU
+was not calculated because of the high complexity level of the required computations).
 
 \section{Conclusions} \label{sec:concl}
 
@@ -997,10 +994,10 @@ In future, it is planned to extend the Globalizer system for solving the multicr
 \newblock Multidimensional global optimization using the first derivatives,
 \newblock \emph{Comput. Math. Math. Phys.}, \textbf{39(5)} (1999), 743--752,.
 
-\bibitem{sergeyevGrishagin1994}[10.1007/BF02207778]
-\newblock Y. D. Sergeyev and V. A. Grishagin,
-\newblock A parallel method for finding the global minimum of univariate functions,
-\newblock \emph{Journal of Optimization Theory and Applications}, \textbf{80(3)} (1994), 513--536.
+\bibitem{sergeyevKvasov2006}[	arXiv:1103.2056]
+\newblock 44. Ya.D. Sergeyev, D.E. Kvasov,
+\newblock Global search based on efficient diagonal partitions and a set of Lipschitz constants,
+\newblock \emph{SIAM Journal on Optimization}, \textbf{16(3)} (2006), 910--937.
 
 \bibitem{sergeyevGrishagin2001}[10.1023/A:1010185125012]
 \newblock Y. D. Sergeyev and V. A. Grishagin,
