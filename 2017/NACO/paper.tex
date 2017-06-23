@@ -119,7 +119,7 @@ optimization problems efficiently.
 Global (or multiextremal) optimization problems are among the most complex problems
 in both theory and practice of optimal decision making. In these kinds of problems,
 the optimization criterion can have several local optima within the search domain. 
-The existence of several local optima essentially makes
+The existence of several local optima makes
 finding the global optimum difficult essentially, since it requires examining the whole feasible
 search domain. The volume of computations for solving global optimization problems
 can increase exponentially with increasing number of varied parameters.
@@ -250,7 +250,7 @@ problem (\ref{eq:task}) is reduced to the following one-dimensional problem:
 \par
 It is important to note that this dimensionality reduction scheme transforms the minimized
 Lipschitzian function from (\ref{eq:task}) to the corresponding one-dimensional
-function \(\varphi(y(x))\), which satisfy the uniform H{\"o}lder condition i. e.
+function \(\varphi(y(x))\), which satisfy the uniform H{\"o}lder condition, i. e.
 \begin{equation}
 \label{eq:holder}
 |\varphi(y(x_1))-\varphi(y(x_2))|\leq H{|x_1-x_2|}^{\frac{1}{N}}, x_1,x_2\in[0,1],
@@ -335,12 +335,12 @@ The selection of the trial point \(x^{k+1}\) for the next iteration is performed
   \label{step1}
 0=x_0<x_1<...<x_{k+1}=1,
 \end{equation}
-the points \(x_0\), \(x_k\) were introduced additionally for the convenience of further
-explanation, the values of the minimized function \(z_0\), \(z_k\) at these points are undefined.
+the points \(x_0\), \(x_{k+1}\) were introduced additionally for the convenience of further
+explanation, the values of the minimized function \(z_0\), \(z_{k+1}\) at these points are undefined.
 \par
-\textit{Rule 2}. Compute current estimate of the H{\"o}lder constant \(H\) from (\ref{eq:holder})
+\textit{Rule 2}. Compute the current estimate of the H{\"o}lder constant \(H\) from (\ref{eq:holder})
 \begin{equation} \label{step2}
-M=\max_{1\leq i\leq k}\frac{|z_i-z_{i-1}|}{\rho_i}, \;
+M=\max_{1 < i\leq k}\frac{|z_i-z_{i-1}|}{\rho_i}, \;
 m = \left\{
    \begin{array}{lr}
      rM, & M > 0,\\
@@ -393,7 +393,7 @@ In order to explain the algorithm presented above, let us note the following.
 The characteristics \(R(i), 1\leq i\leq k+1\), calculated according to (\ref{step3}) could
 be interpreted as some measures of importance of the intervals with respect to the
 expected location of the global minimum point. Thus, the rules (\ref{step4}) and (\ref{step5}) for selecting
-the interval for executing the next trial become more clear --- the point of every next
+the interval of the next trial become more clear --- the point of every next
 global optimization iteration is selected within the interval, where the global minimum
 point can be found most likely.
 \par
@@ -519,7 +519,7 @@ computational systems with distributed and shared memory can be developed. This 
       a queue can be created at each computational node for sending the trial points and
       receiving the minimized function values at these points.
     \end{itemize}
-    \item After completing any trial for any problem \(\varphi(y_l(x)),1\leq l\leq s\),
+    \item After completing any trial for any problem \(\varphi(y^l(x)),1\leq l\leq s\),
     at any point \(x'\in[0,1]\), it is necessary:
     \begin{itemize}
       \item to determine all prototypes \(x_i',1\leq i\leq s\) for the point of the
@@ -530,8 +530,8 @@ computational systems with distributed and shared memory can be developed. This 
     \end{itemize}
     \item Prior to starting the next global optimization iteration, the algorithm
     should check the queue of the received data; if there are any data in the queue,
-    these should be included into the search information. The MAGS algorithm uses these
-    accumulated data for the adaptive computing of the optimization iteration points (see Section \ref{subsec:corepar}).
+    these should be included into the search information. The PMAGS algorithm uses these
+    accumulated data for the adaptive computing of the optimization iteration points (see Section \ref{subsec:sharedpar}).
 \end{enumerate}
 \end{enumerate}
 \par
@@ -597,7 +597,7 @@ The Globalizer system comes in two different versions:
 The numerical experiments were carried out using the Lobachevsky supercomputer at
 the State University of Nizhni Novgorod (the operation system – CentOS 6.4, the
 supercomputer management system – SLURM). Each supercomputer node had 2 Intel Sandy Bridge
-E5-2660 processors, 2.2 GHz, with 64 GB RAM. Each processor had 8 cores (i. e. total
+E5-2660 2.2 GHz processors with 64 GB RAM. Each processor had 8 cores (i. e. total
 16 CPU cores were available at each node). In order to generate the executable program code, the Intel C++ 14.0.2 compiler was used.
 \par
 A number of computational nodes had Intel Xeon Phi 5110P processors, each containing 60 cores
@@ -610,7 +610,7 @@ problems with \textit{a priori} known properties: the number of local minima, th
 \par
 In all the executed experiments, 100 global optimization problems generated randomly by the GKLS-generator were solved. The results of experiments were averaged over the number of the solved optimization problems.
 
-\subsection{Comparison with over methods}
+\subsection{Comparison with other methods}
 The results of numerical comparison of three serial algorithms --- DIRECT
 \cite{Jones}, DIRECT\textit{l} \cite{Gablonsky}, and MAGS from Section \ref{subsec:corepar} --- are presented below.
 
@@ -620,7 +620,7 @@ DIRECT\textit{l} are taken from \cite{sergeyevKvasov2006}. According to \cite{se
 was considered to be found if the algorithm generated a trial point \(y^k\) inside
 a hyperinterval with a vertex \(y^*\) and
 \begin{displaymath}
-    |y^k(i)-y^*(i)|\le \sqrt[N]{\Delta}(b(i)-a(i)), i\le i\le N,
+    |y^k(i)-y^*(i)|\le \sqrt[N]{\Delta}(b(i)-a(i)), 1 \le i\le N,
 \end{displaymath}
 where \(N\) is the problem dimensionality, $a$ and $b$ are the borders of the search domain \(D\)
 \footnote{In the case of MAGS, the stop condition was different slightly --- the
@@ -675,13 +675,13 @@ In the first series of experiments, the serial computations using MAGS were exec
 The average numbers of iterations performed by the method for solving the series of optimization problems
 for each class are shown in row I.
 
-In the second series of experiments, the parallel computations were executed using the CPUs.
+In the second series of experiments, the parallel computations were executed using PMAGS on CPUs.
 The achieved relative speedup in iterations is shown in row II; the speedup of the
-parallel computations is shown relative to the serial computations \((p=1)\).
+parallel computations is shown relatively to the serial computations \((p=1)\).
 
 The final series of experiments was executed using Xeon Phi processors. The results
 of these experiments are shown in row III. In this case, the speedup is
-calculated relative to the results of the PMAGS method executed on the CPU using eight cores \((p=8)\).
+calculated relatively to the results of the PMAGS method executed on the CPU using eight cores \((p=8)\).
 
 \begin{table}
   \centering
@@ -716,7 +716,7 @@ III & \textbf{Parallel computations} %\multirow{3}{*}{}
 
 \begin{table}
   \centering
-  \caption{Speedup of parallel computations executed by GMAGS}
+  \caption{Speedup of parallel computations executed by GPMAGS}
   \label{tab:5}
   \begin{tabular}{cccccccc}
     \cline{3-8}\noalign{\smallskip}
@@ -774,7 +774,7 @@ In future, it is planned to extend the Globalizer system for solving the multicr
 \begin{thebibliography}{10}
 
 \bibitem{barkalovGergel2014}
-\newblock K. A. Barkalov and V. P. Gergel,
+\newblock K. Barkalov and V. Gergel,
 \newblock Multilevel scheme of dimensionality reduction for parallel global search algorithms,
 \newblock in \emph{Proceedings of the 1st International Conference on
   Engineering and Applied Sciences Optimization}, (2014), 2111--2124.
@@ -786,7 +786,7 @@ In future, it is planned to extend the Globalizer system for solving the multicr
 
 \bibitem{barkalovGergelLebedev2015}[10.1007/978-3-319-21909-7_31]
 \newblock K. Barkalov, V. Gergel and I. Lebedev,
-\newblock Use of XeonPhi coprocessor for solving global optimization problems,
+\newblock Use of Xeon Phi coprocessor for solving global optimization problems,
 \newblock \emph{LNCS}, \textbf{9251} (2015), 307--318.
 
 \bibitem{barkalovGergelLebedevSysoev2015}
@@ -857,32 +857,32 @@ In future, it is planned to extend the Globalizer system for solving the multicr
 \newblock \emph{Procedia Comput. Sci.}, \textbf{66} (2015), 53--62.
 
 \bibitem{gergel1993}
-\newblock V. P. Gergel,
+\newblock V. Gergel,
 \newblock A software system for multi-extremal optimization,
 \newblock \emph{Eur. J. Oper. Res.}, \textbf{65(3)} (1993), 305--313.
 
 \bibitem{gergel1996}
-\newblock V. P. Gergel,
+\newblock V. Gergel,
 \newblock A method for using derivatives in the minimization of multiextremum functions,
 \newblock \emph{Comput. Math. Math. Phys.}, \textbf{36(6)} (1996), 729--742.
 
 \bibitem{gergel1997}[10.1023/A:1008290629896]
-\newblock V. P. Gergel,
+\newblock V. Gergel,
 \newblock A global optimization algorithm for multivariate functions with Lipschitzian first derivatives,
 \newblock \emph{J. Glob. Optim.}, \textbf{10(3)} (1997), 257--281.
 
 \bibitem{gergel2013}[doi:10.1016/j.procs.2013.05.164]
-\newblock V. P. Gergel, et al.,
+\newblock V. Gergel, et al.,
 \newblock High performance computing in biomedical applications,
 \newblock \emph{Procedia Computer Science}, \textbf{18} (2013), 10--19.
 
 \bibitem{gergel2015}[10.15866/ireaco.v8i1.4935]
-\newblock V. P. Gergel, et al.,
+\newblock V. Gergel, et al.,
 \newblock Recognition of surface defects of cold-rolling sheets based on method of localities,
 \newblock \emph{International Review of Automatic Control }, \textbf{8(1)} (2015), 51--55.
 
 \bibitem{gergelSidorov2015}[10.1007/978-3-319-21909-7_49]
-\newblock V. P. Gergel and S. V. Sidorov,
+\newblock V. Gergel and S. Sidorov,
 \newblock A two-level parallel global search algorithm for solving computationally intensive multi-extremal optimization problems,
 \newblock \emph{LNCS}, \textbf{9251} (2015), 505--515.
 
@@ -924,7 +924,7 @@ In future, it is planned to extend the Globalizer system for solving the multicr
 
 \bibitem{Pizzuti}[10.1007/s00211-002-0419-8]
 \newblock D. E. Kvasov, C. Pizzuti and Y. D. Sergeyev,
-\newblock Local tuning and partition strategies for diagonal go methods,
+\newblock Local tuning and partition strategies for diagonal GO methods,
 \newblock \emph{Numerische Mathematik}, \textbf{94(1)} (2003), 93--106.
 
 \bibitem{liberti2009}[10.1007/0-387-30528-9_8]
@@ -991,7 +991,7 @@ In future, it is planned to extend the Globalizer system for solving the multicr
 \bibitem{sergeyev1999}
 \newblock Y. D. Sergeyev,
 \newblock Multidimensional global optimization using the first derivatives,
-\newblock \emph{Comput. Math. Math. Phys.}, \textbf{39(5)} (1999), 743--752,.
+\newblock \emph{Comput. Math. Math. Phys.}, \textbf{39(5)} (1999), 743--752.
 
 \bibitem{sergeyevKvasov2006}[	arXiv:1103.2056]
 \newblock Y. D. Sergeyev, D. E. Kvasov,
@@ -1029,9 +1029,9 @@ In future, it is planned to extend the Globalizer system for solving the multicr
 \newblock Moscow State University (In Russian), Moscow (2013).
 
 \bibitem{strSergGO}[10.1007/978-1-4615-4677-1]
-\newblock R.G. Strongin and Y.D. Sergeyev,
+\newblock R. G. Strongin and Y. D. Sergeyev,
 \newblock \emph{Global optimization with non-convex constraints. Sequential and parallel algorithms},
-\newblock Kluwer Academic Publishers, Dordrecht (2000).
+\newblock Kluwer Academic Publishers, Dordrecht (2000, 2nd ed. 2013, 3rd ed. 2014).
 
 \bibitem{zilinskTornGO}[10.1007/3-540-50871-6]
 \newblock A. T\"orn and A. \v Zilinskas,
