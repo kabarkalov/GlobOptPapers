@@ -218,7 +218,7 @@ is a time-consuming one. As a result, the overall time of solving the optimizati
 problem (\ref{eq:task}) is determined, first of all by the number of executed trials.
 It should also be noted that the requirement of the Lipschitz condition (\ref{eq:lip})
 is highly important, since an estimate of the global minimum can be constructed on the
-base a finite number of computed values of the optimized function only in this case .
+basis of a finite number of computed values of the optimized function only in this case .
 \par
 As it has been shown earlier by many researchers
 (see, for instance, \cite{floudasPardalosGOState}, \cite{horstTuyGO}, \cite{pinterGO}, \cite{strSergGO}),
@@ -250,7 +250,7 @@ problem (\ref{eq:task}) is reduced to the following one-dimensional problem:
 \par
 It is important to note that this dimensionality reduction scheme transforms the minimized
 Lipschitzian function from (\ref{eq:task}) to the corresponding one-dimensional
-function \(\varphi(y(x))\), which satisfy the uniform H{\"o}lder condition, i. e.
+function \(\varphi(y(x))\), which satisfies the uniform H{\"o}lder condition, i. e.
 \begin{equation}
 \label{eq:holder}
 |\varphi(y(x_1))-\varphi(y(x_2))|\leq H{|x_1-x_2|}^{\frac{1}{N}}, x_1,x_2\in[0,1],
@@ -449,7 +449,9 @@ where the scheduled trials are executed
 \end{equation}
 If the stopping condition is satisfied at least for one interval \(t_j, 1\le j\le p\), the calculations
 are terminated. Otherwise, the index \(k\) is incremented by \(p\), and new global optimization iteration is executed.
-\par
+
+It should be pointed that in case of PMAGS $p$ trials are performed at each iteration (i.e., $k=np$, where $n$ is the number of executed iteration).
+
 The convergence conditions for the developed parallel algorithm are considered
 in \cite{stronginGergelBarkalovParGO}, \cite{strSergGO}. Thus, in particular, when the convergence conditions are
 satisfied, the parallel computations are non-redundant as compared to the serial method
@@ -503,7 +505,7 @@ computational systems with distributed and shared memory can be developed. This 
   corresponding computational node using the PMAGS method (described above in Subsection \ref{subsec:sharedpar})
   supplemented by the following rules of the information interaction.
   \begin{enumerate}
-    \item Prior to beginning new trial at any point \(x'\in [0,1]\) for any problem \(\varphi(y^l(x)),1\leq l\leq s\), the following should be performed:
+    \item Prior to beginning each new trial at some point \(x'\in [0,1]\) for a problem \(\varphi(y^l(x)),1\leq l\leq s\), the following should be performed:
     \begin{itemize}
       \item compute the image \(y'\in D\) for the point \(x'\in [0, 1]\) according to the mapping \(y^l(x)\),
       \item determine  the preimages\footnote{All preimages have the same
@@ -519,17 +521,17 @@ computational systems with distributed and shared memory can be developed. This 
       a queue can be created at each computational node for sending the trial points and
       receiving the minimized function values at these points.
     \end{itemize}
-    \item After completing any trial for any problem \(\varphi(y^l(x)),1\leq l\leq s\),
-    at any point \(x'\in[0,1]\), it is necessary:
+    \item After completing some trial for a problem \(\varphi(y^l(x)),1\leq l\leq s\),
+    at some point \(x'\in[0,1]\), it is necessary:
     \begin{itemize}
-      \item to determine all prototypes \(x_i',1\leq i\leq s\) for the point of the
+      \item to determine all prototypes \(x_i',1\leq i\leq s,\) for the point $x'\in[0,1]$ of the
       completed trial for each problem from the family (\ref{eq:oneDimProblemSerie}),
       \item to send the prototypes \(x_i',1\leq i\leq s\) and the result of the trial
-      \(z'=\varphi(y_l(x'))\) to all computational nodes to include the obtained data into
+      \(z'=\varphi(y^l(x'))\) to all computational nodes to include the obtained data into
       the search information processed according to the rules of the parallel global optimization algorithm.
     \end{itemize}
     \item Prior to starting the next global optimization iteration, the algorithm
-    should check the queue of the received data; if there are any data in the queue,
+    should check the queue of the received data; if there are some data in the queue,
     these should be included into the search information. The PMAGS algorithm uses these
     accumulated data for the adaptive computing of the optimization iteration points (see Section \ref{subsec:sharedpar}).
 \end{enumerate}
@@ -600,9 +602,8 @@ supercomputer management system – SLURM). Each supercomputer node had 2 Intel 
 E5-2660 2.2 GHz processors with 64 GB RAM. Each processor had 8 cores (i. e. total
 16 CPU cores were available at each node). In order to generate the executable program code, the Intel C++ 14.0.2 compiler was used.
 \par
-A number of computational nodes had Intel Xeon Phi 5110P processors, each containing 60 cores
-(total 240 threads). In addition, the supercomputer included the computational nodes equipped
-with two NVIDIA Kepler K20X GPUs, each providing 14 stream multiprocessors (total 2688 CUDA-cores). In order to generate the executable code, the CUDA Toolkit 6.0 was used.
+A number of computational nodes had Intel Xeon Phi 5110P processors, each containing 60 cores. In addition, the supercomputer included the computational nodes equipped
+with two NVIDIA Kepler K20X GPUs, each providing 14 stream multiprocessors (in total 2688 CUDA-cores). In order to generate the executable code, the CUDA Toolkit 6.0 was used.
 \par
 In the performed experiments the optimization problems generated by the GKLS-generator
 \cite{gavianoKvasovLeraSergeev2003} were used. This generator allows obtaining the multiextremal optimization
@@ -620,10 +621,10 @@ DIRECT\textit{l} are taken from \cite{sergeyevKvasov2006}. According to \cite{se
 was considered to be found if the algorithm generated a trial point \(y^k\) inside
 a hyperinterval with a vertex \(y^*\) and
 \begin{displaymath}
-    |y^k(i)-y^*(i)|\le \sqrt[N]{\Delta}(b(i)-a(i)), 1 \le i\le N,
+    |y^k_i-y^*_i|\le \sqrt[N]{\Delta}(b_i-a_i), 1 \le i\le N,
 \end{displaymath}
 where \(N\) is the problem dimensionality, $a$ and $b$ are the borders of the search domain \(D\)
-\footnote{In the case of MAGS, the stop condition was different slightly --- the
+\footnote{In the case of MAGS, the stopping condition was different slightly --- the
 global minimizer \(y^*\) was considered to be found, if MAGS generates a trial
 point \(y^k\)  in the \(\delta\)-vicinity of the global minimum, i. e. \(||y^k-y^*||\le\delta\).
 The size of the vicinity was selected  as \(\delta=\left\|b-a\right\|\sqrt[N]{\Delta}\).}.
@@ -754,7 +755,7 @@ time using all 16 CPU cores of the computational node was 53.8 sec; almost 5-fol
 \par
 A larger scale computational experiment was carried out for the global optimization
 problems with the dimensions of \(N = 8\) and \(N = 10\): total 12 nodes with 36 graphic
-accelerators (three accelerators per the computational node) were employed (total 96768 CUDA-cores were used).
+accelerators (three accelerators per the computational node) were employed (in total 96768 CUDA-cores were used).
 \par
 The averaged execution time using the GPUs to solve the 8-dimensional problem was
 405.6 sec that was 5.9 times less than the execution time for CPU. The averaged time
