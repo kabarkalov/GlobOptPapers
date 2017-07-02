@@ -41,12 +41,12 @@
 Задача многокритериальной оптимизации ставится следующим образом:
 \begin{equation}
   \label{eq:problem}
-  \min\{f(y): y\in D\}, D=\{y\in \mathbb{R}^n: a_i \leqslant y_i \leqslant b_i, i=\overline{1,n} \}
+  \min\{f(y): y\in D\}, D=\{y\in \mathbb{R}^n: a_i \leqslant y_i \leqslant b_i, 1\leqslant i \leqslant n \}
 \end{equation}
 Будем считать, что компоненты вектор-функции (частные критерии) \(f_i(y), 1\leqslant i\leqslant m\), удовлетоворяют в \(D\) условию Липшица с константами \(L_i\):
 \begin{displaymath}
 \label{lip}
-|f_i(y_1)-f_i(y_2)|\leqslant L_i\Vert y_1-y_2\Vert,y_1,y_2\in D,0<L_i<\infty,i=\overline{1,m}
+|f_i(y_1)-f_i(y_2)|\leqslant L_i\Vert y_1-y_2\Vert,y_1,y_2\in D,0<L_i<\infty,1\leqslant i \leqslant m
 \end{displaymath}
 
 As the solution to the problem (\ref{eq:problem}) usually accepted the set \(S(D)\in D\) of  strictly non-dominated points from the range of search, i. e.,
@@ -77,7 +77,8 @@ Therefore, not limiting the generality, one can consider the solving of the
 one-dimensional problem \(\min\{f(y(x)): x\in [0;1]\}\), satisfying Hölder condition. The issues of numerically building the mapping like a Peano curve and the corresponding theory have been considered in detail in \cite{evolvents2013}. Here we would note that an evolvent built numerically is an approximation to the theoretical Peano curve with a precision of the order \(2^{-m}\) where \(m\) is the building parameter of the evolvent.
 
 \section{Description of the Parallel Algorithm With Local Refinement}
-Рассмотрим схему скаляризации редуцированной задачи (\(\ref{eq:problem}\)), представленную в \cite{}. Пусть
+\label{sec:algorithm}
+Рассмотрим схему скаляризации редуцированной задачи (\(\ref{eq:problem}\)), представленную в \cite{markinStrongin1993}. Пусть
 \begin{equation}
   \varphi(x)=\max\{h(x,y):y\in [0;1]\},x\in [0;1].
 \end{equation}
@@ -87,12 +88,12 @@ one-dimensional problem \(\min\{f(y(x)): x\in [0;1]\}\), satisfying Hölder cond
   \varphi^*=\min\{\varphi(x):x\in [0;1]\}.
 \end{equation}
 
-Как показано в \cite{}, множество слабо-эффективных решений редуцированной задачи (\(\ref{eq:problem}\)) совпадает множеством глобально оптимальных решений задачи (\ref{eq:aux_problem}), т.е.
+Как показано в \cite{markinStrongin1993}, множество слабо-эффективных решений редуцированной задачи (\(\ref{eq:problem}\)) совпадает множеством глобально оптимальных решений задачи (\ref{eq:aux_problem}), т.е.
 \begin{equation}
   \label{eq:s}
   S([0;1])=\{x\in [0;1]:\varphi(x)=\varphi^*\}
 \end{equation}
-Также в \cite{} показано, что функция \(\varphi(x)\) удовлетворяет условию Гёльдера при выполнении требований (\ref{equation}). Таким образом, к функции \(\varphi(x)\) можно применить информационно-статистический алгоритм глобального поиска, чтобы решить задачу (\ref{eq:aux_problem}). Однако, \(\varphi(x)\) задаётся через оператор \(\max\{...\}\), поэтому непосредственно вычислить её затруднительно. В \cite{} приведена модификация классического информационно-статистического алгоритма \cite{}, в которой значения \(\varphi(x)\) вычисляются приближённо. Далее приведём модифициованную версию указанного алгоритма. Модификация заключается в использовании техники local refinement, описанной в \cite{}, а также в распараллеливании по характеристикам \cite{}.
+Также в \cite{markinStrongin1993} показано, что функция \(\varphi(x)\) удовлетворяет условию Гёльдера при выполнении требований (\ref{eq:holder}). Таким образом, к функции \(\varphi(x)\) можно применить информационно-статистический алгоритм глобального поиска, чтобы решить задачу (\ref{eq:aux_problem}). Однако, \(\varphi(x)\) задаётся через оператор \(\max\{...\}\), поэтому непосредственно вычислить её затруднительно. В \cite{markinStrongin1993} приведена модификация классического информационно-статистического алгоритма \cite{mixedAlg}, в которой значения \(\varphi(x)\) вычисляются приближённо. Далее приведём модифициованную версию указанного алгоритма. Модификация заключается в использовании техники local refinement, описанной в \cite{strOptBook}(chapter 3), а также в распараллеливании по характеристикам \cite{strOptBook}(chapter 5).
 
 Первые две итерации производятся в концевых точках \(x^0=0\) и \(x^1=1\) интервала \([0;1]\). Выбор точек \(x^{k+j}, 1\leqslant j\leqslant p\) осуществляется по правилам:
 
@@ -139,44 +140,83 @@ The algorithm is terminated if the condition \(\Delta_{t_j}\leqslant \varepsilon
 After the search is terminated, the set \(S(\{x^0,\dots ,x^k\})\) of all
 non-dominated points of the truncated sequence \(\{x^0,\dots ,x^k\}\) is accepted as an estimation for \(S\) from (\ref{eq:s}).
 
-The theoretical substantiation of this method when \(p=1\) and \(q=0\) is presented in \cite{}. Siffitient condition of convergence is: exists an iteration such that \(r\mu_\nu \geqslant 4H_\nu,1\leqslant \nu \leqslant m\).
+The theoretical substantiation of this method when \(p=1\) and \(q=0\) is presented in \cite{strOptBook}(chapter 3). Siffitient condition of convergence is: exists an iteration such that \(r\mu_\nu \geqslant 4H_\nu,1\leqslant \nu \leqslant m\).
+\section{Test Problems}
+Для оценки степени ускорения сходимости модифицированного алгоритма из секции \ref{sec:algorithm} использовались следующие задачи:
+\begin{enumerate}
+  \item Markin-Strongin problem from \cite{markinStrongin1993}:
+    \begin{equation}
+      \left \{
+      \begin{array}{l}
+        f_1(y) = \min\{\sqrt{y_1^2+y_2^2},\sqrt{(y_1-1.5)^2+(y_2+1.5)^2}\} \\
+        f_2(y)=\sqrt{(y_1+0.5)^2+(y_2-0.5)^2} \\
+      \end{array}
+      \right .
+      y_1\in [-1;2],y_2\in [-2;1]
+    \end{equation}
+  \item Fonseca and Fleming problem from \cite{}:
+  \begin{equation}
+    \label{eq:fonseca}
+    \left \{
+    \begin{array}{l}
+      f_{1}\left(y\right) = 1 - \exp \left(-\sum_{i=1}^{n} \left(y_{i} - \frac{1}{\sqrt{n}} \right)^{2} \right) \\
+      f_{2}\left(y\right) = 1 - \exp \left(-\sum_{i=1}^{n} \left(y_{i} + \frac{1}{\sqrt{n}} \right)^{2} \right) \\
+    \end{array}
+    \right .
+    \quad y\in [-4;4]^n
+  \end{equation}
+  \item Schaffer function N. 2:
+    \begin{equation}
+      \left \{
+      \begin{array}{l}
+        f_1(y) = \begin{cases}
+                  -y,   & \text{if } y \leqslant 1 \\
+                   y-2, & \text{if } 1 < y \leqslant 3 \\
+                   4-y, & \text{if } 3 < y \leqslant 4 \\
+                   y-4, & \text{if } y > 4 \\
+                \end{cases} \\
+        f_2(y) = (y-5)^2\\
+      \end{array}
+      \right .
+      \quad y\in [-5;10]
+    \end{equation}
+  \item Poloni's two objective function:
+    \begin{equation}
+      \left \{
+      \begin{array}{l}
+        f_{1}\left(y\right) = \left[1 + \left(A_{1} - B_{1}\left(y\right) \right)^{2} + \left(A_{2} - B_{2}\left(y\right) \right)^{2} \right] \\
+        f_{2}\left(y\right) = \left(y_1 + 3\right)^{2} + \left(y_2 + 1 \right)^{2} \\
+      \end{array}
+      \right .
+      \quad y\in [-\pi;\pi]^2
+    \end{equation}
+    where
+    \begin{equation*}
+      \begin{cases}
+        A_{1} = 0.5 \sin \left(1\right) - 2 \cos \left(1\right) + \sin \left(2\right) - 1.5 \cos \left(2\right)  \\
+        A_{2} = 1.5 \sin \left(1\right) - \cos \left(1\right) + 2 \sin \left(2\right) - 0.5 \cos \left(2\right)  \\
+        B_{1}\left(y\right) = 0.5 \sin \left(y_1\right) - 2 \cos \left(y_1\right) + \sin \left(y_2\right) - 1.5 \cos \left(y_2\right)  \\
+        B_{2}\left(y\right) = 1.5 \sin \left(y_1\right) - \cos \left(y_1\right) + 2 \sin \left(y_2\right) - 0.5 \cos \left(y_2\right)
+      \end{cases}
+    \end{equation*}
+\end{enumerate}
 \section{Experimental Results}
+В данном разделе будем понимать под уcкорением работы метода ускорение по числу выполненных итераций, а не по времени выполнения. Если вычисление критериев задачи (\ref{eq:problem}) занимает достаточно много времени, то накладные затраты на реализацию решающих правил метода оптимизации невелики по сравнению с временем вычисления критериев \(f_i(y), 1\leqslant i\leqslant m\).
+
+\paragraph{Local refinement advantages.} В \cite{barkalovLebedev2016} приведены численные эксперименты, показывающие ускорение сходимости при применении техники локального уточнения в алгоритме, решающем скалярные задачи глобальной оптимизации. Подобных результатов стоит ожидать и от многокритериального алгоритма. Многокритериальный метод с локальным уточнением (MOLF) был применён к задаче Fonseca and Fleming (\ref{eq:fonseca}) при \(n=2\). Параметры метода были следующие: \(\varepsilon=0.01,\;r=4,\;q=4,\;\alpha=15,\;p=1\). До остановки метода было произведено 1176 итераций, количество найденных слабо оптимальных точек --- 90. При \(q=0\) (без локального уточнения) метод производит 1484 итерации, количество найденных слабо оптимальных точек --- 93.
+
+В дальнейшем для всех экспериментов будем использовать MOLF при \(q=4\).
+\paragraph{Parallel method results.}
 \section{Conclusion}
 %
 % ---- Bibliography ----
 %
-\begin{thebibliography}{5}
-%
-\bibitem {clar:eke}
-Clarke, F., Ekeland, I.:
-Nonlinear oscillations and
-boundary-value problems for Hamiltonian systems.
-Arch. Rat. Mech. Anal. 78, 315--333 (1982)
+%\bibliographystyle{plain}
+%\bibliographystyle{alpha}
+\bibliographystyle{unsrt}
+%\bibliographystyle{splncs03}
+\bibliography{u_pdc_refs}
 
-\bibitem {clar:eke:2}
-Clarke, F., Ekeland, I.:
-Solutions p\'{e}riodiques, du
-p\'{e}riode donn\'{e}e, des \'{e}quations hamiltoniennes.
-Note CRAS Paris 287, 1013--1015 (1978)
-
-\bibitem {mich:tar}
-Michalek, R., Tarantello, G.:
-Subharmonic solutions with prescribed minimal
-period for nonautonomous Hamiltonian systems.
-J. Diff. Eq. 72, 28--55 (1988)
-
-\bibitem {tar}
-Tarantello, G.:
-Subharmonic solutions for Hamiltonian
-systems via a $\bbbz_{p}$ pseudoindex theory.
-Annali di Matematica Pura (to appear)
-
-\bibitem {rab}
-Rabinowitz, P.:
-On subharmonic solutions of a Hamiltonian system.
-Comm. Pure Appl. Math. 33, 609--633 (1980)
-
-\end{thebibliography}
 \clearpage
 \addtocmark[2]{Author Index} % additional numbered TOC entry
 \renewcommand{\indexname}{Author Index}
