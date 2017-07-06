@@ -2,13 +2,15 @@
 %
 \usepackage{makeidx}  % allows for indexgeneration
 
-\usepackage[T2A]{fontenc}
+\usepackage[T1,T2A]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath,amssymb}
 \usepackage[russian,english]{babel}
+\usepackage{amsmath,amssymb}
 \usepackage{subfig}
 \usepackage{graphicx}
+\usepackage{tabularx}
 \DeclareMathOperator{\sign}{sign}
+\newcolumntype{K}[1]{>{\centering\arraybackslash}p{#1}}
 %
 \begin{document}
 %
@@ -170,6 +172,7 @@ The theoretical substantiation of this method when \(p=1\) and \(q=0\) is presen
   \end{equation}
   \item Schaffer function N. 2 \cite{Huband2006}:
     \begin{equation}
+      \label{eq:schaffer2}
       \left \{
       \begin{array}{l}
         f_1(y) = \begin{cases}
@@ -202,25 +205,100 @@ The theoretical substantiation of this method when \(p=1\) and \(q=0\) is presen
         B_{2}\left(y\right) = 1.5 \sin \left(y_1\right) - \cos \left(y_1\right) + 2 \sin \left(y_2\right) - 0.5 \cos \left(y_2\right)
       \end{cases}
     \end{equation*}
+%  \item A problem considered in \cite{}:
+%    \begin{equation}
+%      \left \{
+%      \begin{array}{l}
+%        f_1(y) = (y_1 - 1)y_2^2 +1 \\
+%        f_2(y)= y_2 \\
+%      \end{array}
+%      \right .
+%      \quad y\in [0;1]^2
+%    \end{equation}
 \end{enumerate}
 \section{Experimental Results}
+The computational experiments have been carried out on the Lobachevsky supercomputer at
+Lobachevsky State University of Nizhni Novgorod. A computational node included 2 Intel Sandy
+Bridge E5-2660 2.2 GHz processors, 64 Gb RAM. The CPUs had 8 cores (i. e. total 16 cores
+were available per a node).
+
 В данном разделе будем понимать под уcкорением работы метода ускорение по числу выполненных итераций, а не по времени выполнения. Если вычисление критериев задачи (\ref{eq:problem}) занимает достаточно много времени, то накладные затраты на реализацию решающих правил метода оптимизации невелики по сравнению с временем вычисления критериев \(f_i(y), 1\leqslant i\leqslant m\).
 
-\paragraph{Local refinement advantages.} В \cite{barkalovLebedev2016} приведены численные эксперименты, показывающие ускорение сходимости при применении техники локального уточнения в алгоритме, решающем скалярные задачи глобальной оптимизации. Подобных результатов стоит ожидать и от многокритериального алгоритма. Многокритериальный метод с локальным уточнением (MOLF) был применён к задаче Fonseca and Fleming (\ref{eq:fonseca}) при \(n=2\). Параметры метода были следующие: \(\varepsilon=0.01,\;r=4,\;q=4,\;\alpha=15,\;p=1\). До остановки метода было произведено 1176 итераций, количество найденных слабо оптимальных точек --- 90. При \(q=0\) (без локального уточнения) метод производит 1484 итерации, количество найденных слабо оптимальных точек --- 93. На рис. \ref{fig:fonseca_slater} представлено множество \(S\) в задаче (\ref{eq:fonseca}) и его численные оценки, полученная при \(q=0\) (fig. \ref{fig:fonseca_slater}.a) и \(q=4\) (fig. \ref{fig:fonseca_slater}.b).
+\paragraph{Local refinement advantages.} В \cite{barkalovLebedev2016} приведены численные эксперименты, показывающие ускорение сходимости при применении техники локального уточнения в алгоритме, решающем скалярные задачи глобальной оптимизации. Подобных результатов стоит ожидать и от многокритериального алгоритма. Многокритериальный метод с локальным уточнением (MOLF) был применён к задаче Fonseca and Fleming (\ref{eq:fonseca}) при \(n=2\). Параметры метода были следующие: \(\varepsilon=0.01,\;r=4,\;q=4,\;\alpha=15,\;p=1\). До остановки метода было произведено 1176 итераций, количество найденных слабо оптимальных точек --- 90. При \(q=0\) (без локального уточнения) метод производит 1484 итерации, количество найденных слабо оптимальных точек --- 93. На рис. \ref{fig:fonseca_slater} представлено множество \(S\) в задаче (\ref{eq:fonseca}) и его численные оценки, полученные при \(q=0\) (fig. \ref{fig:fonseca_slater}.a) и \(q=4\) (fig. \ref{fig:fonseca_slater}.b).
 
 \begin{figure}[ht]
     \centering
-    \subfloat[MOLF with \(q=0\)]{{\includegraphics[width=.45\textwidth]{img/fonseca_glob.pdf} }}
-    \qquad
-    \subfloat[MOLF with \(q=4\)]{{\includegraphics[width=.45\textwidth]{img/fonseca_loc.pdf} }}
+    \subfloat[MOLF with \(q=0\)]{{\includegraphics[width=.5\textwidth]{img/fonseca_glob.pdf} }}
+    \subfloat[MOLF with \(q=4\)]{{\includegraphics[width=.5\textwidth]{img/fonseca_loc.pdf} }}
     \caption{Numericas estimation of \(S\) obtained by MOLF}
     \label{fig:fonseca_slater}
 \end{figure}
 
 В дальнейшем для всех экспериментов будем использовать MOLF при \(q=4\).
-\paragraph{Parallel method results.} Для каждой задачи из секции \ref{sec:test_problems}
+\paragraph{Parallel method results.} Чтобы продемонстрировать ускорение по итерациям, которое даёт MOLF при \(p > 1\), были решены все задачи из секции \ref{sec:test_problems} при значениях \(p=1,2,4,8,16\). Параметры метода при этом были следующие: \(r=4.5\), \(\varepsilon=0.01\), \(\alpha=15\). Для задачи (\ref{eq:schaffer2}) \(\varepsilon=0.001\). В таблице \ref{tab:exResultsIters} приведено количество итераций (в скобках мощность оценки множества \(S\)), а в таблице \ref{tab:exResultsItersSpeedup} --- ускорение по итерациям.
+
+Как видно из таблицы \ref{tab:exResultsIters}, мощность оценки множества \(S\) при изменении \(p\) меняется незначительно, т. е. качество полученной оценки сохраняется. В то же время, количество итераций соркащается пропорционально увеличению значения \(p\) (таблица \ref{tab:exResultsItersSpeedup}). На рис. \ref{fig:s_estimation_all} приведены примеры численных решений рассматриваемых задач.
+\begin{table}
+  \centering
+  \caption{Results of numerical experiments: number of iterations iterations}
+  \label{tab:exResultsIters}
+  \begin{tabular}{|l|K{1.7cm}|K{1.7cm}|K{1.7cm}|K{1.7cm}|K{1.7cm}|}
+\hline
+\textbf{Problem} & \multicolumn{5}{|c|}{\(p\)}\\
+\cline{2-6}
+  & \(1\) & \(2\) & \(4\) & \(8\) & \(16\)\\
+\hline
+Markin-Strongin & 1041(198) & 516(198) & 256(185) & 131(197) & 68(191) \\
+\hline
+Fonseca and Fleming 2d & 1181(93) & 636(99) & 386(111) & 176(95) & 106(97) \\
+\hline
+Fonseca and Fleming 3d & 5346(160) & 3551(183) & 1186(143) & 606(153) & 351(142) \\
+\hline
+Schaffer function N. 2 & 271(158) & 136(163) & 64(146) & 32(142) & 16(141)\\
+\hline
+Poloni's function & 3351(102) & 1706(90) & 856(88) & 426(96) & 201(99) \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}
+  \centering
+  \caption{Results of numerical experiments: speedup in iterations}
+  \label{tab:exResultsItersSpeedup}
+  \begin{tabular}{|l|K{1.5cm}|K{1.5cm}|K{1.5cm}|K{1.5cm}|}
+\hline
+\textbf{Problem} & \multicolumn{4}{|c|}{\(p\)}\\
+\cline{2-5}
+  & \(2\) & \(4\) & \(8\) & \(16\)\\
+\hline
+Markin-Strongin & 2.02 & 4.07 & 7.95 & 15.31 \\
+\hline
+Fonseca and Fleming 2d & 1.86 & 3.06 & 6.71 & 11.14 \\
+\hline
+Fonseca and Fleming 3d & 1.51 & 4.51 & 8.82 & 15.23 \\
+\hline
+Schaffer problem N. 2 & 1.99 & 4.23 & 8.47 & 16.94\\
+\hline
+Poloni's problem & 1.96 & 3.91 & 7.87 & 16.67 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+    \centering
+    \subfloat[Markin-Strongin problem]{{\includegraphics[width=.5\textwidth]{img/strongin.pdf} }}
+    \subfloat[Fonseca and Fleming 3d problem]{{\includegraphics[width=.5\textwidth]{img/fonseca.pdf} }}
+
+    \subfloat[Schaffer problem N. 2]{{\includegraphics[width=.5\textwidth]{img/schaffer2.pdf} }}
+    \subfloat[Poloni's problem]{{\includegraphics[width=.5\textwidth]{img/poloni.pdf} }}
+    \caption{Numericas estimation of \(S\) obtained by MOLF}
+    \label{fig:s_estimation_all}
+\end{figure}
+
+\paragraph{Parallel method time speedup.} Целевые функции всех перечисленных в разделе задачи обладают невысокой вычислительной сложностью. Чтобы продемонстрировать возможность получения ускорения по времени для задач с трудновычислимыми критериями, в критерии были внесены дополнительные интенсивные вычисления с плавающей точкой, не влияющие на результирующие значения. Полученные при этом ускорения приведены в таблице \ref{}.
 
 \section{Conclusion}
+
 %
 % ---- Bibliography ----
 %
