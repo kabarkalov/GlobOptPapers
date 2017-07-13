@@ -8,6 +8,7 @@ texfirst: ${IMAGES} | builddir
 
 refs: texfirst
 	cp ./u_pdc_refs.bib ./build/
+	cp ./splncs03.bst ./build/
 	cd ./build&& bibtex u_pdc_paper
 
 texsecond: refs
