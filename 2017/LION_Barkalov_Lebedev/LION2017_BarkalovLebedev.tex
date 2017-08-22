@@ -1,0 +1,237 @@
+\documentclass{llncs}
+
+
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage[misc,geometry]{ifsym}
+
+%\usepackage{amsmath}
+%\usepackage{amsfonts}
+%\usepackage{amssymb}
+%\usepackage{epstopdf}
+%\usepackage{epsfig}
+
+
+%\usepackage{url}
+%\urldef{\mailsa}\path|i.surmin@gmail.com, avbk@mail.ru, bastrakov@vmk.unn.ru,  |
+%\urldef{\mailsb}\path|evgeny.efimenko@gmail.com, arkady.gonoskov@gmail.com, meerov@vmk.unn.ru|
+
+
+\begin{document}
+
+\mainmatter 
+
+\title{Comparing Two Approaches for Solving Constrained Global Optimization Problems}
+\author{Konstantin Barkalov \Letter \and Ilya Lebedev \\
+\email{ \{konstantin.barkalov,ilya.lebedev\}@itmm.unn.ru}}
+
+\institute{Lobachevsky State University of Nizhny Novgorod, Nizhny Novgorod, Russia}
+
+
+
+\maketitle
+
+\begin{abstract}
+In the present study, a method for solving the multiextremal problems with non-convex constrains without the use of the penalty or barrier functions is considered. This \textit{index method} is featured by a separate accounting for each constraint. The check of the constraint fulfillment sequentially performed in every iteration point is terminated upon the first constraint violation occurs. The results of numerical comparing of the index method with the penalty function one are presented. The comparing has been carried out by means of the numerical solving of several hundred multidimensional multiextremal problems with non-convex constrains generated randomly.
+
+\keywords global optimization, multiextremal functions, non-convex constraints.
+
+\end{abstract}
+
+\section{Introduction}
+
+In the present paper, the methods for solving the global optimization problems with non-convex constraints
+\begin{eqnarray}
+&\varphi(y^\ast)=\min{\left\{\varphi(y):y\in D, \; g_i(y)\leq 0, \; 1 \leq i \leq m\right\}}, \label{problem} \\
+&D=\left\{y\in R^N: a_j\leq y_j \leq b_j, 1\leq j \leq N\right\}. \label{D}
+\end{eqnarray}
+are considered. The objective function as well as the constraint ones are supposed to satisfy Lipschitz condition
+%\[ \left|g_i(y')-g_i (y'')\right| \leq L_i \left\|y'-y'' \right\|, \; y',y''\in S, \; 1\leq i \leq m+1. \]
+with Lipschitz constants unknown a priori. The analytical formulae of the problem functions may be unknown, i.e. these ones may be defined by an algorithm for computing the function values in the search domain (so called ``black-box''-functions). Moreover, it is suggested that even a single computing of a problem function value may be a time-consuming operation since in the applied problems it is related to the necessity of numerical modeling (see, for example, \cite{Famularo}--\cite{Modorskii}).
+
+The method of penalty functions is one of the most popular numerical methods for solving the problems of this kind. The idea of the method is simple and very universal; therefore, the method has found wide application to solving various practical problems. A detailed description of the method can be found, for example, in \cite{Bazaraa}. Nevertheless, the method of penalty functions has a number of disadvantages. 
+
+First, when using this method, a number of unconstrained problems with different penalty coefficients should be solved. The issue of choosing the penalty coefficients should be addressed for each problem separately.
+
+Second, the use of large values of the penalty coefficients results in the minimization of the functions with a ravine-type minimum that essentially complicates the computations.
+
+Third, this method is not applicable in the problems with the partially computable functions, for example, in the case when the objective function is undefined if the constraints are violated.
+
+In the present work, the use of the penalty function method is compared to the application of the index method of accounting for the constraints developed in Nizhny Novgorod State University. The method features are (i) accounting for the information on each constraint separately and (ii) solving the problems, in which the function values may be undefined out of the feasible domain.
+
+\section{Index method}
+
+A novel approach to the minimization of the multiextremal functions with non-convex constraints (called the index method of accounting for the constraints) has been developed in \cite{Strongin2000}--\cite{Strongin2003}. The approach is based on a separate accounting for each constraint of the problem and is not related to the use of the penalty functions. 
+At that, employing the continuous single-valued Peano curve $y(x)$ (\textit{evolvent}) mapping the unit interval $[0,1]$ on the $x$-axis onto the $N$-dimensional domain (\ref{D}) it is possible to find the minimum in (\ref{problem}) by solving a one-dimensional problem
+\[
+\varphi(y(x^\ast))=\min \left\{\varphi(y(x)): x \in [0,1], \; g_i(y(x))\leq 0, \; 1 \leq i \leq m\right\}.
+\]
+The considered dimensionality reduction scheme juxtaposes to a multidimensional problem with Lipschitzian functions a one-dimensional problem, where the corresponding functions satisfy uniform H{\"o}lder condition (see \cite{Strongin2000}).
+
+According to the rules of index method, every iteration called trial at corresponding point of the search domain includes a sequential checking of fulfillment of the problem constraints at this point. The first occurrence of violation of any constraint terminates the trial and initiates the transition to the next iteration point, the values of the rest problem functions are not computed in this point. This allows: (i) accounting for the information on each constraint separately and (ii) solving the problems, in which the function values may be undefined out of the feasible domain.
+
+The index algorithm can be applied to solving the unconstrained problems as well, i.e. in the case when $m = 0$ in the problem statement (\ref{problem}). In this case, the algorithm works analogously to its prototype -- global search algorithm (GSA) -- developed for solving the unconstrained optimization problems. Various modifications of the index algorithm and the corresponding theory of convergence are presented in \cite{Strongin2000}. The algorithm is very flexible and allows an efficient parallelization as for shared memory, as for distributed memory, as for accelerators \cite{Barkalov2010}--\cite{Lebedev2016}.
+
+\section{Results of experiments}
+
+Let us compare the solving of the constrained global optimization problems using penalty functions method (PM) and index method (IM). The penalty function was taken in the form 
+\[
+G(y) = \sigma \sum_{j=1}^m\max\left\{0,g_j(y)\right\}^2,
+\]
+where $\sigma$ is the penalty coefficient. Thus, a constrained problem is reduced to an unconstrained problem
+\[
+F(y)=\varphi(y)+G(y)
+\]
+which was solved using global search algorithm.
+
+The experiments was carried out with the use of GKLS generator.  This generator for the functions of arbitrary dimensionality with known properties (the number of local minima, the size of their domains of attraction, the global minimizer, etc.) has been proposed in \cite{Gaviano}. Eight GKLS classes of differentiable test functions of the dimensions $N = 2, 3, 4,$ and 5, have been used. For each dimension, both \textit{Hard} and \textit{Simple} classes have been considered. The difficulty of a class was increased either by decreasing the radius of the attraction region of the global minimizer, or by decreasing the distance from the global minimizer $y^\ast$ to the domain boundaries. Application of this generator for studying some unconstrained optimization algorithms has been described in \cite{Kvasov2006}--\cite{SergeyevKvasov2015}. 
+
+According to the scheme described in \cite{GergelLION}, eight series of 100 problems each based on the functions of \textit{Simple} and \textit{Hard} classes with the dimensions $N = 2, 3, 4, 5$ have been generated. There were two constraints and objective functions in each problem. The volume fraction of the feasible domain was varied from 0.2 to 0.8. The penalty parameter $\sigma$ was selected to be equal to 100. 
+
+The global minimum was considered to be found if the algorithm generates a trial point $y^k$ in the $\delta$-vicinity of the global minimizer, i.e. $\left\|y^k-y^\ast\right\|_\infty\leq\delta$. The size of the vicinity was selected as $\delta = 0.01\left\|b-a\right\|$. When using IM for \textit{Simple} class, parameter $r = 4.5$ was selected, for \textit{Hard} class $r = 5.6$ was taken. The maximum allowed number of iterations was $K_{max} = 10^6$. 
+% the space-filling curve construction parameter was fixed as $m = 10$. 
+
+
+The average number of iterations $k_{av}$ performed by PM for solving a series of problems from both classes is shown in Table \ref{tab:PM_GKLS}. The same values for the index method are presented in Table \ref{tab:IM_GKLS}. The number of unsolved problems is specified in brackets. It reflects a situation when not all problems of the class have been solved by the method. This means that the algorithm was stopped as the maximum allowed number of iterations $K_{max}$ was achieved. In this case, the value $K_{max}=10^6$ was used for calculating the average value of the number of iterations $k_{av}$ that corresponds to the lower estimate of the average value. 
+
+
+\begin{table}
+	\caption{The values of $k_{av}$ when solving the GKLS problems by PM}
+	\label{tab:PM_GKLS}
+	\center
+	\begin{tabular}{cccccccccccc}
+		\hline\noalign{\smallskip}
+		$\Delta$ & \multicolumn{2}{c}{ $N=2$ } & & \multicolumn{2}{c}{$N=3$} & & \multicolumn{2}{c}{$N=4$} & & \multicolumn{2}{c}{$N=5$}  \\
+		\noalign{\smallskip} \cline{2-3} \cline{5-6} \cline{8-9} \cline{11-12} \noalign{\smallskip}
+		 & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard}  \\
+		\noalign{\smallskip} \hline \noalign{\smallskip}
+		0.2 &	1639 &	1507 & &	56149 &	60651 & & 160198(5) &	119764(2) & &	305957(1) &	488587(14) \\ 			
+		0.4 & 1534 &	1967 & &	67145 &	74860 & &	158547 &	127832 & &	396480(4) &	434328(2) \\
+		0.6 & 1201 &	1514 & &	92854 &	101240 & &	138550 &	143818 & &	373617(8) &	561447(9) \\
+		0.8 & 1277 &	1287 & &	108121& 148479 & &	130372 &	145592 & &	488791(12) &	646538(24)\\
+		\noalign{\smallskip}\hline
+	\end{tabular}
+\end{table}
+
+\begin{table}
+	\caption{The values of $k_{av}$ when solving the GKLS problems by IM}
+	\label{tab:IM_GKLS}
+	\center
+	\begin{tabular}{cccccccccccc}
+		\hline\noalign{\smallskip}
+		$\Delta$ & \multicolumn{2}{c}{ $N=2$ } & & \multicolumn{2}{c}{$N=3$} & & \multicolumn{2}{c}{$N=4$} & & \multicolumn{2}{c}{$N=5$}  \\
+		\noalign{\smallskip} \cline{2-3} \cline{5-6} \cline{8-9} \cline{11-12} \noalign{\smallskip}
+		 & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard}  \\
+		\noalign{\smallskip} \hline \noalign{\smallskip}
+		0.2 &	447 &	911 & &	14719 &	20120 & &	59680 &	66551(1) & &	391325(2) &	188797(12) \\ 			
+		0.4 & 465 &	1800 & & 11951 &	17427 & &	71248 &	86899 & &	339327(1) &	151998(3) \\
+		0.6 & 403 &	1988 & &	7366 &	12853 & &	58451 &	92007 & &	316648 &	179013(4) \\
+		0.8 & 371	& 4292 & &	4646 &	8702 & &	33621 &	54405 & &	309844 &	124952\\
+		\noalign{\smallskip}\hline
+	\end{tabular}
+\end{table}
+
+\begin{table}
+	\caption{Solving of GKLS problems by the index method, N=4}
+	\label{tab:IM_GKLS_k}
+	\center
+	\begin{tabular}{cccccccc}
+		\hline\noalign{\smallskip}
+		$\Delta$ & \multicolumn{3}{c}{ \textit{Simple} } & & \multicolumn{3}{c}{\textit{Hard}} \\
+		\noalign{\smallskip} \cline{2-4} \cline{6-8} \noalign{\smallskip}
+		 & $k_1$ & $k_3$ & $k_3$& & $k_1$ & $k_2$ & $k_3$ \\
+		\noalign{\smallskip} \hline \noalign{\smallskip}
+		0.2 &	59680 &	20445 &	4401 & &	66551 &	24210 &	6316 \\ 			
+		0.4 & 71248	& 28527	& 6784 & &	86899 &	39682 &	12615 \\
+		0.6 & 58451 &	31508 &	9505 & &	92007 &	52560 &	19853 \\
+		0.8 & 33621	& 21411	& 10446 & &	54405 &	36838 &	22202 \\
+		
+		\noalign{\smallskip}\hline
+	\end{tabular}
+\end{table}
+
+The  average values presented demonstrate that the solving of the specified problems using the index method requires less number of iterations than with the use of the penalty function one. At the same time, separate accounting for the constraints in the index method provides less number of computations of the values of the problem functions as well. The numbers of computations of the values of the constraint functions $g_1(y), \; g_2(y)$ and those for the objective function $\varphi(y)$ ($k_1$, $k_2$, and $k_3$, respectively) are presented in Table \ref{tab:IM_GKLS_k} for four-dimensional problems.
+
+\section {Conclusion}
+
+Concluding, let us note that the index method for solving constrained global optimization problems considered in the present work:
+
+\begin{itemize}
+	\item is based on the global search algorithm, which is not inferior in the speed of work than other well-known algorithms;
+	\item allows solving the initial problem directly, without the use of the penalty functions (thus, the issues of selection the penalty coefficient and of solving a series of unconstrained problems with different penalty coefficients are eliminated);
+	\item allows solving the problems, which the values of the problem function are not defined everywhere (for example, the objective function values are undefined out of the problem feasible domain);
+	\item speeds up the process of solving the constrained optimization problems (due to an essential reduction of the total number of computations of the problem function values).
+\end{itemize}
+The last statement has been supported by the numerical solving several hundred test problems.
+
+\bigskip
+
+\textbf{Acknowledgments.} This study was supported by the Russian Science Foundation, project No 16-11-10150.
+
+\begin{thebibliography}{99}
+
+\bibitem{Famularo}
+Famularo, D., Pugliese, P., Sergeyev, Ya.D.:A global optimization technique for checking parametric robustness. Automatica. 35, 1605--1611 (1999)
+
+\bibitem{Menniti}
+Kvasov D.E., Menniti D., Pinnarelli A., Sergeyev Ya.D., Sorrentino N.: Tuning fuzzy power-system stabilizers in multi-machine systems by global optimization algorithms based on efficient domain partitions. Electric Power Systems Research. 78(7), 1217--1229 (2008)
+
+\bibitem{Kvasov2015}
+Kvasov, D.E., Sergeyev, Y.D.: Deterministic approaches for solving practical black-box global optimization problems. Advances in Engineering Software. 80, 58--66 (2015)
+
+\bibitem{Modorskii}
+Modorskii, V.Y., Gaynutdinova, D.F., Gergel, V.P., Barkalov, K.A.: Optimization in design of scientific products for purposes of cavitation problems.Solving Global Optimization Problems on GPU Cluster. In: Simos T.E. (Ed.) ICNAAM 2015, AIP Conference Proceedings. 1738, art. no. 400013 (2016)
+
+\bibitem{Bazaraa}
+Bazaraa, M.S., H.D. Sherali and C. M. Shetty: Nonlinear Programming: Theory and Algorithms. Second Edition, John Wiley \& Sons, New York (1993)
+
+\bibitem{Strongin2000}
+Strongin, R.G., Sergeyev, Ya.D.: Global optimization with non-convex constraints. Sequential and parallel algorithms. Kluwer Academic Publishers, Dordrecht (2000)
+
+\bibitem{Pugliese}
+Sergeyev, Ya.D., Famularo, D., Pugliese, P.: Index Branch-and-Bound Algorithm for Lipschitz univariate global optimization with multiextremal constraints. J. Glob. Optim. 21(3), 317--341 (2001)
+
+\bibitem{Barkalov2002}
+Barkalov, K.A., Strongin, R.G.: A global optimization technique with an adaptive order of checking for constraints. Comput. Math. Math. Phys. 42(9), 1289--1300 (2002)
+
+\bibitem{Strongin2003}
+Strongin, R.G., Sergeyev, Ya.D.: Global optimization: fractal approach and non-redundant parallelism. J. Glob. Optim. 27(1), 25--50 (2003)
+
+\bibitem{Barkalov2010}
+Barkalov, K., Ryabov, V., Sidorov, S.: Parallel Scalable Algorithms with Mixed Local-Global Strategy for Global Optimization Problems. In: Malyshkin, V. (Ed.) MTPP 2010, LNCS. 6083, 232--240 (2010)
+
+\bibitem{Barkalov2014}  
+Barkalov, K.A., Gergel, V.P.: Multilevel scheme of dimensionality reduction for parallel global search algorithms. In: Proceedings of the 1st International Conference on Engineering and Applied Sciences Optimization -- OPT-i 2014. pp. 2111--2124 (2014)
+
+\bibitem{Barkalov2015}
+Barkalov, K., Gergel, V., Lebedev, I.: Use of Xeon Phi Coprocessor for Solving Global Optimization Problems. In: Malyshkin, V. (Ed.) PaCT 2015, LNCS. 9251, 307--318 (2015)
+
+\bibitem{Barkalov2016}
+Barkalov, K., Gergel, V.: Parallel Global Optimization on GPU. J. Glob. Optim. 66(1), 3--20 (2016)
+
+\bibitem{Lebedev2016}
+Barkalov, K., Gergel, V., Lebedev, I.: Solving Global Optimization Problems on GPU Cluster. In: Simos T.E. (Ed.) ICNAAM 2015, AIP Conference Proceedings. 1738, art. no. 400006 (2016)
+
+\bibitem{Grishagin2016} 
+Gergel, V., Grishagin, V., Gergel, A.: Adaptive nested optimization scheme for multidimensional global search. J. Glob. Optim. 66 (1), 35--51 (2016)
+
+\bibitem{Gaviano}
+Gaviano, M., Kvasov, D.E, Lera, D., and Sergeyev, Ya.D.: Software for generation of classes of test functions with known local and global minima for global optimization. ACM Transactions on Mathematical Software 29(4), 469--480 (2003)
+
+\bibitem{Kvasov2006} 
+Sergeyev, Ya.D., Kvasov D.E.: Global search based on efficient diagonal partitions and a set of Lipschitz constants. SIAM J. Optim. 16(3), 910--937 (2006)
+
+\bibitem{Paulavicius2014} 
+Paulavicius, R., Sergeyev, Y., Kvasov, D., Zilinskas, J.: Globally-biased DISIMPL algorithm for expensive global optimization. J. Glob. Optim. 59(2-3), 545--567 (2014)
+
+\bibitem{SergeyevKvasov2015} 
+Sergeyev, Y.D., Kvasov, D.E.: A deterministic global optimization using smooth diagonal auxiliary functions. Commun. Nonlinear Sci. Numer. Simulat. 21(1-3), 99--111 (2015)
+
+\bibitem{GergelLION} 
+Gergel, V.: An Approach for Generating Test Problems of Constrained Global Optimization. Proceedings of the LION11 conference (2017) [submitted]
+
+                                                                           
+\end{thebibliography}
+
+\end{document}
