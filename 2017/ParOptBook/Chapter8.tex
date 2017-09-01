@@ -1,0 +1,247 @@
+%%%%%%%%%%%%%%%%%%%% author.tex %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% sample root file for your "contribution" to a contributed volume
+%
+% Use this file as a template for your own input.
+%
+%%%%%%%%%%%%%%%% Springer %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% RECOMMENDED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\documentclass[graybox]{svmult}
+%%
+%%% choose options for [] as required from the list
+%%% in the Reference Guide
+%%
+%\usepackage{mathptmx}       % selects Times Roman as basic font
+%\usepackage{helvet}         % selects Helvetica as sans-serif font
+%\usepackage{courier}        % selects Courier as typewriter font
+%%\usepackage{type1cm}        % activate if the above 3 fonts are
+                             %% not available on your system
+%%
+%\usepackage{makeidx}         % allows index generation
+%\usepackage{graphicx}        % standard LaTeX graphics tool
+%%                             % when including figure files
+%\usepackage{multicol}        % used for the two-column index
+%\usepackage[bottom]{footmisc}% places footnotes at page bottom
+%
+%
+%\usepackage[colorlinks=true]{hyperref}
+%%\hypersetup{urlcolor=blue, citecolor=red}
+%
+
+%% see the list of further useful packages
+%% in the Reference Guide
+%
+%\makeindex             % used for the subject index
+%                       % please use the style svind.ist with
+%                       % your makeindex program
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{document}
+
+\title{Supercomputer parallel computations in solving the applied optimization problems }
+% Use \titlerunning{Short Title} for an abbreviated version of
+% your contribution title if the original one is too long
+\author{Konstantin Barkalov}
+% Use \authorrunning{Short Title} for an abbreviated version of
+% your contribution title if the original one is too long
+\institute{Konstantin Barkalov \at Lobachevsky State University of Nizhni Novgorod,  Nizhni Novgorod, Russia \email{konstantin.barkalov@itmm.unn.ru}}
+%
+% Use the package "url.sty" to avoid
+% problems with special characters
+% used in your e-mail or web address
+%
+\maketitle
+
+\abstract*{In this chapter, the examples of solving the applied problems in the fields of optimal design (the finding of the optimum profile of a vehicle wheel), chemical research (finding the unknown kinetic parameters in the mathematical models of the complex chemical reactions), economics (the identification of the parameters in the regional economic model) are given.}
+
+\abstract{In this chapter, the examples of solving the applied problems in the fields of optimal design (the finding of the optimum profile of a vehicle wheel), chemical research (finding the unknown kinetic parameters in the mathematical models of the complex chemical reactions), economics (the identification of the parameters in the regional economic model) are given.}
+
+%\abstract{Each chapter should be preceded by an abstract (10--15 lines long) that summarizes the content. The abstract will appear \textit{online} at \url{www.SpringerLink.com} and be available with unrestricted access. This allows unregistered users to read the abstract as a teaser for the complete chapter. As a general rule the abstracts will not appear in the printed version of your book unless it is the style of your particular book or that of the series to which your book belongs.\newline\indent Please use the 'starred' version of the new Springer \texttt{abstract} command for typesetting the text of the online abstracts (cf. source file of this chapter template \texttt{abstract}) and include them with the source files of your manuscript. Use the plain \texttt{abstract} command if the abstract is also to appear in the printed version of the book.}
+
+\section{Optimization of the rail transport wheel profile}
+
+The considered problem of the search for the optimum profile of the wheels for the rail transport (railway, subway, tram, etc.) has been solved in the framework of joint research project supported by Russian Foundation for Basic Research (project number 04-01-89002-NVO\_a) and NWO (Netherlands Organization for Scientific Research, project number 047.016.014)  ``Fast Computing in Global Optimization: Sequential and Parallel Environments'', carried out at Lobachevsky State University of Nizhni Novgorod and Delft University of Technology, the Netherlands (TU Delft).
+
+\subsection{Problem Statement}
+
+The problem of the rail transport wheel profile optimization is described in details in \cite{8_Markine2005,8_Markine2007}. Here, a brief description of this problem is presented only. Since the wheels are of the conical shape, the center of a mounted axle is moving along a sinusoid. This process is illustrated in Fig.~\ref{8_fig_1}). The parameters of the contact between the wheel and the rail, such as the radius of rotation, the contact angle, and the angle of inclination for the mounted axle are varied at the transverse displacement of the mounted axle relative to the rail. The relationship between these variations and the transverse position of the mounted axle is determined by the wheel and rail profiles.
+
+\begin{figure}[t]
+%\sidecaption[t]
+\includegraphics[width=0.9\linewidth]{figures/8_1.png}
+\caption{The displacement of the mounted axle}
+\label{8_fig_1}     
+\end{figure}
+
+The radius of rotation of the wheel at the contact point is an important parameter of the contact between the wheel and the rail. Actually, the radius can be different for the right and the left wheels since the mounted axle can shift relative to the rail (the radii $r_1$ and $r_2$, respectively in Fig.~\ref{8_fig_2}).
+
+\begin{figure}[t]
+%\sidecaption[t]
+\includegraphics[width=0.7\linewidth]{figures/8_2.png}
+\caption{The difference in the radii of rotation}
+\label{8_fig_2}     
+\end{figure}
+
+When the mounted axle is in the central position, the radii of rotation are the same for the left and right wheels, i.e., $r_1=r_2=r$. The difference in the radii of rotation for the left and right wheels can be defined as a function of the transverse displacement of the mounted axle relative to its central position $\Delta r(x)=r_1(x)-r_2(x)$.
+
+The mathematical model for this problem developed in Technical University Delft consists in the following. The wheel profile is described by B-spline, for building of which a set of points on the edge, on the edge base, and on the rolling surface of the wheel were selected (Fig.~\ref{8_fig_3})). Positions of these points can be varied for the purpose of variation of the profile. In order to reduce the computational costs for the optimization, the positions of the points on the upper surface of the edge as well as on the conical part of the profile were fixed since these parts of the wheel profile do not contact the rails.
+
+\begin{figure}[t]
+%\sidecaption[t]
+\includegraphics[width=0.7\linewidth]{figures/8_3.png}
+\caption{Modeling of the wheel profile}
+\label{8_fig_3}     
+\end{figure}
+
+The ordinates of the movable points of the spline $z_i$ were selected as the components of the vector of the optimization problem parameters $y$, i.e.,
+\[
+y=(z_1,...,z_N),
+\]
+and the abscissas of these points were fixed.
+
+The number of the movable points and, consequently, the number $N$ of variables in the considered problem was equal to $11$. For each parameter   the interval $\left[–1, 1\right]$ was taken as the domain of its variation. The difference of the radii of rotation $\Delta r(x)$ was minimized. The constraints were introduced according to the stability considerations. For example, one of the constraints was imposed on the maximum angle of inclination for the mounted axle.
+
+\subsection{The results of the experiments}
+
+Thus, the optimization problem has $N=11$ parameters and $m=6$ constraints. The objective function as well as the constraint functions is the multiextremal ones. A one-dimensional section of the objective function is presented in Fig.~\ref{8_fig_4} for illustration.
+
+\begin{figure}[t]
+%\sidecaption[t]
+\includegraphics[width=0.7\linewidth]{figures/8_4.png}
+\caption{A section of the objective function }
+\label{8_fig_4}     
+\end{figure}
+
+The constraints have no analytical form and defined by a MATLAB computational procedures. The computation of the values of all problem functions (objective function and constraints) at one point $y$ using Pentium IV processor with the clock frequency of 3 GHz takes about 10 sec. 
+
+Thus, having formulated the problem, let us try to estimate the resources required for its solving in dependence on the method selected. Let us take, for example, the method of full scanning a uniform grid. Having selected 10 variants for the values of each parameter (remind, that the total number of parameters equals to 11), we obtain $10^{11}$ computations at the grid nodes that requires $\sim 10^{12}$ sec., i.e., $\sim 3$ years of computations using a supercomputer with 10 000 processors. Thus, the problem is so hard to solve that the parallel computations are not only necessary but should be supplied with the efficient numerical methods to obtain the results in a reasonable time unavoidably.
+
+The problem described above has been solved by the authors using the parallel index method with the multiple shifted evolvents on a cluster of 4 computers in Delft University of Technology. The search precision in the coordinates was $2^{-10}$ , i.e., 1024 points of each parameter value in the case of the full scanning method. The search time for the optimum estimate was 27 hours. The problem functions values have been computed $4297 + 4415 + 4236 + 4266 = 17214$ times.
+
+The computations carried out at TU Delft for a wheel of the optimum profile demonstrated its service life to increase up to 120 000 km between the profile corrections (more than five times longer as compared to the wheels of the original profile) and the maximum permitted speed to increase from 40 up to 60 m/sec.
+
+\section{Solving the inverse problem of chemical kinetics}
+
+In the present section the results of joint research project carried out at Lobachevsky State University of Nizhni Novgorod and at Institute of Petrochemistry and Catalysis, Russian Academy of Sciences (IPC RAS) \cite{8_Gubaidullin2011}.
+
+\subsection{Problem statement}
+
+The building of the mathematical models of the complex chemical reactions implies the presence of the unknown kinetic parameters (the rate constants, the activation energies, and the frequencies of collisions between the reacting molecules), which could be found by solving the problem of the minimization of the deviations between the calculated data (\textit{the direct problem}) and the experimental ones. Thus, a problem of identifying the mathematical model (\textit{the inverse problem of chemical kinetics}) arises, which in general case is a global optimization problem.
+
+Many problems of physics chemistry imply a considerable amount of computations, nevertheless, providing rather low precision. Investigating the inverse problems of chemical kinetics requires solving many systems of differential and algebraic equations. The kinetics of complex chemical reactions is featured by the presence of parameters varying fast and slowly (because various stages of reactions go with different rates). Therefore, solving the direct kinetic problems is complicated by the hardness of the differential equations describing the mechanisms of these reactions.
+
+The direct kinetic problem for the isothermal non-stationary model in a closed system is Cauchy problem for a system of ordinary differential equations
+\begin{equation} 
+ \frac{dx_i}{dt}= F_i, i=1,..,M; \; F_i=\sum_{j=1}^{N}{S_{ij}w_j}
+\end{equation}
+\begin{equation} 
+ w_j=k_j\prod_{i=1}^{M}{\left(x_i\right)^{\left|\alpha_{ij}\right|}}-k_{-j}\prod_{i=1}^{M}{\left(x_i\right)^{\left|\beta_{ij}\right|}}
+\end{equation}
+with the initial conditions $t=0$, $x_i(0)=x_i^0$, where 
+\begin{itemize}
+	\item $x_i$ are the concentrations of the substances (\textit{the molar fractions}) participating in the reaction;
+	\item $M$ is the number of substances; 
+	\item $N$ is the number of steps;
+	\item $S_{ij}$ are the stoichiometric matrix; 
+	\item $w_j$ are the rates of the $j$-th step, $1/{hr}$; 
+	\item $k_j$, $k_{-j}$ are the reduced rate constants for the forward and reverse reactions ($1/{hr}$), respectively;
+	\item $\alpha_{ij}$ are the negative elements of $S_{ij}$, and $\beta_{ij}$ are the positive elements of $S_{ij}$.
+\end{itemize}
+
+Since a part of the constants $k_j$, $k_{-j}$, as a rule, are not known, the problem of identification of the mathematical model of  the inverse kinetic problem arises. This problem is a minimization one for the function of the deviation between the calculated data and the experimental ones
+\begin{equation} \label{8_chem_func}
+F=\sum_{i=1}^n{\sum_{j=1}^M{\left|x_{ij}^p-x_{ij}^{\epsilon}\right|}}\rightarrow \min,
+\end{equation}
+where
+\begin{itemize}
+	\item $x_{ij}^p$ are the calculated values of the observable substances concentrations  (\textit{molar fractions});	
+	\item $x_{ij}^{\epsilon}$ are the values of the observable substances concentrations measured experimentally (\textit{molar fractions});
+	\item $n$ is the number of the experimental points.
+\end{itemize}
+
+To find the activation energies and the collision frequencies of the molecules reacting at the elementary step, Arrhenius equation
+\[
+k=Ae^{-\frac{Ea}{RT}}
+\]
+is used, where
+\begin{itemize}
+	\item $k$ is the reduced rate constant for the elementary step, $1/hr$;	
+	\item $E$ is the activation energy, $J/{mol}$;
+	\item $R$ is gas constant, $J/{(mol \cdot K)}$;
+	\item $А$ is the collision frequency for the reacting molecules;
+	\item $T$ is the temperature, $K$.	
+\end{itemize}
+
+Since in the search for the rate constants of the elementary steps, these ones may fall into the area, where the differential equations system describing the reactions may appear to be a stiff one, Mishelsen method with automatic step selection is applied to solving the direct problem \cite{8_Gubaidullin2010}. As the model output data $x_{ij}^p$ depend on the values of the constants $k_j$, $k_{-j}$ nonlinearly, problem (\ref{8_chem_func}) is a multiextremal optimization problem.
+
+\subsection{The results of the experiments}
+
+Traditionally, the methods based on the random search ideas had been applied in IPC RAS for solving problem (\ref{8_chem_func}). The typical computation costs were several days of continuous computations. Within the framework of the joint research project by IPC RAS and Lobachevsky State University of Nizhni Novgorod it was proposed to apply the efficient parallel global optimization methods described in Chapter 5. %Ссылка на главу!!!!
+
+For the application of the novel identification technique the mathematical model for the reaction of the catalytical carboalumination of olefins and acetylenes with the assistance of threealkylalanes in the presence of transition metal complexes was selected. This reaction has applied in the laboratory research at IPC RAS as an efficient method for the synthesis of new Me-C (methyl-carbon), Et-C (ethyl-carbon), and C-C (carbon-carbon) bonds \cite{8_Parfenova2009}. The natural experiments of conducting the reactions of the catalytical carboalumination of olefins and acetylenes for different temperatures and fixed initial concentrations have been carried out in IPC RAS. In the experiments, the concentrations of five substances were traced and their percentage ratios were determined. A number of schemes for the mathematical description of the reaction of catalytical carboalumination of olefins and acetylenes (including the parameters to be identified) have been proposed in IPC RAS. As a priority problem of the identification of the unknown parameters, it was required to determine the rate constants for the elementary steps for the proposed reaction schemes for various temperatures as well as to find the activation energies for the elementary steps for various catalysts. These schemes and the identification problem have been described in details in \cite{8_Gubaidullin2011}. Here, note that the minimization problem arising depends on 10 parameters and is box-constrained one. The computational costs for the function value at one point are $\sim 3$ sec. (Intel Xeon 3.2 GHz). The objective function is  multiextremal that is confirmed by its two-dimensional section presented in Fig.~\ref{8_fig_5}. 
+
+\begin{figure}[t]
+%\sidecaption[t]
+\includegraphics[width=0.8\linewidth]{figures/8_5.png}
+\caption{Two-dimensional section of the objective function}
+\label{8_fig_5}     
+\end{figure}
+
+As a result of the computations, the estimates of the rate constants for the elementary steps for the 10- and 12-step reactions schemes of the carboalumination in the presence of $Cp_2 ZrCl_2$ catalyst have been obtained. The objective function value at the obtained optimizer was $F = 3.040$. It appeared to be impossible to achieve the function value close to zero because the experimental data contains the uncertainties. Nevertheless, the model identified using the parallel global optimization method allowed obtaining a good conformity between the calculated data and the experimental ones. As an illustration, the comparison of the computed and experimental concentrations of substances participating in the reactions is presented in Fig.~\ref{8_fig_6}.
+
+\begin{figure}
+\begin{minipage}{0.5\linewidth}
+\center{\includegraphics[width=1.0\linewidth]{figures/8_6a.png} \\ (a)}
+\end{minipage}
+\hfill
+\begin{minipage}{0.5\linewidth}
+\center{\includegraphics[width=1.0\linewidth]{figures/8_6b.png} \\ (b)}
+\end{minipage}
+\caption{The comparison of the calculated data with the experimental ones}
+\label{8_fig_6}
+\end{figure}
+
+
+\section{Identification of the dynamic balance normative models of the regional economy}
+
+In the present section, the results obtained within the research project supported by RFBR ``Parallel global optimization methods in the identification of the dynamic balance for the normative models of the regional economy'', project 11-07-97017, carried out jointly by the research teams from Lobachevsky State University of Nizhni Novgorod and from Dorodnicyn Computing Centre of RAS are presented \cite{8_Gergel2011}.
+
+\subsection{Problem statement}
+
+The regional economy (the district, region, or state, etc. level) was the object of investigations. For the mathematical description of the economical processes taking place at the regional level, a dynamic balance normative economic model has been proposed in Dorodnicyn Computing Centre of RAS [7]. This model is a general one. However, it includes a significant number of parameters  being specific to the different regions. It is possible to find these parameters (or \textit{to identify the model}) by solving the problem of minimization of the deviation of the calculated time series of the macroeconomic measures from the corresponding historic statistical data. The functions entering the problem statement are the nonlinear ones. As a result, the problem of identification of the mathematical economic model is the global optimization one.
+
+
+\begin{thebibliography}{99.}
+
+\bibitem{8_Markine2005} 
+Shevtsov, I.Y., Markine, V.L., Esveld, C.: Optimal design of wheel profile for railway vehicles. Wear. \textbf{258(7-8)}, 1022--1030 (2005)
+
+\bibitem{8_Markine2007} 
+Shevtsov, I.Y., Markine, V.L., Esveld, C.: An inverse shape design method for railway wheel profiles. Structural and Multidisciplinary Optimization. \textbf{33(3)}, 243--253 (2007)
+
+\bibitem{8_Gubaidullin2011}
+Gubaidullin, I.M., Ryabov, V.V., Tikhonova, M.V.: Application of the global optimization index method to solving inverse problems of chemical kinetics. Numerical methods and programming. \textbf{12(1)}, 137--145 (2011) (in Russian)
+
+\bibitem{8_Gubaidullin2010}
+Tikhonova, M.V., Gubaidullin, I.M., Spivak, S.I.: The numerical solution of the direct chemical kinetics problem by the Rosenbrock's and Mishelsen's methods for the stiff systems of differential equations. MVMS Journal. \textbf{12(12}, 26--33 (2010) (in Russian)
+
+\bibitem{8_Parfenova2009}
+Parfenova, L.V., Gabdrakhmanov, V.Z., Khalilov, L.M., Dzhemilev, U.M.: On study of chemoselectivity of reaction of trialkylalanes with alkenes, catalyzed with $Zr$ $\pi$-complexes. Journal of Organometallic Chemistry. \textbf{694(23)}, 3725--3731 (2009)
+
+\bibitem{8_Gergel2011}
+Gergel, V.P., Gorbachev, V.A., Olenev, N.N., Ryabov, V.V., Sidorov, S.V. Parallel global optimization methods for identification of the dynamic balance normative model of regional economy. Bulletin of South Ural State University. \textbf{25(9)}, 4--15 (2011) (In Russian)
+
+\bibitem{8_Olenev1999}
+Avtukhovich, E.V., Guriev, S.M., Olenev, N.N., Petrov, A.A., Pospelov, I.G., Shananin, A.A., Chukanov, S.V.: A Mathematical Model of the Transition Economy. The Computing Centre of the Russian Academy of Sciences, Moscow (1999) (In Russian)
+
+8. N.N. Olenev. Model of innovation potential of regional economy // Proceedings of international conference “Economy of depressed areas: problems and prospects of progress of regional economy”. Barnaul, Altai State University Press. 2007. pp.178188. (In Russian)
+
+
+
+
+\end{thebibliography}
+
+%\end{document}
