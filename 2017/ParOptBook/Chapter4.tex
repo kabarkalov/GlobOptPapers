@@ -7,36 +7,36 @@
 %%%%%%%%%%%%%%%% Springer %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-%% RECOMMENDED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\documentclass[graybox]{svmult}
-%
-%% choose options for [] as required from the list
-%% in the Reference Guide
-%
-%\usepackage{mathptmx}       % selects Times Roman as basic font
-%\usepackage{helvet}         % selects Helvetica as sans-serif font
-%\usepackage{courier}        % selects Courier as typewriter font
-%\usepackage{type1cm}        % activate if the above 3 fonts are
-%                           % not available on your system
-%
-%\usepackage{makeidx}         % allows index generation
-%\usepackage{graphicx}        % standard LaTeX graphics tool
-%                             % when including figure files
-%\usepackage{multicol}        % used for the two-column index
-%\usepackage[bottom]{footmisc}% places footnotes at page bottom
-%\usepackage{mathtools}
-%\mathtoolsset{showonlyrefs}
-%
-%% see the list of further useful packages
-%% in the Reference Guide
-%
-%\makeindex             % used for the subject index
-%                       % please use the style svind.ist with
-%                       % your makeindex program
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%\begin{document}
+% RECOMMENDED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[graybox]{svmult}
+
+% choose options for [] as required from the list
+% in the Reference Guide
+
+\usepackage{mathptmx}       % selects Times Roman as basic font
+\usepackage{helvet}         % selects Helvetica as sans-serif font
+\usepackage{courier}        % selects Courier as typewriter font
+\usepackage{type1cm}        % activate if the above 3 fonts are
+                           % not available on your system
+
+\usepackage{makeidx}         % allows index generation
+\usepackage{graphicx}        % standard LaTeX graphics tool
+                             % when including figure files
+\usepackage{multicol}        % used for the two-column index
+\usepackage[bottom]{footmisc}% places footnotes at page bottom
+\usepackage{mathtools}
+\mathtoolsset{showonlyrefs}
+
+% see the list of further useful packages
+% in the Reference Guide
+
+\makeindex             % used for the subject index
+                       % please use the style svind.ist with
+                       % your makeindex program
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
 
 \title{Global search algorithms for one-dimensional multiextremal optimization problems with nonlinear constraints}
 % Use \titlerunning{Short Title} for an abbreviated version of
@@ -73,7 +73,7 @@ be considered. Let $\varphi(x)$ and $g_j(x)\le 0,1\le j\le m$ be the real functi
 
 As before, the objective function $\varphi$ (hereinafter denoted also as $g_{m+1}$) and the left parts of the constraints $g_j(x)\le 0,1\le j\le m$ re assumed to satisfy \emph{Lipschitz condition} with the corresponding constants $L_j,1\le j\le m+1$, namely:
 \begin{equation}
-  |g_j(x_1)-g_j(x_2)|\le L_j|x_1-x_2|,1\le j\le m+1,x_1,x_2
+  |g_j(x_1)-g_j(x_2)|\le L_j|x_1-x_2|,1\le j\le m+1,x_1,x_2\in [a,b]
 \end{equation}
 
 \example{
@@ -247,47 +247,58 @@ if $\mu_\nu$ is equal to zero, then assume $\mu_\nu=1$. As follows from \eqref{e
 \[
 R(i)=2\Delta_i-4\frac{z_i-z_\nu^\ast}{r_\nu \mu_\nu}, \; \nu=\nu(x_i)>\nu(x_{i-1}),
 \]
-\begin{equation}%\label{eq:14}
+\begin{equation}
+\label{eq4:characteristic}
 R(i)=\Delta_i+\frac{(z_i-z_{i-1})^2}{r_\nu^2 \mu_\nu^2\Delta_i}-2\frac{z_i+z_{i-1}-2z_\nu^\ast}{r_\nu \mu_\nu}, \;  \nu=\nu(x_i)=\nu(x_{i-1}),
 \end{equation}
 \[
 R(i)=2\Delta_i-4\frac{z_{i-1}-z_\nu^\ast}{r_\nu \mu_\nu}, \; \nu=\nu(x_{i-1})>\nu(x_i),
 \]
-where $\Delta_i=(x_i - x_{i-1})^{1/N}$. The values $r_\nu > 1, \; 1 \leq
-\nu \leq m+1,$ are parameters of the algorithm. An appropriate selection
-of $r_\nu$ allows to consider the product $r_\nu \mu_\nu$ as an estimate
-of the H{\"o}lder constants $H_\nu, \; 1 \leq \nu \leq m+1$.
-
+\[
+\Delta_i=x_i - x_{i-1}
+\]
+The values $r_\nu>1, 1\le\nu\le m+1$ are the parameters of the algorithm. An appropriate choice of the values $r_\nu$ allows using the products $r_\nu\mu_\nu$ as the estimates of Lipschitz constants $L_\nu, 1\le\nu\le m+1$.
 \emph{Rule 7.} Find the interval $(x_{t-1},x_t)$ with the maximum characteristic
-\begin{equation}\label{MaxR}
+\begin{equation}
+\label{eq4:MaxR}
 R(t)=\max{\left\{R(i): 1 \leq i \leq k+1\right\}}.
 \end{equation}
-
-Rule 7. Make the next trial at the midpoint of the interval
-$(x_{t-1},x_t)$ if the indices of the points $x_{t-1}$ and $x_t$  are not
-the same, i.e.
+\emph{Rule 8.} Make the next trial at the midpoint of the interval
+$(x_{t-1},x_t)$ if the indices of the points $x_{t-1}$ and $x_t$  are not the same, i.e.
 \[
 x^{k+1} = \frac{x_t + x_{t-1}}{2}, \; \nu(x_{t-1}) \neq \nu(x_t).
 \]
 Otherwise, make the trial at the point
-\begin{equation}%\label{eq:142}
-x^{k+1} = \frac{x_t+x_{t-1}}{2} - \frac{\mathrm{sign}(z_t-z_{t-1})}{2r_\nu}\left[\frac{\left|z_t-z_{t-1}\right|}{\mu_\nu}\right]^N, \; \nu=\nu(x_{t-1})=\nu(x_t).
+\begin{equation}
+\label{eq4:next_point}
+x^{k+1} = \frac{x_t+x_{t-1}}{2} - \frac{z_t-z_{t-1}}{2r_\nu\mu},\; \nu=\nu(x_{t-1})=\nu(x_t).
 \end{equation}
 
-We may take as termination condition the inequality $\Delta_t \leq
-\epsilon$, where $t$ is from (\ref{MaxR}) and $\epsilon>0$ is the
-predefined accuracy.
+The described rules can be supplemented with the termination condition, finalizing the iterations of the method if
+\begin{equation}
+\label{eq4:stop_cond}
+  x_t - x_{t-1}\le\epsilon
+\end{equation}
+where t from \eqref{eq4:MaxR} and $\epsilon>0$ is the predefined accuracy of the optimization.
 
-Various modifications of this algorithm and the corresponding theory of
-convergence are given in
-\cite{Strongin2000,Barkalov2002,Gergel2005,Strongin2013}.
+Let us formulate the conditions of convergence for the algorithm in the form of the following theorem.
+\begin{theorem}
+Let the considered index algorithm be applied to the solving of problem \eqref{eq4:problem} and the following conditions be satisfied:
+\begin{enumerate}
+  \item each function $gj, 1\le j\le m+1$ satisfies Lipschitz condition with the constant $L_j$ in the interval $[a,b]$, i.e.,
+  \[
+  |g_j(x_1)-g_j(x_2)|\le L_j|x_1-x_2|,1\le j\le m+1,x_1,x_2 \in[a,b]
+  \]
+  \item the following inequalities hold for the quantities $\mu_\nu$ from \eqref{eq4:lip_est} starting from some step
+  \[
+  \r_\nu\mu_\nu > 2L_\nu,1\le\nu\\le m+1.
+  \]
+\end{enumerate}
 
-The algorithm considered above is very flexible and allows for an
-efficient parallelization for shared memory, for distributed memory, and
-for accelerators \cite{Barkalov2010,Barkalov2015,Barkalov2016,Gergel2016}.
+Then the set of the limit points of the sequence $\{x_k\}$ generated by the index algorithm coincides with the set of solutions of problem \eqref{eq4:problem} with $\epsilon=0$ and termination criterion \eqref{eq4:stop_cond}. In addition, the index of each limit point equals to $M$ and the convergence to any limit point $\overline{x}$  is bilateral if $\overline{x}\not=a$ and $\overline{x}\not=b$.
+\end{theorem}
 
-
-
+This theorem is given without a proof, which can be found, for example, in \cite{}[1, 2]. Various modifications of this algorithm and the corresponding theory of convergence are given in \cite{}[5–10].
 
 \section{Index algorithm taking into account the existence of -reserved solutions}
 
@@ -307,4 +318,4 @@ The issues of convergence acceleration of the index method have been considered 
 
 For all proposed algorithms, the results of numerical experiments are presented. The results confirm the theoretical statements about convergence acceleration.
 
-%\end{document}
+\end{document}
