@@ -236,6 +236,7 @@ if $\mu_\nu$ is equal to zero, then assume $\mu_\nu=1$. As follows from \eqref{e
 
 \emph{Rule 5.} For all nonempty sets $I_\nu, \; 1 \leq \nu \leq m+1$, compute the estimates
 \begin{equation}
+  \label{eq4:mu_const}
   z_\nu^\ast = \left\{
   \begin{array}{lr}
     0, & \nu < M,\\
@@ -352,14 +353,21 @@ In the case when the objective function and the left-side parts of the constrain
 \example
 {
 Let us consider problem \eqref{eq4:problem} with $x\in[0,6,2,2]$, $m=3$ as an illustration:
+\begin{gather}
+\varphi(x)=\cos(18x-3)\sin(10x-7)+1, \\
+g_1(x)=\exp(-x/2)\sin(6x-1.5) \\
+g_2(x)=\sin(4x-2.2)+\cos(6x-2.9) \\
+g_3(x)=|x|\sin(2\pi x - 0.5).
+\end{gather}
 }
-
 \begin{figure}[h]
   \label{fig:4_7}
   \centering
   \includegraphics[width=0.8\textwidth]{figures/4_7.jpg}
   \caption{The solution of a problem by Index Method}
 \end{figure}
+The functions $g_j , 1\le j\le 4$, are pictured in Fig. \ref{fig:4_7}. Assuming a partial calculability, the arcs of
+the functions corresponding to the domains $Q_j ,1\le j\le 4$, from \eqref{eq4:q} are presented in Fig. \ref{fig:4_8}.
 
 \begin{figure}[h]
   \label{fig:4_8}
@@ -367,6 +375,51 @@ Let us consider problem \eqref{eq4:problem} with $x\in[0,6,2,2]$, $m=3$ as an il
   \includegraphics[width=0.8\textwidth]{figures/4_8.jpg}
   \caption{The problem solving by Index Method with the $\epsilon$-reservs}
 \end{figure}
+
+Index algorithm described in Sec. 3.3 was used to solve this example with $x_1=(a+b)/2$, $r=2$, and $\varepsilon=10^{-5}$. The coordinates of 102 trial points executed by the algorithm in the process of problem solving are marked by four rows of the vertical strokes in Fig. \ref{fig:4_7}. The strokes of the upper row correspond to the points with the index $\nu=1$, the ones of the second and the third rows --- to the points, the indices of which are equal to 2 and 3, respectively; and the points
+marked by the strokes of the bottom row are feasible.
+
+The coordinates of the trials executed in the close points are marked by a dark rectangle. The values of the functions $g_1 , g_2 , g_3$ , and $\varphi=g_4$ have been computed $k_1=102$, $k_2=80, k_3=64,$ and $k_4=26$ times, respectively. As one can see in Fig. \ref{fig:4_7}, the trial points concentration takes place not only in the vicinity of the point of the global optimum $x^*=2,07957$, but also in the vicinities of the inadmissible boundary points of the domains $Q_j$ from \eqref{eq4:q}. This effect can be reduced by the substitution of estimates \eqref{eq4:mu_const} by the estimates
+\begin{equation}
+  \label{eq4:mu_const}
+  z_\nu^\ast = \left\{
+  \begin{array}{lr}
+    -\epsilon_\nu, & \nu < M,\\
+    \min\{ g_\nu(y(x_i): i\in I_\nu \}, & \nu = M.
+  \end{array}
+  \right.
+\end{equation}
+where $\epsilon_R=(\epsilon_1 ,\dots, \epsilon_m)$ is a predefined vector with positive components. Thus, $z^*=0$ if there exist the points $x_i,1\le i\le k$ from series \eqref{eq4:search_data} with the index greater than $\nu$. As a consequence of this substitution the values of the characteristics $R(i)$ from \eqref{eq4:characteristic} will become lower (because of the subtraction of $\epsilon_\nu$) if
+\begin{equation}
+  \nu=\max\{\nu(x_{i-1},\nu(x_i)\}<\max\{\nu(x_j):1\le j\le k\}\le V
+\end{equation}
+that makes executing the trials in the corresponding intervals  ($x_{i-1}$ , $x_i$ ) less probable. In all other aspects, the algorithm remains the same.
+
+This \emph{prima facie} mechanical trick has a well-established theoretical basis considered below.
+
+\begin{definition}
+  The point $x_\epsilon$ is called an $\epsilon$-reserved solution of problem \eqref{eq4:problem} if the condition
+  \begin{equation}
+    \varphi(x_\epsilon)=\min\{\varphi(x):x\in [a,b], g_j(x)\le -\epsilon_j,1\le j\le m\}
+  \end{equation}
+  meets where $\epsilon_1, \dots,\epsilon_m$ are the positive values of reserve for each constraint. Let us introduce into consideration also the set
+  \begin{equation}
+  X_\epsilon = \{x\in[a,b]:g_j(x)\le 0, 1\le j\le m, \varphi(x)\le\varphi(x_\epsilon)\}
+  \end{equation}
+  of all feasible solutions of the problem, which are no worse with respect to the objective function value than the $\epsilon$-reserved solution.
+\end{definition}
+
+The existence of the $\epsilon$-reserved solution of problem \eqref{eq4:problem} can be interpreted as some analogue of the conditions of regularity in the classical nonlinear programming problems. The applied role of this condition should be noted also. Even if the exact solution $x^*$ is known, its practical implementation is possible as some approximation to $x^*$ only. Therefore, the existence of the feasible points from $Q$ close to $x^*$ (with respect to the coordinates and to the objective
+function values) is important. The existence of the $\epsilon$-reserved solution guarantees the availability of such points. Moreover, the domain $X_\epsilon$ may play a role of the set of suitable approximations.
+
+The index algorithm with the $\epsilon$-reserves has been applied to the considered example with $\epsilon_i=0.2, 1\le i\le 3$. The search trial coordinates are marked by the vertical strokes in Fig. \ref{fig:4_8}. The solution has required 52 trials only and provided the same precision of the problem solution as in
+the case when the vector $\epsilon_R$ equals to zero. Moreover, the values of the functions $g_1$ , $g_2$ , $g 3$ , and $\varphi=g_4$ have been calculated $k_1 =52$, $k_2 =39$, $k_3 =38$, and $k_4 =25$ times, respectively.
+
+The conditions of convergence for the algorithm are presented in the following theorem (given without proof, see \cite{}).
+
+\begin{theorem}
+  Assume
+\end{theorem}
 
 \section{Index method with adaptive order of checking for constraints}
 According to the rules of the index method considered in the preceding subsections, every trial includes the successive check of the fulfillment of the problem constraints in the corresponding point of the search domain. The finding of the first violated constraint terminates the trial and initiates the transition to the next iteration. If a numeration of the constraints in the increasing order by the computational costs of their checking is introduced (i.e., if the simpler constraints are checked first) one can reduce essentially the overall computational costs in the course of optimization. The above is important for the problems, in which the estimating of the function value requires a considerable computational resources connected with a necessity of the numerical modelling of the behavior of the systems described by these functions (as it takes place, for example, in numerous problems of the optimal design).
