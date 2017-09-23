@@ -7,37 +7,37 @@
 %%%%%%%%%%%%%%%% Springer %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-% RECOMMENDED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[graybox]{svmult}
-
-% choose options for [] as required from the list
-% in the Reference Guide
-
-\usepackage{mathptmx}       % selects Times Roman as basic font
-\usepackage{helvet}         % selects Helvetica as sans-serif font
-\usepackage{courier}        % selects Courier as typewriter font
-\usepackage{type1cm}        % activate if the above 3 fonts are
-                           % not available on your system
-
-\usepackage{makeidx}         % allows index generation
-\usepackage{graphicx}        % standard LaTeX graphics tool
-                             % when including figure files
-\usepackage{multicol}        % used for the two-column index
-\usepackage[bottom]{footmisc}% places footnotes at page bottom
-
-%custom package
-\usepackage{mathtools}
-
-% see the list of further useful packages
-% in the Reference Guide
-
-\makeindex             % used for the subject index
-                       % please use the style svind.ist with
-                       % your makeindex program
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{document}
+%% RECOMMENDED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\documentclass[graybox]{svmult}
+%
+%% choose options for [] as required from the list
+%% in the Reference Guide
+%
+%\usepackage{mathptmx}       % selects Times Roman as basic font
+%\usepackage{helvet}         % selects Helvetica as sans-serif font
+%\usepackage{courier}        % selects Courier as typewriter font
+%\usepackage{type1cm}        % activate if the above 3 fonts are
+%                           % not available on your system
+%
+%\usepackage{makeidx}         % allows index generation
+%\usepackage{graphicx}        % standard LaTeX graphics tool
+%                             % when including figure files
+%\usepackage{multicol}        % used for the two-column index
+%\usepackage[bottom]{footmisc}% places footnotes at page bottom
+%
+%%custom package
+%\usepackage{mathtools}
+%
+%% see the list of further useful packages
+%% in the Reference Guide
+%
+%\makeindex             % used for the subject index
+%                       % please use the style svind.ist with
+%                       % your makeindex program
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{document}
 
 \title{Global search algorithms for one-dimensional multiextremal optimization problems with nonlinear constraints}
 % Use \titlerunning{Short Title} for an abbreviated version of
@@ -353,12 +353,12 @@ In the case when the objective function and the left-side parts of the constrain
 \example
 {
 Let us consider problem \eqref{eq4:problem} with $x\in[0,6,2,2]$, $m=3$ as an illustration:
-\begin{gather}
+\begin{gather*}
 \varphi(x)=\cos(18x-3)\sin(10x-7)+1, \\
 g_1(x)=\exp(-x/2)\sin(6x-1.5) \\
 g_2(x)=\sin(4x-2.2)+\cos(6x-2.9) \\
 g_3(x)=|x|\sin(2\pi x - 0.5).
-\end{gather}
+\end{gather*}
 }
 \begin{figure}[h]
   \label{fig:4_7}
@@ -400,11 +400,13 @@ This \emph{prima facie} mechanical trick has a well-established theoretical basi
 \begin{definition}
   The point $x_\epsilon$ is called an $\epsilon$-reserved solution of problem \eqref{eq4:problem} if the condition
   \begin{equation}
+    \label{eq4:eps_res_problem}
     \varphi(x_\epsilon)=\min\{\varphi(x):x\in [a,b], g_j(x)\le -\epsilon_j,1\le j\le m\}
   \end{equation}
   meets where $\epsilon_1, \dots,\epsilon_m$ are the positive values of reserve for each constraint. Let us introduce into consideration also the set
   \begin{equation}
-  X_\epsilon = \{x\in[a,b]:g_j(x)\le 0, 1\le j\le m, \varphi(x)\le\varphi(x_\epsilon)\}
+    \label{eq4:x_epsilon}
+    X_\epsilon = \{x\in[a,b]:g_j(x)\le 0, 1\le j\le m, \varphi(x)\le\varphi(x_\epsilon)\}
   \end{equation}
   of all feasible solutions of the problem, which are no worse with respect to the objective function value than the $\epsilon$-reserved solution.
 \end{definition}
@@ -418,8 +420,127 @@ the case when the vector $\epsilon_R$ equals to zero. Moreover, the values of th
 The conditions of convergence for the algorithm are presented in the following theorem (given without proof, see \cite{}).
 
 \begin{theorem}
-  Assume
+  Assume problem \eqref{eq4:problem} to have a solution $x^*$ and the following conditions to be satisfied:
+  \begin{enumerate}
+    \item each domain $Q_j ,1\le j\le m+1$ from \eqref{eq4:q} is a union of a finite number of positive length segments;
+    \item each function $g_j ,1\le j\le m+1$ allows Lipschitz extension $G_j (x)$ with the constant $L_j$ over the whole interval $[a,b]$, i.e.,
+    \begin{equation}
+      g_j(x)=G_j(x),x\in Q_j,1\le j\le m+1;
+    \end{equation}
+    \item the components $\epsilon_\nu$ of the reserve vector $\epsilon_R$ corresponding to the constraints being active at the absolute minimum point $x^*$ (i.e., the constraints, for which $g_\nu(x^*)=0$) satisfy the inequalities
+    \begin{equation}
+      \label{eq4:reserves}
+      0<2\epsilon_\nu<L_\nu(\beta-\alpha)
+    \end{equation}
+    where $\beta-\alpha$ is the length of the interval $[\alpha,\beta]\subset Q_{m + 1}$ containing the point $x^*$;
+    \item the components $\epsilon_\nu$ of the reserve vector $\epsilon_R$ corresponding to the constraints which are not active at the absolute minimum point $x^*$ (i.e., $g_\nu(x^* )<0)$ satisfy either inequalities \eqref{eq4:reserves} or the inequalities
+    \begin{equation}
+      0< \epsilon_\nu <|g_\nu (x^* )|;
+    \end{equation}
+  \end{enumerate}
+
+  Then:
+  \begin{enumerate}
+    \item the point $x^*$ is the limit point of the trial sequence $\{x_k \}$ generated by index algorithm for problem \eqref{eq4:problem} at $\epsilon =0$ in the termination condition \eqref{eq4:stop_cond};
+    \item any limit point $\overline x$ of the sequence ${x_k }$ is a solution of the problem \eqref{eq4:problem};
+    \item the convergence to the limit point $x$ is a bilateral one if $x\not=a$ and $x\not=b$.
+    If the conditions \eqref{eq4:reserves} and (4.27) are not satisfied for given vector of reserves $\epsilon_R$ but the
+    problem $\eqref{eq4:problem}$ has an $\epsilon$-reserved solution $x_\epsilon$ defined by \eqref{eq4:eps_res_problem}, then:
+
+    \item for any limit point $x$ of the sequence ${x_k}$ it is true that
+    \begin{displaymath}
+      \varphi(\overline x)=\inf\{\varphi(x^k):g_j(x^k)\le 0,\: 1\le j\le m,\: k=1,2,\dots\}\le\varphi(x_\epsilon);
+    \end{displaymath}
+    \item any limit point $\overline x$ is a boundary point of the set $X_\epsilon$ from \eqref{eq4:x_epsilon} if the function $\varphi(x)$ has no more than one point of local maximum in each of the isolated intervals making up the set $X_\epsilon$;
+    \item the above statement on the bilateral character of the convergence remains in force.
+  \end{enumerate}
 \end{theorem}
+
+As it has been demonstrated by the experiment with solving the example described above, the increase of the reserve values may result in an essential decrease of the trial concentration in the boundary points of non-feasible domains. The theoretical properties of the trial sequences generated by the index algorithm are determined by the following statement (see the proof in \cite{}[4] also).
+\begin{theorem}
+  Assume the convergence conditions for the index algorithm to be satisfied and the inequalities
+  \begin{displaymath}
+    g_\nu(x)\ge\delta_\nu,x\in[\alpha,\beta],\delta_\nu\ge 0
+  \end{displaymath}
+  to be satisfied in a subinterval $[\alpha,\beta]\subset Q_\nu \: 1\le\nu\le m$, the length of which meets the condition
+  \begin{displaymath}
+    \beta-\alpha>\frac{2(r_\nu-1)(\delta_\nu+\epsilon_\nu)}{r^2_\nu L_\nu}.
+  \end{displaymath}
+
+  Then for the density $P_{\alpha\beta}$ of the points from the sequence $\{x_k\}$ generated by the index algorithm while solving the problem \eqref{eq4:problem} there is the estimate
+  \begin{displaymath}
+    P_{\alpha\beta}<\frac{r^2_\nu L_\nu}{(r_\nu-1)(\delta_\nu+\epsilon_\nu)}.
+  \end{displaymath}
+\end{theorem}
+
+\textbf{Selection of components of the vector of reserves.} A problem of the choice of concrete component values in the vector of reserves $\epsilon_R$ arises when applying the considered algorithm.
+The convergence theorem can help in solving this problem. Condition \eqref{eq4:reserves} can be considered as a recommendation for the selection of the reserve values, for which the property of
+convergence to the solution of problem \eqref{ex4:problem} remains. However, in the general case the values of Lipschitz constants are not given \emph{a priori}, and the length of the interval $[\alpha,\beta]$ from $Q_{m + 1}$, including the sought solution $x^*$ is not kwon also. These difficulties are possible to avoid by
+substitution of the unknown coefficients $L_j,\: 1\le j\le m$, by their adaptive underestimates $\mu_\nu$ from (4.15) and by assumption that $\beta-\alpha>\delta=\epsilon q$ where $\epsilon >0$ (accuracy) is a parameter defined in the termination condition and the factor $q>1$ can be interpreted as an a priori estimate of how many times the length of the interval $[\alpha,\beta]$ is greater than given accuracy $\epsilon$. As a result, one can take
+the reserve estimates in the form (adaptive reserves)
+\begin{displaymath}
+  \epsilon_\nu=\mu_\nu\delta,\: 1\le\nu\le m.
+\end{displaymath}
+
+\textbf{The results of the experiment.} In order to demonstrate the efficiency of the adaptive reserves, a series of problems with the multiextremal constraints has been solved.
+
+Let us consider a generator $G$ generating the problems with $m$ constraints on the base of a random mechanism $F$ producing the functions $f(x),\: x \in [ a , b ]$. The rules determining the
+functioning of this mechanism $G$ consist in the following.
+\begin{enumerate}
+  \item $m+1$ functions $f_j(x),\: 1\le j \le m+1,\: x\in[a,b]$, are generated independently by means of given mechanism $F$.
+  \item The minimax value
+  \begin{displaymath}
+    \Delta=\min_{a\le x\le b}\max_{1\le j\le m}f_j(x),
+  \end{displaymath}
+  is calculated and the left-hand parts of the constraints
+  \begin{equation}
+    \label{eq4:generated_g}
+    g_j(x)=f_j(x)-\Delta\delta,\: 1\le i\le m,
+  \end{equation}
+  which a nonempty feasible domain $Q$ corresponds to at $\delta>0$ are introduced. Increasing the value of the parameter $\delta$ allows to expand the feasible domain.
+  \item Function \eqref{eq4:generated_g} and the objective function $\varphi(x)=f_{m+1}( x )$ form a problem of the kind \eqref{eq4:problem} obviously having a solution.
+\end{enumerate}
+
+n the cases, when it is necessary to denote the parameters $m$ and $\delta$ used by the generator during its functioning, let us use the notation $G ( m , \delta )$. In the experiments, the results of whichare presented below two generators were employed. One of these (let us denote it as $G_{SH} ( 5 , 1 ) )$ was based on the function
+\begin{displaymath}
+  \varphi(x)=-\sum_{j=1}^{10}\frac{1}{(K_j(x-A_j)^2+C_j)}x\in[0,10].
+\end{displaymath}
+$1\le K_j\le 3,\: 0\le A_j,\: C_j\le 10 $, where the parameters $K_j,\: A_j,\: C_j ,\: 1 \le j \le 10$ are the independent random variables distributed uniformly over the intervals specified above. The second generator hereinafter denoted as $G_{HL} ( 5 , 1 ) )$ was based on the function
+\begin{equation}
+  \varphi(x)=\sum_{j=1}^{14}(A_j\sin(2j\pi x) + B_j\cos(2j\pi x)),\: x\in[0,1]
+\end{equation}
+where the values of the parameters $A_j,\: B_j,\: 1 \le j \le 14$, are distributed independently and uniformly over the interval $[-1 ,1 ]$. Both generators were applied to the generation of 100 own
+problems of the kind \eqref{eq4:problem}.
+
+The problems were solved by the initial index algorithm as well as by the algorithm with $\epsilon$-reservation. The parameters $r_\nu ,\: 1 \le \nu \le 6$, from (4.17) were chosen as
+\begin{displaymath}
+  r_\nu = \left\{
+  \begin{array}{lr}
+    \gamma, & k_\nu < 20\\
+    2, & k_\nu \ge 20
+  \end{array}
+  \right.,
+\end{displaymath}
+where $k_\nu$ is the number of the computed values of the function $g_\nu$ (i.e., the cardinality of the set $I_\nu$). In the test set generated by generator $G_{SH}$ the values $\gamma=20,\: \epsilon = 0.001$ and the reserves $\delta_\nu=0.02,\: 1 \le \nu \le 5$, were used in the experiments. For the problems from the second test set
+(generated by $G_{HL}$ ) the values $\gamma = 10, \epsilon=0.0001$ and the parameters $\delta_\nu=0.001,\: 1 \le \nu\le 5$, were used.
+
+\begin{figure}[h]
+  \label{fig:4_9}
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/4_9.png}
+  \caption{The operation characteristics in class $G_{SH}$}
+\end{figure}
+
+\begin{figure}[h]
+  \label{fig:4_10}
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/4_10.png}
+  \caption{The operation characteristics in class $G_{HL}$}
+\end{figure}
+
+The operational characteristics for both method obtained for the test problem sets generated by $G_{SH}$ and $G_{HL}$ are presented in Figures 4.9 and 4.10, respectively. The lower (solid) curves refer to the initial index algorithm while the upper (dashed) ones correspond to the index algorithm with the adaptive reserves. Such arrangement of the curves demonstrates the algorithm with the
+adaptive reserves to provide much faster obtaining the estimates falling into given vicinity of the solution than the initial index algorithm. The average numbers of iterations for the method
+without the reserves and for the method with the adaptive reserves were equal to 171 and 117 for the problems $G_{SH}$ and 199 and 142 for the ones $G_{HL}$ , respectively.
 
 \section{Index method with adaptive order of checking for constraints}
 According to the rules of the index method considered in the preceding subsections, every trial includes the successive check of the fulfillment of the problem constraints in the corresponding point of the search domain. The finding of the first violated constraint terminates the trial and initiates the transition to the next iteration. If a numeration of the constraints in the increasing order by the computational costs of their checking is introduced (i.e., if the simpler constraints are checked first) one can reduce essentially the overall computational costs in the course of optimization. The above is important for the problems, in which the estimating of the function value requires a considerable computational resources connected with a necessity of the numerical modelling of the behavior of the systems described by these functions (as it takes place, for example, in numerous problems of the optimal design).
@@ -428,7 +549,222 @@ Obviously, the computational expenditures of the trial execution depend on the o
 
 For many applied problems, it is naturally to assume that a constraint violated at a point in the search domain, will be violated in some neighborhood of this point as well. In this case, it might be useful to begin the next trials in the points of this neighborhood with checking the fulfillment of this particular constraint. In the scope of the above, it seems reasonable to design a global optimization algorithm allowing the modification of the constraint  check order taking into account the information obtained during the search. The check order design will be oriented onto the constraint violated at an iteration point to be found as early as possible.
 
+Let us now turn to the generalization of the scheme described in sections 3.3 and 3.4 onto the case when the constraint check order is not a fixed one. For further consideration, the initial algorithm described above will be referred to as \emph{Fixed Check Order Method} (FCOM).
+
+The algorithm proposed below allows the modification of the constraint order check during solving the problem \eqref{eq4:problem}. These modifications are firstly directed onto analyzing during the current iteration the constraint violated at the end of the interval including the current iteration point. As it has been already mentioned above, such an approach might reduce the number of checks at the new trial point since the violation of this constraint in a vicinity of already found violation might be quite probable. Hence, the need in new rules for the juxtaposition of the indices to the points from \eqref{eq4:search_data} (remind, that these indices determine the use of expressions \eqref{eq4:characteristic} for the computation of the characteristics) as well as in a special order
+of the constraint check at the current trial point arises. Note that the formation of such order is inessential for the intervals, the ends of which belong to a feasible domain $Q$ from (4.31) since a necessity for checking all constraints is probable in such intervals.
+
+Assume the constraint with the number $j,\: 1\le j\le m$, to fulfill at all points of the domain
+\begin{equation}
+  Q_j=\{x\in[a,b]:g_j(x)\le 0\},\: 1\le j\le m,
+\end{equation}
+which hereinafter will be called the feasible domain for this constraint. The feasible domain $Q$ of initial problem \eqref{eq4:problem} can be defined by the condition
+\begin{equation}
+  Q=Q_1\cap\dots\cap Q_m.
+\end{equation}
+
+\textbf{The constraints’ check order.} he numbering of the constraints and the objective function introduced in the statement of problem \eqref{eq4:problem} and defined by the sequence of integer numbers
+\begin{equation}
+  \label{eq4:basic_h}
+  H=\{1,2,\dots,m,m+1\},
+\end{equation}
+will be considered as a base one.
+Assume that every particular point $x$ from the search domain $[a,b]$ can have its own order of the problem constraints’ checking. The order of such checking corresponding to the point $x_i$ from (4.12) will be defines as some permutation $H(x_i )$ of the basic numbers from \eqref{eq4:basic_h}, i.e.,
+\begin{equation}
+  H(x_i)=\{j_{i1},\dots,j_{im},j_{i,m+1}\},\:0\le i\le k,
+\end{equation}
+where
+\begin{equation}
+  j_{i,m+1}=m+1,\:0\le i\le k.
+\end{equation}
+
+Since the constraints’ check order while the trial execution at the point $x$ i is determined by the corresponding tuple $H(x_i )$ from (4.33), the termination of the trial at this point after the computation of the values of l problem functions produces the value $z_i=g_\nu(x_i)$ where $\nu=j_{il}$. In this connection, let us use not the serial number $l$ of the last function calculated in this point, as it was accepted in (4.7) but the index of the last function in the basic numeration (4.32) as the
+value of $\nu(x_i )$ for the point $x_i$ , i.e.,
+\begin{equation}
+  \nu(x_i)=j_{il}.
+\end{equation}
+
+\textbf{Algorithm.} The trial selection rules for Fixed Check Order Method (FCOM) already considered above give the base of the new algorithm scheme, which will be called \emph{Adaptive
+Check Order Method} (ACOM). Since the alterable constraint check order excludes a possibility to use expression (4.13) to determine the sets $I\nu$, to construct them, an information array connecting each $x_i$ from (4.12) with the indices of all functions, which have been computed in this node is necessary. Hereinafter, the existence of such database is presumed. The rest modifications consist in the following.
+
+\emph{Modification 1 (the fixation of the check order)}. Each point $x_i$ from \eqref{eq4:search_data} is assigned the corresponding checking order $H(x_i )$ from (4.33), and this order is included into the algorithm database.
+
+\emph{Modification 2 (the determination of the trial points’ indices).} Each point $x_i$ from \eqref{eq4:search_data} is assigned the value $z_i=g_\nu(x_i)$ where according to (4.35), the index $\nu=\nu(x_i)$ is the basic index from (4.32) corresponding to the value of the last function estimated in this point. These indices are used in all computations based on expressions (4.13)– (4.17), (4.19).
+
+The modifications in the method of using the indices are related to rules (4.17) of calculations of the characteristics $R(i)$ of the intervals $(x_{i-1},x_i),\: 1\le i\le k$, with noncoincident
+indices of the boundary points only. Assume
+\begin{equation}
+  \nu(x_{i-1})=j_{i-1,p}=j_{i,q}\not=\nu(x_i)=j_{i-1,u}=j_{i,x},
+\end{equation}
+i.e., the problem function with the basic index $\nu(x_{i-1})$ has the index $p$ in the sequence $H(x_{i-1})$ corresponding to the point $x_{i-1}$ and the index $q$ in the sequence $H(x_i)$ corresponding to the point $x_i$. Analogously, the function with the basic index $\nu(x_i)$ corresponds to the index $u$ from the sequence $H(x_{i-1})$ and the index s from the sequence $H(x_i)$. Then, the introduced modification altering the sixth rule of FCOM consists in the following.
+
+If for the indices $p,q, u$ and $s$ from (4.36) the conditions
+\begin{equation}
+  p<u,q<s,
+\end{equation}
+are fulfilled, in order to determine the characteristic $R(i)$ one should use the second expression from formulae (4.17) with $\nu=\nu(x_i)$ (note that in this case the value $g_\nu(x_{i-1})$ is undefined).
+
+Otherwise, when the reverse to (4.37) conditions are fulfilled
+\begin{equation}
+  p>u,q>s,
+\end{equation}
+the characteristic $R(i)$ is defined by the third expression from (4.17) with $\nu=\nu(x_{i-1})$ (in this
+case, the value $g_\nu(x_i ) is undefined)$. In the cases when conditions (4.37) and (4.38) are not fulfilled, the initial order of calculations prescribed by the sixth rule of the initial algorithm remains.
+
+\emph{Modification 3 (the choice of the constraints’ check order in the current trial point).} Assume that the constraints’ check order corresponding to the first two trial points is defined by
+the conditions
+\begin{equation}
+  H(a)=H(b)=H,
+\end{equation}
+where $H$ from (4.32). Let
+\begin{displaymath}
+  p=\nu(x_{t-1}),\: q=\nu(x_t)
+\end{displaymath}
+are the indices of the boundary points of the interval $(x_{t-1},x_t)$ including the current trial point $x^{k+1}$ (according to the eighth rule) determined according to (4.35). Let us introduce a notation $\{s,H\backslash s\}$ for the tuple obtained from $H$ by excluding the index $s$, shifting all indices $1,2,\dots,s-1$ to the right of one position, and the transfer of the index s excluded from $H$ into the first position, i.e.,
+\begin{displaymath}
+  \{s,H\backslash s\}=\{s,1,2,\dots,s-1,s+1,\dots,q-1,q+1,\dots,m+1\}.
+\end{displaymath}
+When $1\le p\le q\le m$, the superposition of the operations of the type described above produces the tuple of the kind
+\begin{displaymath}
+  \{p,\{q,H\backslash q\}\backslash p\}=\{p,q,1,\dots,p-1,p+1,\dots,q-1,q+1,\dots,m+1\}.
+\end{displaymath}
+Note that according to (4.34), the index $m+1$ always occupies the last position.
+
+Now let us agree to determine the order $H(x^{k+1}),\: k\ge 1$ according to the following rules:
+\begin{gather}
+ H(x^{k+1})=H,\: p=q=m+1, \nonumber \\
+ H(x^{k+1})=\{p,H\backslash p\}, (p=q<m+1)\cup(p<q=m+1), \nonumber \\
+ H(x^{k+1})=\{q,H\backslash q\}, p=m+1>q\\
+ H(x^{k+1})=\{p, \{q,H\backslash q\}\backslash p\}, p<q\le m \nonumber \\
+ H(x^{k+1})=\{q, \{p,H\backslash p\}\backslash q\} m\ge p>q. \nonumber
+\end{gather}
+
+\textbf{Note.} While solving the problem \eqref{eq4:problem} rules (4.39) and (4.40) included into the scheme of ACOM assign the index values from (4.35) to all trial points unambiguously. Then, any feasible point $x$ always corresponds to the index $\nu(x)=m+1$. This value can be predicted before the trial execution in such point as well. However, if the point $x$ is not a feasible one and does not belong to the points, in which the trials have been executed already, the index value can be undefined in this point.
+
+The convergence conditions for the algorithm are formulated in the following theorem.
+
+\begin{theorem}
+Assume problem \eqref{eq4:problem} to have a solution $x^*$ and the following conditions are fulfilled:
+\begin{enumerate}
+  \item each domain $Q_j ,1\le j\le m+1$ from (4.30) represents a union of a finite number of segments with a positive length;
+  \item each function $g_j(x): 1\le j\le m+1$ satisfies Lipschitz condition with the corresponding constant $L_j$;
+  \item the components $\epsilon_\nu$ of the reserve vector $\epsilon_R$ satisfy the inequalities
+  \begin{equation}
+    0<2\epsilon_\nu<L_\nu(\beta-\alpha),
+  \end{equation}
+  where $\beta-\alpha$ is the length of the interval $[\alpha,\beta]$ belonging to the feasible domain $Q$ from (4.31) and including the point $x^*$, which is the solution of the problem;
+  \item since some sufficiently large step number $k$ the values $\mu_\nu$ from (4.15) corresponding to the nonempty sets $I_\nu$ satisfy the inequalities
+  \begin{displaymath}
+    r_\nu\mu_\nu>2L_\nu,\: 1\le\nu\le m+1,
+  \end{displaymath}
+  where $r_\nu>1,\: 1\le\nu\le m+1$ are the parameters of the algorithm.
+\end{enumerate}
+
+  Then:
+  \begin{enumerate}
+    \item the point $x^*$ is a limit point of the sequence $\{x_k\}$ generated by the described method with the adaptive constraint check order for problem \eqref{eq4:problem} at $\epsilon=0$ in termination condition \eqref{eq4:stop_cond};
+    \item any limit point $x$ of the sequence $\{x_k\}$ is a solution of problem \eqref{eq4:problem};
+    \item the convergence to the limit point $\overline x$ is bilateral if $\overline x\not= a$ and $\overline x\not=b$.
+  \end{enumerate}
+\end{theorem}
+
+\textbf{Proof} of the theorem is given in \cite{}[5].
+
+\textbf{The results of the experiments.} Let us consider solving of the problem from Example \ref{ex4:problem} using ACOM with the parameters $r_\nu=2, \epsilon_\nu=0,\: 1\le \nu\le 3$, and $\epsilon=10^{-5}$ in the termination criterion as an illustration. The trial point coordinates executed by the algorithm during the
+problem solving practically coincide to the ones marked by three rows of the vertical strokes in Fig. 4.6. However, the number of the computations of the constraint values appears to be different for FCOM and ACOM. In the fixed constraints’ check order the function values have been calculated $k_1 =63,\: k_2 =49,\: k_3 =35$ times while in the adaptive order --- $k_1 =52,\: k_2 =48,\:
+k_3 =35$ times. These results are evidence of the decrease of the number of such checks when using ACOM even for the example with two constraints. The efficiency of the proposed scheme reveals itself more clearly when solving the problems with many constraints.
+
+With this purpose, let us return to solving the problem series produced by generators $G_{SH}(5,1)$ and $G_{HL} (5,1)$ described in section 3.4. Both generators were applied to the generation of
+its own set of 1000 problems of the kind \eqref{eq4:problem}.
+
+\begin{figure}[h]
+  \label{fig:4_11}
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/4_11.jpg}
+  \caption{The distribution of problems of the class $G_{SH}$}
+\end{figure}
+
+\begin{figure}[h]
+  \label{fig:4_12}
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/4_12.jpg}
+  \caption{The distribution of problems of the class $G_{HL}$}
+\end{figure}
+
+The distribution of the interval lengths $[\alpha,\beta]$ from (4.41) including the solution points $x^*$ corresponding to the problems from the first set is presented in Fig. 4.11. Fig. 4.12 demonstrates a similar distribution for the problems of the second set. In these figures, the values $(\beta=\alpha)/(b-a)$ (in percentage) are plotted against the abscissa axes while the numbers of problems in the corresponding sets are plotted against the ordinate ones. In order to obtain the discussed estimates, the lengths of the intervals $[\alpha,\beta]$ corresponding to the respective functions were determined by a numerical method.
+
+More detailed information on the number of problems (in either of two sets) featured by a small (less than 0.1\%) measure of the interval $[\alpha,\beta]$ is presented below.
+
+\begin{table}
+  \caption{The number of problems with a small measure of the interval $[\alpha,\beta]$}
+\begin{center}
+  \label{tab4:exp_results2}
+  \begin{tabular}{| c | c | c | c| c | c | c | c | c| c |}
+    \hline
+    \% & 0.01 & 0.02 & 0.03 & 0.04 & 0.05 & 0.06 & 0.07 & 0.08 & 0.09 \\ \hline
+    $G_{SH}$ & 0 & 1 & 2 & 1 & 0 & 0 & 1 & 1 & 1  \\ \hline
+    $G_{HL}$ & 3 & 6 & 2 & 3 & 5 & 1 & 2 & 1 & 2 \\ \hline
+  \end{tabular}
+\end{center}
+\end{table}
+
+As follows from the figures and Table \ref{tab4:exp_results2}, the problems from the second set produced by generator $G_{HL}$ are characterized in general by a narrower feasible vicinity of the solution point $x^*$.
+
+The constraint functions $g_\nu( x ),\: 1 \le\nu\le 5$, and the objective function $\varphi (x)$ for a problem from the class $G_{HP}$ are plotted in Fig. 4.13 as an example. The feasible domains which are formed by the separate constraints are marked on the abscissa axis. The whole feasible domain of the problem (the intersection of all feasible domains of the constraints) is shown along with the graph of the objective function.
+
+\begin{figure}[h]
+  \label{fig:4_13}
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/4_13.png}
+  \caption{Function plots of a test problem from the class $G_{HL}$}
+\end{figure}
+
+The experiments have been carried out for the algorithms described above with the fixed constraints’ check order and with the adaptive one (FCOM and ACOM, respectively). The parameters $r_\nu, 1\le\nu\le 5$, from (4.17) were defined by the expressions
+\begin{displaymath}
+  r_\nu = \left\{
+  \begin{array}{lr}
+    \gamma, & k_\nu < 20\\
+    2, & k_\nu \ge 20
+  \end{array}
+  \right.,
+\end{displaymath}
+where $k_\nu$ is the number of the calculated values of the function $g_\nu$ (i.e., the cardinality of the set $I_\nu$). In the experiments, the values $\gamma=20,\: \epsilon = 0.001$, and the reserves $\epsilon_\nu=0.1,\: 1\le\nu\le 5$, were set for the set produced by the generator $G_{SH}$. For the problems from the second set (generator $G_{HL}$ ) the values  $\gamma=10,\: \epsilon = 0.0001$, and the reserves $\epsilon_\nu=0.001,\: 1\le\nu\le 5$, were used.
+
+\begin{figure}[h]
+  \label{fig:4_14}
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/4_13.png}
+  \caption{Operational characteristics for the class $G_{SH}$}
+\end{figure}
+
+\begin{figure}[h]
+  \label{fig:4_15}
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/4_15.png}
+  \caption{Operational characteristics for the class $G_{HL}$}
+\end{figure}
+
+The operational characteristics for both the methods obtained on the sets produced by generators $G_{SH}$ and $G_{HL}$ are presented in figures 4.14 and 4.15, respectively. The lower (solid) curves correspond to FCOM while the upper (dashed) ones --- to ACOM. These positions of the curves demonstrate that the algorithm with the adaptive check order provides in average faster obtaining the estimates falling into given vicinity of the solution than the algorithm with the fixed checking order.
+
+\begin{figure}[h]
+  \label{fig:4_16}
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/4_16.png}
+  \caption{Average number of function values computations for the class $G_{SH}$}
+\end{figure}
+
+\begin{figure}[h]
+  \label{fig:4_17}
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/4_16.png}
+  \caption{Average number of function values computations for the class $G_{HL}$}
+\end{figure}
+
+Moreover, the trials executed according to the rules of ACOM appear to be much less computation costly (in average) than the ones executed by FCOM. This fact is illustrated in figures 4.16 and 4.17, where the average number of computations of the function values executed by FCOM and ACOM for given sets are presented. Fig. 4.16 corresponds to the generator $G_{SH}$ while Fig. 4.17 shows the results for the generator $G_{HL}$. In both figures the function indices are plotted on the abscissa axes. The estimates of the average numbers of the computations of these function values during the trials’ execution are marked on the plot axes. The solid lines in the figures connect the points of the estimates corresponding to FCOM while the dashed ones connect the points of estimates corresponding to ACOM. The presented data confirm that introducing the adaptive constraints’ check order can reduce the total number of the computations essentially.
+
 \section{Parallel computations for the multiextremal optimization problems with nonlinear constraints}
+\subsection{Asynchronous parallel index algorithm}
+In this subsection the asynchronous parallel index algorithm with $p>1$ parallel processors for solving the problem \eqref{ex4:problem} will be presented.
 
 \section*{A brief conclusion}
 Constrained global optimization problems are under consideration. The method of penalty functions is one of the most popular numerical methods for solving the problems of this kind. Nevertheless, the method of penalty functions has a number of disadvantages. A new method for reduction of a constrained problem to an unconstrained one, so called \emph{index method}, has been considered in this chapter. This method, unlike the classical penalty function one, allows avoiding the problem of the parameter selection (like the penalty coefficients for the constraints). It is also allows solving the problems with partially defined objective function and constraints. This is quite natural for many applied problems, especially, in the optimal design of technical systems, because if some conditions of operation are not met, then some other characteristics of the system performance may not be defined.
@@ -437,4 +773,4 @@ The issues of convergence acceleration of the index method have been considered 
 
 For all proposed algorithms, the results of numerical experiments are presented. The results confirm the theoretical statements about convergence acceleration.
 
-\end{document}
+%\end{document}
