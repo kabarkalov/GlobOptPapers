@@ -1,65 +1,1091 @@
-%%%%%%%%%%%%%%%%%%%% author.tex %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%% author.tex %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% sample root file for your "contribution" to a contributed volume
-%
-% Use this file as a template for your own input.
-%
-%%%%%%%%%%%%%%%% Springer %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%% RECOMMENDED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\documentclass[graybox]{svmult}
-%
-%% choose options for [] as required from the list
-%% in the Reference Guide
 %
 %\usepackage{mathptmx}       % selects Times Roman as basic font
 %\usepackage{helvet}         % selects Helvetica as sans-serif font
 %\usepackage{courier}        % selects Courier as typewriter font
 %\usepackage{type1cm}        % activate if the above 3 fonts are
-                             % not available on your system
-%
+                            %% not available on your system
+%%
 %\usepackage{makeidx}         % allows index generation
 %\usepackage{graphicx}        % standard LaTeX graphics tool
-%                             % when including figure files
+                             %% when including figure files
 %\usepackage{multicol}        % used for the two-column index
-%\usepackage[bottom]{footmisc}% places footnotes at page bottom
-%
-%% see the list of further useful packages
-%% in the Reference Guide
+%\usepackage[bottom]{footmisc}
+%\usepackage{amsmath}
+%\usepackage{multirow}
+%\usepackage{array}
+%\usepackage{caption}
 %
 %\makeindex             % used for the subject index
-%                       % please use the style svind.ist with
-%                       % your makeindex program
+                       %% please use the style svind.ist with
+                       %% your makeindex program
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %\begin{document}
 
-\title{Parallel algorithms for one-dimensional  multiextremal optimization }
+\title{Parallel algorithms for one-dimensional multiextremal optimization}
+%\titlerunning{Global optimization via dimensionality reduction}
 % Use \titlerunning{Short Title} for an abbreviated version of
 % your contribution title if the original one is too long
-\author{Name of First Author and Name of Second Author}
+\author{Vladimir A.Grishagin and Yaroslav D.Sergeyev}
 % Use \authorrunning{Short Title} for an abbreviated version of
 % your contribution title if the original one is too long
-\institute{Name of First Author \at Name, Address of Institute, \email{name@email.address}
-\and Name of Second Author \at Name, Address of Institute \email{name@email.address}}
-%
-% Use the package "url.sty" to avoid
-% problems with special characters
-% used in your e-mail or web address
+\institute{Vladimir A.Grishagin \at N.I.Lobachevsky State University, Gagarin Avenue 23, 603950 Nizhni Novgorod, Russia   \email{vagris@unn.ru}
+\and Yaroslav D.Sergeyev \at N.I.Lobachevsky State University, Gagarin Avenue 23, 603950 Nizhni Novgorod, Russia 
+\at DIMES, University of Calabria, Via P. Bucci, Cubo 42-C, 87036 Rende (CS), Italy \email{yaro@si.deis.unical.it}}
 %
 \maketitle
 
-\abstract*{Each chapter should be preceded by an abstract (10--15 lines long) that summarizes the content. The abstract will appear \textit{online} at \url{www.SpringerLink.com} and be available with unrestricted access. This allows unregistered users to read the abstract as a teaser for the complete chapter. As a general rule the abstracts will not appear in the printed version of your book unless it is the style of your particular book or that of the series to which your book belongs.
-Please use the 'starred' version of the new Springer \texttt{abstract} command for typesetting the text of the online abstracts (cf. source file of this chapter template \texttt{abstract}) and include them with the source files of your manuscript. Use the plain \texttt{abstract} command if the abstract is also to appear in the printed version of the book.}
 
-\abstract{Each chapter should be preceded by an abstract (10--15 lines long) that summarizes the content. The abstract will appear \textit{online} at \url{www.SpringerLink.com} and be available with unrestricted access. This allows unregistered users to read the abstract as a teaser for the complete chapter. As a general rule the abstracts will not appear in the printed version of your book unless it is the style of your particular book or that of the series to which your book belongs.\newline\indent
-Please use the 'starred' version of the new Springer \texttt{abstract} command for typesetting the text of the online abstracts (cf. source file of this chapter template \texttt{abstract}) and include them with the source files of your manuscript. Use the plain \texttt{abstract} command if the abstract is also to appear in the printed version of the book.}
+\abstract{This chapter is devoted to the development and study of parallel global search algorithms on the base of a generalization of the sequential characteristical scheme to the case of parallel computations.  Classes of synchronous and asynchronous optimization algorithms are introduced following the general schemes of parallel computations for solving optimization problems described in Chapter 1. The problems of convergence and parallelization efficiency for these characteristical algorithms are theoretically investigated including a study of various types of convergence, sufficient conditions of convergence to global minimizers, and conditions of non-redundant parallelization. The general theoretical results are applied to a number of known global optimization methods and are illustrated in computational experiments.}
 
-\section{Section Heading}
-Use the template \emph{chapter.tex} together with the Springer document class SVMono (monograph-type books) or SVMult (edited books) to style the various elements of your chapter content in the Springer layout.
+\section{Parallel synchronous characteristical algorithms of global search}
+\label{sec:3_1}
+Let us consider the one-dimensional problem 
+\begin{equation}
+\label{eq:3_1}
+\varphi(x)\rightarrow \min,\ x\in Q=[a,b]
+\end{equation}
 
-Instead of simply listing headings of different levels we recommend to let every heading be followed by at least a short passage of text. Further on please use the \LaTeX\ automatism for all your cross-references and citations. And please note that the first line of text that follows a heading is not indented, whereas the first lines of all subsequent paragraphs are.
+for the search domain  $Q=[a,b]$ and the general schemes of the parallel synchronous optimization methods (\ref{eq:1_20})-(\ref{eq:1_25}) and the parallel asynchronous methods (\ref{eq:1_26})-(\ref{eq:1_30}). Let us assume that the termination condition is absent in these schemes, i.e., in (\ref{eq:1_25}) $H_{k(n)}(\bullet) = 1$ and in (\ref{eq:1_30}) $H_{k}(\bullet)=1$ for any $k=k(n)$ will be the total number of trials executed during all $n$ iterations.
+
+\begin{definition}
+	A parallel method for solving the problem (\ref{eq:3_1}) is called \textit{parallel synchronous characteristical algorithm}, if, starting from some iteration number $n_0\ge1$, the selection of the trial coordinates at the $(n+1)$-th iteration $(n\ge n_0)$ is performed according to the following procedure:
+	
+	\begin{description} [Step 1.]
+	\item [\textbf{Step 1.}] {Define a set 
+	\begin{equation}
+	\label{eq:3_2}
+	\Lambda_n = \{x_0,x_1,...,x_\tau \}
+	\end{equation}
+	of a finite number $\tau + 1 = \tau(n)+1$ of the points in the domain $Q=[a,b]$ assuming that $a \in \Lambda_n, b \in \Lambda_n$, all coordinates of the preceding trials $x^i \in \Lambda_n, 1 \le i \le k$, and the set $\Lambda_n$ is ordered (by the subscript) in the increasing order of the coordinates, i.e.,
+	\begin{equation}
+	\label{eq:3_3}
+	a = x_0 < x_1 < ... <x_{\tau - 1} < x_\tau = b.
+	\end{equation}
+	}
+	\item [\textbf{Step 2.}] {Juxtapose the value $R(i)$ called the characteristic of the interval to each interval $(x_{i-1}, x_i), 1 \le i \le \tau$.}
+	
+	\item [\textbf{Step 3.}] {Sort the characteristics $R(i), 1 \le i \le \tau$, in the decreasing order:
+	\begin{equation}
+	\label{eq:3_4}
+	R(t_1) \ge R(t_2) \ge R(t_{\tau - 1}) \ge R(t_\tau).
+	\end{equation}
+	}
+	\item [\textbf{Step 4.}] {Select $p = p(n+1) \le \tau$ first characteristics from the series (3.4) with the numbers $t_j, 1 \le j \le p$, and to choose the new trials of the next $(n+1)_{th}$ iteration at the points of the set 
+	\begin{equation}
+	\label{eq:3_5}
+	T(n+1) = \{x^{k+1}, ...,x^{k+p}\},
+	\end{equation}
+	according to the rule
+	\begin{equation}
+	\label{eq:3_6}
+	x^{k+j} = d(t_j) \in (x_{t_j - 1}, x_{t_j})
+	\end{equation}
+	for $1 \le j \le p$, in the intervals with maximal characteristics.}
+	\end{description}
+\end{definition}
+
+As the examples of the parallel characteristical algorithms one can consider the parallel versions of the scanning method, of the  method of broken lines, of Kushner’s method, and of the information algorithms, the sequential variants of which have been described in the previous Chapter.
+
+The class of the parallel characteristical methods has been introduced and investigated in (\cite{3_GrishaginSergeyevStrongin}). In this work, the succession of the convergence properties of the parallel characteristical methods with respect to the sequential prototypes has been established. Also, the estimates of the speed up of the parallel characteristical algorithms have been obtained. A theoretical substantiation of the properties of the synchronous parallel characteristic methods with respect to the character of their convergence and the parallelization efficiency will be provided below. 
+
+\section{Convergence of characteristical algorithms}
+\label{sec:3_2}
+\subsection{Bilateral convergence}
+Let us introduce the notations $z_j = \varphi(x_j), 1 \le j \le \tau$, for the values of the objective function at the points $x_j \in \Lambda_k$ and introduce the values
+\begin{equation*}
+\xi = min \{ z_{i-1}, z_i \},
+\end{equation*}
+\begin{equation*}
+\tilde{\xi_i} = 
+\begin{cases}
+\xi_i, & if\  x_{i-1} \in \{x^S\}\  and\  x_i \in \{x^S\}; \\
+z_{i-1},& if\  x_{i-1} \in \{x^S\}\  and \ x_i \notin \{x^S\}; \\
+z_i, & if\  x_{i-1} \notin \{x^S\}\  and\  x_i \in \{x^S\}.
+\end{cases}
+\end{equation*}
+
+\begin{theorem}
+\label{theor:3_1}
+	Let a point $x_\ast$ be a limit point (or an accumulation point) of the search trials sequence $\{x_k\}$  generated by a synchronous characteristical algorithm when solving the problem (3.1) over the interval $[a, b]$, and $x_\ast \neq a$  and $x_\ast \neq b $. Assume that the characteristics $R(i)$ and the rules for the selection of the next trial points $d(t)$ satisfy the following requirements:
+	
+	\textbf{i)} if a point $\bar{x} \in [x_{i(n)-1}, x_{i(n)}]$ and $x_{i(n)-1} \to \bar{x}, x_{i(n)} \to \bar{x}$ when $n \to \infty $  then
+	\begin{equation}
+	\label{eq:3_7}
+	R(i(n)) \to - \mu \varphi(\bar{x}) + c;
+	\end{equation}
+	
+	\textbf{ii)} in the case, when starting from some search iteration, the interval $(x_{i-1}, x_i), i=i(n)$, does not include trial points, i.e., a number $\tilde{n} \ge 1$ exists such that for any $n \ge \tilde{n}$
+	\begin{equation}
+	\label{eq:3_8}
+	(x_{i-1} ,x_{i} )\bigcap \{ x^{k} \} =\emptyset
+	\end{equation}
+	for the characteristic of the interval holds the strict inequality
+	\begin{equation}
+	\label{eq:3_9}
+	\mathop{\lim }\limits_{n\to \infty } R(i)>-\mu \tilde{\xi }_{i} +c
+	\end{equation}
+	
+	\textbf{iii)} when selecting a point for the next trial from set (2.59) the inequality 
+	\begin{equation}
+	\label{eq:3_10}
+	{\rm \; \; }\max \{ x^{k+j} -x_{t_{j} -1} ,x_{t_{j} } -x^{k+j} \} \le \nu (x_{t_{j} } -x_{t_{j} -1} )
+	\end{equation}
+	takes place where $\mu$, $c$, and $\nu$ are some constants, and $\mu \ge 0,{\rm \; \; }0<\nu <1$.
+	
+	Then the sequence $\{ x^{k} \} $ includes two subsequences; one of those converges to $x^{*} $ from the left, and another one from the right.
+	\end{theorem}
+	\begin{proof} Let us first consider the case when $x^{*} \notin \{ x^{k} \} $. Let us denote as $s=s(n),n\ge 1$, the number of the interval $(x_{s-1} ,x_{s} )$ including the limit point $x^{*} $ after the execution of the $n$-th iteration. Obviously, after the first iteration $[x_{s-1} ,x_{s} ]\subseteq [a,b]$. After the next trial point $x^{k+l} \in T(n+1)$ has fallen into the interval $(x_{s-1} ,x_{s} )$, the following estimate holds according to (3.10) for a new interval $(x_{s(n+1)-1} ,x_{s(n+1)} )$ containing $x^{*} $: 
+	
+	\begin{equation*}
+		x_{s(n+1)} -x_{s(n+1)-1} \le \nu (x_{s(n)} -x_{s(n)-1} )
+	\end{equation*}
+	
+	In this case, if $\lambda$ trials (starting from the beginning of the search process) fell into the interval including the point $x^{*} $, the length of this interval satisfies the inequality 
+	\begin{equation}
+	\label{eq:3_11}
+	x_{s} -x_{s-1} \le \nu ^{\lambda } (b-a)
+	\end{equation}
+	
+	Since the point $x^{*}$ is a limit one, after the formation of the interval $(x_{s-1} ,x_{s} )$ at some iteration, an infinite number of trials falls into this interval. Therefore, it follows from (\ref{eq:3_11}) that 
+	\begin{equation}
+	\label{eq:3_12}
+	\mathop{\lim }\limits_{n\to \infty } (x_{s(n)} -x_{s(n)-1} )=0 
+	\end{equation}
+	
+	According to  (\ref{eq:3_12}), we can take the sequence of the left ends $\{ x_{s(n)-1} \} $ and the one of the right ends $\{ x_{s(n)} \} $ of intervals $(x_{s(n)} ,x_{s(n)-1} )$ as the sought subsequences. 
+	
+	If $x^{*} \in \{ x^{k} \} $, the numbers $w\ge 1$ and $q>k(w-1)$ such that $x^{q} =x^{*} \in T(w)$ can be always found. Then for any $n>w$ a number $j=j(n)$, $0\le j\le \tau (n)$, exists, for which $x_{j} =x^{*} $. Assume that a unilateral convergence to $x^{*} $ takes place, for example, from the left (the case of the unilateral convergence from the right can be considered in the same way). Then an iteration number $\tilde{w}\ge w$ and the trial number $v>k(\tilde{w})$ can be always found so that $x^{v} \in T(\tilde{w}),$ and for all $n\ge \tilde{w}$ the trials will not fall into the interval $(x_{j} ,x_{j+1} )=(x^{q} ,x^{v} )$. 
+	
+	For the interval $(x_{j} ,x_{j+1} )$ according to  (\ref{eq:3_8}),  (\ref{eq:3_9})
+
+	\begin{equation*}
+	\mathop{\lim }\limits_{n\to \infty } R(j+1)>-\mu \, \tilde{\xi }_{j+1} +c\ge -\mu \, \varphi (x^{*} )+c.
+	\end{equation*}
+	
+	Correspondingly, for the interval $(x_{j-1} ,x_{j} )$ because of  (\ref{eq:3_7}) 
+	
+	\begin{equation}
+	\label{eq:3_13}
+	\mathop{\lim }\limits_{n\to \infty } R(j)=-\mu \, \varphi (x^{*} )+c.
+	\end{equation}
+	
+	Therefore, starting from some iteration, the inequality $R(j+1)>R(j)$ will hold.
+	
+	However, because of the decision rules  (\ref{eq:3_4}) - (\ref{eq:3_6}) this relation contradicts to the impossibility to execute the trials in the interval $(x_{j} ,x_{j+1} )$. 
+	\end{proof}
+	\begin{corollary} 
+	A termination condition of the kind 
+		\begin{equation}
+	\label{eq:3_14}
+	\mathop{\min }\limits_{1\le j\le p} (x_{t_{j} } -x_{t_{j} -1} )\le \varepsilon ,
+	\end{equation}
+	where the numbers $t_{j} ,\; 1\le j\le p$, are from  (\ref{eq:3_4}) and $\varepsilon >0$ is the predefined search precision can be introduced into the computational scheme of the characteristical algorithm satisfying the conditions of Theorem \ref{theor:3_1}. In other words, the computations are terminated as soon as the length of the smallest interval among the intervals of the iteration with the maximal characteristics becomes less than the predefined precision $\epsilon$. In this case, the search process is terminated after a finite number of steps. 	
+	\end{corollary}
+	\begin{proof} First, note that in a finite interval $[a,b]$ the trial sequence will always have at least one limiting point $x^{*} $. Let us denote as $s=s(k),k\ge 1$, the number of the interval including the point $x^{*} $ at the $n$-th iteration of the search. Since this point is a limit one, an infinite number of trials falls into the interval $(x_{s-1} ,x_{s} )$. In this case, relation  (\ref{eq:3_12}) takes place for this interval, from  where it follows that condition  (\ref{eq:3_14}) is fulfilled inevitably at some search iteration. Note that if the point $x^{*} $ is not an internal one, a unilateral convergence is sufficient for feasibility of  (\ref{eq:3_14}).
+	\end{proof}
+	\textbf{Note.} Condition  (\ref{eq:3_10}) is equivalent to the inequality
+	\begin{equation*}
+	{\rm \; \; }\min \{ x^{k+j} -x_{t_{j} -1} ,x_{t_{j} } -x^{k+j} \} \ge (1-\nu )(x_{t_{j} } -x_{t_{j} -1} ).
+	\end{equation*}
+	
+	Indeed, one can see easily that, for example,
+	\begin{displaymath}
+	x^{k+j} -x_{t_{j} -1} =(x_{t_{j} } -x_{t_{j} -1} )-(x_{t_{j} } -x^{k+j} )\ge (x_{t_{j} } -x_{t_{j} -1} )-\nu (x_{t_{j} } -x_{t_{j} -1} )=  
+	\end{displaymath}
+	\begin{displaymath}
+	=(1-\nu )(x_{t_{j} } -x_{t_{j} -1} ).  
+	\end{displaymath}
+	
+	For the interval $x_{t_{j} } -x^{k+j} $, an analogous estimate takes place, from were it follows that the considered inequality is true. 
+	
+	Let us verify the feasibility of the conditions of Theorem  \ref{theor:3_1} for several examples of the algorithms belonging to the caharacteristical class. These algorithms are generalizations of known sequential methods of global optimization (see Chapter 2) to the parallel case. \\
+	
+	\textbf{Method of sequential scanning } \\
+	
+	For this method the characteristics 
+	\[R(i)=x_{i} -x_{i-1} ,\, 1\le i\le \tau ,\] 
+	and the new point  $x^{k+j} ,\; 1\le j\le p,$ from  (\ref{eq:3_6}) in the interval $(x_{t_{j} -1} ,x_{t_{j} } )$is calculated as
+	\[x^{k+j} =0.5(x_{t_{j} -1} +x_{t_{j} } ).\] 
+	
+	If the interval $(x_{i-1} ,x_{i} )$ shrinks into a point, the characteristic of this method tends to zero. Therefore, one can take the constants $\mu$ and $c$ in  (\ref{eq:3_7}) as $\mu = c = 0 $. If the trials do not fall into the interval $(x_{i-1} ,x_{i} )$ starting from some search iteration, the length of this interval (coinsiding with its characteristic) remains positive that provides the fulfillment of the condition  (\ref{eq:3_9}) for selected $\mu$ and $c$. As for inequality  (\ref{eq:3_10}), it obviously is true for  $\nu = 0.5$.
+	\\ 
+	
+	\textbf{Kushner's method }\cite{3_Kushner} \\
+	
+	In this algorithm the characteristics 
+	\[R(i)=-\frac{4(\varphi _{k}^{*} -\delta _{k} -z_{i} )(\varphi _{k}^{*} -\delta _{k} -z_{i-1} )}{x_{i} -x_{i-1} } ,\; 1\le i\le \tau ,\] 
+	are used, and the new trial  (\ref{eq:3_6}) in the interval  $(x_{t-1} ,x_{t} ),\, t=t_{j} ,$  are executed at the point
+	\begin{equation} 
+	\label{eq:3_15} 
+	x^{k+j} =x_{t-1} +\frac{(x_{t} -x_{t-1} )(\varphi _{k}^{*} -\delta _{k} -z_{t} )}{2(\varphi _{k}^{*} -\delta _{k} )-z_{t} -z_{t-1} }  
+	\end{equation} 
+	where $\delta _{k} >0$ is a parameter of the method and 
+	\[\varphi _{k}^{*} =\mathop{\min }\limits_{0\le i\le \tau } z_{i} .\] 
+	
+	Let us assume that the function \textit{$\varphi$}(\textit{x}) is limited within the finite values $\varphi _{\min } $ and $\varphi _{\max } $ over the interval $[a,b]$, i.e., $\varphi _{\min } \le \varphi (x)\le \varphi _{\max } ,\; x\in [a,\, b]$.
+	
+	If for any step $k$ the method parameter $\delta _{k} >\delta >0$ then $\varphi _{k}^{*} -z_{i} -\delta _{k} <-\delta <0$, $\varphi _{k}^{*} -z_{i-1} -\delta _{k} <-\delta <0$ and the characteristic 
+	\[R(i(k))=-\frac{4(\varphi _{k}^{*} -\delta _{k} -z_{i} )(\varphi _{k}^{*} -\delta _{k} -z_{i-1} )}{x_{i} -x_{i-1} } \to -\infty \] 
+	when the length of the interval $(x_{i-1} ,x_{i} )$ tends to zero. Therefore,  (\ref{eq:3_7}) holds when $\mu = 0$ and the nominal value of $c=-\infty $ (the proof of Theorem \ref{theor:3_1} does not change if the limit value in the right part of  (\ref{eq:3_7}) is equal to $-\infty$). 
+	
+	Since the characteristic of any interval with a nonzero length possesses a finite value,  (\ref{eq:3_9}) holds as well.
+	
+	Let us remind a notation $t=t_{j} $ for the trial $x^{k+j} $of the current iteration  (\ref{eq:3_15}) and consider the differences 
+	
+	\begin{equation*}
+	x^{k+j} -x_{t-1} =\beta _{1} (x_{t} -x_{t-1} ),\; \; x_{t} -x^{k+j} =\beta _{2} (x_{t} -x_{t-1} ), 
+	\end{equation*}
+	
+	where
+
+	\begin{equation*}
+	\beta _{1} =\frac{z_{t-1} -\varphi _{k}^{*} +\delta _{k} }{z_{t-1} +z_{t} -2(\varphi _{k}^{*} -\delta _{k} )} ,\; \; \beta _{2} =\frac{z_{t} -\varphi _{k}^{*} +\delta _{k} }{z_{t-1} +z_{t} -2(\varphi _{k}^{*} -\delta _{k} )}.
+	\end{equation*}
+	
+	Let us introduce an auxiliary function $\sigma (w,\alpha )=\frac{w+\alpha }{w+2\alpha } $. Since $\min \{ z_{t-1} ,\; z_{t} \} \ge \varphi _{k}^{*} $, $\beta _{1} \le \sigma (z_{t-1} -\varphi _{k}^{*} ,\delta _{k} ),\; \beta _{2} \le \sigma (z_{t} -\varphi _{k}^{*} ,\delta _{k} )$. 
+	
+	For any positive value $w$, the function $\sigma (w,\alpha )$ decreases with increasing $\alpha$ because $\sigma '_{\alpha } (w,\alpha )=\frac{-w}{(w+2\alpha )^{2} } <0,$ therefore, for $\delta _{k} >\delta >0$ the following inequalities hold:
+	
+	\begin{equation*}
+	\beta _{1} \le \sigma (z_{t-1} -\varphi _{k}^{*} ,\delta ),\; \beta _{2} \le \sigma (z_{t} -\varphi _{k}^{*} ,\delta ).
+	\end{equation*}
+	
+	In turn, the function $\sigma (w,\alpha )$ increases with increasing $w$ for any positive $\alpha$ since $\sigma '_{w} (w,\alpha )=\frac{\alpha }{(w+2\alpha )^{2} } >0$, therefore 
+	
+	\begin{equation*}
+	\max \{ \sigma (z_{t-1} -\varphi _{k}^{*} ,\delta ),\; \sigma (z_{t} -\varphi _{k}^{*} ,\delta )\} \le \sigma (\varphi _{\max } -\varphi _{\min } ,\; \alpha ). 
+	\end{equation*}
+	
+	The last inequality means that 
+	
+	\begin{equation*}
+	\max \{ \beta _{1} ,\; \beta _{2} \} \le \sigma (\varphi _{\max } -\varphi _{\min } ,\; \delta )=\frac{\varphi _{\max } -\varphi _{\min } +\delta }{\varphi _{\max } -\varphi _{\min } +2\delta }. 
+	\end{equation*}
+	
+	The last value can be selected as the constant $\nu$  for the relation  (\ref{eq:3_10}) since, obviously, $0<\nu <1$. \\
+	
+	\textbf{Method of broken lines \cite{3_Piyavskij, 3_Shubert}} \\
+	
+	The characteristics of this algorithm
+	
+	\begin{equation}
+	\label{eq:3_16}
+	R(i)=\frac{m(x_{i} -x_{i-1} )}{2} -\frac{z_{i} +z_{i-1} }{2} ,\; 1\le i\le \tau,
+	\end{equation}
+	and for the interval $(x_{t_{j} -1} ,x_{t_{j} } )$ from  (\ref{eq:3_6}) the point  of the new trial falling into this interval is taken in the form
+	
+	\begin{equation}
+	\label{eq:3_17}
+	x^{k+j} =\frac{x_{t_{j} } +x_{t_{j} -1} }{2} -\frac{z_{t_{j} } -z_{t_{j} -1} }{2m}.
+	\end{equation}
+	
+	In order to satisfy the assertion of the theorem, let us assume that the minimized function $\varphi(x)$ satisfies the Lipschitz condition with the constant $L>0$, i.e.,
+	
+	\begin{equation}
+	\label{eq:3_18}
+	\left|\varphi (x')-\varphi (x'')\right|\le L\left|x'-x''\right|,x',x''\in [a,b],
+	\end{equation}	
+	and, in addition, the method parameter $m>L$. 
+	
+	Being Lipschitzian, the function $\varphi(x)$ is continuous. Hence, the characteristic of the interval will tend to the value $-\varphi (\bar{x})$ when shrinking the interval $(x_{i-1} ,x_{i} )$ to the point $\bar{x}$, i.e., for the feasibility of  (\ref{eq:3_7}) one can take $\mu= 1$ and $c=0$. Now let us check if inequality  (\ref{eq:3_9}) holds with given $\mu$ and $c$ for the interval $(x_{i-1} ,x_{i} )$ satisfying  (\ref{eq:3_8}). We can use a simple equality 
+	
+	\begin{equation}
+	\label{eq:3_19}
+	\min \{ z_{i-1} ,z_{i} \} =\frac{1}{2} (z_{i-1} +z_{i} -\left|z_{i-1} -z_{i} \right|)
+	\end{equation}
+	to estimate the method characteristic  (\ref{eq:3_16}), along with the Lipschitz condition and the assumption  (\ref{eq:3_8}) that the length of the interval remains constant and positive, starting from some search iteration:
+	\begin{displaymath}
+	R(i)=m\frac{x_{i} -x_{i-1} }{2} -\frac{z_{i} +z_{i-1} }{2} >L\frac{x_{i} -x_{i-1} }{2} -\frac{z_{i} +z_{i-1} }{2} \ge \frac{\left|z_{i-1} -z_{i} \right|-(z_{i-1} +z_{i} )}{2} =
+	\end{displaymath}
+	\begin{displaymath}
+	=-\min \{ z_{i-1} ,z_{i} \}. 
+	\end{displaymath}
+	
+	The obtained inequalities establish the truth of  (\ref{eq:3_9}).
+	
+	In order to determine the factor $\nu $ in  (\ref{eq:3_10}) let us estimate the value
+	\begin{displaymath}
+	x_{t_{j} } -x^{k+j} =\frac{x_{t_{j} } -x_{t_{j} -1} }{2} +\frac{z_{t_{j} } -z_{t_{j} -1} }{2m} \le \frac{x_{t_{j} } -x_{t_{j} -1} }{2} +L\frac{x_{t_{j} } -x_{t_{j} -1} }{2m} = 
+	\end{displaymath}
+		\begin{displaymath}
+	 =\left(1+\frac{L}{m} \right)\frac{x_{t_{j} } -x_{t_{j} -1} }{2} . 
+	\end{displaymath}
+	
+	An analogous estimate takes place for the interval $(x_{t_{j} -1} ,x^{k+j} )$ as well, therefore, one can take $\nu =0,5(1+L/m)$. Obviously, $\nu >0$ and, because $m>L$, $\nu <1$. \\
+	
+	\textbf{Core information Algorithm of Global Search (AGS)} \\
+	
+	The decision rule  (\ref{eq:3_2})- (\ref{eq:3_6}) of AGS includes characteristics 
+	
+	\begin{equation}
+	\label{eq:3_20}
+	R(i)=m(x_{i} -x_{i-1} )+\frac{(z_{i} -z_{i-1} )^{2} }{m(x_{i} -x_{i-1} )} -2(z_{i} +z_{i-1} ),\; 1\le i\le \tau ,
+	\end{equation}
+	and points of new trials calculated according to  (\ref{eq:3_17}). The factor $m$ is determined by the expressions
+	
+	\begin{equation}
+	\label{eq:3_21}
+	m=\left\{\begin{array}{c} {rM,M>0} \\ {1,M=0} \end{array}\right. ,
+	\end{equation}
+	\begin{equation}
+	\label{eq:3_22}
+	M=\mathop{\max }\limits_{1\le i\le \tau } \frac{\left|z_{i} -z_{i-1} \right|}{x_{i} -x_{i-1} },
+	\end{equation}
+	where $r>1$ is a parameter of the method.
+	
+	Having assumed the Lipschitz property  (\ref{eq:3_18}) of the objective function  (\ref{eq:3_1}), let us prove that this method also satisfies the conditions of Theorem \ref{theor:3_1} with $\mu=4$, $c=0$, and $\nu =0,5(1+1/r)$.
+	
+	Because of Lipschitzness when shrinking the interval $(x_{i-1} ,x_{i} )$ into a point $\bar{x}$ its characteristic tends to $-4\varphi (\bar{x})$, i.e., for the truth of  (\ref{eq:3_7}) one can take $\mu=4$ and $c=0$.
+	
+	In order to check  (\ref{eq:3_9}) under the condition  (\ref{eq:3_8}) let us consider two cases. First, assume that the equality $z_{i-1} =z_{i} $ holds for the interval $(x_{i-1} ,x_{i} )$. Then, the characteristic
+	\begin{equation*}
+	R(i)=m(x_{i} -x_{i-1} )-2(z_{i} +z_{i-1} )>\; -2(z_{i} +z_{i-1} )= -4\min \{ z_{i-1} ,z_{i} \},
+	\end{equation*}
+	since the length of the interval $(x_{i-1} ,x_{i} )$ does not change anymore, starting from some iteration $n_{\Delta } $ , i.e., a constant $\Delta >0$ exists such that for all $n>n_{\Delta } $ the inequalities $x_{i} -x_{i-1} >\Delta >0$ hold.
+	
+	Now assume that $z_{i-1} \ne z_{i} $. Let us rewrite the characteristic  (\ref{eq:3_20}) in the form
+	
+	\begin{equation}
+	\label{eq:3_23}
+	R(i) = |z_{i} -z_{i-1} |(\beta +\frac{1}{\beta } )-2(z_{i} +z_{i-1} ),
+	\end{equation}
+	where $0<\beta =\frac{m(x_{i} -x_{i-1} )}{\; \left|z_{i} -z_{i-1} \right|} \; <1$ as a consequence of  (\ref{eq:3_21}),  (\ref{eq:3_22}). In this case, the value $\beta +\frac{1}{\beta } >2$, therefore from  (\ref{eq:3_23})
+	
+	\begin{equation*}
+	R(i)>\; 2\left|z_{i} -z_{i-1} \right|-2(z_{i} +z_{i-1} )=-4\min \{ z_{i} ,z_{i-1} \} .
+	\end{equation*}
+	
+	As for the condition  (\ref{eq:3_10}), according to  (\ref{eq:3_22}) the following estimate holds: 
+	\begin{displaymath}
+	x_{t_{j} } -x^{k+j} =\frac{x_{t_{j} } -x_{t_{j} -1} }{2} +\frac{z_{t_{j} } -z_{t_{j} -1} }{2m} \le \frac{x_{t_{j} } -x_{t_{j} -1} }{2} +M\frac{x_{t_{j} } -x_{t_{j} -1} }{2m} =
+	\end{displaymath}
+	\begin{displaymath}
+	=\left(1+\frac{1}{r} \right)\frac{x_{t_{j} } -x_{t_{j} -1} }{2}. 
+	\end{displaymath}
+		
+	The length of the interval $(x_{t_{j} -1} ,x^{k+j} )$ can be estimated in the same way, therefore, one can take $\nu$ = $0.5(1+1/r)$. Since $r>1$, the condition $0<\nu <1$ is satisfied obviously. \\
+	
+	\textbf{Information Algorithm of Global Search with trials at internal points (AGSIP)} \\
+	
+	In the framework of this method all trials are executed at internal points of the search domain $[a,b]$. The set $\Lambda _{n} $ includes the trial points and the end points $a$ and $b$, from where $\tau =k+1$. Morover, $z_{j} =\varphi (x_{j} )$ for $1\le j\le k$ only since at the ends points of the domain the trials are not executed.
+	
+	The characteristics $R(i),\; 1\le i\le \tau ,$ of AGSIP are computed in accordance with the expression
+	
+	\begin{equation}
+	\label{eq:3_24}
+	R(i)=
+	\left\{
+	\begin{array}{l} 
+	{m(x_{i} -x_{i-1} )+\frac{r(z_{i} -z_{i-1} )^{2} }{M(x_{i} -x_{i-1} )} -2(z_{i} +z_{i-1} ),\; 1<i<\tau ,} \\ 
+	{m(x_{i} -x_{i-1} )-4z_{1} ,\; i=1,} \\ 
+	{m(x_{i} -x_{i-1} )-4z_{k} ,\; i=\tau ,} 
+	\end{array}
+	\right., 
+	\end{equation}
+	
+	and the next trial points are computed as 
+	
+	\begin{equation}
+	\label{eq:3_25}
+	x^{k+j} =\; 0.5(x_{t_{j} } +x_{t_{j} -1} )-
+	\left\{
+	\begin{array}{l} 
+		{0,\; \; t_{j} =1\; \; or \; \; t_{j} =\tau ,} \\ 
+		{(z_{t_{j} } -z_{t_{j} -1} )/(2m),\; 2\le t_{j} \le \tau -1.} 
+	\end{array}
+	\right. 
+	\end{equation}
+	
+	Under Lipschitz condition  (\ref{eq:3_18}), we obtain that when shrinking the interval $(x_{i-1} ,x_{i} )$ to a point $\bar{x}$, its characteristic tends to $-4\varphi (\bar{x})$, i.e., for the fulfillment of  (\ref{eq:3_7}), it is possible to take $\mu = 4$ and $c = 0$.
+	
+	For the characteristics of the «boundary» intervals $(x_{0} =a,x_{1} )$ and $(x_{\tau -1} ,x_{\tau } =b)$ we have $\mathop{\lim }\limits_{n\to \infty } R(1)>-4z_{1} $ for the left interval and $\mathop{\lim }\limits_{n\to \infty } R(\tau )>-4z_k$ for the right one. Since the length of the boundary intervals under the condition  (\ref{eq:3_8}) is always positive, the feasibility of these inequalities and, consequently  (\ref{eq:3_9}) is obvious also. 
+	
+	Let us consider the characteristic of «internal» interval $(x_{i-1} ,x_{i} ),\; 1<i\le k=\tau -1$. Let us write it in the form 
+	\begin{equation*}
+	R(i)=\; m\Delta _{i} (1-r^{-2} )+\frac{r(\left|z_{i} -z_{i-1} \right|-M\Delta _{i} r^{-1} )^{2} }{M\Delta _{i} } -4\tilde{\xi }_{i},
+	\end{equation*}
+	
+	where $\Delta _{i} =x_{i} -x_{i-1} ,\; \tilde{\xi }_{i} =\min \{ z_{i-1,} z_{i} \} $. Since the second summand is non-negative, the parameter $r>1$, and $\Delta _{i} >0$ the strict inequality $R(i)>-4\tilde{\xi }_{i} $ takes place, i.e.,  (\ref{eq:3_9}) holds.
+	
+	As for  (\ref{eq:3_10}), it is obvious that  $\nu =0.5(1+1/r)$.
+	
+	\noindent 
+	\subsection{Everywhere dense convergence}
+	
+	\begin{theorem} If $\mu = 0$ in the assertions of Theorem \ref{theor:3_1}, then any point of the search domain is a limit point of the search trial sequence.
+	\label{theor:3_2}
+	\end{theorem}
+	\begin{proof} Let us assume that some point $x'\in [a,b]$ is not a limit point of the search trials sequence generated by the algorithm. This means, that starting from some iteration $u\ge 1$, the trials do not fall into the interval $(x_{q-1} ,x_{q} )$, $q=q(n)$, such that $x_{q-1} \le x'\le x_{q} $ anymore. If $x'\in (a,b),$ and for some $m$ the point $x'=x^{m} $, two such intervals exist, and any of them can be considered. 
+	
+	Then, for any iteration $n\ge u$, the inequality 
+	
+	\begin{equation}
+	\label{eq:3_26}
+	\mathop{\lim }\limits_{n\to \infty } R(q)>c.
+	\end{equation}
+	takes place according to  (\ref{eq:3_9}).
+	
+	However, the trial sequence being located inside the interval $[a,b]$, includes at least one converging subsequence. For the interval $(x_{s-1} ,x_{s} )$, $s=s(n),$ containing a limit point of this subsequence because of the bilateral convergence the relation  (\ref{eq:3_7}) holds, i.e., 
+	
+	\begin{equation}
+	\label{eq:3_27}
+	\mathop{\lim }\limits_{n\to \infty } R(s)=c.
+	\end{equation}
+	
+	This means that as a consequence of  (\ref{eq:3_26}),  (\ref{eq:3_27}) a number $w\ge u$ exists, such that for all $n\ge w$ the inequality 
+	
+	\begin{equation*}
+	R(q)>R(s),
+	\end{equation*}
+	
+	takes place that contradicts to the initial hypothesis of the impossibility of falling trials into the interval $(x_{q-1} ,x_{q} )$when $n\ge w\ge u$, according to the rules  (\ref{eq:3_4}),  (\ref{eq:3_5}) of the basic scheme of the parallel characteristical algorithm.
+	
+	This contradiction brings to a close the theorem proof.
+	\end{proof}
+	
+	Theorem \ref{theor:3_2} establishes the conditions for so-called «everywhere dense» convergence, when the method converges to all points of the search domain including the global minimum points certainly. This types of convergence is adequate to such classes of problems, for which computing the estimates of the extremum from a finite number of trials is impossible (for example, for the continuous functions). In this case, the convergence to global optimum solution can be provided by the everywhere dense convergence property only.
+	
+	Among the examples considered above, scanning method and Kushner's method have such type of convergence. Among the other known algorithms, these are the methods described in \cite{3_Gorodetsky, 3_Zilinskas1975}.
+	
+		The conditions of the everywhere dense convergence are the sufficient conditions of the convergence to the global optimum of the objective function. However, the character of convergence of this kind requires an additional analysis for investigations of the efficiency of the search sequence point distribution. One of such approaches is based on getting the estimates of the relative density of the trial distribution in different subdomains of the search domain as compared to the trial point density in a neighborhood of the global minimum \cite{3_Gorodetsky, 3_GoroGri}.
+	
+	The theorem below establishes another type of behavior of the parallel characteristical algorithms: 
+	
+	\subsection{Locally optimal convergence}
+	
+	\begin{theorem}
+	\label{theor:3_3}
+		Let us assume that:
+		
+		\noindent i)~ the objective function $\varphi (x),x\in [a\, ,\, b],$ of the problem  (\ref{eq:3_1}) is a continuous one;
+		
+		\noindent ii)~ $x^{*} $ is a limit point of the search trial sequence generated by a parallel characteristical algorithm in the course of solving the problem  (\ref{eq:3_1});
+		
+		\noindent iii) the assertions of Theorem \ref{theor:3_1} hold for the algorithm with $\mu >0$; 
+		
+		\noindent iv)~ the number $p=p(n)$ of parallel trials at iterations is uniformly bounded, i.e.,
+		\[p(n)\le P\] 
+		where $P\ge 1$ is a predefined integer constant.
+		
+		\noindent Then:
+		
+		\noindent i)~ $\varphi (x^{k} )\ge \varphi (x^{*} ),k\ge 1;$
+		
+		\noindent ii)~if another limit point $x^{**} \ne x^{*} $ exists, then $\varphi (x^{**} )=\varphi (x^{*} );$
+		
+		\noindent iii) if the number of local minima of $\varphi (x)$ in the interval $[a,b]$ is finite, then $x^{*} $ is a local minimizer of $\varphi (x)$.
+	\end{theorem} 
+
+	\textbf{Proof}. Let us assume that $j=j(n)$ is the number of the interval $(x_{j-1} ,\, x_{j} )$ such that $x_{j-1} \le x^{*} \, \le x_{j} $. Note that for the characteristic of this interval the relation  (\ref{eq:3_13}) holds as a consequence of Theorem \ref{theor:3_1}.
+	
+	Let us prove the first statement. Assume that at the iteration with the number $u\ge 1$ a trial has been executed at the point $x^{q} \in T(u)$ such that 
+	
+	\begin{equation}
+	\label{eq:3_28}
+	\varphi (x^{q} )<\varphi (x^{*} ).
+	\end{equation}
+	Let us denote as $s=s(n),\; n\ge u$ the number of the point $x^{q} $ in the series  (\ref{eq:3_2}), i.e., $x^{q} =x_{s} $. 
+	
+	Let us demonstrate that the point $x^{q} $ is also a limit point of the trial sequence. If it is not so, since a moment when the trials do not fall into the interval $(x_{s-1} ,\, x_{s} )$ containing this point and for the characteristic $R(s)$ of this interval because of  (\ref{eq:3_9}) we have
+	
+	\begin{equation}
+	\label{eq:3_29}
+	\mathop{\lim }\limits_{n\to \infty } R(s)>-\mu \varphi (x^{q} )+c.
+	\end{equation}
+	Note, that if $s=0$, an inequality, analogous to  (\ref{eq:3_29}) takes place for the characteristic $R(s+1)$ of the interval $(x_{s} ,\, x_{s+1} )$.
+	
+	Now, taking into account  (\ref{eq:3_13}) and  (\ref{eq:3_28}), one can claim that starting from some iteration, the inequality
+	
+	\begin{equation*}
+	R(s)>R(j),
+	\end{equation*}
+	holds that because of decision rule  (\ref{eq:3_4}) contradicts to the impossibility of  executing trials in the interval $(x_{s-1} ,\, x_s)$, i.e., to our assumption that the point $x^q $ is not a limit one of the search trial sequence.
+	
+	Since the function $\varphi (x)$ is  continuous, the inequality $\varphi (x)<\varphi (x^{*} )$ is fulfilled in a vicinity $\Theta \subseteq [a,b]$ of the point $x^q$. Since the point $x^{q} $ is a limit one, this vicinity will include more than $P+1$ points of the trial sequence $\{ x^k \} $. However, in this case more than $P$ intervals formed by these points will have larger characteristics than $R(j)$ from  (\ref{eq:3_13}). This means that according to rule ( \ref{eq:3_4}) the trials can not fall into the interval $(x_{j-1} , x_j )$ starting since a moment. However, this is impossible since the point $x^{*} $ is a limit one.
+	
+	The second assertion of the theorem is a simple consequence of the first one since having assumed, for example, that $\varphi (x^{**} )<\varphi (x^{*} )$ we will get at some iteration a trial $x^{q} $ such that $\varphi (x^q )<\varphi (x^{*} )$. 
+	
+	The theorem is concluded by proving the point $x^{*} $ to be a local optimum one. Let us assume the opposite, namely, that $x^{*} $ is not a local minimum point. Then, there exists a nonempty vicinity $\Theta \subseteq [a,b]$ of the point $x^{*} $, in which the function $\varphi (x)$ is strictly monotonous, i.e., the inequality $\varphi (x)<\varphi (x^{*} ),\; x\in \Theta $ takes place either to the left or to the right of $x^{*} $. Since the convergence to the point $x^{*} $ is bilateral a point $x^j \in \Theta $ will appear in the trial sequence necessarily such that $\varphi (x^j)<\varphi (x^{*} )$. In the case when $x^{*} =a$ or $x^{*} =b$ a unilateral convergence is sufficient for the last inequality to be true. This fact contradicts to the first statement and completes the proof of the theorem.
+	
+	Thus, if in conditions  (\ref{eq:3_7}),  (\ref{eq:3_9}) the constant $\mu$ is positive (this means that the method \textit{accounts for} the information on the function in the asymptotic), then the behavior of the algorithm becomes more task-oriented, i.e., it seeks for such points only, which have the property of local minimum. Moreover, the second statement of the theorem claims that the method cannot converge to the local minima of different depth.
+	
+	Among the considered algorithms, the method of broken lines, AGS and AGSIP possess this property. Among the other known both sequential and parallel methods, these are the information algorithms \cite{3_GrishaginStrongin_EnginCybernetics, 3_SergeyevLocTun, 3_SergMukhKvasLera, 3_StrMonRus, 3_StrMarkin, 3_StrSergMon2000} as well as the methods described in \cite{3_Pinter, 3_SergGri1994, 3_SergeyevGrishaginOMS}.
+	
+		
+	\subsection{Sufficient conditions of global convergence}
+	
+	Theorem \ref{theor:3_3} does not guarantee the convergence to the global minimum of the investigated optimization problem. In order to get these guarantees (or the sufficient conditions of convergence to global minimum) it is necessary to have additional properties of the objective function. With this purpose, let us consider a class of functions $\varphi (x),x\in [a\, ,\, b],$ satisfying the H\"{o}lder condition 
+	
+	\begin{equation}
+	\label{eq:3_30}
+	|\varphi (x')-\varphi (x'')|\le H\sqrt[{N}]{|x'-x''|} ,x',x''\in [a,b],
+	\end{equation}
+	where $N\ge 1$ is an integer number, and $H>0$ is called the H\"{o}lder constant. The functions of the type  (\ref{eq:3_30}) arise, in particular, in the reduction of the multidimensional functions onto an interval using Peano mapping [    ] that allows reducing a multidimensional optimization problem to solving a one-dimensional problem  (\ref{eq:3_1}). Note that for \textit{N~}$=$~1 condition  (\ref{eq:3_30}) turns into Lipschitz condition  (\ref{eq:3_18}) with $H=L$.
+	
+	\begin{theorem}
+	\label{theor:3_4}
+		Let us assume that a function $\varphi (x),x\in [a, b],$ satisfies the H\"{o}lder condition  (\ref{eq:3_30}). Then any global minimizer $x^{*} $ of the function $\varphi (x)$ over $[a, b]$ is a limit point of the search trial sequence generated by the parallel characteristic algorithm while solving the problem  (\ref{eq:3_1}) if the conditions  (\ref{eq:3_7}) and  (\ref{eq:3_10}) of Theorem \ref{theor:3_1} are satisfied and the interval $(x_{i-1} ,x_{i} )$ which has no trials inside, i.e., satisfying   (\ref{eq:3_8}), meets the inequality 
+	
+	\begin{equation}
+	\label{eq:3_31}
+	\mathop{\lim }\limits_{n\to \infty } R(i)>\frac{\alpha \mu H}{\sqrt[{N}]{2} } \sqrt[{N}]{(x_{i} -x_{i-1} )} -\mu \omega _{i} +c,
+	\end{equation}
+	where the constants $\mu, c$, and $\nu$ satisfy the conditions of Theorem \ref{theor:3_1}, the parameters $\alpha =1$,  if $x_{i-1} \in \{ x^s \} $ and $ x_i \in \{ x^s \} $, or $\alpha =2$ when either $x_{i-1} $ or $x_i $ does not belong to the trial sequence $\{ x^s \} $. The value  $\omega _i $ is determined as 
+	\begin{equation} 
+	\label{eq:3_32} 
+	\omega _{i} =\left\{
+	\begin{array}{c}
+	{\frac{1}{2} (z_{i-1} + z_i ),\; if \; x_{i-1} \in \{ x^s \} \; and \; x_i \in \{ x^s \} ;} \\ 
+	{ \begin{array}{l} 
+		{z_{i-1} \; ,\; \quad \quad \quad if \; x_{i-1} \in \{ x^s \} \; and \; x_i \notin \{ x^s \} ;} \\ 
+		{z_i \quad \; , \quad \quad \quad if\; x_{i-1} \notin \{ x^s \} \, \; and\; \, x_i \in \{ x^s \} .}
+	  \end{array}}
+ 	\end{array}\right. \; \,  
+	\end{equation} 
+	\end{theorem}
+
+	\textbf{Proof}. Let us assume that the global minimum $x^{*} $ is not the limit point of the trial sequence and that $i=i(n)$ is the number of the interval $(x_{i-1} , x_i)$ including this point at the $n$-th search iteration, i.e., $x_{i-1} \le x^{*} \le \, x_i $. Then the trials will not fall into this interval since an iteration. Being in the interval $(x_{i-1} ,\, x_i )$, the point $x^{*} $ can be expressed in the form $x^{*} =\lambda x_{i-1} +(1-\lambda )x_i , 0\le \lambda \le 1$. As a consequence of  (\ref{eq:3_30}) 
+	
+	\begin{equation*}
+	\varphi (x_{i-1} )-\varphi (x^{*} )\le H\sqrt[{N}]{(x^{*} -x_{i-1} )} =H\sqrt[{N}]{(1-\lambda )(x_{i} -x_{i-1} )} ,
+	\end{equation*}
+	\begin{equation}
+	\label{eq:3_33}
+	\varphi (x_{i} )-\varphi (x^{*} )\le H\sqrt[{N}]{(x_{i} -x^{*} )} =H\sqrt[{N}]{\lambda (x_{i} -x_{i-1} )} ,
+	\end{equation}
+	
+	hence, 
+	
+	\begin{equation*}
+	\varphi (x_i)+\varphi (x_{i-1} )\le 2\varphi (x^{*} )+H(\sqrt[{N}]{\lambda } +\sqrt[{N}]{1-\lambda } )\sqrt[{N}]{(x_{i} -x_{i-1} )\le } 
+	\end{equation*}
+	\begin{equation}
+	\label{eq:3_34}
+	\le 2\varphi (x^{*} )+H\sqrt[{N}]{(x_i -x_{i-1} )} \mathop{\max }\limits_{0\le \lambda \le 1} \{ \sqrt[{N}]{\lambda } +\sqrt[{N}]{1-\lambda } \} =2\varphi (x^{*} )+\frac{2H}{\sqrt[{N}]{2} } \sqrt[{N}]{(x_{i} -x_{i-1} )} ,
+	\end{equation}
+	because the function $\sqrt[{N}]{\lambda } +\sqrt[{N}]{1-\lambda } $ reaches its maximum in the interval $[0,1]$ at the point $\lambda =\frac{1}{2} $.
+	
+	In the case, when the parameter $\alpha =1$ and $\omega _i =\frac{1}{2} (z_{i-1} +z_i )$, we have
+	
+	\begin{equation}
+	\label{eq:3_35}
+	\mathop{\lim }\limits_{n\to \infty } R(i)>(\frac{\mu H}{\sqrt[{N}]{2} } \sqrt[{N}]{(x_i -x_{i-1} )} -\frac{\mu }{2} (z_{i-1} +z_i))+c.
+	\end{equation}
+	
+	The last inequality along with  (\ref{eq:3_34}) allows obtaining the estimate 
+	
+	\begin{equation}
+	\label{eq:3_36}
+	\mathop{\lim }\limits_{n\to \infty } R(i)>-\mu \, \varphi (x^{*} )+c.
+	\end{equation}
+	
+	Now assume that $\omega _i =z_i $. Then $\alpha =2$ (the case of $\omega _i =z_{i-1} $ can be considered by analogy). From  (\ref{eq:3_33})
+	\[-\mu z_i \ge -2\mu \varphi (x^{*} )-\frac{2\mu H}{\sqrt[{N}]{2} } \sqrt[{N}]{(x_{i} -x_{i-1} )} +\mu \varphi (x_{i-1} )\] 
+	and, moreover, $\varphi (x_{i-1} )\ge \varphi (x^{*} )$as $x^{*} $ is a global minimize. Therefore,
+	
+	\begin{equation*}
+	\mathop{\lim }\limits_{n\to \infty } R(i)>\frac{2\mu H}{\sqrt[{N}]{2} } \sqrt[{N}]{(x_{i} -x_{i-1} )} -\frac{\mu }{2} z_{i} +c\ge 
+	\end{equation*}
+	\begin{equation*}
+	\ge \frac{2\mu H}{\sqrt[{N}]{2} } \sqrt[{N}]{(x_i -x_{i-1} )} -2\mu \varphi (x^{*} )+\mu \varphi (x_{i-1} )-\frac{2\mu H}{\sqrt[{N}]{2} } \sqrt[{N}]{(x_i -x_{i-1} )} +c\ge -\mu \varphi (x^{*} )+c,
+	\end{equation*}
+	i.e.,  (\ref{eq:3_36}) is true again.
+	
+	At the same time, the trial sequence has at least one limit point $\bar{x}$ in the interval $[a,b]$, for which the inequality $\varphi (\bar{x})\ge \varphi (x^{*} )$ is true necessarily. Besides, according to Theorem \ref{theor:3_1} for the interval $(x_{j-1} ,\, x_j )$, $j=j(n)$ including $\bar{x}$, the equality
+	\begin{equation*}
+	\mathop{\lim }\limits_{n\to \infty } R(j)=-\mu \, \varphi (\bar{x})+c.
+	\end{equation*}
+	takes place. However, in this case, the inequality $R(i)>R(j)$ holds starting from some search iteration. But because of the rule  (\ref{eq:3_4}) this inequality contradicts to the assumption of the impossibility to place the trials in the interval $(x_{i-1} ,\, x_i)$.
+	
+	\begin{corollary} If $\mu =0$,  (\ref{eq:3_31}) coinsides with  (\ref{eq:3_9}) and Theorem \ref{theor:3_4} becomes identical to Theorem \ref{theor:3_1}. In this case, H\"{o}lder property of the objective function is not required.
+	\end{corollary}
+	\begin{corollary} If in the conditions of the theorem $\mu >0$ and the number of processors involved in the execution of given iteration is limited uniformly, then the characteristical algorithm converges to all the global minimum points and only to these ones.
+	\end{corollary}
+	\begin{proof} Indeed, the convergence to all global minimum points is a result of the theorem itself. The impossibility of the convergence to the points, being different from the global minimizers is a consequence of the second statement of Theorem \ref{theor:3_3}.
+	\end{proof}
+	
+	Let us establish the sufficient conditions of convergence for the method of broken lines and AGS, in which the factor $\mu >0$ under assumption  (\ref{eq:3_18}) for the objective function. As $N=1$ and $\omega _i =\frac{1}{2} (z_{i-1} +z_{i} )$, condition  (\ref{eq:3_31}) turns into 
+	
+	\begin{equation*}
+	\mathop{\lim }\limits_{n\to \infty } R(i)>\frac{\mu L}{2} (x_{i} -x_{i-1} )-\mu \omega _i.
+	\end{equation*}
+	
+	For the method of broken lines inequality  (\ref{eq:3_31}) is satisfied obviously when $m>L$ if one keeps in mind the relation  (\ref{eq:3_19}).
+	
+	For the characteristic of AGS an obvious inequality holds 
+	
+	\begin{equation*}
+	R(i)\ge m(x_{i} -x_{i-1} )-2(z_{i} +z_{i-1} )=m(x_{i} -x_{i-1} )-\frac{\mu }{2} (z_{i} +z_{i-1} ),
+	\end{equation*}
+	from where the feasibility of  (\ref{eq:3_31}) follows for $m>2L$.
+	
+	Concerning the method AGSIP  (\ref{eq:3_24})- (\ref{eq:3_25}), in the case $1<i<\tau $ its characteristic satisfies the previous inequality as well, i.e., $m>2L$. However, if $i=1$ then  (\ref{eq:3_31}) is simplified to 
+	\[\mathop{\lim }\limits_{n\to \infty } R(1)>4L(x_{1} -x_{0} )-4z_{1} \] 
+	because of $\alpha =2,\mu =4$, and  (\ref{eq:3_31}) is met if $m>4L$. The case $i=\tau $ can be considered analogously. Thus, the global convergence of AGSIP is provided by the inequality $m>4L$.
+	
+	\noindent 
+	\section{Conditions of the non-redundant parallelization}
+	
+	The parallelization of the sequential characteristical algorithms according to the scheme  (\ref{eq:3_2})--(\ref{eq:3_6}) leads to the loss of a part of search information when computing the coordinates of the next iteration $x^{k+j} $, $1\le j\le p,$ see  (\ref{eq:3_5}). As a matter of fact, in a sequential algorithm, to the moment of selecting the (single) point of the next trial, the results of \textit{all} preceding trials (the function values) are known already. But in a parallel method, the selection of the points $x^{k+j} $, $1<j\le p,$ is performed without taking into account the function values at the points $x^{k+s} $, $1\le s<j$ since these values have not been computed yet. The higher the parallelization level $p(n)$ in scheme  (\ref{eq:3_2})--(\ref{eq:3_5}), the greater the losses of the information while planning the trials. These losses are the most essential in the full parallelization, when $p(n)=\tau (n)$ in  (\ref{eq:3_2}).
+	
+	An incomplete accounting for the information can result in a situation when a parallel algorithm distributes the trials more dense as compared to the sequential prototype, i.e., it generates \textit{redundant} trials. 
+	
+	Let us evaluate the redundancy of the parallelization quantitatively following the approach from [66]. Let us assume that $\{ x^{k} \} $ and $\{ y^{s} \} $ are the infinite trial sequences ($\varepsilon =0$ in the termination conditions  (\ref{eq:3_14}) generated by a pure sequential characteristic method and by its parallel generalization, respectively, when these two solve the same problems  (\ref{eq:3_1}). A coincidence of these sequences, i.e.,
+	\begin{equation} 
+	\label{eq:3_37} 
+	\{ x^{k} \} =\{ y^{s} \}  
+	\end{equation} 
+	means that the parallel algorithm distributes the trials at the same points as the pure sequential one does. Note that  (\ref{eq:3_37}) does not require  step-by-step coincidence $x^q =y^q ,\; q\ge 1$. 
+	
+	When relation  (\ref{eq:3_37}) takes place, the parallelization is called a \textit{non-redundant} one. If  (\ref{eq:3_37}) does not hold and $\{ x^{k} \} \subseteq \{ y^{s} \} $, then the parallel scheme has some redundancy. Let us introduce a \textit{redundancy coefficient} in order to characterize the redundancy quantitatively as
+	\begin{equation}
+	\label{eq:3_38}
+	\lambda (s,q)=V(s,q)/(s-q),\; s>q,
+	\end{equation}
+	where
+	\begin{equation*}
+	V(s,q)=card(\{ y^{q+1} ,\ldots ,y^{s} \} \backslash \{ x^{k} \} )
+	\end{equation*}
+	
+	is the number of the redundant points in $\{ y^{s} \} $ from the (\textit{q}+1)-th trial to the \textit{s-th} one. The definition  (\ref{eq:3_38}) supposes the inclusion $\{ x^k \} \subseteq \{ y^s \} $. Obviously, $V(s, 0)=0$ for any $s\ge 1$ corresponds to the non-redundant case  (\ref{eq:3_37}).
+	
+	Now let us consider the parallel characteristical algorithms, which after $n{}_{0} \ge 1$ initial  iterations use always two processors, i.e.,
+	\begin{equation}
+	\label{eq:3_39}
+	p(n)=2,\; n>n_{0}.
+	\end{equation}
+	
+	Let us make several non-burdensome assumptions. Assume that if the trial point $x^{k+q} $ of current iteration is selected in an interval $(x_{j-1} ,x_{j} )$ such that the objective function values $z_{j-1} ,z_j $ have been computed already in the ends of this interval, then this point can be represented in the form
+	\begin{equation}
+	\label{eq:3_40}
+	x^{k+q} =g_{j} +sign(z_{j-1} -z_{j} )\theta _{j} ,
+	\end{equation}
+	where
+	\begin{equation}
+	\label{eq:3_41}
+	g_{j} =(x_{j-1} +x_{j} )/2, 
+	\end{equation}
+	\begin{equation}
+	\label{eq:3_42}
+	0\le \theta _{j} \le \sigma (x_{j} -x_{j-1} ),
+	\end{equation}
+	and $0<\sigma \le 0.5$. Note that  (\ref{eq:3_10}) follows from  (\ref{eq:3_40}) -  (\ref{eq:3_42}) for $\nu =0.5+\sigma $.
+	
+	If the objective function value has not been computed at one of the ends of the interval $(x_{j-1} ,x_{j} )$ then 
+	\begin{equation}
+	\label{eq:3_43}
+	x^{k+q} =g_{j} .
+	\end{equation}
+	
+	Along with  (\ref{eq:3_40}) -  (\ref{eq:3_43}), assume that the characteristics $R(i), 1\le i\le \tau $, and the values $\theta _j ,\; 1\le j\le p$, depend on the boundary points of the corresponding interval and on the function values computed in these points only, i.e.,
+	\begin{equation}
+	\label{eq:3_44}
+	R(i)=\Sigma (x_{i-1} ,x_{i} ,z_{i-1} ,z_{i} ),
+	\end{equation}
+	\begin{equation}
+	\label{eq:3_45}
+	\theta _{j} =\Theta (x_{j-1} ,x_{j} ,z_{j-1} ,z_{j} ).
+	\end{equation}
+	
+	Finally, let us assume that 
+	
+	\begin{equation}
+	\label{eq:3_46}
+	y^s =x^s ,\; 1\le s\le k(n_{0} ),
+	\end{equation}
+	i.e., the initial trials, preceding the characteristical rule  (\ref{eq:3_2}) - (\ref{eq:3_5}), are the same for both sequential and parallel methods.
+	
+	\begin{theorem} 
+	\label{theor:3_5}
+	Let us assume that: \\
+	i) the function $\varphi (x),x\in [a\, ,\, b],$ to satisfy Lipschitz condition  (\ref{eq:3_18}) with the constant  $L>0$; \\
+	ii) the conditions  (\ref{eq:3_39}),  (\ref{eq:3_40}),  (\ref{eq:3_42}) -  (\ref{eq:3_45}), and  (\ref{eq:3_7}) hold for the parallel characteristic algorithm and for its sequential prototype; \\	
+	iii) the constants $\mu $ and $\sigma $ satisfy the inequalities $\mu >0$, $\sigma \le \frac{1}{6} $; \\
+	iv) for any interval $(x_{i-1} ,\, x_i )$ with the length $\Delta _i >0$ its characteristic 
+	\begin{equation}
+	\label{eq:3_47}
+	R(i)>\mu L(x_{i} -x_{i-1} )-\mu \tilde{\xi }_{i} +c.
+	\end{equation}
+	
+	Then for the redundancy coefficient  (\ref{eq:3_38}) the estimate 
+	\begin{equation} 
+	\label{eq:3_48} 
+	\lambda (s,n_{0} )\le E[(s-n_{0} )/6]/(s-n_{0} )<0.17 
+	\end{equation} 
+	is true. Here $E[\vartheta ]$ is the integer part of $\vartheta $.
+	\end{theorem}
+	\textbf{Proof.} If after the $s$-th iteration of the parallel method and the $k$-th iteration of the sequential one the equality 
+	\begin{equation}
+	\label{eq:3_49}
+	(y_{t-1} ,y_{t} )=(x_{q-1} ,x_{q} ),\; t=t(s),\; q=q(k),
+	\end{equation}
+	holds and the next trial points $y^{s+1} $ and $x^{k+1} $ fall into the given intervals, respectively, then as a consequence of  (\ref{eq:3_44})
+	\begin{equation}
+	\label{eq:3_50}
+	R(t(s))=R(q(k)),
+	\end{equation}
+	and, according to  (\ref{eq:3_6}),  (\ref{eq:3_40}), and  (\ref{eq:3_42}), 
+	\begin{equation}
+	\label{eq:3_51}
+	y^{s+1} =x^{k+1}.
+	\end{equation}
+	
+	The decision rules of the characteristical algorithms along with  (\ref{eq:3_49})- (\ref{eq:3_51}) and  (\ref{eq:3_37}) with $s=k=n_0 $ provide the inclusion
+	\begin{equation*}
+	\{ x^{k} \} \subseteq \{ y^{s} \},
+	\end{equation*}
+	which allows evaluating the redundancy with the help of the coefficient  (\ref{eq:3_38}).
+	
+	Conditions  (\ref{eq:3_7}),  (\ref{eq:3_47}), and  (\ref{eq:3_10}) with $\nu =0,5+\sigma $ ensure the fulfillment of the conditions of Theorem \ref{theor:3_4}, according to which when $\mu >0$ the global minimum points of the function $\varphi (x)$ only can be the limit points of the sequences $\{ x^k \} $and\textit{ $\{ y^{s} \} $}. This means that the set of limit points of the sequence \textit{$\{ y^{s} \} $} coincides with the set of limit points of the sequence $\{ x^k \} $. 
+	
+	Assume that the first \textit{k} points of the sequence $\{ x^k \} $ are ordered according to  (\ref{eq:3_3}) and $j=j(k)$ is the number of an interval $(x_{j-1} ,x_j )$ such that $x_{j-1} \le x^{*} \le x_{j} $ where $x^{*} $ is the global minimizer of the function $\varphi (x)$. On account of  (\ref{eq:3_47}) and Lipschitz condition, we have the inequality 
+	\begin{equation}
+	\label{eq:3_52}
+	R(j)>-\mu \varphi (x^{*} )+c.
+	\end{equation}
+	for the characteristic of this interval. Since the point $x^{*} $ is a limit one, then according to  (\ref{eq:3_7}) 
+	\begin{equation*}
+	R(j(k))\to -\mu \varphi (x^{*} )+c+0.
+	\end{equation*}
+	if $k\to \infty $.
+	
+	Taking into account the rule  (\ref{eq:3_4}) one can state that any interval $(x_{i-1} ,x_{i} ),\; i=i(k),$ the characteristic of which satisfies  (\ref{eq:3_52}) includes at least one point of the sequence $\{ x^{k} \} $. At the same time, any interval $(x_{i-1} ,x_{i} ),\; i=i(k),$ for which 
+	\begin{equation}
+	\label{eq:3_53}
+	R(i)<-\mu \varphi (x^{*} )+c,
+	\end{equation}
+	cannot include the points of the sequence $\{ x^{k} \} $. Thus, the redundant trials of the parallel method can be executed only in the intervals, for which  (\ref{eq:3_53}) holds.
+	
+	Let us consider again the interval \textit{$[x_{j-1} ,x_{j} ],\; j=j(k)$}including the global minimum point $x^{*} $. The current trial at the point $x=x^{k+1} $ within this interval forms two new subintervals
+	\begin{equation}
+	\label{eq:3_54}
+	[x_{j-1} ,\; x]\, ,\; [x,x_{j} ],
+	\end{equation}
+	one of which includes $x^{*} $. Let it be the first subinterval, i.e.,
+	\begin{equation}
+	\label{eq:3_55}
+	x^{*} \in [x_{j-1} ,\; x].
+	\end{equation}
+	
+	Then the inequality  (\ref{eq:3_52}) is true for this interval. Let us show that this inequality holds for the interval \textit{$\; [x,x_{j} ]$} as well. Let us introduce the notations
+	\begin{equation}
+	\label{eq:3_56}
+	\Delta _{x} =x_{j} -x,\; \xi _{x} =\; \min \{ z_{j} ,\; z\} ,\; z=z^{k+1} .
+	\end{equation}
+	
+	Let us consider the case when the points $x_{j-1} $ and $x_j $ are the coordinates of the search trials, i.e., the function values $z_{j-1} $ and $z_j $ have been computed in these points, therefore, $\tilde{\xi }_{j} =\min \{ z_{j-1} ,z_j \} $. Let us estimate the value of $\xi _x $. Assume first that $z_{j-1} <z_j $. On account of  (\ref{eq:3_55}),  (\ref{eq:3_40}),  (\ref{eq:3_42}), and  (\ref{eq:3_56}) we have 	
+	\begin{equation*}
+	x^{*} \le x=g_j -\theta _j \le g_j 
+	\end{equation*}
+	\begin{equation*}
+	\xi _x \le z\le \varphi (x^{*} )+L(x-x^{*} )<\varphi (x^{*} )+L\Delta _x.
+	\end{equation*}
+	
+	If $z_{j-1} \ge z_j $, let us consider two cases. In the first case when $x^{*} >g_{j} $ we have 
+	\begin{equation*}
+	x=g_j +\theta _j 
+	\end{equation*}
+	\begin{equation*}\xi _x \le z\le \varphi (x^{*} )+L(x-x^{*} )<\varphi (x^{*} )+L(x-g_j )=
+	\end{equation*}
+	\begin{equation*}
+	=\varphi (x^{*} )+L\theta _{j} \le \varphi (x^{*} )+L\sigma \Delta _{j} \le \varphi (x^{*} )+L\Delta _{x} ,
+	\end{equation*}	
+	since $\Delta _x \ge (1-\nu )\Delta _j =(0,5-\sigma )\Delta _j $ (see Note to Theorem \ref{theor:3_1}), and because of $\sigma \le {1/{\vphantom{1 6}}6} $ 
+	
+	\begin{equation*}
+	\Delta _{x} \ge \frac{1}{3} \Delta _{j} >\sigma \Delta _{j}.
+	\end{equation*}
+	
+	In the second case when $x^{*} \le g_j $ we can build a chain of inequalities
+	\begin{equation*}
+	\xi _{x} =0,5(z_{j} +z-\left|z_{j} -z\right|)\le 0,5(z_{j} +z)\le 0,5(z_{j-1} +z)\le \phi (x^{*} )+0,5L(x-x_{j-1} )\le 
+	\end{equation*}
+	\begin{equation*}
+	\le \varphi (x^{*} )+\frac{L(1+2\sigma )}{2(1-2\sigma )} \Delta _{x} \le \varphi (x^{*} )+L\Delta _{x},
+	\end{equation*}
+	which allows estimating the characteristic \textit{$R_{x} $} of the interval $(x,x_{j} )$ as
+	\begin{equation*}
+	R_{x} >\mu L\Delta _{x} -\mu \xi _{x} +c\ge -\mu \varphi (x^{*} )+c,
+	\end{equation*}
+	from where 
+	\begin{equation}
+	\label{eq:3_57}
+	R_{x} >-\mu \varphi (x^{*} )+c.
+	\end{equation}
+	
+	The inequality  (\ref{eq:3_57}) holds as well when $x_{j} \notin \{ x^{s} \} $ because in this case $x=g_j $ according to  (\ref{eq:3_43}). Since $\varphi (x)$ satisfies the Lipschitz condition, $z\le \varphi (x^{*} )+L\Delta _x $ therefore
+	\begin{equation*}
+	R_{x} >\mu L\Delta _{x} -\mu z+c\ge -\mu \varphi (x^{*} )+c.
+	\end{equation*}
+	
+	Thus, if a pair of intervals of type  (\ref{eq:3_54}) exists after k trials then the choice of two trials simultaneously according to the decision rules  (\ref{eq:3_2}) -  (\ref{eq:3_6}) and  (\ref{eq:3_39}) cannot produce redundant trials. However, after $k(n_0)$ initial trials  (\ref{eq:3_46}) we can obtain the worst situation when there exists only one interval satisfying the condition  (\ref{eq:3_52}), namely, the interval $[x_{j-1} ,x_j ]$, which includes the global minimizer $x^{*} $ and the other intervals  violate the inequality  (\ref{eq:3_52}). This means that the interval \textit{$[x_{j-1} ,x_{j} ]$} has the maximal characteristic among all ones, therefore the first trial of the new $(n_{0} +1)$-th iteration will be executed in this interval according to rule  (\ref{eq:3_4}) but the second trial of this iteration will be  redundant. 
+	
+	The execution of a trial in the interval $[x_{j-1} ,x_j ]$ will result in an appearance of a pair of intervals  (\ref{eq:3_54}), and  (\ref{eq:3_52}) holds for each of them. Therefore, at the $(n_0 +2)$-th iteration the next two trials $y^q \in \{ x^k \} $ will be executed in these intervals. If one of the trials of the $(n_0 +3)$-th iteration falls into the interval  (\ref{eq:3_55}), this will result in the appearance of a new pair  (\ref{eq:3_54}) again and in the absence of the redundant trials at this iteration. Thus, the source of redundant trials can be  the situation when a pair of trials of the $(n_0 +3)$-th iteration includes the points from \textit{$(x,x_j )$} but does not contain any point from  (\ref{eq:3_55}). If this situation takes place at the $(n_0 +3)$-th iteration then the $(n_0 +4)$-th iteration can execute one trial in interval  (\ref{eq:3_55}) and another one in an interval $(x_{i-1} ,x_i )$ such that its characteristic satisfies the inequality  (\ref{eq:3_53}). The latter trial will be  redundant. After that, we have the situation identical to the one occurred after the execution of the $(n_0 +1)$-th iteration.
+	
+	Thus, during three iterations from the $(n_0 +1)$-th to the $(n_0 +3)$-th one inclusive, in which 6 trials have been executed, one can obtain  no more than one redundant trial. This means that relation  (\ref{eq:3_48}) is true.
+	
+	\begin{corollary} If the objective function $\varphi (x)$ has $\gamma $ global minimum points and there is at least one point of the sequence $\{ y^q \} $ (generated during the execution of the initial iterations) between two adjacent global minimizers, then under the conditions of Theorem \ref{theor:3_5} the parallel characteristical algorithm with $2\gamma $ parallel processors involved into every iteration provides the redundancy according to  (\ref{eq:3_48}).
+	\end{corollary}
+	
+	\section{ Experimental results}
+	
+	In order to illustrate the theoretical conclusions drawn above the results of the experiments carried out using a multiprocessor cluster at the Lobachevsky State University of Nizhni Novgorod and mini-supercomputer ALLIANT FX/80 on the test classes of functions of various dimensionality are presented in this subsection.
+	
+	Let us assume that the computational time costs of a trial are much greater than the ones of the implementation of the algorithm computational scheme so that the latter can be neglected. In this situation, one can use the speed up in iterations 
+	\begin{equation*}
+	s(p)=\frac{K(1)}{K(p)/p} ,\; p>1
+	\end{equation*}
+	
+	as a general measure for estimating the parallelization efficiency. Here $K(1)$ is a number of trials executed by the sequential characteristical algorithm during solving an optimization problem (after the completion of the initial trials) and $K(p)$ is the number of trials executed by the parallel method using \textit{p} parallel processors at every iteration during solving the same problem. 
+	
+	For carrying out the experiments with the one-dimensional parallel characteristical algorithms a set of the test functions proposed in \cite{3_HansenJaumardLu} has been used. The parallel algorithms based on the sequential versions of the Kushner's method (KM), of the Method of Broken Lines (MBL), and of the information algorithm AGSIP have been considered. On the base of three functions from \cite{3_HansenJaumardLu} and various starting points, three problems have been taken:
+	
+	PROBLEM 1. Function \#2, starting points 3, 4, and 5. 
+	
+	PROBLEM 2. Function \#9, starting points 5, 8, and 11.
+	
+	PROBLEM 3. Function \#19, starting points 1, 2, and 3.
+	
+	For Kushner's method and for method of broken lines the initial trials have been executed at the boundary points $a$ and $b$ of the corresponding search intervals $[a,b]$ as well. For these methods, the exact values of Lipschitz constants have been used, unlike AGSIP, for which the adaptive estimate  (\ref{eq:3_21}) with $r=2$ has been employed. The value of $\epsilon = 0.0001(b-a)$ has been used in the termination criterion  (\ref{eq:3_14}) for these methods. The results of the experiments are summarized in Table~\ref{tab:3_1} where $q$ denotes the problem number and $p$ is the number of the parallel processors. The global minima were found in all cases.
+	
+	\begin{table}[ht]
+		\centering
+		\caption{The result of experiments for the invariant functions}
+		\label{tab:3_1}
+		{\setlength{\extrarowheight}{1.5pt}
+			\begin{tabular}
+				{|c|c|c|c|c|c|c|c|}
+				\hline
+				\multirow{2}{*}{\textbf{$q$}} 
+				& \multirow{2}{*}{\textbf{$p$}} 
+			    	 & \multicolumn{2}{|c|}{\textbf{KM}} 
+				     & \multicolumn{2}{|c|}{\textbf{MBL}} & \multicolumn{2}{|c|}{\textbf{AGSIP}} \\
+				\cline{3-8}
+				  &  & \textbf{Number of trials} & \textbf{Speed up} 
+				     & \textbf{Number of trials} & \textbf{Speed up} 
+				     & \textbf{Number of trials} & \textbf{Speed up} \\ 
+				\hline
+				\multirow{4}{*}{1} 
+				  & 1 & 4252 & --   & 151 & --   & 120 & --   \\ \cline{3-8}
+				  & 2 & 4353 & 1.95 & 151 & 2.0  & 119 & 2.02 \\ \cline{3-8}
+				  & 3 & 4352 & 2.93 & 155 & 2.92 & 162 & 2.21 \\ \cline{3-8}
+				  & 4 & 4353 & 3.91 & 157 & 3.83 & 163 & 2.93 \\ \hline
+				\multirow{4}{*}{2} 
+				  & 1 & 4622 & --   & 124 & --   & 125 & --   \\ \cline{3-8}
+				  & 2 & 4621 & 2.0  & 123 & 2.02 & 125 & 2.0  \\ \cline{3-8}
+				  & 3 & 4622 & 3.0  & 122 & 3.05 & 126 & 2.98 \\ \cline{3-8}
+				  & 4 & 4373 & 4.24 & 125 & 3.7  & 127 & 3.94 \\ \hline
+				\multirow{4}{*}{3} 
+				  & 1 & 2780 & --   & 126 & --   & 148 & --   \\ \cline{3-8}
+				  & 2 & 2799 & 2.0  & 127 & 1.98 & 153 & 1.93 \\ \cline{3-8}
+				  & 3 & 2762 & 3.02 & 128 & 2.95 & 159 & 2.79 \\ \cline{3-8}
+				  & 4 & 2769 & 4.02 & 133 & 3.78 & 163 & 3.63 \\ \hline
+				
+			\end{tabular}
+		}
+	
+	\end{table}
+
+
+	As follows from the results of the experiments, in some cases the methods have demonstrated greater speed up than the number of processors used (superlinear speed up). This situation is possible in the Kushner's method and in AGSIP because the objective function behavior is estimated adaptively in these algorithms. For example, in AGSIP the hyperspeed up will take place if Lipschitz constant is estimated more precisely in the parallel version than in the sequential one. 
+	
+	Further experiments have been carried out for the multidimensional problems according to the approach to the dimensionality reduction based on Peano curves presented in Chapter 5. The second series of experiments was devoted to maximization of 100 two-dimensional functions of the type
+	\begin{equation}
+	\label{eq:3_58}
+	\varphi(y)=\left\{\left(\sum _{i=1}^7\sum _{j=1}^7A_{ij} g_{ij} (y)+B_{ij}h_{ij}(y) \right)^2 +\left(\sum _{i=1}^7\sum _{j=1}^7C_{ij}g_{ij}(y)-D_{ij}h_{ij}(y)\right)^2 \right\}^{1/2},
+	\end{equation}
+	where 
+	\begin{equation*}
+	y=(y_1 ,y_2 )\in R^2 ,0\le y_s \le 1,s=1,2,
+	\end{equation*}
+	\begin{equation*}
+	g_{ij} (y)=\sin (i\pi y_1 )\sin (j\pi y_2 ),
+	\end{equation*}
+	\begin{equation*}
+	h_{ij} (y)=\cos (i\pi y_1 )\cos (j\pi y_2 )
+	\end{equation*}
+	 and the coefficients $A_{ij} ,B_{ij} ,C_{ij} ,D_{ij} $ were distributed uniformly over the interval $[-1,1]$.  
+
+	The test problems were reduced to the one-dimensional ones by Peano mappings. Two parallel characteristic algorithms were applied to solve the reduced one-dimensional problems until the precision $\varepsilon =0.001$  in the termination condition is reached. The first algorithm was described in \cite{3_SergGri1994}. It uses a fixed estimate of Lipschitz constant (let us denote this algorithm as Parallel Method with Fixed Lipschitz constant, or PMFL). Note that obtaining this estimate has required 2000 computations of the function values on a uniform grid. Using PMFL, the global  solutions have been found in 99 cases of 100. In the only case, the solution has not been found (neither by a sequential algorithm nor by the parallel method) because of not enough accurate estimate of the Lipschitz constant: the estimate obtained was less than the actual value. The second algorithm, used for comparison, was the parallel multidimensional information algorithm applying Peano curves (PMIP). Using PMIP, the optima have been found in all 100 problems. The results of the experiments (the averaged number of trials and the speed up) are presented in Table ~\ref{tab:3_2}. 
+
+	\begin{table}[ht]
+		\centering
+	\caption{Averages results for two-dimensional functions  (\ref{eq:3_58})}
+	\label{tab:3_2}
+	{\setlength{\extrarowheight}{1.5pt}
+	\begin{tabular}
+		{|c|c|c|c|c|}
+		\hline
+		\multirow{2}{*}{\textbf{P}} & \multicolumn{2}{|c|}{\textbf{PMFL}}  & \multicolumn{2}{|c|}{\textbf{PMIP}} \\ \cline{2-5}
+		 & \textbf{Number of trials} & \textbf{Speed up} & \textbf{Number of trials} & \textbf{Speed up} \\ \hline
+		1 & 1013.25 & --    & 1575.12 & --    \\ 		\hline
+		2 & 1012.82 & 2.001 & 1569.08 & 1.974 \\ 		\hline
+		3 & 1012.33 & 3.003 & 1562.61 & 3.024 \\ 		\hline
+		4 & 1012.00 & 4.005 & 1599.92 & 3.938 \\ 		\hline
+	\end{tabular}
+}
+	\end{table}
+	
+	The third series of experiments consisted in the minimization of the multidimensional function 
+	\begin{equation}
+	\label{eq:3_59}
+	\varphi (y)=\frac{\pi }{N} \left\{\sin ^{2} (\pi z_{1} )+5(z_{N} -1)^2 +\sum _{i=1}^{N-1}\left[(z_{i} -1)^2 (1+\sin ^2 (\pi z_{i+1} ))\right] \right\}
+	\end{equation}
+	where $z_{i} =1+0,25(y_i -1)$, $-10\le y_{i} \le 10$, and $1\le i\le N$ for the dimensions $N=$~2,~3,~and~4. This function is a modification of the test one from \cite{3_LucidiPiccioni}. 
+	
+	Two methods have been applied for the minimization of this function: PMIP and method of broken lines generalized for the multidimensional case according to the dimensionality reduction scheme based on Peano curves (MBLP). The value of $\varepsilon =10^{-5} $ was used in the termination criterion  (\ref{eq:3_14}) of the methods. Lipschitz constant was estimated adaptively according to  (\ref{eq:3_21}). The parameters $r=3.5$ for PMIP and  $r=1.7$ for MBLP were selected according to the sufficient conditions of convergence for the algorithms. The global minima points have been found in all cases. The results of the experiments are presented in Table \ref{tab:3_3}.
+	
+	\begin{table}[ht]
+		\centering
+		\caption{The results of the comparison for the problem  (\ref{eq:3_59})}
+		\label{tab:3_3}
+		{\setlength{\extrarowheight}{1.5pt}
+		\begin{tabular}
+			{|c|c|c|c|c|c|}
+			\hline
+			\multirow{2}{*}{\textbf{$N$}} 
+			& \multirow{2}{*}{\textbf{$p$}} 
+			& \multicolumn{2}{|c|}{\textbf{PMIP}} 
+			& \multicolumn{2}{|c|}{\textbf{MBLP}} \\
+			\cline{3-6}
+			&  & \textbf{Number of trials} & \textbf{Speed up} 
+			& \textbf{Number of trials} & \textbf{Speed up} \\ 
+			\hline
+			\multirow{4}{*}{2}
+			& 1 & 1082 & --    & 1027 & --    \\ \cline{3-6}
+			& 2 & 1084 & 1.996 & 1028 & 1.998 \\ \cline{3-6}
+			& 3 & 1083 & 2.997 & 1050 & 2.934 \\ \cline{3-6}
+			& 4 & 1136 & 3.810 & 1224 & 3.356 \\ \hline
+			\multirow{4}{*}{3}
+			& 1 & 4784 & --    & 4649 & --    \\ \cline{3-6}
+			& 2 & 4776 & 2.003 & 5018 & 1.853 \\ \cline{3-6}
+			& 3 & 4776 & 3.005 & 4647 & 3.001 \\ \cline{3-6}
+			& 4 & 4768 & 4.016 & 4480 & 4.151 \\ \hline
+			\multirow{4}{*}{4}
+			& 1 & 7958 & --    & 6274 & --    \\ \cline{3-6}
+			& 2 & 7876 & 2.021 & 5238 & 2.396 \\ \cline{3-6}
+			& 3 & 6750 & 3.537 & 6486 & 2.902 \\ \cline{3-6}
+			& 4 & 7820 & 4.072 & 6468 & 3.880 \\ \hline
+		\end{tabular}
+	}
+	\end{table}
+
+
+	As it has been already mentioned above, the adaptive estimate of the function behaviour during the search process can result in a superlinear speed up. In general, the experiments have confirmed the main theroretical conclusions on the convergence of the parallel algorithms and on the efficiency of their parallelizaion drawn in the present chapter.
+	
+	\section{Parallel asynchronous characteristical global search algorithms}
+	
+	As it has been pointed out above, the synchronous scheme has a disadvantage: the processors completed their trials during current iteration before the others stay idle waiting for final completing the iteration. However, an asynchronism can be introduced into the structure of the characteristical methods that allows excluding the idle of processors because of differences in the run time for different processors and, therefore, increasing the parallelization efficiency in comparison with the synchronous scheme.
+	
+	Before describing the structure of the asynchronous characteristical algorithm, let us come back to the general computational scheme of the asynchronous method (see (\ref{eq:1_26})--(\ref{eq:1_30})) and remind a number of important aspects and notations. Since the iterations are distributed in time in the asynchronous algorithm, it is convenient to use the number of trial \textit{k} when describing the method. In this connection, let us introduce a set of the coordinates of the completed trials
+	\begin{equation} 
+	\label{eq:3_60} 
+	w(k)=\{ w_{1} ,w_{2} ,\ldots ,w_{k} \} , 
+	\end{equation} 
+	$k\ge 1$, and a set of the coordinates, at which the new trials are executed after completing the preceding $k$ trials
+	\begin{equation} 
+	\label{eq:3_61} 
+	v(k)=\{ v_{1} ,v_{2} ,\ldots ,v_{p(k)} \}  
+	\end{equation} 
+	Here $p(k)$ is a number of processors executing the current trials, 
+	\begin{equation*}
+	w_{j} =x^{i_{j} } ,\; 1\le j\le k,
+	\end{equation*}
+	\begin{equation*}
+	v_{s} =x^{i_{s} } ,\; 1\le s\le p(k),\; 1\le i_{j} ,\; i_{s} \le k+p(k).
+	\end{equation*}
+	
+	It is obvious that
+	\begin{equation*}
+	w(k)\bigcup v(k)=\{ x^{1} ,\ldots ,x^{k} ,\ldots ,x^{k+p(k)} \}.
+	\end{equation*}
+	
+	\textbf{Definition 3.2.} An algorithm for solving the problem  (\ref{eq:3_1}) is called  \textit{parallel asynchronous characteristical method} if the decision rule of the trial coordinate selection for the algorithm consists in the following.
+	
+	The first $k_{1} \ge 1$ trials are executed in the interval $[a,b]$ arbitrarily, but starting from the search step with number $k=k_{0} \le k_{1} {\kern 1pt} ,\; k_{1} -k_{0} \le p(k_{0} )$, such that $k_{0} $ trials have been completed and $k_{1} -k_{0} $ trials are running, the rule of new trial coordinates selection is as follows:
+	
+	\begin{description} [\textbf{Step1.}]
+	\item[\textbf{Step 1.}] {If the idle processors are absent, the algorithm is waiting a free processor. If $1\le \pi =\pi (k)\le p(k)$ processors have completed the execution of trials and the function values $z^{i_{j} } =\varphi (x^{i_{j} } )$ at the points $x^{i_{1} } ,\; x^{i_{2} } ,\ldots ,x^{i_{\pi } } $, $x^{i_{j} } \in v(k),\; 1\le j\le \pi ,$ have been computed, then the step number is set to $k=k+\pi $, the sets $w(k)=w(k-\pi )\cup \{ x^{i_{1} } ,\; x^{i_{2} } ,\ldots ,x^{i_{\pi } } \} ,$ $v(k)=v(k-\pi )\backslash \{ x^{i_{1} } ,\; x^{i_{2} } ,\ldots ,x^{i_{\pi } } \} $ are formed, and the transition to the next step is performed.}
+	\item [\textbf{Step 2.}]   {A set 
+	\begin{equation*}
+	\Lambda _{k} =\{ x_{0} ,x_{1} ,...,x_{\tau } \}
+	\end{equation*}
+	of a finite number $\tau +1=\tau (n)+1$ of points in the domain $Q=[a,b]$ is defined provided that $a\in \Lambda _k ,b\in \Lambda _k $, $w(k)\subseteq \Lambda _k ,\; v(k)\subseteq \Lambda _k ,$ and the set $\Lambda _k $ is the ordered one (by the subscript) in the increasing order, i.e.,
+	\begin{equation*}
+	a=x_0 <x_1 <...<x_{\tau -1} <x_{\tau } =b.
+	\end{equation*}
+	}
+	\item [\textbf{Step 3.}] {A list $\Sigma _k$ of the numbers of the feasible intervals $(x_{i-1} ,x_i )$ is formed; such intervals are those, boundary points $x_{i-1} \; {\rm and}\; x_i $ of which are either the coordinates of the completed trials or the boundary points of the interval $[a,\, b]$. In other words, the index $i$ of the interval $(x_{i-1} ,x_i )$ belongs to the set $\Sigma _k $ if none of the ends of the interval is a coordinate of a noncompleted trial. }
+	
+	\item [\textbf{Step 4.}] {The value $R(i)$ is juxtaposed to each feasible interval $(x_{i-1} ,x_i )$, $i\in \Sigma _k $. $R(i)$ is called the characteristic of this interval. }
+	
+	\item [\textbf{Step 5.}] {The characteristics $R(i),\; 1\le i\le \tau $, are arranged in the decreasing order:
+	\begin{equation}
+	\label{eq:3_62}
+	R(t_{1} )\ge R(t_{2} )\ge \ldots \ge R(t_{\tau -1} )\ge R(t_{\tau } ).
+	\end{equation}
+	}
+	\item [\textbf{Step 6.}] {$\pi$ maximal characteristics with the indices $t_j ,\; 1\le j\le \pi $, are selected in the sequence  (\ref{eq:3_62}) and the trials are executed at the points of the set 
+	\begin{equation}
+	\label{eq:3_63}
+	T(k)=\{ x^{\eta +1} ,\ldots ,x^{\eta +\pi } \} ,
+	\end{equation}
+	in the intervals corresponding to these characteristics according to the rules 
+	\begin{equation*}
+	x^{\eta +j} =d(t_{j} )\in (x_{t_{j} -1} ,x_{t_{j} } )
+	\end{equation*}	
+	for $1\le j\le \pi $, where $\eta =card(w(k))+card(v(k))$.
+	}
+	\item [\textbf{Step 7.}] {The points of set $T(k)$ from  (\ref{eq:3_63}) are added to the set \textit{v}(\textit{k}) and the transition to Step 1 is performed.}
+	\end{description}
+	
+	The theoretical results connected with the asynchronous characteristical algorithms are generally similar to those for the synchronous ones. In order to formulate these results exactly, let us consider a trial sequence $\{ x^k\} $ generated by an asynchronous characteristic algorithm. Assume for the simplification that the number of processors is fixed and equal to \textit{p}. Let us associate with the trial sequence $p$ subsequences $\{ \vartheta _{s}^{j} \} ,\, 1\le j\le s$, where $\vartheta _{s}^{j} $ is the moment of completing the $s-$th trial by the $j-$th processor. Let us consider the values
+	\begin{equation}
+	\label{eq:3_64}
+	\vartheta _{s}^{j} -\vartheta _{s-1}^{j} ,\; 1\le j\le p,s>1.
+	\end{equation}
+	
+	Assume that the number of idle processors $\pi \le card(\Sigma _{k} )$, i.e., none of the idle processors is to wait for the appearance of a free interval to execute a new trial. If it is possible to neglect the time of the formation of the set  (\ref{eq:3_63}), the value $\vartheta _{s}^{j} -\vartheta _{s-1}^j $ is the execution time of the \textit{s-}th trial by the \textit{j-}th processor. However, in general, $\vartheta _{s}^j -\vartheta _{s-1}^{j} $ are the times from the completing of the ($s - 1$)-th trial till the completion of the $s-$th trial by the \textit{j-}th processor and can include the time of the new trial point selection for the $j-$th processor according to Steps 2 - 6 of the asynchronous algorithm. 
+	
+	Assume that the times  (\ref{eq:3_64}) are bounded from above, i.e., there is a constant \textit{$\vartheta$}  such that 
+	
+	\begin{equation}
+	\label{eq:3_65}
+	\vartheta _{s}^{j} -\vartheta _{s-1}^{j} \le \tilde{\vartheta },\; 1\le j\le p,s>1.
+	\end{equation}
+	
+	In fact, the relation  (\ref{eq:3_65}) ensures any trial in the asynchronous scheme to be completed in a finite time necessarily.
+	
+	In this case (if the additional condition  (\ref{eq:3_65}) holds) Theorems \ref{theor:3_1}-\ref{theor:3_4} take place for the asynchronous methods as well; the proofs of those differ from the ones for the synchronous algorithms in minor details. 
+	
+	The quantitative efficiency enhancement of the asynchronous algorithms as compared to the synchronous ones is demonstrated in Chapter 4 by means of experiments with the test functions being multiextremal essentially. 
+	
+	
+	
+\begin{thebibliography}{99.}
+\bibitem{3_Gorodetsky} Gorodetsky, S.Y.: Convergence and asymptotic estimates of behavior for one class of search methods. In: System Dynamics. Dynamics and Control. Gorki State University Publishing (1984). In Russian 
+\bibitem{3_GoroGri} Gorodetsky, S.Y., Grishagin, V.A.: Nonlinear Programming and Multiextremal Optimization, Models and Methods of Finite-Dimensional Optimization, vol. 2. NNGU Press, Nizhni Novgorod, Russia (2007). In Russian
+\bibitem{3_GrishaginSergeyevStrongin} Grishagin, V.A., Sergeyev, Y.D., Strongin, R.G.: Parallel characteristical algorithms for solving problems of global optimization. J. Global Optim. \textbf{10}(2), 185–206 (1997)
+\bibitem{3_GrishaginStrongin_EnginCybernetics} Grishagin, V.A., Strongin, R.G.: Optimization of multiextremal functions subject to monotonically unimodal constraints. Engineering Cybernetics \textbf{22},  117--122 (1984)
+\bibitem{3_HansenJaumardLu} Hansen, P., Jaumard, B., Lu, S.H.: Global Optimization of Univariate Lipschitz Functions:2. New Algorithms and Computational Comparison. Math. Program. \textbf{55}, 273--293 (1989)
+\bibitem{3_Kushner}	Kushner, H.J.: A new method of locating the maximum point of an arbitrary multipeak curve in the presence of noise. Transactions of ASME, Ser. D. Journal of Basic Engineering \textbf{86}, 97--106 (1964)
+\bibitem{3_LucidiPiccioni} Lucidi, S., Piccioni, M.:  Random tunneling by means of acceptance-rejection sampling for global optimization. J. Optim. Theory Appl. \textbf{62}(2), 255--277 (1989)
+\bibitem{3_Pinter}	Pint{\'e}r, J.D.: Global Optimization in Action.: Kluwer Academic Publishers, Dordrecht (1996)
+\bibitem{3_Piyavskij}	Piyavskij, S.A.: An Algorithm for Finding the Absolute Extremum of a Function. USSR Comput. Math. Math. Phys. \textbf{12}(4), 57--67 (1972)
+\bibitem{3_SergeyevLocTun} Sergeyev, Y.D.: An information global optimization algorithm with local tuning. SIAM J. Optim. \textbf{5}(4), 858–870 (1995)
+\bibitem{3_SergGri1994} Sergeyev, Y.D., Grishagin, V.A.: A Parallel Method for Finding the Global Minimum of Univariate Functions. J. Optim. Theory Appl. \textbf{80}(3), 513--536 (1994)
+\bibitem{3_SergeyevGrishaginOMS} Sergeyev, Y.D., Grishagin, V.A.: Sequential and parallel algorithms for global optimization, Optim. Methods Softw. \textbf{3},  111--124 (1994)
+\bibitem{3_SergMukhKvasLera} Sergeyev, Y.D., Mukhametzhanov, M.S., Kvasov, D.E., Lera, D.: Derivative-free local tuning and local improvement techniques embedded in the univariate global optimization. J. Optim. Theory Appl. 171(1), 186–208 (2016)
+\bibitem{3_Shubert} Shubert, B.O.: A sequential method seeking the global maximum of a function. SIAM J. Numer. Anal. \textbf{9}(3), 379–388 (1972)
+\bibitem{3_StrMonRus}	Strongin, R.G.: Numerical Methods in Multiextremal Problems (Information-Statistical Algorithms). Nauka, Moscow (1978). In Russian
+\bibitem{3_StrMarkin} Strongin, R.G., Markin, D.L.: Minimization of multiextremal functions with nonconvex constraints. Cybernetics 22, 486–493 (1986)
+\bibitem{3_StrSergMon2000} Strongin, R.G., Sergeyev, Y.D.: Global Optimization with Non-Convex Constraints. Sequential and Parallel Algorithms. Kluwer Academic Publishers, Dordrecht (2000)
+\bibitem{3_Zilinskas1975} $\check{Z}$ilinskas, A.: One-step Bayesian method for the search of the optimum of one-variable functions. Cybernetics 1, 139--144 (1975)
+\end{thebibliography}
 
 %\end{document}
