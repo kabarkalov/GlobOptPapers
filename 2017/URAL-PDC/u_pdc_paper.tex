@@ -37,11 +37,11 @@
 \begin{abstract}
 This work considers a parallel algorithm for the multi-objective optimization. The
 algorithm is based on the application of the information-statistical approach for solving
-reduced scalar problem, the set of the global optima in which coincides to the set of the
-weakly efficient solutions of the initial multi-objective problem. In the present work the parallelization scheme, which is common for all information-statistical global search algorithms,
+reduced scalar problem in which the set of the global optima coincides to the set of the
+weakly efficient solutions of the initial multi-objective problem.
+In the work the parallelization scheme, which is common for all information-statistical global search algorithms,
 was applied to the sequential algorithm of the multi-objective optimization. Also, in this
-work one of the techniques of accounting for the local properties of the objective function
-allowing accelerating the convergence essentially has been applied to the multi-objective
+work one of the convergence speedup techniques based on local properties of objective functions has been applied to the multi-objective
 problems.
 
 \keywords{deterministic global optimization, multi-objective optimization, parallel numerical
@@ -50,8 +50,8 @@ methods, derivative-free algorithms}
 %
 \section{Introduction}
 The multi-objective optimization problems attract an increasing interest in recent years since
-these ones reflect the controversy of the requirements arising to the modeled objects of real
-world the most completely. In such problems, the solutions are a compromised decision of a set
+these ones most completely reflect the controversy of the requirements arising to the modeled objects of real
+world. In such problems, the solutions are a compromised decision of a set
 of these ones. As a rule, these compromised solutions are chosen either from a set, in which all
 elements cannot be improved with respect to any criterion without the worsening of the other
 criteria (Pareto-optimal or efficient solutions) or from a set, in which no one element could be
@@ -60,8 +60,8 @@ latter requirement is weaker, and all Pareto-optimal solutions are the Slater-op
 well.
 
 To find the complete set of efficient or weakly efficient points is the most computationally
-complex problem, however it provides a wide choice of possible compromised solutions. A
-plenty of approaches to the finding of these sets has been developed: the application of the
+complex problem, however it provides a wide choice of possible compromised solutions. To find these sets a
+plenty of approaches have been developed: the application of the
 genetic algorithms to the multi-objective problem directly~\cite{DebPratap2002}, the use of the
 parametric convolutions reducing the problem to a series of the scalar global optimization
 problems~\cite{GergelKozinov2017}, various approaches to the solving the problems with the
@@ -70,9 +70,9 @@ using of the most of these methods is the absence of the theoretical guarantee o
 convergence to the whole sought set of the Pareto-optimal solutions on a wide class of
 problems including the ones with the non-convex multiextremal criteria. A method having this
 property in the case, when all criteria satisfy the Lipschitz condition has been developed on the
-basis of the information global search algorithm~\cite{markinStrongin1993}. In the present
-paper, the parallel and accelerated by the local refinement technique~\cite{strOptBook}(chapter
-3) modification of this method will be considered.
+basis of the information global search algorithm~\cite{markinStrongin1993}.
+In the paper there is considered the parallel modification of this method accelerated due to the local refinement
+technique~\cite{strOptBook}(chapter 3).
 
 \section{Problem Statement and Dimensionality Reduction}
 The multi-objective optimization problems are stated in the following way:
@@ -81,8 +81,8 @@ The multi-objective optimization problems are stated in the following way:
   \min\{f(y): y\in D\}, D=\{y\in \mathbb{R}^n: a_i \leqslant y_i \leqslant b_i, 1\leqslant i
 \leqslant n \}.
 \end{equation}
-Let us assume the components of the vector function (the partial criteria) \(f_i(y), 1\leqslant
-i\leqslant m\), to satisfy the Lipschitz condition with the Lipschitz constant \(L_i\) in \(D\):
+Assume that the components of the vector function (the partial criteria) \(f_i(y), 1\leqslant
+i\leqslant m\) satisfy the Lipschitz condition with the Lipschitz constant \(L_i\) in \(D\):
 \begin{displaymath}
 \label{lip}
 |f_i(y_1)-f_i(y_2)|\leqslant L_i\Vert y_1-y_2\Vert,y_1,y_2\in D,0<L_i<\infty,1\leqslant i
@@ -96,7 +96,7 @@ solution of the problem (\ref{eq:problem}), i.e.
   \label{eq:slater}
   S(D) = \{y\in D: \nexists z\in D, f_i(z)<f_i(y),1\leqslant i \leqslant m\},
 \end{equation}
-which is usually referred as the set of semi-efficient (or weakly efficient) solutions. The
+which is called the set of semi-efficient (or weakly efficient) solutions. The
 conditions in the right-hand side of the definition (\ref{eq:slater}) are known as the principle of
 weak Pareto-optimality (or Slater's optimality principle).
 
@@ -107,7 +107,7 @@ The use of the space-filling curve (\textit{evolvent}) \(y(x)\)
 N\rbrace=\{y(x):0\leqslant x\leqslant 1\}
 \end{displaymath}
 is a classic dimensionality reduction scheme for global optimization algorithms~\cite{evolvents2013}.
-Such a mapping allows the reduction of the problem (\(\ref{eq:problem}\)) stated in a
+Such a mapping allows to reduce the problem (\(\ref{eq:problem}\)) stated in a
 multidimensional space to solving a one-dimensional problem at the expense of worsening its
 properties.
 In particular, the one-dimensional functions \(f_i(y(x))\) are not Lipschitzian but the
@@ -121,11 +121,11 @@ where the H\"older constants \(H_i\) are related to the Lipschitz constant \(L_i
 H_i=4L_id\sqrt{N},d=\max\{b_i-a_i:1\leqslant i\leqslant n\}.
 \end{displaymath}
 \par
-Therefore, not limiting the generality, one can consider the solving of the
+Without losing generality one can, one can consider the solving of the
 one-dimensional problem \(\min\{f(y(x)): x\in [0,1]\}\), satisfying the H\"older condition. The
 issues of the numerical building the mapping like a Peano curve and the corresponding theory
 have been considered in detail in~\cite{evolvents2013}. Here we would note that an evolvent
-built numerically is an approximation of the theoretical Peano curve with a precision of the
+built numerically approximates the theoretical Peano curve with a precision of the
 order \(2^{-m}\), where \(m\) is the building parameter of the evolvent.
 
 \section{Description of the Parallel Algorithm With Local Refinement}
@@ -160,10 +160,10 @@ approximately. Let us consider a new version of this algorithm. The modification
 consists in the use of the local refinement technique described in~\cite{strOptBook}(chapter 3)
 as well as in the parallelization based on the characteristics~\cite{strOptBook}(chapter 5).
 
-The algorithm for solving problem (\ref{eq:problem}) involves constructing a sequence of points $x^i$, where the values of the objective functions are calculated. Let us call the functions values calculation process (including construction of image $y^i=y(x^i)$) the trial, and the tuple $\{x^i, y^i , f_1(y^i), ... f_m(y^i)\}$, the trial result. At each iteration $p$ trials is carried out in parallel, and the set of tuples 
-\[ 
+The algorithm for solving problem (\ref{eq:problem}) involves constructing a sequence of points $x^i$, where the values of the objective functions are calculated. Let us call the functions values calculation process (including construction of image $y^i=y(x^i)$) the trial, and the tuple $\{x^i, y^i , f_1(y^i), ... f_m(y^i)\}$, the trial result. At each iteration $p$ trials is carried out in parallel, and the set of tuples
+\[
 \{x^i, y^i , f_1(y^i), ... f_m(y^i)\}, 1 \leq i \leq k=np,
-\] 
+\]
 makes up the search data collected using the method after carrying out $n$ steps. The rules that define the work of a parallel multi-objective algorithm are as follows.
 
 The first two iterations are performed at the boundary points~\(x^0=0\) and \(x^1=1\) of the
@@ -237,7 +237,7 @@ The theoretical substantiation of this method when \(p=1\) and \(q=0\) is presen
 %The siffitient condition of convergence is: there exists an iteration such that \(r\mu_\nu \geqslant 4H_\nu, 1\leqslant \nu \leqslant m\).
 \section{Test Problems}
 \label{sec:test_problems}
-In order to evaluate the degree of speedup of the convergence of the modified algorithm from
+To evaluate the degree of speedup of the convergence of the modified algorithm from
 Section \ref{sec:algorithm}, the following problems were used:
 \begin{enumerate}
   \item Markin-Strongin problem \cite{markinStrongin1993}:
@@ -330,17 +330,17 @@ B_{2}\left(y\right) \right)^{2} \right] \\
 The computational experiments have been carried out on the Lobachevsky supercomputer at
 State University of Nizhny Novgorod. A computational node included 2 Intel
 Sandy Bridge E5-2660 2.2 GHz processors, 64 Gb RAM. The CPUs had 8 cores (i. e. total 16 cores
-were available per a node).
-In the present section, we will understand the speedup of the method as the speedup in the
+were available per a node). C++ language and OpenMP parallel framework were used to implement the considered algorithm.
+
+In this section, we will understand the speedup of the method as the speedup in the
 number of executed iterations, not in the time of execution. If the problem
 criteria (\ref{eq:problem}) is time-consuming, the overhead costs for the execution of the
 decision rules of the optimization method are low as compared to the time of computing the
 criteria \(f_i(y), 1\leqslant i\leqslant m\).
 
-\paragraph{Local refinement advantages.} In \cite{barkalovLebedev2016} the numerical
-experiments demonstrating the speedup of convergence when using the local refinement
-technique in the algorithm solving the scalar global optimization problems are presented. One
-could expect similar results from the multi-objective algorithm as well. The multi-objective
+\paragraph{Local refinement advantages.} In \cite{barkalovLebedev2016} the numerical experiments
+are presented which demonstrate the speedup of convergence of the scalar global optimization algorithm using the local refinement techniques described above.
+One could expect similar results from the multi-objective algorithm as well. The multi-objective
 algorithm with local refinement (MOAR) has been applied to the  Fonseca and Fleming
 problem (\ref{eq:fonseca}) at \(n=2\). The parameters of the method were as follows:
 \(\varepsilon=0.01,\;r=4,\;q=4,\;\alpha=15,\;p=1\). Before the method stops, 1176 iterations
@@ -373,7 +373,7 @@ in in Table \ref{tab:exResultsItersSpeedup}. As it is evident form Table
 \ref{tab:exResultsIters}, the cardinality of the weak-optimal solutions set changed insufficiently when varying \(p\)
 i. e. the quality of the obtained estimates remained the same. At the same time, the number of
 iterations decreased linearly with increasing value of \(p\) (Table
-\ref{tab:exResultsItersSpeedup}). In Fig. \ref{fig:s_estimation_all}, the examples of the
+\ref{tab:exResultsItersSpeedup}). Thus, the parallel algorithm reduces the number of iterations almost in \(p\) times comparing to the sequantal one. In Fig. \ref{fig:s_estimation_all}, the examples of the
 numerical solutions of the considered problems are given.
 
 \begin{table}
@@ -470,9 +470,9 @@ Poloni's problem & 336.74 & 1.82 & 3.64 & 6.98 & 10.60 \\
 \end{table}
 
 \section{Conclusion}
-In the present work, a method for solving the multi-objective optimization problems allowing
-finding a uniform estimate of the set of the weakly-optimal points has been considered. The
-techniques of parallelization and of the acceleration of convergence common for all algorithms
+In the work a method for solving the multi-objective optimization problem has been considered which allows to
+find a uniform estimate of the set of the weakly-optimal points.
+The techniques of parallelization and of the acceleration of convergence common for all algorithms
 of similar structure have been applied. The numerical experiments performed have
 demonstrated a speedup in convergence when using the local refinement. Also, the
 parallelization based on the characteristics was found to be efficient for this method. The
