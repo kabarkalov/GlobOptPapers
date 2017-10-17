@@ -10,6 +10,7 @@
 \usepackage{fontspec}
 \usepackage{unicode-math}
 \usepackage{amsfonts}
+\usepackage{subfig}
 
 \setromanfont{CMU Serif}
 \setsansfont{CMU Sans Serif}
@@ -40,36 +41,108 @@
 \end{frame}
 
 \begin{frame}
+  \begin{center}
   \frametitle{Problem statement}
+
   \begin{displaymath}
-    \label{eq:problem}
-    \min\{f(y): y\in D\}, D=\{y\in \mathbb{R}^n: a_i \leqslant y_i \leqslant b_i, 1\leqslant i
-  \leqslant n \}.
-\end{displaymath}
+    \min\{f(y): y\in D\}, D=\{y\in \mathbb{R}^n: a_i \leqslant y_i \leqslant b_i, 1\leqslant i \leqslant n \},
+  \end{displaymath}
+where \(f(y)\) is a vector-function.
+
+\enspace
+Solution of the problem is a set of non-dominated points (Slater set):
+  \begin{displaymath}
+    S(D) = \{y\in D: \nexists z\in D, f_i(z)<f_i(y),1\leqslant i \leqslant m\}
+  \end{displaymath}
+Assume objectives to satisfy Lipschitz condition in \(D\):
+  \begin{displaymath}
+    |f_i(y_1)-f_i(y_2)|\leqslant L_i\Vert y_1-y_2\Vert,y_1,y_2\in D,0<L_i<\infty,1\leqslant i\leqslant m
+  \end{displaymath}
+
+\end{center}
 \end{frame}
 
 \begin{frame}
   \frametitle{Dimension reduction}
   Peano-type curve \(y(x)\) allows to reduce dimension of the original multi-objective problem:
-  \begin{displaymath}
-  \lbrace y\in R^N:-2^{-1}\leqslant y_i\leqslant 2^{-1},1\leqslant i\leqslant
-  N\rbrace=\{y(x):0\leqslant x\leqslant 1\}
-  \end{displaymath}
+  \begin{gather}
+    \lbrace y\in \mathbb{R}^N:-2^{-1}\leqslant y_i\leqslant 2^{-1},1\leqslant i\leqslant N\rbrace=\{y(x):0\leqslant x\leqslant 1\} \nonumber \\
+    \min\{f(y): y\in D\}=\min\{f(y(x)): x\in [0,1]\} \nonumber
+  \end{gather}
 
+  \begin{figure}[ht]
+    \subfloat{{\includegraphics[width=.35\textwidth]{img/peano3d.png} }}
+    \subfloat{{\includegraphics[width=.35\textwidth]{img/peano2d.png} }}
+  \end{figure}
+\end{frame}
 
+\begin{frame}
+  \frametitle{Scalarization tecnique}
+  Multi-objective problem can be reduced to a scalar optimization problem using the following function:
   \begin{eqnarray*}
-    \varphi(x)=\max\{h(x,y):y\in [0,1]\},x\in [0,1],\\
-    h(x,y)=\max\{f_i(x)-f_i(y):1\leqslant i\leqslant m\}.
+    h(x,y)=\min\{f_i(x)-f_i(y):1\leqslant i\leqslant m\}, \\
+    \varphi(x)=\max\{h(x,y):y\in [0,1]\},x\in [0,1].
   \end{eqnarray*}
-
+If \(x^*\) is weakly effective point, then \(\varphi(x^*)\le 0\), in the opposite case \(\varphi(x^*)> 0\), so
+the equivalent scalar problem is:
   \begin{displaymath}
     \varphi^*=\min\{\varphi(x):x\in [0,1]\}.
   \end{displaymath}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Optimization method}
+  \frametitle{Scalarization tecnique}
+  One-dimensional example:
+  \begin{figure}
+    \subfloat{{\includegraphics[width=.5\textwidth]{img/objectives.pdf} }}
+    \subfloat{{\includegraphics[width=.5\textwidth]{img/phi_func.pdf} }}
+  \end{figure}
+\end{frame}
 
+\begin{frame}
+  \frametitle{Optimization method}
+Optimization method generates searh sequence \(\{x_k\}\) and consists of the following steps:
+\begin{enumerate}
+  \setlength{\itemindent}{.1in}
+  \item[Step 1.] Sort the searh information (one-dimentional points) in increasing order.
+  \item[Step 2.] Compute an approximation of the function \(\varphi(x)\).
+  \item[Step 3.] For each interval \((x_{i-1}, x_i)\) compute quantity \(R(i)\), called characteristic.
+  \item[Step 4.] Choose an interval \((x_{t-1}, x_t)\) with the greatest characteristic and
+  compute objective \(f(y(x))\) in the point choosen using the descision rule \(d\):
+  \begin{displaymath}
+    x^{k+1}=d(t)\in (x_{t-1}, x_t)
+  \end{displaymath}
+  \item[Step 4.] If \(x_{t}-x_{t-1}<\varepsilon\) stop the method.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Improved parallel optimization method}
+  \begin{itemize}
+    \item
+    \textit{Local refinement.} Every \(q\) iterations ignore the characteristics \(R(i)\)
+    and perform calculation of the objective at the minimum point of the \(\varphi(x)\) approximation.
+    \item
+    \textit{Parallelization by characteristics.} At the Step 4 choose \(p\) best intervals
+    and generate \(p\) new points using rule \(d(i)\). Then compute the objective \(f(y(x))\) at this
+    point in parallel exploiting \(p\) computation units.
+
+    \enspace
+    In the best case (method doesn't generate redundand points compared to sequental
+    one and wastes time only on computation of the objective)
+    this scheme can give speedup in \(p\) times.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Results}
+  Examples of numerical solutions:
+  \begin{figure}[ht]
+      \centering
+      \subfloat{{\includegraphics[width=.5\textwidth]{../img/viennet.png}}}
+      \subfloat{{\includegraphics[width=.5\textwidth]{../img/poloni.pdf} }}
+  \end{figure}
 \end{frame}
 
 \begin{frame}
