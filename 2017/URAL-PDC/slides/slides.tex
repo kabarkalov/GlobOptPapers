@@ -13,7 +13,7 @@
 \usepackage{subfig}
 
 \setromanfont{CMU Serif}
-\setsansfont{CMU Sans Serif}
+%\setsansfont{CMU Sans Serif}
 \setmathfont{Latin Modern Math}
 
 \usepackage{polyglossia}
@@ -32,7 +32,7 @@
 
 \title{Parallel Multi-objective Optimization Method for Finding Complete Set of Weakly Efficient Solutions}
 \author{\textbf{Vladislav~Sovrasov}}
-\institute{Lobachevsky University}
+\institute{Lobachevsky University of Nizhni Novgorod}
 \date{}
 
 \begin{document}
@@ -83,7 +83,7 @@ Assume objectives to satisfy Lipschitz condition in \(D\):
     h(x,y)=\min\{f_i(x)-f_i(y):1\leqslant i\leqslant m\}, \\
     \varphi(x)=\max\{h(x,y):y\in [0,1]\},x\in [0,1].
   \end{eqnarray*}
-If \(x^*\) is weakly effective point, then \(\varphi(x^*)\le 0\), in the opposite case \(\varphi(x^*)> 0\), so
+If \(x^*\) is weakly effective point, then \(\varphi(x^*)= 0\), in the opposite case \(\varphi(x^*)> 0\), so
 the equivalent scalar problem is:
   \begin{displaymath}
     \varphi^*=\min\{\varphi(x):x\in [0,1]\}.
@@ -92,7 +92,7 @@ the equivalent scalar problem is:
 
 \begin{frame}
   \frametitle{Scalarization tecnique}
-  One-dimensional example:
+  Example:
   \begin{figure}
     \subfloat{{\includegraphics[width=.5\textwidth]{img/objectives.pdf} }}
     \subfloat{{\includegraphics[width=.5\textwidth]{img/phi_func.pdf} }}
@@ -112,7 +112,7 @@ Optimization method generates searh sequence \(\{x_k\}\) and consists of the fol
   \begin{displaymath}
     x^{k+1}=d(t)\in (x_{t-1}, x_t)
   \end{displaymath}
-  \item[Step 4.] If \(x_{t}-x_{t-1}<\varepsilon\) stop the method.
+  \item[Step 5.] If \(x_{t}-x_{t-1}<\varepsilon\) stop the method.
 \end{enumerate}
 \textit{\footnotesize	{Detailed description: Strongin R.G., Sergeyev Ya.D.: Global optimization with non-convex constraints. Sequential and parallel algorithms (2000), Chapter 7}}
 \end{frame}
@@ -122,11 +122,11 @@ Optimization method generates searh sequence \(\{x_k\}\) and consists of the fol
   \begin{itemize}
     \item
     \textit{Local refinement.} Every \(q\) iterations ignore the characteristics \(R(i)\)
-    and perform calculation of the objective at the minimum point of the \(\varphi(x)\) approximation.
+    and perform calculation of the objective near the current running-minimum point of the \(\varphi(x)\) approximation.
     \item
     \textit{Parallelization by characteristics.} At the Step 4 choose \(p\) best intervals
-    and generate \(p\) new points using rule \(d(i)\). Then compute the objective \(f(y(x))\) at this
-    point in parallel exploiting \(p\) computation units.
+    and generate \(p\) new points using rule \(d(i)\). Then compute the objective \(f(y(x))\) at these
+    points in parallel exploiting \(p\) computation units.
 
     \enspace
     In the best case (method doesn't generate redundand points compared to sequental
@@ -203,7 +203,7 @@ Optimization method generates searh sequence \(\{x_k\}\) and consists of the fol
 %
 \begin{frame}
   \frametitle{Results (speedup in time)}
-
+  Each calculation of the objective takes about 8ms.
   \begin{table}[ht]
     \centering
     \begin{tabular}{|l|p{1.6cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|}
@@ -235,6 +235,21 @@ Optimization method generates searh sequence \(\{x_k\}\) and consists of the fol
   \end{figure}
 \end{frame}
 
+\begin{frame}
+  \frametitle{Conclusion and future work}
+    Already done:
+    \begin{itemize}
+      \item local refinement technique was introduced to the multi-objective method scheme;
+      \item parallelism by characteristics was applied to the multi-objective method, efficiency metrics were collected.
+    \end{itemize}
+    Future work:
+    \begin{itemize}
+      \item compute quality metrics for the obtained solutions of the test problems;
+      \item compare the method with other approaches;
+      \item expand method to constrained problems;
+      \item use MPI for distributed computation of objectives.
+    \end{itemize}
+\end{frame}
 
 \begin{frame}{{}}
   \frametitle{ }
@@ -242,7 +257,6 @@ Optimization method generates searh sequence \(\{x_k\}\) and consists of the fol
     \Large{Q\&A}
 
 \vspace{1cm}
-    Vladislav Sovrasov
 
     sovrasov.vlad@gmail.com
 
