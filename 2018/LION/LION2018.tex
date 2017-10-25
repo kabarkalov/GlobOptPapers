@@ -153,9 +153,19 @@ As it has been already said, a risk measure is a mapping that transforms a rando
   \item $R(F)=\sup(F)$. This is the most conservative case, in which one is concerned with the worst case performance of the system. The expression $\sup(F)$ stands for the least of all values that are greater than the random response $F$ with probability 1. If the support of the probability density function (PDF) of $F$ is not compact (i.e. $F$ can take arbitrary large values with non-zero probability) than $\sup(F)$ will be infinite.
   \item $R(F)=\mu(F)+k\sigma(F)$, where $\sigma(F)$ is the standard deviation of $F$ and $k>0$ is a constant. This risk measure is sometimes referred to as the safety margin. Optimization using this risk measure is referred to as robust design optimization \cite{KochYangGu2004,Yao2011,ZhangZhuChenArendt2013} and reflects the paradigms of a ‘$3\sigma$-design’, a ‘$6\sigma$-design’, etc.
   \item $R(F)=q_F(\alpha)$, where $q_F(\alpha)$ is the value of the quantile function, or simply the quantile, corresponding to a given probability $\alpha\in (0,1)$. This choice corresponds to the paradigm of reliability-based design optimization  \cite{AouesChateauneuf2010,Yao2011,YounChoi2004}. In this approach, one wants to keep the probability of the system failing (i.e. violating the constraint or underperforming, depending on the context) below a given threshold. The value $1-\alpha$ is the desired probability of failure. Although rather intuitive, this choice has known computational issues which are discussed by Rockafellar and Royset \cite{RockafellarRoyset2010}.
+  \item $R(F)=\overline{q}_F(\alpha)$, where $\overline{q}_F(\alpha)$ is the \textit{superquantile} introduced by Rockafellar and Uryasev \cite{RockafellarUryasev2000} and $\alpha \in (0,1)$ is a parameter. The $\alpha$-superquantile can be interpreted as the so-called \textit{buffered probability of failure}. The buffered probability of failure is always slightly more conservative than the usual probability of failure and, therefore, optimizing with respect to the buffered probability, one automatically gets constraints on the conventional probability of failure. It was found by Basova, Rockafellar, and Royset \cite{BasovaRockafellarRoyset} based on a number of engineering examples that the buffered probability of failure typically overestimates the conventional probability of failure by a factor of 3. 	
 \end{itemize}
 
-For this study, we chose as risk measure the safety margin $R(F)=\mu(F)+k\sigma(F)$, aiming at covering both robust design optimization and reliability design optimization. Let us briefly discuss its computation.
+Superquantiles exhibit significantly better numerical properties than usual quantiles \cite{RockafellarRoyset2010}. The $\alpha$-superquantile can also be interpreted either as an average of quantiles  for $\alpha < \beta <1$, or as the conditional expectation of $F$ in its $(1−\alpha)$-tail \cite{RockafellarRoyset2015}:
+\[
+\overline{q}_F(\alpha) = \frac{1}{1-\alpha} \int_\alpha^1q_F(\beta)d\beta ;
+\]
+\[
+\overline{q}_F(\alpha) = E\left[F|F\geq q_F(\alpha)\right],
+\]
+where $E\left[F|F\geq q_F(\alpha)\right]$ is the conditional expectation of $F$ (conditional mean). The superquantile corresponding to $\alpha = 0$ is just the mean $\mu(F)=E[F]$.
+
+For this study, we chose two risk measures: the safety margin $R(F)=\mu(F)+k\sigma(F)$ and the superquantile $R(F)=\overline{q}_F(\alpha)$, aiming at covering both robust design optimization and reliability design optimization. Let us briefly discuss its computation.
 
 To compute the safety margin risk measure, one needs to compute two integrals:
 \begin{displaymath}
@@ -166,6 +176,12 @@ To compute the safety margin risk measure, one needs to compute two integrals:
 \end{displaymath}
 
 The dimension of these integrals is $n+n_e$. To compute them efficiently, methods of high-dimensional integration must be employed. Here, quasi-Monte-Carlo integration \cite{Caflisch1998} based on Niederreiter sequences \cite{Niederreiter1992} is used.
+
+Computation of the superquantile is not much more involved than calculating expectations, although it is not straightforward to see from its definition. A simple formula for the superquantile exists \cite{RockafellarUryasev2000,RockafellarRoyset2015} that combines computation of an expected value and solution of an auxiliary convex one-dimensional optimization problem:
+    \begin{equation} \label{eq:auxiliary_problem}
+			\overline{q}_F(\alpha) = \min_c\{c+E[(F-c)_+]\},
+    \end{equation}
+where where ($F-c)_+$ denotes the positive part of the function $(F(\pmb x+ \pmb u,\pmb y) - c)_+$ (i.e. $F(\pmb x+ \pmb u,\pmb y) - c)$, if this value is positive, and zero otherwise), $E[\cdot]$ is, as before, the expected value, and $c$ is a scalar. It has been shown by Rockafellar and Uryasev \cite{RockafellarUryasev2000} that the function to be minimized in (\ref{eq:auxiliary_problem}) is convex and continuously differentiable in $c$ if the underlying distribution is continuous. Therefore, the minimum in (\ref{eq:auxiliary_problem}) can be easily found using an appropriate one-dimensional convex optimization technique, e.g. the golden search, which was used in the examples in the next section. The integral (expectation) in (\ref{eq:auxiliary_problem}) can be approximated using the quasi-Monte-Carlo method. To solve the auxiliary optimization problem (\ref{eq:auxiliary_problem}), one would need to compute the expectation several times with different values of $c$. It should be noted, however, that this procedure does not require any additional evaluations of the response $F$ as the same samples can be used every time. Therefore, the solution of the auxiliary optimization problem (\ref{eq:auxiliary_problem}) does not present any significant additional computational challenges.
 
 \section{Numerical Example}
 \label{sec:num_example}
@@ -224,7 +240,24 @@ The notation $\sigma$ was used to denote the variance of a response, but it also
 
 Solving the same problem using the new version of MAM suitable for problems with uncertainty, we obtain the value of the deterministic objective (volume of the structure) at the robust optimum $V = 67799.335\; cm^3$. To obtain this result, MAM again used 150 points per trust region to build metamodels, which resulted in a total of 1500 function evaluations, which is orders of magnitude smaller than the number of points required if no metamodels are used.
 
+Finally, let us test the performance of MAM in optimization using the superquantile risk measure. The problem statement now is as follows:
+\begin{displaymath}
+  \begin{array}{c}
+    \min\limits_{\pmb b, \pmb h} \overline{q}_\alpha \left(V(\pmb b, \pmb h)\right) \\
+    s.t.\;1.0 \le b_i \le 10.0, \\
+    5.0 \le h_i \le 100.0, \\    
+		\overline{q}_\alpha \left(y_N\right) \le 2.5, \\
+    \overline{q}_\alpha \left(\sigma_i\right) \le \bar{\sigma} = 14000, \\
+    \overline{q}_\alpha \left(\frac{h_i}{b_i}\right)\le 20,
+  \end{array}
+\end{displaymath}
+where $\overline{q}_\alpha \left(F\right) $ denotes the $\alpha$-superquantile of a response $F$ (i.e. conditional expectation of $F$ in the upper $\alpha$-tail of its distribution). The value of the deterministic objective at the SQP solution in this problem for $\alpha = 1-10^{-3}$ (this corresponds to a probability of failure of $10^{-3}$) is $V = 68056.999\; cm^3$.
+
+Applying MAM to this problem, the value of the deterministic objective was obtained as $V = 68200.668\; cm^3$. Despite the fact that the superquantile uses information in the tail of the distribution, where local approximations used in MAM are not as reliable, the obtained results are very close to the reference SQP solution. The total number of  points used by MAM (i.e. the number of times the beam was analyzed) in this example is 1649.
+
 The $\mu(F ) + k\sigma(F)$ risk measure uses quantities that are estimated in the middle of the distribution --- the mean and the standard deviation. On the one hand, this has the advantage that samples drawn directly from the distribution of the random variables $\pmb u$ and $\pmb y$ are well suited to approximately compute this risk measure. On the other hand, probabilistic interpretation of the obtained results in this case is only possible under the normality assumption for the distribution of $F$; if the actual distribution of $F$ has heavier tails than the normal one, the actual probability of failure will be higher than the one  the system was designed for.
+
+The superquantile focuses on the tails of the distribution, and is better computed using importance sampling with a distribution with heavier tails (in this example, the Student's $t$-distribution was used). Although the superquantile somewhat overestimates the probability of failure (typically by the factor of 3, as reported by Basova, Rockafellar and Royset \cite{BasovaRockafellarRoyset} based on several of engineering examples), it provides a distribution-independent constraint on the probability of failure of an engineering system being optimized.
 
 \section{Conclusion}
 \label{sec:conclusion}
