@@ -67,6 +67,134 @@ is a \textit{trial result}.
 \Russian
 ѕараллельный индексный алгоритм, который может быть применен дл€ решени€ подобных задач с частично вычислимыми функци€ми и который реализован в системе Globalizer, подробно описан в [2]. ќсновна€ иде€ алгоритма состоит в сведении исходной многомерной задачи к набору св€занных подзадач меньшей размерности, и параллельному их решению. —хемы редукции размерности, используемые при работе индексного алгоритма, кратко описаны в следующем разделе.
 
+\section{Dimensionality reduction}
+
+\subsection{Dimensionality reduction using space-filling curves}
+
+The use of Peano curve $y(x)$ 
+\begin{equation}
+\left\{y\in R^N: -2^{-1}\leq y_i \leq 2^{-1}, 1 \leq i \leq N\right\}=\left\{y(x):0\leq x \leq 1 \right\}
+\end{equation}
+unambiguously mapping the interval of real axis $[0,1]$ onto a $N$-dimensional cube is the first of the dimensionality reduction methods considered.  To implement this method of dimensionality reduction a numerically constructed curve (\textit{evolvent}) is used. The evolvent is $2^{-m}$ accurate approximation of the theoretical Peano curve in $L_\infty$ metric, where $m$ is an evolvent construction parameter. Problems of numerical construction of the evolvents and the corresponding theory are considered in detail in \cite{Strongin2000}. 
+
+By using this kind of mapping it is possible to reduce the multidimensional problem~(\ref{problem}) to a univariate problem
+\[
+\varphi(y(x^\ast))=\min \left\{\varphi(y(x)): x \in [0,1], \; g_i(y(x))\leq 0, \; 1 \leq i \leq m\right\}.
+\]
+
+The considered dimensionality reduction scheme juxtaposes a
+multidimensional problem with lipschitzian functions to a univariate
+problem where the corresponding functions satisfy the uniform H{\"o}lder
+condition (see \cite{Strongin2000}), i.e.
+\[
+\left|g_i(y(x'))-g_i (y(x''))\right| \leq H_i \left|x'-x'' \right|^{1/N}, \; x',x''\in [0,1], \; 1\leq i \leq m+1.
+\]
+Here $N$ is the dimensionality of the initial multidimensional problem and
+the coefficients $H_i$ are related with the Lipschitz constants $L_i$ of
+the initial problem by the inequalities $H_i \leq 2L_i \sqrt{N+3}$.
+
+\subsection{Nested optimization scheme}
+
+Nested optimization scheme is based on relation (see \cite{Grishagin2001})
+\begin{equation}\label{nested}
+\min_{y \in D}{\left\{\varphi(y): \; g_i(y)\leq 0, \; 1 \leq i \leq m\right\}}= \min_{u_1\in D_1}\min_{u_2\in D_2}...\min_{u_M\in D_M }{\left\{\varphi(y): \; g_i(y)\leq 0, \; 1 \leq i \leq m\right\}},
+\end{equation}
+which allows replacing the solving of multidimensional problem (\ref{problem}) by solving a family of subproblems related to each other recursively.
+Here we consider vector $y$ as a vector of block variables
+\begin{equation}
+y=(y_1,y_2,...,y_N)=(u_1,u_2,...,u_M),
+\end{equation}
+where the $i$-th block variable $u_i$ is a vector of $N_i$ components of vector $y$, taken serially i.e. $u_1=(y_1,y_2,...,y_{N_1})$, $u_2=(y_{N_1+1},y_{N_1+2},...,y_{N_1+N_2})$,..., $u_M=(y_{N-N_M+1},y_{N-N_M+2},...,y_{N})$, at that $N_1+N_2+...+N_M=N$. 
+The subdomains $D_i, 1 \leq i \leq M$, are projections of initial search domain $D$ onto the subspaces corresponding to the variables $u_i, 1 \leq i \leq M$. 
+
+\Russian 
+¬ проведенном исследовании данна€ схема примен€лась при M=2, т.е. использовалс€ только один уровень вложенности
+\begin{equation}
+\min_{y \in D}{\left\{\varphi(y): \; g_i(y)\leq 0, \; 1 \leq i \leq m\right\}}= \min_{u_1\in D_1}\min_{u_2\in D_2}{\left\{\varphi(y): \; g_i(y)\leq 0, \; 1 \leq i \leq m\right\}}.
+\end{equation}
+
+\section{Organization of Parallel Computing}\label{sec:4}
+
+
+\section{Numerical experiments}\label{sec:5}
+
+\begin{itemize}
+	\item one could control the size of the feasible domain $Q_{m+1}$ with respect to the whole domain $D$;
+	\item the global minimizer of the objective function is known a priori taking into account the constraints;
+	\item the global minimizer of the objective function without accounting for the constraints is out of the feasible domain $Q_{m+1}$  (with the purpose of simulating the behavior of the constraints and the objective function in the applied constrained optimization problems).
+\end{itemize}
+
+
+
+\begin{figure}[ht]
+\begin{minipage}[h]{0.5\linewidth}
+\center{\includegraphics[width=1.0\linewidth]{vag_06.png} \\ (a)}
+\end{minipage}
+\hfill
+\begin{minipage}[h]{0.5\linewidth}
+\center{\includegraphics[width=1.0\linewidth]{GKLS_04.png} \\ (b)}
+\end{minipage}
+\center{{\bf Figure 1.} The level lines of (a) hard and (b) simple subproblems }
+\end{figure}
+
+
+The numerical experiments were carried out using two classes of problems (\textit{Simple} ans \textit{Hard}) with $N=5$. The problem was considered to be solved if the algorithm generates a trial point $y^k$ in $\delta$-vicinity of the global minimizer, i.e. $\left\|y^k-y^\ast\right\|\leq\delta$ . The size of the vicinity was selected as $\delta=0.01\left\|b-a\right\|$, where $a$ and $b$ are the boundaries of the search domain $D$. The maximum allowable number of iterations was $K_{max} = 10^6$.
+
+\Russian
+ѕервый эксперимент проведем при решении серий задач Simple и Hard на одном узле, полностью задействовать оба доступных CPU (т.е. p=16 физических €дер). ¬ таблице 1 приведено среднее врем€ (в секундах), потребовавшихс€ дл€ решени€ задач серии.
+
+\begin{table}[ht]
+\center{{\bf Table 1.} Average time for solving the problem on one node}
+\begin{center}
+\begin{tabular}{cc}
+\hline
+Problems & Time, sec. \\
+\hline
+\textit{Hard} & 52  \\
+\textit{Simple} & 51 \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\Russian
+—ледующий эксперимент проведем, задействовав p узлов по три графических ускорител€ на каждом из них. “ак, при p=32 было задействовано 94 GPU ускорител€, на каждом из которых Ц 2688 CUDA-€дер.  ¬ таблице 2 приведено врем€ работы алгоритма, а в таблице 3 Ц ускорение по отношению к запуску на одном узле.
+
+\begin{table}[ht]
+\center{{\bf Table 2.} Average time for solving the problem on $p$ nodes}
+\begin{center}
+\begin{tabular}{cccc}
+\hline
+Problems & $p = 8$ & $p=16$ & $p=32$ \\
+\hline
+\textit{Hard} & 11.51 & 5.53 & 0.54 \\
+\textit{Simple} & 2.04 & 1.50 & 0.47\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[ht]
+\center{{\bf Table 3.} Speedup with respect to one node}
+\begin{center}
+\begin{tabular}{cccc}
+\hline
+Problems & $p = 8$ & $p=16$ & $p=32$ \\
+\hline
+\textit{Hard} & 5 & 9 & 96\\
+\textit{Simple} & 25 & 34& 109\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+
+Computational experiments were carried out on a high-performance cluster of Lobachevsky State University of Nizhni Novgorod. The cluster node included two Intel Sandy Bridge E5-2660 2.2 GHz CPUs, 64 Gb RAM, and three NVIDIA Kepler K20’ GPUs (2688 CUDA cores, 6 Gb GDDR5). 
+
+\section{Conclusion}
+
 
 
 \section*{Acknowledgments}
