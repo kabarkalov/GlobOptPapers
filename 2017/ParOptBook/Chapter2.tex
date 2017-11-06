@@ -1,65 +1,636 @@
-%%%%%%%%%%%%%%%%%%%% author.tex %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% sample root file for your "contribution" to a contributed volume
-%
-% Use this file as a template for your own input.
-%
-%%%%%%%%%%%%%%%% Springer %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%% RECOMMENDED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%% author.tex %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
 %\documentclass[graybox]{svmult}
-%
-%% choose options for [] as required from the list
-%% in the Reference Guide
 %
 %\usepackage{mathptmx}       % selects Times Roman as basic font
 %\usepackage{helvet}         % selects Helvetica as sans-serif font
 %\usepackage{courier}        % selects Courier as typewriter font
 %\usepackage{type1cm}        % activate if the above 3 fonts are
-                             % not available on your system
-%
+                            %% not available on your system
+%%
 %\usepackage{makeidx}         % allows index generation
 %\usepackage{graphicx}        % standard LaTeX graphics tool
-%                             % when including figure files
+                             %% when including figure files
 %\usepackage{multicol}        % used for the two-column index
-%\usepackage[bottom]{footmisc}% places footnotes at page bottom
+%\usepackage[bottom]{footmisc}
+%\usepackage{amsmath}
 %
-%% see the list of further useful packages
-%% in the Reference Guide
+%
 %
 %\makeindex             % used for the subject index
-%                       % please use the style svind.ist with
-%                       % your makeindex program
+                       %% please use the style svind.ist with
+                       %% your makeindex program
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %\begin{document}
-
-\title{Information-statistical and characteristical global search algorithms}
-% Use \titlerunning{Short Title} for an abbreviated version of
-% your contribution title if the original one is too long
-\author{Name of First Author and Name of Second Author}
-% Use \authorrunning{Short Title} for an abbreviated version of
-% your contribution title if the original one is too long
-\institute{Name of First Author \at Name, Address of Institute, \email{name@email.address}
-\and Name of Second Author \at Name, Address of Institute \email{name@email.address}}
 %
-% Use the package "url.sty" to avoid
-% problems with special characters
-% used in your e-mail or web address
+\title{Information and characteristical global search algorithms}
+%\titlerunning{Global optimization via dimensionality reduction}
+
+\author{Vladimir A.Grishagin, Dmitri E.Kvasov, Marat A.Mukhametzhanov and Roman G.Strongin}
+\authorrunning{V.Grishagin, D.Kvasov, M.Mukhametzhanov, R.Strongin} 
+\institute{Vladimir A.Grishagin \at N.I.Lobachevsky State University, Gagarin Avenue 23, 603950 Nizhni Novgorod, Russia   \email{vagris@unn.ru}
+\and Dmitri E.Kvasov \at N.I.Lobachevsky State University, Gagarin Avenue 23, 603950 Nizhni Novgorod, Russia 
+\at DIMES, University of Calabria, Via P. Bucci, Cubo 42-C, 87036 Rende (CS), Italy \email{yaro@si.deis.unical.it}
+\and Marat A.Mukhametzhanov \at N.I.Lobachevsky State University, Gagarin Avenue 23, 603950 Nizhni Novgorod, Russia 
+\at DIMES, University of Calabria, Via P. Bucci, Cubo 42-C, 87036 Rende (CS), Italy \email{yaro@si.deis.unical.it}
+\and Roman G.Strongin \at N.I.Lobachevsky State University, Gagarin Avenue 23, 603950 Nizhni Novgorod, Russia   \email{vagris@unn.ru} }
+
 %
 \maketitle
 
-\abstract*{Each chapter should be preceded by an abstract (10--15 lines long) that summarizes the content. The abstract will appear \textit{online} at \url{www.SpringerLink.com} and be available with unrestricted access. This allows unregistered users to read the abstract as a teaser for the complete chapter. As a general rule the abstracts will not appear in the printed version of your book unless it is the style of your particular book or that of the series to which your book belongs.
-Please use the 'starred' version of the new Springer \texttt{abstract} command for typesetting the text of the online abstracts (cf. source file of this chapter template \texttt{abstract}) and include them with the source files of your manuscript. Use the plain \texttt{abstract} command if the abstract is also to appear in the printed version of the book.}
 
-\abstract{Each chapter should be preceded by an abstract (10--15 lines long) that summarizes the content. The abstract will appear \textit{online} at \url{www.SpringerLink.com} and be available with unrestricted access. This allows unregistered users to read the abstract as a teaser for the complete chapter. As a general rule the abstracts will not appear in the printed version of your book unless it is the style of your particular book or that of the series to which your book belongs.\newline\indent
-Please use the 'starred' version of the new Springer \texttt{abstract} command for typesetting the text of the online abstracts (cf. source file of this chapter template \texttt{abstract}) and include them with the source files of your manuscript. Use the plain \texttt{abstract} command if the abstract is also to appear in the printed version of the book.}
+\abstract{This chapter describes the main principles of two approaches to development and investigation of global optimization algorithms. The first approach called statistical one considers a probabilistic model of the optimization problem in which the objective function is a realization of some stochastic process with predefined properties. In this model the optimization algorithm is built as an optimal stochastic procedure implementing a Bayesian strategy.  A brief description of the general technique of deriving the methods within the framework of this approach is given. Some simple algorithmic schemes as a result of applying the techniques are presented. The second approach is called characteristical and focused on a general structure of decision rules for optimization algorithms.  }
 
-\section{Section Heading}
-Use the template \emph{chapter.tex} together with the Springer document class SVMono (monograph-type books) or SVMult (edited books) to style the various elements of your chapter content in the Springer layout.
+\section{Information approach to the global search}
+\label{sec:2_1}
+The information approach proposed by Prof. Strongin \cite{2_StrMonRus, 2_Str1989, 2_StrSergMon2000} provides a theoretical basis for the development of the global extremum search algorithms. At first, we will give a brief description of the general technique of deriving the methods within the framework of this approach. Further, some simple algorithmic schemes as a result of applying the technique will be presented. 
 
-Instead of simply listing headings of different levels we recommend to let every heading be followed by at least a short passage of text. Further on please use the \LaTeX\ automatism for all your cross-references and citations. And please note that the first line of text that follows a heading is not indented, whereas the first lines of all subsequent paragraphs are.
+Consider the optimization problem 
+\begin{equation}
+\label{eq:2_-1}
+\varphi(y)\rightarrow\min, y \in Q\subseteq R^N.
+\end{equation}
+i.e., the problem of finding the lowest (minimal) value of the objective function $\varphi(y)$ and the coordinate (global minimizer) of this value in the admissible domain $Q$ of the N-dimensional Euclidean space $R^N$.
 
+According to the computational model formed within the framework of this approach it is supposed for the problem (\ref{eq:2_-1}) that a probability distribution $F$ is defined in the class of the measurable subsets of the set $\Phi$ of all functions $\varphi$ defined in the domain $Q$. The acceptance of this model means that the minimized function $\varphi$ is considered as a realization of some stochastic process, i.e., as the function of two arguments $\varphi=\varphi(y,\sigma)$, where $y\in Q$ and $\sigma$ is a random value, the properties of which are determined by the distribution $F$. 
+
+Any additional information on the function $\varphi$ (known a priori as well as a posteriori) can be estimated in the probabilistic sense as a probability $F(\Phi\acute{})$  of the function $\varphi$ to belong to the set  $\Phi\acute{}$ of the functions possessing the properties corresponding to the given information. Particularly, the distribution $F$ is assumed a priori can be transformed to a posteriori distribution   with respect to the search information obtained in the course of optimization. This distribution allows estimating the position of extremum, predicting the result of the next trial, and designing the optimization algorithms based on the statistical decision rules. The detailed description of this methodology is given in the monographs ~\cite{2_StrMonRus} and \cite{2_StrSergMon2000}. Here we will demonstrate briefly an application of this approach to the one-dimensional case. 
+
+Let in the problem (\ref{eq:2_-1})  the dimension $N=1$ and the admissible domain Q be a closed interval $[a,b]$ of the real axis. In order to emphasize that the problem under study is  one-dimensional  the variable $x$ will be used instead of the objective function argument $y$. Further, consider given problem 
+\begin{equation}
+\label{eq:2_0}
+\varphi(x)\rightarrow\min, x \in Q.
+\end{equation}
+in a discrete statement.
+
+Let us define a finite uniform $\epsilon$-grid in the interval $[a,b]$ 
+\begin{equation}
+\label{eq:2_1}
+x_0=a<x_1=a+\epsilon<\ldots<x_i=a+i\epsilon<\ldots x_n=b
+\end{equation}
+and introduce the set of grid node indices 
+\begin{equation}
+\label{eq:2_2}
+U=\{0,1,\ldots n\}.
+\end{equation}
+Assume that in the problem (\ref{eq:2_0}) the set $Q=\{x_i,i\in U\}$ . Then it is necessary to determine the node $x_\nu$ , in which $\varphi(x)$ defined over the domain $Q$ reaches the global minimum, i.e.,
+\begin{equation}
+\label{eq:2_3}
+\varphi(x_\nu)\leq \varphi(x_i),i\in U.
+\end{equation}
+In the present model any function $\varphi(x)$  is defined by the values $\varphi_i=\varphi(x_i),0\leq i\leq n$  completely, i.e., it can be represented as a vector
+\begin{equation}
+\label{eq:2_4}
+\varphi=(\varphi_0,\ldots \varphi_n)\in R^{n+1}
+\end{equation}
+in $(n+1)$-dimensional Euclidean space $R^{n+1}$. Then, the a priori assumptions of the minimized function  $\varphi\in R^{n+1}$ could be described by defining the density $p(\varphi$) of a probabilistic distribution $F$ over the space $R^{n+1}$.
+
+If the density $p(\varphi)$ is  positive and continuous then the minimum of the optimized function is achieved at a single point with the probability equal to unity. Therefore, in order to estimate this minimum, it is sufficient  to compute the probabilities $\eta(\alpha)$ of minimum location at the points $\alpha$ coinciding with the grid nodes. Moreover, after executing the trials at some grid nodes and obtaining the search information $\omega_k$, one can deduce some conditional probabilities $\eta(\alpha/\omega_k)$  providing \textit{a posteriori} the current estimates of the extremum. 
+
+Unfortunately, the computation of these probabilities requires an integration over the complicated multidimensional domains. To simplify the model, an additional random value  $\xi(\alpha)$ (called \textit{the nature state}) is introduced  which is connected with the given  probability density $p(\varphi)$  by the decomposition 
+\begin{equation}
+\label{eq:2_5}
+p(\varphi)=\sum_{\alpha\in U}p(\varphi/\alpha)\xi(\alpha).
+\end{equation}
+The introduction of this decomposition allows establishing the nearness condition for the a posteriori probabilities $\eta(\alpha/\omega_k)$  and $\xi(\alpha/\omega_k)$  and, therefore, passing to the computation of the conditional probabilities of the nature state, which is simpler essentially.
+
+As a particular example of an application of the information approach, let us consider a probabilistic description, where the a priori known probability $p(\varphi)$ is represented by a decomposition $p(\varphi/\alpha),0\leq \alpha\leq n,$ where
+\begin{equation}
+\label{eq:2_6}
+p(\varphi/\alpha)=\prod_{i=0}^n {\frac{1}{\sigma_i\sqrt{2\pi}}\exp\left\{-\sum_{i=0}^n {\frac{(\Delta\varphi_i-m_i(\alpha))^2}{2\sigma_i^2}}\right\}}.
+\end{equation}
+Here
+\begin{displaymath}
+\Delta\varphi_i=\varphi_i-\varphi_{i-1},1\leq i\leq n,\; \Delta\varphi_0=\varphi_0,
+\end{displaymath}
+\begin{displaymath}
+\sigma_i=cm,\;1\leq i\leq n,\;c>0,\;m>0,
+\end{displaymath}
+\begin{displaymath}
+m_i(\alpha) =
+  \begin{cases}
+    -m, & i\leq\alpha, \\
+    \ \ \  m, & i>\alpha,
+  \end{cases} \ 1\leq i\leq n.
+\end{displaymath}
+
+According to the present description, for any fixed $\alpha$  the first differences $\Delta\varphi_i$  and the function value $\varphi_0$  at the point $x_0$ are the samples of the mutually independent Gaussian random variables with the standard deviations $\sigma_i=cm,1\leq i \leq n,\;\sigma_0$   and mathematical expectations $m_i(\alpha),1\leq i\leq n,\;m_0$.
+
+These assumptions are some probabilistic analog of Lipschitz condition, which bounds the first differences of the minimized function and provides its uniform continuity. Indeed, according to the description the variances of the differences $\Delta\varphi_i$  of the function $\varphi$ are bounded. Besides, these differences are the realizations of the independent normal values that in the case $mn=const$  provides a probabilistic property analogous to the uniform continuity.
+
+In addition,  for any given $\alpha$ the a priori mathematical expectations
+\begin{displaymath}
+\mu_\alpha(i) =m_0-m\times
+  \begin{cases}
+    i, & i\leq\alpha, \\
+    2\alpha-i, & i>\alpha,
+  \end{cases} 
+\end{displaymath}
+for the values $\varphi_i$  of the function $\varphi$  has a single local minimum, i.e., the functions close to the constants are unlikely.
+
+In the model considered an exclusion of the parameters $m_0$  and $\sigma_0$  determining the mathematical expectation and the standard deviation of $\varphi_0$  is possible if the initial trial is executed at the node with the index $i_0=0$ . In this case some asymmetry arises because of the function value at the left boundary is defined initially. In order to correct this asymmetry, the next trial should be executed at the right end of the grid, i.e., at the point with the index $i_1=n$ .
+
+Let us now assume that the trials executed already have been renumbered by subscripts in increasing order of the grid nodes 
+\begin{equation}
+\label{eq:2_7}
+a=i_0<i_1<\ldots<i_{k-1}<i_k=b,
+\end{equation}
+and that the information
+\begin{equation}
+\label{eq:2_8}
+\omega=\omega_k=\{(i_s,z_s),0\leq s\leq k\},
+\end{equation}
+where $z_s=\varphi(i_s),0\leq s\leq k,$  has been obtained.
+
+Then the nature state probabilities determined \textit{a posteriori} can be expressed as 
+\begin{displaymath}
+\xi(\alpha/\omega_k)=B\times h(\omega_k,\alpha)\xi(\alpha),
+\end{displaymath}
+where $B$ is a constant and for any $\alpha$ from the interval  $i_{s-1}\leq\alpha\leq i_s,1\leq s\leq k,$
+\begin{displaymath}
+h(\omega_k,\alpha)=\exp\left\{-\frac{(\alpha-\alpha_s^*)^2}{2\rho_s^2}\right\}\exp\left\{\frac{R(s)}{2mc^2}\right\},
+\end{displaymath}
+\begin{equation}
+\label{eq:2_9}
+\alpha_s^*=\frac{i_s-i_{s-1}}{2}-\frac{z_s-z_{s-1}}{2m},
+\end{equation}
+\begin{equation}
+\label{eq:2_10}
+R(s)=m\Delta_s+\frac{(z_s-z_{s-1})^2}{m\Delta_s}-2(z_s+z_{s-1}),
+\end{equation}
+\begin{displaymath}
+\rho_s^2=\left(\frac{c}{2}\right)\Delta_s,\ \Delta_s=i_s-i_{s-1}.
+\end{displaymath}
+Let us assume that the distribution  $\xi(\alpha)$ is a uniform one ($\xi(\alpha)=1/(n+1)$), i.e., all initial states of nature are of equal probability, and the parameter $m$ satisfies the condition
+\begin{equation}
+\label{eq:2_11}
+m>\max_{1\leq s\leq k}\left|\frac{z_s-z_{s-1}}{\Delta_s}\right|.
+\end{equation}
+Then, if $c$ is small enough, the most probable nature state is achieved at the point
+\begin{equation}
+\label{eq:2_12}
+\alpha^*=E(\alpha_t^*+0.5),
+\end{equation}
+of the interval $(i_{t-1},i_t)$ , for which the value $R(t)$  is maximal among all  the values $R(s)$  from (\ref{eq:2_10}). Here $E$ is the function of the integer part of its argument, i.e., $\alpha^*$  is the closest integer number to $\alpha_t^*$  from (\ref{eq:2_9}). Because of nearness of the a posteriori probabilities $\eta(\alpha/\omega_k)$  and  $\xi(\alpha/\omega_k)$ the point (\ref{eq:2_12}) is the most probable point of the global minimum. 
+
+Note an important aspect connected with the parameter $m$ and the condition (\ref{eq:2_11}). In order to satisfy it, we will use the following adaptive scheme to estimate the parameter $m$ according to the results of the trials (\ref{eq:2_8}):
+\begin{equation}
+\label{eq:2_13}
+m =\begin{cases}
+    rM, & M>0, \\
+    1, & M=0,
+  \end{cases} 
+\end{equation}
+where
+\begin{equation}
+\label{eq:2_14}
+M=\max_{1\leq s\leq k}\left|\frac{z_s-z_{s-1}}{i_s-i_{s-1}},\right| 
+\end{equation}
+
+The coefficient $r$ is considered to be a parameter of the method and to satisfy the inequality $r>1$.
+
+Thus, in order to continue the minimum search after execution of the trials at the nodes (\ref{eq:2_7}), it seems naturally to select a new node with the maximum probability to find the sought extremum, i.e., the point (\ref{eq:2_12}). But in order to find this point it is enough to compute the values   from (\ref{eq:2_10}) called characeristics of the corresponding intervals   and to select the greatest of these ones. As a result, the complex problem of direct computation of the most probable minimum position via the multidimensional integration is reduced to a simple problem of the computation of characteristics (\ref{eq:2_10}).
+
+\section{The core global search algorithm}
+\label{sec:2_2}
+Let us consider the one-dimensional problem of the minimization of a function over an interval:
+\begin{equation}
+\label{eq:2_15}
+\varphi(x)\rightarrow \min,x\in Q=[a,b]. 
+\end{equation}
+
+Let us expand the discrete algorithm described in the above section onto the continuous case of the problem (\ref{eq:2_15}) by increasing the number of nodes infinitely ($n\rightarrow \infty$) so that finally the finite interval $Q=[a,b]$  is obtained. In this situation, the discrete algorithm can be transformed into its limiting continuous variant in the following way.
+
+In the relations (\ref{eq:2_10}), (\ref{eq:2_14}) the indices  from (\ref{eq:2_7}) are substituted by the corresponding grid nodes (\ref{eq:2_1}). 
+
+\begin{equation}
+\label{eq:2_16}
+x_{i_s}=a+i_s((b-a)/n), 0\leq s\leq k. 
+\end{equation}
+This substitution does not change the values of the characteristics $R(s)$ in (\ref{eq:2_10}). 
+
+Let us hereafter denote the node $x_{i_s}$ as $x_s$  for simplification. The substitution of (\ref{eq:2_16}) in (\ref{eq:2_9}) leads to the expression for the point of a new  $(k+1)$-th trial
+\begin{equation}
+\label{eq:2_17}
+x^{k+1}=a+\alpha_t^*((b-a)/n)=\frac{1}{2}(x_t-x_{t-1})-\frac{z_t-z_{t-1}}{2\tilde{m}},
+\end{equation}
+where $\tilde{m}$ is connected with $m$ from (\ref{eq:2_13}) as $\tilde{m}=m(\frac{b-a}{n})$.
+
+Note that the point $x_{\alpha^*}=a+\alpha^*(\frac{b-a}{n})$  where $\alpha^*$  from (\ref{eq:2_12}) is the node of the grid (\ref{eq:2_1}) closest to the point (\ref{eq:2_17}). This means that if $n\rightarrow\infty$ the point $x_{\alpha^*}$  tends to the point $x^{k+1}$.
+
+Hereinafter the «continuous» algorithm described above will be called as \textit{the core algorithm of the global search (AGS)}.
+
+\subsection {Computational scheme of the core algorithm}
+\label {subsec:2_2_1}
+Let us give a detailed description of the AGS computational scheme applied to solving the problem (\ref{eq:2_15}) and consider the set 
+\begin{equation}
+\label{eq:2_18}
+\omega=\omega_k=\{(x^i,z^i),1\leq i\leq k\}
+\end{equation}
+as the search information after $k$ trials an points $x^i$ with results $z^i=\varphi(x^i),\:1\leq i\leq k$. According to the algorithm, the first two trials are executed at the ends of the interval  $[a,b]$, i.e., $x^1=a,\;x^2=b$. The function values $z^1=\varphi(x^1),\;z^2=\varphi(x^2)$  are computed and the number $k$ of the executed trials is set to 2.
+
+Assume that $k\geq 2$  trials have been executed and that the information (\ref{eq:2_18}) has been obtained. In order to select the point of a new trial $x^{k+1}$  it is necessary to perform the following steps.
+\begin{description}[\textbf{Step 1}]
+\item[\textbf{Step 1}]{Renumber by subscripts (beginning from zero) the points $x^i,\:1\leq i\leq k$,  from (\ref{eq:2_18}) in increasing order, i.e.,
+\begin{displaymath}
+a=x_0<x_1<\ldots <x_{k-1}=b.
+\end{displaymath} }
+\item[\textbf{Step 2}]{Juxtapose to the points $x_i,\:1\leq i\leq k-1$,  the function values $z_i=\varphi(x_i),\:1\leq i\leq k-1$,  corresponding to trial results $z^i$  from (\ref{eq:2_18}) and renumbered by subscripts.}
+\item[\textbf{Step 3}]{Compute the maximal absolute value of the first divided differences 
+\begin{displaymath}
+M=\max_{1\leq i\leq k-1}\left|\frac{z_i-z_{i-1}}{x_i-x_{i-1}}\right|
+\end{displaymath}
+and accept
+\begin{equation}
+\label{eq:2_19}
+m =\begin{cases}
+    rM, & M>0, \\
+    1, & M=0,
+  \end{cases} 
+\end{equation}
+where $r>1$ is a predefined parameter of the method. } %end of Step 3
+\item[\textbf{Step 4}]{For each interval $(x_{i-1},x_i),1\leq i\leq k-1$,  calculate the characteristic
+\begin{displaymath}
+R(i)=m(x_i-x_{i-1})+\frac{(z_i-z_{i-1})^2}{m(x_i-x_{i-1})}-2(z_i+z_{i-1}).
+\end{displaymath} } %end of Step 4
+\item[\textbf{Step 5}]{Find the interval $(x_{t-1},x_t)$ , which the maximum characteristic
+\begin{equation}
+\label{eq:2_20}
+R(t)=\max_{1\leq i\leq {k-1}}R(i).
+\end{equation}  } %end of Step 5
+\item[\textbf{Step 6}]{Execute the new trial at the point 
+\begin{displaymath}
+x^{k+1}=\frac{1}{2}(x_{t-1}+x_t) - \frac{z_t-z_{t-1}}{2m}.
+\end{displaymath}
+compute the value $z^{k+1}=\varphi(x^{k+1})$ , and increment the search step counter: $k=k+1$  .
+} %end of Step 6
+\end{description}
+
+Following the general scheme of optimization algorithms ~\cite{2_GriSergChap1}  the operations of Steps 1-6 describe the decision rule of AGS.
+
+The termination criterion is given as
+\begin{equation}
+\label{eq:2_21}
+H_k(\Phi,\omega_k) =
+  \begin{cases}
+    0, & x_t-x_{t-1}\leq\epsilon, \\
+    1, & x_t-x_{t-1}>\epsilon,
+  \end{cases}
+\end{equation}
+where $\epsilon>0$  is a predefined search accuracy.
+
+Finally, the pair
+\begin{equation}
+\label{eq:2_21_1}
+e^k=(\varphi_k^*,x_k^*)
+\end{equation}
+where  $\varphi_k^*$ is the lowest of the computed function values, i.e.,
+\begin{equation}
+\label{eq:2_21_2}
+\varphi_k^*=\min_{1\leq i\leq k}\varphi(x^i)=\min_{0\leq i\leq {k-1}}\varphi(x_i),
+\end{equation}
+and
+\begin{displaymath}
+x_k^*=\arg \min_{1\leq i\leq k}\varphi(x^i),
+\end{displaymath}
+(the coordinate of $\varphi_k^*$ ), is taken as the estimate of the minimum. 
+
+The most important theoretical properties of AGS concerning convergence and efficiency of the method are given in the next subsection. 
+\subsection {Conditions of convergence and efficiency estimates}
+\label{subsec:2_2_2}
+This subsection contains a brief description of the main theoretical results regarding the properties of the core information algorithm. The strict substantiation of these properties has been given in the monographs ~\cite{2_StrMonRus, 2_StrSergMon2000} and can be derived as a consequence of the general characteristical theory of global optimization methods ~\cite{2_GrishaginSergeyevStrongin}.
+
+Let us consider an infinite sequence of trials $\{x^k\}=\{x^1,x^2,\ldots ,x^k,\ldots\}$  generated by AGS in the absence of the termination criterion. Since $\{x^k\}\subseteq [a,b]$  this sequence contains necessarily at least one converging subsequence. Assume that $x^+$  is the accumulation point (the limit of some converging subsequence) of the sequence $\{x^k\}$ . Then
+\begin{description}[i)]
+\item [i)]{if $a<x^+<b$ ($x^+$ is an internal point of the closed interval $[a,b]$)  the trial sequence contains two subsequences, one of which converges to $x^+$  from the left and the other – from the right;}
+\item [ii)]{for any $k\geq 1$  the inequality $\varphi(x^k)\geq \varphi(x^+)$ is true;}
+\item [iii)]{if there exists another limit point $x^{++}$  of the sequence $\{x^k\}$, then $\varphi(x^{++})=\varphi(x^+)$;}
+\item [iv)]{if the function $\varphi(x)$ has a finite number of local extrema within the interval $[a,b]$ then the point $x^+$ is a local minimum point;}
+\item [v)]{if the function $\varphi(x)$ satisfies the Lipschitz condition in the interval $[a,b]$ with a constant $L>0$, i.e.,
+\begin{equation}
+\label{eq:2_22}
+\left|\varphi(x')-\varphi(x'')\right|\leq L\left|x'-x''\right|
+\end{equation} 
+and, beginning from some search step, the inequality 
+\begin{equation}
+\label{eq:2_23}
+m>2L
+\end{equation}
+holds then any point of the global minimum of the function $\varphi(x)$ in the interval $[a,b]$ is a limit (accumulation) point of the AGS trial sequence.} 
+\end{description}
+
+As a consequence of  assertions (iii) and (v), under conditions (\ref{eq:2_22}) and (\ref{eq:2_23}) AGS finds all the global minimum points of a Lipschitzian objective function and converges only to such points. This means that the method generates an essentially non-uniform trial grid in the search domain. In order to estimate this non-uniformity reflecting the efficiency of the trial placement by the algorithm, let us introduce the concept of the trial density as a measure of this efficiency.
+\begin{definition}
+\label{def:2_1}
+\textit{The density of the sequence} $\{x^k\}$   in the subinterval $[\alpha,\beta]\subset [a,b]$  is the quantity
+\begin{displaymath}
+P_{\alpha\beta}=\frac{K_{\alpha\beta}}{\beta-\alpha},
+\end{displaymath}
+where $K_{\alpha\beta}$ is the number of points of the trial sequence $\{x^k\}$  falling into the interval $[\alpha,\beta]$.
+\end{definition}
+
+Assume that a Lipschitzian (\ref{eq:2_22}) function $\varphi(x)$ satisfies the following inequality over an interval $[\alpha,\beta]$. 
+\begin{equation}
+\label{eq:2_24}
+\varphi(x)\geq\varphi(x^*)+\Delta,\;x\in [\alpha,\beta],
+\end{equation}
+where  $\Delta>0$ and $x^*$  is the global minimum point of $\varphi(x)$ in the interval $[a, b]$. If $\beta-\alpha>2\Delta/L$  and the condition $m\geq 2L$  is satisfied, then for AGS ~\cite{2_StrMonRus, 2_StrSergMon2000} 
+\begin{equation}
+\label{eq:2_25}
+P_{\alpha\beta}\leq\frac{3m}{2\Delta}.
+\end{equation}
+
+Note that the subinterval $[\alpha,\beta]$ satisfying (\ref{eq:2_24}) can contain no global minimum. It means that in this subinterval a finite number of trials only can be located as a consequence of the statement (iii). The inequality (\ref{eq:2_25}) gives a quantitative estimate of this number. 
+
+Moreover, the inequality (\ref{eq:2_25}) allows comparing the trial density for AGS and for the uniform scanning method. If the global minimum value $\varphi(x^*)$   in the problem (\ref{eq:2_15}) with the Lipschitzian function (\ref{eq:2_22}) can be found with a precision $\gamma>0$  (with respect to the function value) by the  method of scanning  the uniform grid nodes then the step of this grid should not exceed the value $2\gamma/L$  in order to achieve the precision $\gamma$. In this case, the trial density $\tilde{P_{\alpha\beta}^*}$ of the scanning scheme over the interval $[\alpha,\beta]$ satisfies the inequality 
+\begin{equation}
+\label{eq:2_26}
+P_{\alpha\beta}^*\geq \frac{L}{2\gamma}.
+\end{equation}
+
+If the Lipschitz constant $L$ is known, let us assume for AGS that $m=2L$ . Then from (\ref{eq:2_25}) and (\ref{eq:2_26})
+\begin{equation}
+\label{eq:2_27}
+P_{\alpha\beta}\leq \left(\frac{6\gamma}{\Delta}\right)P_{\alpha\beta}^*.
+\end{equation}
+It follows from (\ref{eq:2_27}) that the higher the required precision $\gamma$ of the problem solution, the higher the degree of the efficiency of AGS as compared to the scanning method. 
+
+Let us give also the theoretical comparison of AGS with the broken lines method proposed by Piyavskij ~\cite{2_Piyavskij} for the minimization of the Lipschitzian functions (\ref{eq:2_22}). This method like AGS uses some estimate $m$ for the Lipschitz constant  $L$ as their parameter. Let us assume that this estimate is the same for both the methods and that the objective function is linear over the interval $[\alpha,\beta]$. Then the inequality 
+\begin{displaymath}
+P_{\alpha\beta}\leq 2P_{\alpha\beta}^+,
+\end{displaymath}
+takes place ~\cite{2_GrishaginDynSys} where $P_{\alpha\beta}^+$  is the density of Piyavskij method over the interval $[\alpha,\beta]$.
+\subsection {Operational characteristics}
+\label{subsec:2_2_3}
+The complexity of the investigated problem and of the applied methods allows obtaining the theoretical estimates of efficiency and performing the theoretical comparison of the algorithms in rather rare cases only. In this situation, the numerical experiments become an important element of analyzing the algorithms. To compare various algorithms to each other, the authors have proposed a technique based on building the operational characteristics of the methods ~\cite{2_GrishaginOperChar, 2_StrSergMon2000}. Let us give a brief description of this approach to the comparison of the algorithms’ efficiencies.
+
+The efficiency of any optimization algorithm is connected inseparably with two criteria, namely,
+
+\begin{enumerate}
+\item {the computational cost of the search to the moment of termination;}
+\item {the precision of the problem solution determined by the extremum estimate $e^k$  from (\ref{eq:2_21_1})}. 
+\end{enumerate}
+
+Assume that the search cost is measured in the number of trials $K$ executed to the moment of termination and the accuracy is determined by the value $P=\varphi_K^*-\varphi^*$   where $\varphi_K^*$  from (\ref{eq:2_21_2}) for $k=K$ is the lowest value of the function computed after $K$ steps and  $\varphi^*$ is the minimum value of the objective function. Note that the criteria $K$ and $P$ are the contradictory ones, namely, the better the accuracy, the larger the computational costs and vice versa, the less the number of trials, the worse the precision of the problem solution. In other words, introducing these characteristics, we formulate a bi-criterial optimization problem with contradictory criteria.
+
+Having completed the numerical solving of a particular problem with given set of the method parameters, one can obtain the particular values of the criteria, which are convenient to present as a point on a coordinate plane with the axes $K$ and  $P$. A set of such points corresponding to different combinations of the algorithm parameters is called \textit{the operational characteristic} of the method. 
+
+The operational characteristics obtained via the procedure described above reflects the results of the optimization of one function only. The results connected with the functions belonging to some function class are much more informative. Let us expand the concept of the operational characteristic onto this case.
+
+Let us consider a class $\Psi$ of the functions $\psi$ and assume that a probability distribution $F(\Psi)$  is defined over this class. Let us select randomly $n$ functions $\psi_i\in\Psi,\:1\leq i\leq n,$  according to this distribution and perform their optimization with given parameters of the method. After the experiment for the $i$-th function we have the number $K_i$  of trials executed and the accuracy $P_i$ . Let us take the averaged number of trials 
+\begin{displaymath}
+K=\sum_{i=1}^n{K_i}/n
+\end{displaymath}
+and the probability $P$ of finding the global minimum to the moment of the experiment termination with given precision $\delta>0$, i.e.,
+\begin{displaymath}
+P=\sum_{i=1}^n{p_i}/n
+\end{displaymath}
+where
+\begin{displaymath}
+p_i =
+  \begin{cases}
+    1, & P_i<\delta, \\
+    0, & P_i<\delta,
+  \end{cases}
+\end{displaymath}
+as the criteria of the experiment efficiency. The probability $P$ will be called hereafter as \textit{the reliability} of the method.
+
+Having performed the optimization of a sample of functions with several method parameters, we obtain an approximate operational characteristics of the algorithm  for the class $\Psi$.
+
+Plotting the operational characteristics on the plane $(K,P)$   enables to compare visually the efficiency of different optimization algorithms. Namely, if the operational characteristic of one method for given $K$ is located above the one of another method, then the first method is more efficient since it provides a higher reliability for the same computational expenditures. Analogously, if the operational characteristic of one method for given value $P$ is positioned to the left from the operational characteristic of another one then the first method is better because it has spent less number of trials $K$ for solving the same number of problems. 
+
+Note that, in general, the operational characteristic of a method is a set of points in the coordinate plane $(K, P)$. In this set a single value $K$ may correspond to several values of $P$ obtained for different method parameters. In this situation, the operational characteristics of different methods can overlap with each other, and in this overlap, one method can be better for particular method parameters while another one can be better with other parameter selection. How one can compare the methods to each other generally in this case? Since the method parameters could be selected according to researcher’s decision, it is proposed to compare the algorithms in accordance with the best operational characteristic indicators achieved, i.e., to compare the upper envelopes of the operational characteristics of the methods. 
+
+Let us formalize this approach. Assume that the set $C=\{K(\pi),P(\pi)\}$ is the operational characteristic of an optimization algorithm obtained for groups of parameters $\pi\in\Pi$, where  $\Pi$  is the set of all possible combinations of method parameters. Let us construct the sections $C(K)$ of the set $C$ for different fixed $K$ as
+\begin{displaymath}
+C(K)=\{P:(K,P)\in C\}.
+\end{displaymath}
+and select the maximal reliabilities for all nonempty sections $C(K)$ 
+\begin{equation}
+\label{eq:2_28}
+P^*(K)=\max \{P:P\in C(K)\}.
+\end{equation}
+
+The curve (\ref{eq:2_28}) will be hereafter called \textit{the best operational characteristic} of the optimization method. Now the comparison of the efficiencies of the methods can be reduced to the comparison of their best operational characteristics.
+     
+The condition $P(\pi)=P^*(K)$  determines the best method parameters for given $K$ and in such a way one can construct the set  $\pi^*$ of the optimal parameters  corresponding to the curve (\ref{eq:2_28}) for the optimization algorithm investigated on the chosen test class.
+
+The concept of operational characteristics has been recently expanded to the class of non-deterministic optimization methods as a more general concept of operational zones ~\cite{2_SergKvasMukhOZ}.
+
+Examples of operational characteristics for several algorithms  on different classes of test functions can be found, for example, in ~\cite{2_GerGriIsr, 2_GerGriGer, 2_GrishaginOperChar, 2_GriIsrSergAMC, 2_StrMonRus, 2_StrSergMon2000}.
+
+\section{Characteristical computational scheme for global search algorithms}
+\label{sec:2_3}
+The convergence to the sought solution (to the global minimum of the objective function of the problem (\ref{eq:2_15}) in the case considered) is an important property of a numerical method. The character of convergence determines the efficiency of the optimization method essentially. The present section is dedicated to the considering from a general theoretical viewpoint the convergence properties for a wide class of the numerical methods of the global extremum search for the functions of a single argument. This class called  \textit{the class of characteristical algorithms} includes many well-known methods  developed in the frameworks of various approaches to the design of optimization algorithms. 
+
+Since many algorithms of multidimensional global search are based on the reduction of a multidimensional problem to a one-dimensional subproblem (or to a family of the one-dimensional ones) ~\cite{2_CarrHowe, 2_GerGriGer, 2_Goertzel, 2_SergStrLeraMonogr, 2_ShiOlaf, 2_StrSergMon2000} this theory can be applied to the analysis of multidimensional optimization problems as well. 
+
+Consider a one-dimensional problem (\ref{eq:2_15}) with the search domain $Q=[a,b]$  and  optimization methods for solving this problem generating an infinite trial sequence $\{x^k\}=x^1,\:x^2,\:\ldots\;x^k,\ldots$, i.e., the methods in which the termination criterion is absent. 
+
+\begin{definition}
+\label{def:2_2}
+A method for solving the problem (\ref{eq:2_15}) is called \textit{characteristical algorithm}  if, starting from some search step $k_0\geq 1$ , the choice of the coordinate $x^{k+1}$  of the next trial $(k\geq k_0)$  consists in the execution of the following steps.
+\begin{description}[\textbf{Step 1.}]
+\item [\textbf{Step 1}]{Construct the set 
+\begin{equation}
+\label{eq:2_29}
+\Lambda_k=\{x_0,\:x_1,\:\ldots\;,x_\tau\}
+\end{equation}
+of a finite number $\tau+1=\tau(k)+1$  of points from the domain $Q=[a,b]$  assuming that $a\in\Lambda_k$, $b\in\Lambda_k$, all the coordinates of the preceding trials $x^i\leq\Lambda_k,\;1\leq i\leq k,$ , and the elements of the set $\Lambda_k$  are renumbered by subscripts in the increasing order of the coordinate, i.e.,
+\begin{equation}
+\label{eq:2_30}
+a=x_0<x_1<\:\ldots\:<x_{\tau-1}<x_\tau=b.
+\end{equation}
+}%end of Step 1
+\item [\textbf{Step 2}]{Juxtapose to each interval $(x_{i-1},\:x_i),\;1\leq i\leq \tau$, a number $R(i)$ called  \textit{characteristic}  of this interval.
+}%end of Step 3
+\item [\textbf{Step 3}]{Select the interval $(x_{t-1},\:x_t)$ corresponding to the maximal characteristic 
+\begin{equation}
+\label{eq:2_31}
+R(t)=\max\{R(i):1\leq i\leq \tau\}.
+\end{equation}
+}%end of Step 3
+\item [\textbf{Step 4}]{Execute the next trial at a point
+\begin{equation}
+\label{eq:2_32}
+x^{k+1}=d(t)\in (x_{t-1},\:x_t).
+\end{equation}
+}%end of Step 4
+\end{description}
+\end{definition}
+According to the definition, the characteristical scheme of the algorithm defines the structure of its decision rule (see the general scheme of optimization methods in  ~\cite{2_GriSergChap1}) via the sequence of the operations described at Steps 1-4. The following meaningful interpretation can be given for these operations. 
+
+In order to execute the next trial, the search domain $[a,b]$ is divided into $\tau$ subintervals $(x_{i-1},\:x_i),\:1\leq i\leq \tau$, by the points of the set $\Lambda_k$ . Next, for each interval the possibility to find out the global minimum in this interval is estimated (the interval characteristic is a mesure of such the possibility) and the interval with the best (maximal) characteristic is taken. The point of the next trial is selected in this interval according to the rule $d(\bullet)$.
+
+Note that the set (\ref{eq:2_29}) along with the trial coordinates may include the points, in which the trials have not been executed (for example, in a number of the information algorithms from ~\cite{2_StrSergMon2000} the ends of the search interval are such points). Concerning numbering, the upper index of trial coordinates corresponds to the order of the trial execution in the search process and the lower index determines the position of the point in the ordered array (\ref{eq:2_30}). Thus, the coordinate of the $i$-th  trial $x^i$  in the set $\Lambda_k$  gets a lower index  $j$, i.e., $x^i=x_j$  and index $j$ can change from one step to another $(j=j(k))$ .
+
+The concept of the characteristical structure of optimization methods has been introduced for the first time by Grishagin in ~\cite{2_GrishaginCharAlg}. Later, it was generalized and expanded onto other classes of problems and types of algorithms ~\cite{2_GrishaginSergeyevStrongin, 2_Pinter, 2_SergDivBest}. 
+
+As examples, some well-known global search algorithms can be described in the characteristical form. In the first four algorithms, two initial trials are executed at the points $x^1=a$  and $x^2=b$ , the characteristical rule takes its power starting from $k \geq 2$. Morover, the set $\Lambda_k (k\geq2)$    consists of the trial points only, i.e.,  $\Lambda_k=\{x^1,x^2,\:\ldots\:,x^k\}$ and, consequently, $\tau=k-1$ . Let us also use the designation $z_j=\varphi(x_j)$  for the objective function values at the points $x_j\in \Lambda_k$ .
+\paragraph{\textbf{Method of sequential scanning}}
+In this method, the length of an interval is its characteristic, i.e.,
+\begin{equation}
+\label{eq:2_33}
+R(i)=x_i-x_{i-1}.
+\end{equation}
+and the next trial point is selected in the middle of the longest interval
+\begin{displaymath}
+x^{k+1}=\frac{1}{2}(x_t+x_{t-1}).
+\end{displaymath}
+\paragraph{\textbf{\textbf{Kushner's method \cite{2_Kushner}}}}
+The characteristic of the method has the form
+\begin{equation}
+\label{eq:2_34}
+R(i)=-\frac{4(\varphi_k^*-\delta_k-z_i)(\varphi_k^*-\delta_k-z_{i-1})}{x_i-x_{i-1}}
+\end{equation}
+and the next trial is executed at the point
+\begin{equation}
+\label{eq:2_35}
+x^{k+1}=x_{t-1}+\frac{(x_t-x_{t-1})(\varphi_k^*-\delta_k-z_t)}{2(\varphi_k^*-\delta_k)-z_t-z_{t-1}}.
+\end{equation}
+where $\delta_k>0$  is a parameter of the method, in general, depending on the number of the search step $k$,  and $\varphi_k^*$ from (\ref{eq:2_21_2}) is the lowest computed value of the objective function.
+\paragraph{\textbf{Method of broken lines}}
+In this method, which has been proposed by Piyavskij  ~\cite{2_Piyavskij} and later by Shubert ~\cite{2_Shubert} for the optimization of the Lipschitzian function (\ref{eq:2_22}). The characteristic of this method is calculated as
+\begin{equation}
+\label{eq:2_36}
+R(i)=\frac{m(x_{i-1}-x_i)}{2}-\frac{z_{i-1}+z_i}{2},
+\end{equation}
+and the point of the next trial is selected according to the expression
+\begin{equation}
+\label{eq:2_37}
+x^{k+1}=\frac{x_{t-1}+x_t}{2}-\frac{z_t-z_{t-1}}{2m},
+\end{equation}
+where $m>0$  is a parameter of the method.
+\paragraph{\textbf{Core information algorithm of global search (AGS)}}
+This method has been proposed by Strongin ~\cite{2_StrMonRus, 2_StrSergMon2000} as Bayesian one-step optimal algorithm and uses the characteristic
+\begin{equation}
+\label{eq:2_38}
+R(i)=m(x_i-x_{i-1})+\frac{(z_i-z_{i-1})^2}{m(x_i-x_{i-1})}-2(z_i+z_{i-1})
+\end{equation}
+The next trial point is selected according to (\ref{eq:2_37}). 
+The value $m>0$  is computed according to the expression
+\begin{equation}
+\label{eq:2_39}
+m =\begin{cases}
+    rM, & M>0, \\
+    1, & M=0,
+  \end{cases} 
+\end{equation}
+where
+\begin{equation}
+\label{eq:2_40}
+M=\max_{1\leq i\leq \tau}\left|\frac{z_i-z_{i-1}}{x_i-x_{i-1}}\right|
+\end{equation}
+and $r>1$ is a parameter of the method.
+\paragraph{\textbf{Information algorithm of global search with  trials at the internal points only (AGSIP)}}
+This algorithm ~\cite{2_SergStrAGSIP} is applied to the optimization of the functions over an interval without computations of the function values at the boundary points of the interval. This is important in the case, when the interval boundaries cannot be expressed explicitly.
+
+According to AGSIP, one or several initial trials are executed at internal points of the interval $(a,b)$. Then, the characteristical scheme comes into effect. The set $\Lambda_k$  includes the trial points and the ends of the interval only, from where $\tau=k+1$ . As before, $z_j=\varphi(x_j)$, however, for $1\leq j\leq k$  only.
+
+The characteristic of the method is computed according to the expression
+\begin{equation}
+\label{eq:2_41}
+R(i) =\begin{cases}
+    m(x_i-x_{i-1})+\frac{r(z_i-z_{i-1})^2}{M(x_i-x_{i-1})}-2(z_i+z_{i-1}), & 1<i<\tau, \\
+    m(x_1-x_0)-4z_1, & i=1, \\
+		m(x_\tau-x_{\tau-1})-4z_\tau, & i=\tau,
+  \end{cases} 
+\end{equation}
+and the next trial point is computed as 
+\begin{equation}
+\label{eq:2_42}
+x^{k+1} =\frac{x_{t-1}+x_t}{2}-
+\begin{cases}
+    0, & t=1\ or\ t=\tau, \\
+    (z_t-z_{t-1})(2m), & 1<t<\tau,
+  \end{cases} 
+\end{equation}
+where the value $m$ is taken according to (\ref{eq:2_39}) with 
+\begin{displaymath}
+M=\max_{2\leq i\leq \tau-1}\left|\frac{z_i-z_{i-1}}{x_i-x_{i-1}}\right|.
+\end{displaymath}
+After the particular examples, let us consider an interesting theoretical result on the connection of the one-step optimality principle of the optimization algorithms with the property of  characteristical decomposition.
+\begin{theorem} 
+\label{theor:2_1}
+One-step optimal (minimax or Bayesian) algorithm is the characteristical one.
+\end{theorem}
+\begin{proof}
+According to the one-step optimality principle ~\cite{2_Mockus, 2_StrMonRus, 2_StrSergMon2000} a real function $W_k(x)$  characterizing the efficiency of the trial execution at the point $x$ at the step $k$ is introduced, and it is supposed that the less the value of the criterion $W_k$ , the higher the efficiency. If an algorithm selects the next trial point $x^{k+1},\:k\geq k_0\geq 1$, according to the condition 
+\begin{equation}
+\label{eq:2_43}
+W_k(x^{k+1})=\max_{x\in [a,b]}W_k(x)
+\end{equation}
+then this method is called \textit{one-step optimal algorithm}.
+
+Let us rewrite the condition of the one-step optimality (\ref{eq:2_43}) in the form 
+\begin{displaymath}
+W_k(x^{k+1})=\max_{1\leq i\leq \tau}\max_{x\in [x_{i-1},x_i]}W_k(x).
+\end{displaymath}
+Hence, the value
+\begin{displaymath}
+R(i)=\max_{x\in [x_{i-1},x_i]}W_k(x)
+\end{displaymath}
+may be taken as the characteristic of the interval $(x_{i-1},\:x_i)$ , and
+\begin{displaymath}
+d(t)=\arg \max_{x\in [x_{i-1},x_i]}W_k(x).
+\end{displaymath}
+The theorem has been proved.
+\end{proof}
+
+All the information univariate algorithms belong to the characteristical class since either these algorithms are derived from the principle of one-step optimality (like AGS) or they are generalizations of the core one-step optimal method inheriting the characteristical structure of their decision rules (like AGSIP). It should be noticed, that the method of broken lines and the Kushner's method were constructed as one-step optimal algorithms as well. 
+
+General theoretical results on the convergence of the characteristical algorithms are presented in ~\cite{2_GrishaginCharAlg, 2_GrishaginSergeyevStrongin}. These results determine conditions providing the following properties:
+\begin{description}[i)]
+\item [i)] {bilateral convergence to internal limit points of trial sequence that allows to substantiate the  termination criterion for characteristical algorithms;}
+\item [ii)] {everywhere dense convergence;}
+\item [iii)] {convergence to locally optimal points;}
+\item [iv)] {convergence to all global minimizers (sufficient conditions of global convergence to the solution defined by the Problem statement C from Chapter 1).}
+\end{description}
+
+The detailed proof of assertions i) – iv) can be found in ~\cite{2_GrishaginSergeyevStrongin} and in this monograph (see ~\cite{2_GriSergChap3}) as a particular case of the more general results obtained for the class of parallel characteristical algorithms.
+
+\section{Speed up of global search on the base of additional information}
+\label{sec:2_4}
+The information global search algorithms considered in the present chapter are aimed at the solving of the multiextremal optimization problems with Lipschitzian functions. Constructing the optimizing sequences is performed sequentially and uses the search information $\omega_k$ obtained during the process of computations. Moreover, in order to solve the optimization problems the precise values of Lipschitz constants for the model functions are not required a priori. These values are estimated in the course of global search on the base of the search information available (see, for example, (\ref{eq:2_19}).
+Nevertheless, another one important issue remains, which requires a special attention for the design of the efficient decision rules of the global search algorithms. This issue consists in the fact that in most cases the behavior of the functions in the multiextremal global optimization problems is a non-uniform one in different subdomains of the search domain. In some subdomains the model function values can vary rather fast (that would correspond to high values of Lipschitz constant in these subdomains). In other subdomains (for example, in  vicinities of the extrema points) the function values can change more slowly. As a result, the integral (or common) estimates of the characteristics of the optimized function for the whole search domain can not correspond in full to the function properties in different subdomains of the search domain.
+Two directions may be outlined among the possible approaches taking into account the nonuniformity of the optimized function behavior in different subdomains of the search domain, in the framework of which the most valuable results have been obtained, namely:
+\begin{itemize}
+\item 
+Construction of separate estimates of Lipschitz constants for the optimized function in different subdomains of the search domain;
+\item 
+The use of the additional information on the optimized function behavior. In most cases, the values of derivatives at the points of the executed trials of the global search are considered as such additional information.
+ \end{itemize}
+Below we consider these approaches  in more details for the one-dimensional optimization problems. 
+
+% 
+\begin{thebibliography}{99.}
+
+\bibitem{2_CarrHowe}	Carr, C.R., Howe, C.W.: Quantitative Decision Procedures in Management and Economic: Deterministic Theory and Applications. McGraw-Hill, New York (1964)
+\bibitem{2_GerGriIsr} Gergel, V.,  Grishagin, V., Israfilov, R.: Local tuning in nested scheme of global optimization, Procedia Computer Science \textbf{51}, 865--874 (2015) 
+\bibitem{2_GerGriGer}	Gergel, V., Grishagin, V., Gergel, A.: Adaptive nested optimization scheme for multidimensional global search, J. Glob. Opt. \textbf{66}, 35--51 (2016)
+\bibitem{2_Goertzel}	Goertzel, B.: Global Optimization with Space-Filling Curves. Appl. Math. Lett. 12, 133--135 (1999)
+\bibitem{2_GrishaginOperChar}  Grishagin,V.A.: Operation characteristics of some global search algorithms, Problems of Statistical Optimization \textbf{7},  198--206 (1978). In Russian
+\bibitem{2_GrishaginCharAlg} Grishagin, V.A.: On convergence conditions for a class of global search algorithms. In: Proc. of the 3rd All–Union Seminar on Numerical Methods of Nonlinear Programming,  82–84. Kharkov (1979). In Russian
+\bibitem{2_GrishaginDynSys} Grishagin, V.A.: Comparative investigation of search dynamics for two global optimization algorithms. System Dynamics \textbf{18}(3), 76--89 (1979). In Russian
+\bibitem{2_GriIsrSergAMC}	Grishagin, V.,  Israfilov, R., Sergeyev, Y.: Convergence conditions and numerical comparison of global optimization methods based on dimensionality reduction schemes. Appl. Math.  Comput. \textbf{318}, 270--280 (2018)
+\bibitem{2_GrishaginSergeyevStrongin} Grishagin, V.A., Sergeyev, Y.D., Strongin, R.G.: Parallel characteristical algorithms for solving problems of global optimization. J. Global Optim. \textbf{10}(2), 185--206 (1997)
+\bibitem{2_GriSergChap1} Grishagin, V.A., Sergeyev, Y.D.: Global optimization: from one-dimensional to multidimensional problems via the dimensionality reduction. This volume.
+\bibitem{2_GriSergChap3} Grishagin, V.A., Sergeyev, Y.D.: Parallel algorithms for one-dimensional multiextremal optimization. This volume.
+\bibitem{2_Kushner}	Kushner, H.J.: A new method of locating the maximum point of an arbitrary multipeak curve in the presence of noise. Transactions of ASME, Ser. D. Journal of Basic Engineering \textbf{86}, 97--106 (1964)
+\bibitem{2_Mockus}	Mockus, J.: Bayesian Approach to Global Optimization. Kluwer Academic Publishers, Dordrecht (1988)
+\bibitem{2_Pinter}	Pint{\'e}r, J.D.: Global Optimization in Action.: Kluwer Academic Publishers, Dordrecht (1996)
+\bibitem{2_Piyavskij}	Piyavskij, S.A.: An Algorithm for Finding the Absolute Extremum of a Function. USSR Comput. Math. Math. Phys. \textbf{12}(4), 57--67 (1972)
+\bibitem{2_SergDivBest} Sergeyev, Y.D.: On convergence of “Divide the Best” global optimization algorithms. Optimization 44(3), 303--325 (1998)
+\bibitem{2_SergKvasMukhOZ} Sergeyev, Y.D., Kvasov, D.E., Mukhametzhanov, M.S.: Operational zones for comparing metaheuristic and deterministic one-dimensional global optimization algorithms. Mathematics and Computers in Simulation \textbf{141}, 96-109 (2017)
+\bibitem{2_SergStrAGSIP} Sergeyev, Y.D., Strongin, R.G.:  A global minimization algorithm with parallel iterations. Comput. Maths. Math. Phys. \textbf{29}(2), 7-15 (1989)
+\bibitem{2_SergStrLeraMonogr}	Sergeyev, Y.D., Strongin, R.G., Lera, D.: Introduction to Global Optimization Exploiting Space-Filling Curves. Springer (2013)
+\bibitem{2_ShiOlaf}   Shi, L., {\'O}lafsson, S.: Nested Partitions Method for Global Optimization. Operations Research \textbf{48}, 390--407 (2000)
+\bibitem{2_Shubert} Shubert, B.O.: A sequential method seeking the global maximum of a function. SIAM J. Numer. Anal. \textbf{9}(3), 379--388 (1972)
+\bibitem{2_StrMonRus}	Strongin, R.G.: Numerical Methods in Multiextremal Problems (Information-Statistical Algorithms). Nauka, Moscow (1978). In Russian
+\bibitem{2_Str1989} Strongin, R.G.: The information approach to multiextremal optimization problems. Stochastics and Stochastic Reports \textbf{27}, 65-82 (1989).
+\bibitem{2_StrSergMon2000} Strongin, R.G., Sergeyev, Y.D.: Global Optimization with Non-Convex Constraints. Sequential and Parallel Algorithms. Kluwer Academic Publishers, Dordrecht (2000)
+
+\end{thebibliography}
 %\end{document}
