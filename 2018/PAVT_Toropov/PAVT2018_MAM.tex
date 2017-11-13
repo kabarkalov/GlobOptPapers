@@ -39,7 +39,7 @@
 $^1$ \and
 Konstantin A. Barkalov%(ORCID 0000-0001-5273-2471)
 $^1$ \and
-Evgeny A. Kozinov%(ORCID )
+Evgeny A. Kozinov%(ORCID 0000-0001-6776-0096)
 $^1$ \and
 Vassili V. Toropov%(ORCID 0000-0002-7017-5055)
 $^{1,2}$
@@ -126,7 +126,13 @@ In (\ref{eq:least_sq}) minimization is carried out with respect to the tuning pa
 
 The weight coefficients $w_{pj}$ strongly influence the difference in the quality of the approximations in different regions of the design variable space. Since in realistic constrained optimization problems the optimum point usually belongs to the boundary of the feasible region, the approximation functions should be more accurate in such domain. Thus, the information at the points located near the boundary of the feasible region is to be treated with greater weights. In a similar manner a larger weight can be allocated to a design with a better objective function, see \cite{ToropovFilatov1993,KeulenToropov1997}.
 
-As optimization steps are carried out, a database with response function values becomes available. In order to achieve good quality approximations in the current trust region, an appropriate selection of DoE points must be made. In this work, DoE points in each trust region is generated randomly. Generally, points located far from the current trust region would not contribute to the improvement of the quality of the resulting approximations in the trust region. For this reason only points located in the neighborhood of the current trust region are taken into account.%, as depicted in Fig. 1.
+As optimization steps are carried out, a database with response function values becomes available. In order to achieve good quality approximations in the current trust region, an appropriate selection of DoE points must be made. In this work, DoE points in each trust region is generated randomly. Generally, points located far from the current trust region would not contribute to the improvement of the quality of the resulting approximations in the trust region. For this reason only points located in the neighborhood of the current trust region are taken into account, as depicted in Fig.~\ref{fig:trustregion}.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{trustregion.png}
+    \caption{Current trust region (smaller box) and its extension (larger box): points outside the larger box are not used for building the approximate functions}
+    \label{fig:trustregion}
+\end{figure}
 A box in the space of design variables, which is approximately 1.5 to 1.8 times larger than the box representing the current trust region, was found by numerical experimentation to be a reasonable choice for the size of the neighborhood.
 
 In this work an approach is used that is based on the assembly of different approximate models $\{\varphi_l\}$ into one metamodel using the following form (note that the indices $j$ and $k$ are suppressed to simplify notation):
@@ -148,6 +154,43 @@ In the second step, based on the same DoE and keeping the obtained parameters $a
 \]
 that leads to solving a linear system of $NF$ equations with $NF$ unknowns $b_l$, where $NF$ is the number of regressors in the model pool $\{\varphi_l\}$.
 
+The selection of the regressors $\{\varphi_l\}$ is based on the number of sampling points currently located in the trust region. In the mid-range approximation framework, inexpensive approximate models for objective and constraint functions are built using minimum required number of sampling points. The simplest case is a linear function of the tuning parameters $a$:
+\[
+\varphi(x) = a_0 + \sum_{i=1}^N{a_i x_i}.
+\]
+
+This structure can be extended to an \textit{intrinsically linear} function. Such functions are nonlinear, but they can be led to linear ones by simple transformations. The most useful function among them is the multiplicative function
+\[
+\varphi(x) = a_0 \prod_{i=1}^N{x{_i}^{a_i}}.
+\]
+
+Intrinsically linear functions have been successfully used for a variety of design optimization problems. 
+The advantage of these approximation functions is that a relatively small number $N+1$ ($N$ is number of design variables) of tuning parameters $a_i$ is to be determined, and the corresponding least squares problem is solved easily. This is the most important feature of such approximations as it allows applying them to large scale optimization problems.
+
+Other intrinsically linear functions may be considered in the model pool, e.g.
+\[
+\varphi(x) = a_0 + \sum_{i=1}^N{a_i/x_i},
+\]
+\[
+\varphi(x) = a_0 + \sum_{i=1}^N{a_i x_i^2},
+\]
+\[
+\varphi(x) = a_0 + \sum_{i=1}^N{a_i/x_i^2},
+\]
+\[
+\varphi(x) = a_0 + \sum_{i=1}^N{a_i x_i^3},
+\]
+\[
+\varphi(x) = a_0 + \sum_{i=1}^N{a_i/x_i^3}.
+\]
+
+As more points are added to the database the approximations may be switched to higher quality models, e.g. a rational model
+\begin{equation}\label{eq:rational}
+\varphi(x) = \frac{a_1 + a_2x_1 + a_3x_2+...+a_{n+1}x_n}{1 + a_{n+2}x_1 + a_{n+3}x_2+...+a_{2n+1}x_n},
+\end{equation}
+The coefficients in (\ref{eq:rational}) are determined using a least squares approach which reduces to a nonlinear optimization problem with a constraint on the sign of the denominator (positive or negative). The latter is necessary in order to prevent the denominator from crossing the zero axis within a specified trust region. One may note that this formulation may yield the objective function with many local minima. Currently this problem is resolved using optimization restarts from a specified number of initial guesses randomly generated in a trust region.
+
+Tests results demonstrated that, although the above functions may describe the global behavior rather poorly, such approximations proved to be efficient in the mid-range approximation framework of MAM.
 
 \section{Parallel Algorithm}
 \label{sec:par_alg}
@@ -191,7 +234,50 @@ We are looking for a design with smallest volume $V = \sum_{i=1}^N b_i h_i l_i$.
   \end{array}
 \end{displaymath}
 
-With $N=50$ segments (corresponding to 100 design variables) the SQP solution of this problem is $V = 63704.598\; cm^3$. MAM obtained the solution $V = 63935.360\; cm^3$, using 1500 function evaluations (as compared to almost 8000 evaluations used by SQP). The number of points in a trust region used to build approximations was 150. The solution obtained by MAM is very close to the reference solution obtained by SQP, except for the last design variable (the height of the last segment), which indicates that the problem is insensitive to this variable near the optimum, making it hard for the metamodels to capture this dependence. Both SQP and MAM solutions are, however, feasible and differ only slightly in the value of the objective function.
+With $N=50$ segments (corresponding to 100 design variables) the SQP solution of this problem is $V = 63704.598\; cm^3$. The optimal values of design variables are given below (the first 50 entries are the widths and the last 50 entries are the heights of the segments):
+\setcounter{MaxMatrixCols}{11}
+\[
+\begin{matrix}%[pos]{spalten}
+			b=& 3.246& 3.224& 3.202& 3.179& 3.156& 3.133& 3.109& 3.085& 3.061& 3.036 \\  
+			  & 3.011& 2.985& 2.959& 2.933& 2.905& 2.878& 2.850& 2.821& 2.792& 2.762 \\
+			  & 2.731& 2.700& 2.668& 2.635& 2.602& 2.567& 2.532& 2.495& 2.458& 2.419 \\  
+			  & 2.379& 2.338& 2.295& 2.250& 2.204& 2.156& 2.105& 2.052& 1.996& 1.936 \\  
+			  & 1.873& 1.805& 1.732& 1.651& 1.562& 1.462& 1.345& 1.196& 1.023& 1.000 \\ 	
+\end{matrix}
+\]
+\[
+\begin{matrix}
+	h=& 64.919&64.480&64.033&63.581&63.122&62.656&62.184&61.703&61.216&60.720  \\
+		& 60.216&59.703&59.182&58.651&58.110&57.558&56.996&56.423&55.837&55.239  \\
+		& 54.628&54.003&53.363&52.707&52.035&51.344&50.635&49.906&49.155&48.381  \\
+		& 47.582&46.754&45.897&45.008&44.082&43.116&42.105&41.041&39.919&38.729  \\
+		& 37.462&36.102&34.630&33.020&31.240&29.241&26.910&23.919&20.465&14.639  \\
+\end{matrix}
+\]
+
+MAM obtained the solution $V = 63935.360\; cm^3$, using 1500 function evaluations (as compared to almost 8000 evaluations used by SQP). The number of points in a trust region used to build approximations was 150. The optimal values of design variables obtained by MAM are given below:
+\[
+\begin{matrix}
+	b=&	3.238&3.204&3.202&3.170&3.176&3.128&3.108&3.089&3.057&3.003 \\  
+		& 3.027&2.986&2.959&2.952&2.885&2.855&2.864&2.847&2.803&2.762 \\  
+		& 2.737&2.722&2.630&2.645&2.590&2.558&2.547&2.480&2.693&2.391 \\ 
+		& 2.368&2.310&2.307&2.227&2.176&2.149&2.106&2.016&2.007&1.925 \\  
+		& 1.864&1.843&1.758&1.635&1.582&1.934&1.332&1.173&1.026&2.419 \\ 
+\end{matrix}
+\]
+\[
+\begin{matrix}
+	h=& 64.764&64.083&64.036&63.392&63.518&62.566&62.153&61.772&61.149& 60.054  \\
+		& 60.534&59.728&59.182&59.033&57.695&57.105&57.274&56.943&56.057&55.233  \\
+		& 54.747&54.433&52.590&52.902&51.802&51.150&50.943&49.597&51.567&47.811  \\
+		& 47.373&46.190&46.140&44.543&43.525&42.991&42.119&40.308&40.141&38.506  \\
+		& 37.268&36.839&35.153&32.702&31.615&28.304&26.642&23.447&20.536& 9.417
+
+\end{matrix}
+\]
+
+
+The solution obtained by MAM is very close to the reference solution obtained by SQP, except for the last design variable (the height of the last segment), which indicates that the problem is insensitive to this variable near the optimum, making it hard for the metamodels to capture this dependence. Both SQP and MAM solutions are, however, feasible and differ only slightly in the value of the objective function.
 
 
 \section{Conclusions}
