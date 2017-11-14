@@ -10,8 +10,8 @@
 
 \author{K.A. Barkalov, V.P. Gergel}
 
-\address{Lobachevsky State University of Nizhni Novgorod, Gagarin avenue 23, 
-Nizhni Novgorod, Russia, 603950}
+\address{National Research Lobachevsky State University of Nizhny Novgorod, Gagarin avenue 23, 
+Nizhny Novgorod, Russia, 603950}
 
 
 
@@ -37,12 +37,12 @@ optimized function values at all points of this coverage. The dimensionality
 affects the difficulty of solving the problems of considered class crucially: 
 the computational costs grow with increasing this one exponentially, 
 therefore, for solving such problems, the methods are required, which 
-generate an essentially nonuniform grid in the search domain, denser in the 
-nearness of the global minimum and more sparse far away from this one. In the 
-present paper, the results of investigation of the scaling of the parallel 
+generate a nonuniform grid in the search domain, denser near the 
+global minimizer and more sparse far away from this one. In the 
+present paper, the results of scalability investigation of the parallel 
 index global optimization algorithm developed in Lobachevsky State 
-University of Nizhni Novgorod \cite{Strongin2000,Strongin2013} and implemented in the Globalizer 
-system [NACO] are presented.
+University of Nizhny Novgorod \cite{Strongin2000,Strongin2013} and implemented in the Globalizer 
+system \cite{Globalizer} are presented.
 
 Within the framework of the discussed approach, the solving of the 
 multidimensional problems is reduced to the solving of a set of the connected 
@@ -55,25 +55,23 @@ dimensionality of the problem being solved. The numerical methods allowing
 the efficient utilization of such reduction schemes had been developed 
 in details and substantiated in \cite{Strongin2000,Strongin2013}.
 
-In the algorithms developed in the present paper the objective function and constraints are assumed to be Lipschitzian that is typical for many other approaches to the development of the parallel optimization algorithms (see, for example, \cite{Jones,Zilinskas,Evtushenko}). This assumption is natural for many applied problems since the relative variations of the functions generally cannot exceed a certain threshold determined by the bounded energy of changes occurring in the system under study. Also, a standard assumption is that the execution of a single trial (the computing of the values of the objective function and constraints at a point in the search domain) is a time-consuming operation since it 
+In the algorithms considered in the present paper the objective function and constraints are assumed to be Lipschitzian that is typical for many other approaches to the development of the parallel optimization algorithms (see, for example, \cite{Jones,Zilinskas,Evtushenko}). This assumption is natural for many applied problems since the relative variations of the functions generally cannot exceed a certain threshold determined by the bounded energy of changes occurring in the system under study. Also, a standard assumption is that the execution of a single trial (the computing of the values of the objective function and constraints at a point in the search domain) is a time-consuming operation since it 
 utilized the results of numerical modeling. 
 
 An assumption on different costs of computing the problem functions subject to 
 various components of the vector of parameters is a novel element investigated in the present work. 
 It is assumed that it is possible to select the ``difficult'' and ``easy'' parts 
 of the functions connected with each other. Then, the solving of the 
-``difficult'' part of the problem (for which the execution of the computation-
-costly algorithms is required to conduct the trials) can be performed on the 
-CPU using an efficient index global optimization algorithm. The ``easy'' part 
-of the problem (the execution of which doesn’t require the complex algorithms 
-and can be transferred to an accelerator easily) can be solved on a GPU using 
+``difficult'' part of the problem (for which the execution of time-consuming algorithms is required to conduct the trials) can be performed on CPU using an efficient index global optimization algorithm. The ``easy'' part 
+of the problem (the execution of which doesn't require the complex algorithms 
+and can be transferred to an accelerator easily) can be solved on GPU using 
 the uniform grid technique. Obviously, in this case a major portion of the trials 
-will be performed on the GPUs, and the minor one -- on the CPU. However, 
+will be carried out on GPU, and the minor one will be carried out on CPU. However, 
 because of the difference in the difficulties of the subproblems solved on 
 different units, a speedup of the algorithm as a whole can be expected. 
 The proposed approach has been implemented in Globalizer parallel software 
 system for solving the global optimization problem developed in Lobachevsky 
-State University of Nizhni Novgorod. 
+State University of Nizhny Novgorod. 
 
 \section{Problem statement}
 
@@ -137,9 +135,7 @@ The use of Peano curve $y(x)$
 \left\{y\in R^N: -2^{-1}\leq y_i \leq 2^{-1}, 1 \leq i \leq 
 N\right\}=\left\{y(x):0\leq x \leq 1 \right\}
 \end{equation}
-unambiguously mapping the interval of real axis $[0,1]$ onto a $N$-
-dimensional cube is the first of the dimensionality reduction methods 
-considered.  To implement this method of dimensionality reduction a 
+unambiguously mapping the interval of real axis $[0,1]$ onto a $N$-dimensional cube is the first of the dimensionality reduction methods considered.  To implement this method of dimensionality reduction a 
 numerically constructed curve (\textit{evolvent}) is used. The evolvent is 
 $2^{-m}$ accurate approximation of the theoretical Peano curve in $L_\infty$ 
 metric, where $m$ is an evolvent construction parameter. Problems of 
@@ -181,7 +177,7 @@ Here we consider vector $y$ as a vector of block variables
 y=(y_1,y_2,...,y_N)=(u_1,u_2,...,u_M),
 \end{equation}
 where the $i$-th block variable $u_i$ is a vector of $N_i$ components of 
-vector $y$, taken serially i.e. $u_1=(y_1,y_2,...,y_{N_1})$, 
+vector $y$, taken serially, i.e. $u_1=(y_1,y_2,...,y_{N_1})$, 
 $u_2=(y_{N_1+1},y_{N_1+2},...,y_{N_1+N_2})$,..., $u_M=(y_{N-N_M+1},y_{N-
 N_M+2},...,y_{N})$, at that $N_1+N_2+...+N_M=N$. 
 The subdomains $D_i, 1 \leq i \leq M$, are projections of initial search 
@@ -201,25 +197,25 @@ g_i(y)\leq 0, \; 1 \leq i \leq m\right\}}.
 The organization of parallel computing with the use of the recursive 
 optimization scheme has been considered in details for the shared/distributed 
 memory as well as for the accelerators in \cite{Sysoyev,BarkalovLebedev}. However, in these works the 
-problems were considered, in which the time of the trial execution didn’t 
+problems were considered, in which the time of the trial execution didn't 
 depend on the trial point. Here, the problem is considered assuming that in 
 the function $\varphi(y_1,...,y_N)$ it is possible to select more difficult 
-part $f(y_1,...,y_N)$ (depending on all problem parameters) and a simpler 
-part $g(y_s,...,y_N )$ (depending on a part of the parameters only), for 
+part $f(y_1,...,y_s)$ (depending on a part of the parameters only) and a simpler 
+part $g(y_1,...,y_N)$ (depending on all problem parameters), for 
 example, $\varphi(y)= f(y)g(y)$.
 
 The difficult part of the function implies performing some  
 computations related to the numerical simulation, which can be performed on the 
-CPUs only. The simple part doesn’t imply the complex computations and can be 
+CPUs only. The simple part doesn't imply the complex computations and can be 
 computed on an accelerator, for example, GPU. For solving a problem with such 
 a structure, one can apply the parallel recursive optimization scheme with 
-the use the CPUs at the upper nesting level and the GPUs at the lower one.
+the use CPU at the upper nesting level and GPU at the lower one.
 
 \section{Numerical experiments}\label{sec:5}
 
 The recursive scheme of solving the global optimization problems has been 
 implemented in the Globzlizer solver developed in Lobachevsky State 
-University of Nizhni Novgorod. The global search methods and various 
+University of Nizhny Novgorod \cite{Globalizer}. The global search methods and various 
 dimensionality reduction schemes make the algorithmic base for the 
 Globalizer. The numerical experiments, the results of which are presented in 
 \cite{BarkalovGergelLebedev,BarkalovGergel} demonstrate these methods, at least, are not worse than the well known 
@@ -257,7 +253,7 @@ The level lines of the two-dimensional subproblems based on the functions
 $f(y_1,y_2)$ and $g(y_3,y_4)$ are shown in figure~1. The feasible domains are highlighted by color. One can see that 
 the subproblem (a) has more complex structure as compared to the subproblem 
 (b). At the same time, computing the values of the function $f(y_1,y_2)$ is 
-more computation-costly than of $g(y_3,y_4)$.
+more time-consuming than of $g(y_3,y_4)$.
 
 \begin{figure}[ht]
 \begin{minipage}[h]{0.5\linewidth}
@@ -300,9 +296,8 @@ Problems & Time (sec) \\
 
 Let us conduct the next experiment employing $p$ nodes each including three 
 graphic accelerators. Thus, at $p=32$ total 96 GPU accelerators were employed 
-each including 2688 CUDA cores. In table 2, the execution time of the 
-algorithm is presented and in table 3 -- the speedup with respect to the run 
-on a single node.
+each including 2688 CUDA cores. In tables 2 and 3 the average time and the speedup with respect to the run 
+on a single node are presented.
 
 \begin{table}[ht]
 \center{{\bf Table 2.} Average time for solving the problem on $p$ nodes}
@@ -333,16 +328,15 @@ Problems & $p = 8$ & $p=16$ & $p=32$ \\
 \end{table}
 
 Computational experiments were carried out on a high-performance cluster of 
-Lobachevsky State University of Nizhni Novgorod. The cluster node included 
+Lobachevsky State University of Nizhny Novgorod. The cluster node included 
 two Intel Sandy Bridge E5-2660 2.2 GHz CPUs, 64 Gb RAM, and three NVIDIA 
 Kepler K20Õ GPUs (2688 CUDA cores, 6 Gb GDDR5). 
-The results of experiments demonstrate that the paralle index algorithm combined with the nested optimization scheme provides a good speedup on the considered problem class. 
+The results of experiments demonstrate that the parallel index algorithm combined with the nested optimization scheme provides a good speedup on the considered problem class. 
 
 %The results of experiments performed on a series of test problems of the constrained global optimization with different time of computing the the problem functions demonstrate the index global optimization algorithm combined with the block recursive scheme for the dimensionality reduction to provide a good speedup on the considered problem class. The directions of further investigations include the expansion of the number of algorithms used for solving the subproblems on the GPUs.
 
 \section*{Acknowledgments}
-This study was supported by the Russian Science Foundation, project No 16-11-
-10150.
+This study was supported by the Russian Science Foundation, project No 16-11-10150.
 
 \section*{References}
 
@@ -359,6 +353,9 @@ Kluwer Academic Publishers, 2000. --- 704 p.
 Strongin, R.G. Parallel computing in global optimization problems / R.G. 
 Strongin, V.P. Gergel, V.A. Grishagin, K.A. Barkalov --- Moscow: Publishing 
 of the Moscow State University, 2013. --- 280 p. --- (in Russian).
+
+\bibitem{Globalizer}
+Sysoyev, A.V. Globalizer -- A parallel software system for solving global optimization problems / A.V. Sysoyev, K.A. Barkalov, V.V. Sovrasov, I.G. Lebedev, V.P. Gergel // Lecture Notes in Computer Science. --- 2017. --- Vol. 10421. --- P. 492--499.
 
 \bibitem{Jones}
 Jones, D.R. The DIRECT global optimization algorithm / In: Floudas, C. A., 
