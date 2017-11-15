@@ -17,12 +17,17 @@
 
 
 \documentclass[runningheads,a4paper]{llncs}
-
 \usepackage{amssymb,amsmath}
 \setcounter{tocdepth}{3}
 \usepackage{graphicx}
 \usepackage{enumitem}
 \usepackage{url}
+
+\usepackage[T2A]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage[english, russian]{babel}
+
+
 
 \begin{document}
 
@@ -74,13 +79,16 @@ TBD
 \end{abstract}
 
 \section{Introduction}
-TBD
+
+\Russian
+В статье рассматривается the multipoint approximation method (MAM) и его применение к large scale optimization problems. 
 
 In problems with a large (in the order of hundreds) number of design variables, the multipoint approximation method (MAM \cite{Toropov1989,Toropov1992,ToropovFilatov1993}) proved to be efficient, e.g. in turbomachinery applications \cite{ShahparPolynkinToropov2008,PolynkinToropovShahpar2008,PolynkinToropovShahpar2010} . This method is an iterative optimization technique based on mid-range approximations built in trust regions. A trust region is a sub-domain of the design space in which a set of design points, produced according to a small-scale design of experiments (DoE), are evaluated. These and a subset of previously evaluated design points are used to build metamodels of the objective and constraint functions that are considered to be valid within a current trust region. The trust region will then translate and change size as optimization progresses. The trust region strategy has gone through several stages of development to account for the presence of numerical noise in the response function values \cite{KeulenToropovMarkine1996,ToropovKeulenMarkine1996} and occasional simulation failures \cite{ToropovMarkineHolden1999}. The mid-range approximations used in the trust regions, as originally suggested in \cite{Toropov1989} for structural optimization problems, are intrinsically linear functions (i.e. nonlinear functions that can be led to a linear form by a simple transformation) for individual sub-structures, and assembly of them for the whole structure. This was enhanced by the use of gradient-assisted metamodels \cite{ToropovFilatov1993}, use of simplified numerical models that is also termed a multi-fidelity approach,\cite{ToropovMarkine1996} and the use of analytical models derived by Genetic Programming \cite{ToropovAlvarez1998}. One of the recent developments \cite{PolynkinToropov2012} involved the use of approximation assemblies, i.e. a two stage approximation building process that is conceptually similar to the original one used in \cite{Toropov1989} but is free from the limitation that lower level approximations are linked to individual substructures.
 
 The Moving Least Squares Method (MLSM) was proposed in \cite{LancasterSalkauskas1981} for smoothing and interpolation of scattered data and later used in the mesh-free form of the FEM \cite{Liszka1984}. As suggested in \cite{ChoiYounYang2001}, it can be used as a technique for metamodelling and used in MDO frameworks. The MLSM is a weighted least squares method where the weights depend on the Euclidean distance from a sample point to where the surrogate model is to be evaluated. The weight value for a certain sample point decays as the distance increases. Describing the weight decay with a Gaussian function tends to be the most useful option even though many others have been evaluated in \cite{ToropovSchrammSahaiJones2005}. As demonstrated in \cite{PolynkinToropov2010}, the cross-validated MLSM can be used both for design variable screening and for surrogate modelling. In order to create an efficient MDO framework for problems with disparate discipline attributes \cite{OllarToropovJones2014} extended the optimization approach of MAM to the use of local DOEs and MLS approximations built in different subspaces of the total design variable space corresponding to the individual disciplines. The subspaces are finally combined into the total design variable space in which the resulting MDO problem is solved.
 
-TBD
+\Russian
+This paper presents a Parallel Multipoint Approximation Method that makes it capable of handling problems with the number of design variables in the order of thousands. Параллельный вариант алгоритма был разработан с целью минимизировать время, затрачиваемое на работу непосредственно оптимизационной части алгоритма. При этом предполагается, что процесс вычисления значений целевой функции уже распараллелен.
 
 \section{The Multipoint Approximation Method}
 \label{sec:MAM}
@@ -192,8 +200,22 @@ The coefficients in (\ref{eq:rational}) are determined using a least squares app
 
 Tests results demonstrated that, although the above functions may describe the global behavior rather poorly, such approximations proved to be efficient in the mid-range approximation framework of MAM.
 
-\section{Parallel Algorithm}
-\label{sec:par_alg}
+\section{Parallel Multipoint Approximation Method}\label{sec:par_alg}
+
+\Russian
+Рассмотрим возможные способы распараллеливания, которые можно применить для рассматриваемой задачи.
+Во-первых, можно распараллеливать вычисление функций, описывающих оптимизируемый объект. Данный путь является как очевидным, так и необходимым, т.к. в industrial design optimization problems расчет даже одного значения функции может занимать несколько часов. Однако данный способ является специфичным для каждой конкретной задачи. Вопросы распараллеливания тут решаются на уровне пакетов прикладных программ, в которых выполняется инженерное моделирование (например, Ansys, OpenFOAM, и т.п.). 
+
+Во-вторых, можно скорректировать алгоритм с целью параллельного вычисления нескольких значений целевой функции и ограничений в разных точках области поиска. В соответствии с правилами MAM на каждой итерации в текущем trust region формируется P sampling points in design of experiments. Значения функции в них можно вычислять параллельно на разных процессорах (узлах). Сказанное соответствует распараллеливаню шага 2а алгоритма. The number of sampling points generated in each iteration may be set equal to P = k×NP number, where NP is a number of available processors (or nodes) and k ≥ 1. In terms of the time, the latter will be equivalent to NP function evaluations per step. Данный способ был успешно реализован в работе [35] и показал хорошую эффективность, т.к. при числе design variables порядка ста основное время затрачивается на function evaluations, работа самого MAM (в последовательном режиме) вносит незначительные накладные расходы.
+
+Однако когда число переменных становится порядка тысячи, работа последовательной части MAM начинает оказывать ощутимое влияние на общее время решения задачи (в предположении, что время вычисления значений целевой функции не меняется). Так, для рассмотренной в Section 4 задачи, время проведения одной итерации метода увеличилось в более чем в 2000 раз (с 4 до 9000 секунд ) при увеличении числа переменных в задаче с 100 до 1000. 
+
+Поэтому в рамках проводимого исследования был реализован третий подход к распараллеливанию алгоритма. Были распараллелены вычислительные правила МАМ, обеспечивающие построение аппроксимации, решение аппроксимированной задачи и выбор следующего trust region (шаги 2b, 2c и 2d алгоритма).
+
+С целью выявления наиболее трудоемких мест алгоритма нами был использован Intel VTune Amplifier XE. Проведенный анализ показал, что наиболее трудоемкими операциями, использованными при реализации MAM, являются матричное умножение и решение СЛАУ при построении аппроксимации, а также решение аппроксимированной задачи методом SQP.
+
+Матричное умножение и решение СЛАУ являются стандартными операциями, реализованными во многих высокопроизводительных библиотеках. Здесь нами были использованы соответствующие параллельные методы из библиотеки Intel MKL. Метод SQP был распараллелен самостоятельно с использованием технологии OpenMP.
+
 
 \section{Numerical Example}
 \label{sec:num_example}
@@ -276,11 +298,23 @@ MAM obtained the solution $V = 63935.360\; cm^3$, using 1500 function evaluation
 \end{matrix}
 \]
 
-
 The solution obtained by MAM is very close to the reference solution obtained by SQP, except for the last design variable (the height of the last segment), which indicates that the problem is insensitive to this variable near the optimum, making it hard for the metamodels to capture this dependence. Both SQP and MAM solutions are, however, feasible and differ only slightly in the value of the objective function.
 
+\Russian
+Далее сравним время работы последовательной и параллельной версий программы при решении large scale problems. Размерность N будем варьировать от 100 до 1000 design variables, что соответствует 50 – 500 сегментам cantilevered beam. The number of points in a trust region used to build approximations was 1.5 N  Таблица 1 отражает время работы параллельного алгоритма в зависимости от числа переменных. В таблице 2 приведено число итераций MAM, а также число вычислений значений функции, потребовавшееся для решения задачи. Для сравнения приведено также число вычислений значений функции, которые бы потребовались для решения исходной (неаппроксимированной) задачи методом SQP. Во всех проведенных экспериментах значения целевой функции в последовательной и параллельной версиях алгоритма совпадают (с точностью до вычислительной погрешности), и не сильно отличаются от решения, полученного SQP. При этом наглядно демонстрируется сокращение числа function evaluations, требующееся для решения задачи с использованием MAM по сравнению с использованием SQP.
+
+%Таблица
+
+Computational experiments were carried out on a high-performance cluster of Lobachevsky State University of Nizhny Novgorod. The cluster node included two Intel Sandy Bridge E5-2660 2.2 GHz CPUs and 64 Gb RAM. The CPU had 8 cores, i.e. a total of 16 physical cores were available in the node. MS Visual Studio 15 and Intel Fortran Compiler were used to implement the algorithm.
 
 \section{Conclusions}
+
+Recent developments in the Multipoint Approximation Method (MAM) made it capable of solving large scale industrial optimization problems. The approach uses metamodels built in the space of design variables. MAM solves initial problem by using approximations of the objective function and constraints.
+\Russian
+В рамках данного исследования разработана параллельная версия МАМ, ориентированная на сокращение времени работы оптимизационного алгоритма (в предположении, что вычисление значений the objective function and constraints уже распараллелены). Проведенные эксперименты показывают приемлемое ускорение при решении задач большого размера при использовании 16 ядер. 
+
+Performance is demonstrated on a benchmark example of structural optimization known as the scalable cantilevered beam.  
+
 
 
 \bibliography{bibliography}{}
