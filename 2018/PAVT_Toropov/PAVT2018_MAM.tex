@@ -23,9 +23,9 @@
 \usepackage{enumitem}
 \usepackage{url}
 
-\usepackage[T2A]{fontenc}
-\usepackage[utf8x]{inputenc}
-\usepackage[russian,english]{babel}
+%\usepackage[T2A]{fontenc}
+%\usepackage[utf8x]{inputenc}
+%\usepackage[russian,english]{babel}
 
 
 
@@ -81,7 +81,6 @@ With the purpose of solving the problems of high dimensionality in a reasonable 
 
 \section{Introduction}
 
-\Russian
 In the present paper, the multipoint approximation method (MAM \cite{Toropov1989,Toropov1992,ToropovFilatov1993}) and its application to the large scale optimization problems are considered. In problems with a large (in the order of hundreds) number of design variables MAM proved to be efficient, e.g. in turbomachinery applications \cite{ShahparPolynkinToropov2008,PolynkinToropovShahpar2008,PolynkinToropovShahpar2010}. This method is an iterative optimization technique based on mid-range approximations built in trust regions. A trust region is a sub-domain of the design space in which a set of design points, produced according to a small-scale design of experiments (DoE), are evaluated. These and a subset of previously evaluated design points are used to build metamodels of the objective and constraint functions that are considered to be valid within a current trust region. The trust region will then translate and change size as optimization progresses. The trust region strategy has gone through several stages of development to account for the presence of numerical noise in the response function values \cite{KeulenToropovMarkine1996,ToropovKeulenMarkine1996} and occasional simulation failures \cite{ToropovMarkineHolden1999}. The mid-range approximations used in the trust regions, as originally suggested in \cite{Toropov1989} for structural optimization problems, are intrinsically linear functions (i.e. nonlinear functions that can be led to a linear form by a simple transformation) for individual sub-structures, and assembly of them for the whole structure. This was enhanced by the use of gradient-assisted metamodels \cite{ToropovFilatov1993}, use of simplified numerical models that is also termed a multi-fidelity approach,\cite{ToropovMarkine1996} and the use of analytical models derived by Genetic Programming \cite{ToropovAlvarez1998}. One of the recent developments \cite{PolynkinToropov2012} involved the use of approximation assemblies, i.e. a two stage approximation building process that is conceptually similar to the original one used in \cite{Toropov1989} but is free from the limitation that lower level approximations are linked to individual substructures.
 
 The Moving Least Squares Method (MLSM) was proposed in \cite{LancasterSalkauskas1981} for smoothing and interpolation of scattered data and later used in the mesh-free form of the FEM \cite{Liszka1984}. As suggested in \cite{ChoiYounYang2001}, it can be used as a technique for metamodelling and used in MDO frameworks. The MLSM is a weighted least squares method where the weights depend on the Euclidean distance from a sample point to where the surrogate model is to be evaluated. The weight value for a certain sample point decays as the distance increases. Describing the weight decay with a Gaussian function tends to be the most useful option even though many others have been evaluated in \cite{ToropovSchrammSahaiJones2005}. As demonstrated in \cite{PolynkinToropov2010}, the cross-validated MLSM can be used both for design variable screening and for surrogate modelling. In order to create an efficient MDO framework for problems with disparate discipline attributes \cite{OllarToropovJones2014} extended the optimization approach of MAM to the use of local DOEs and MLS approximations built in different subspaces of the total design variable space corresponding to the individual disciplines. The subspaces are finally combined into the total design variable space in which the resulting MDO problem is solved.
@@ -210,7 +209,7 @@ Second, one can correct the algorithm with the purpose of parallel computing sev
 sampling points are formed in current trust region at every iteration. The function values at these points can be computed on different processors (nodes) in parallel. The above corresponds to the parallelization of Step 2a of the algorithm with the use of the distributed memory. The number of sampling points generated within each iteration may be set equal to $P = k\cdot NP$ number, where $NP$ is a number of available processors (or nodes) and $k \geq 1$. In  terms of the time, the latter will be equivalent to $NP$ function evaluations per step. This method has been implemented successfully in \cite{PolynkinToropov2008} and has demonstrated a good efficiency since at the number of the design variables of the order of $10^2$ major time is consumed by the function evaluations, the work of the MAM itself (in the sequential regime) introduces minor overhead.
 
 However, when the number of variables becomes of the order of $10^3$, the work of the sequential part of MAM begins to affect the total problem solving time essentially (assuming the time of computing the objective function 
-values remains constant). Thus, for the problem considered in Section 4 the time of execution of a single iteration of the method increased more than 2000 times (from 4 up to 9000 seconds) when increasing the number of variables from 100 up to  1000. Therefore, another approach to the parallelization of the algorithm has been applied within the framework of the 
+values remains constant). Thus, for the problem considered in Section 4 the time of execution of a single iteration of the method increased more than 4000 times (from 1.5 up to 6000 seconds) when increasing the number of variables from 100 up to  1000. Therefore, another approach to the parallelization of the algorithm has been applied within the framework of the 
 present study: namely, the computational rules of MAM  providing the construction of the approximating, the solving of the approximated problem, and the choice of the next trust region (Steps 2b, 2c, and 2d of the algorithm) have been parallelized.
 
 In order to find the most time-consuming parts of the sequential program developed earlier, we have applied Intel VTune Amplifier XE. The performed analysis has shown the matrix multiplication and solving SLAE when constructing the approximations as well as solving the approximating problem by SQP method to be the most time-consuming operations in the execution of MAM. The matrix multiplication and solving SLAE are standard operations implemented in many high-performance libraries. Here we used the corresponding parallel methods from Intel MKL library. We have parallelized the SQP method ourselves using OpenMP.
@@ -312,12 +311,12 @@ visibly.
 	\center
 	\begin{tabular}{cccc}
 		\hline\noalign{\smallskip}
-		$N$ & MAM time & PMAM time & Speedup \\
+		$N$ & $T_{MAM}$ & $T_{PMAM}$ & Speedup \\
 		\hline\noalign{\smallskip}
-		100 & 48 &  34 &   \\
-		200 & 48 &  34 &   \\
-		500 & 48 &  34 &   \\
-		1000 & 107479  &  19469 &   \\
+		100 & 15.4 & 11.9 & 1.3  \\
+		200 & 167 &  89 &  1.9 \\
+		500 & 5151 &  1520 & 3.4  \\
+		1000 & 67674 &  13771 & 4.9  \\
 		\noalign{\smallskip}\hline
 	\end{tabular}
 \end{table}
@@ -332,8 +331,8 @@ visibly.
 		\hline\noalign{\smallskip}
 		100 & 10 &  2201 & 9901 \\
 		200 & 10 &  4402 & 28143 \\
-		500 &  &   &  \\
-		1000 &  &   &  \\
+		500 &  &   &  115734 \\
+		1000 &  &   & 305308 \\
 		\noalign{\smallskip}\hline
 	\end{tabular}
 \end{table}
