@@ -115,7 +115,7 @@ where $x$ is the vector of design variables, $a$ and $b$ are the lower and upper
       \label{eq:problem_approx}
       \begin{array}{c}
       \min\limits_{a_i^k \le x_i ^k\le b_i}\widetilde{F}^k_0(x) \\
-      s.t.\; \widetilde{F}^k_j( x) \le 1,\; j=1,\dots ,M,
+      s.t.\; \widetilde{F}^k_j( x) \le 1,\; j=1,\dots ,M.
       \end{array}
     \end{equation}
     The approximate problem (\ref{eq:problem_approx}) is solved using Sequential Quadratic Programming (SQP) and the solution of this problem determines the center of the next trust region.
@@ -236,7 +236,7 @@ The deflection $y_i$ at the right hand of the $i$-th segment is given by the fol
     y_i=\frac{P\cdot l_i^2}{2E\cdot I_i}\Big[L-\sum\limits_{j=1}^i l_j + \frac{2l_i}{3}\Big]+y_{i-1}'l_i+y_{i-1}.
   \end{array}
 \end{displaymath}
-The moment of inertia of a segment is $I_i=\frac{b_i h_i^3}{12}$ and the bending moment at the left end is $M_i=P[L+l_i- \sum_{j=1}^{i}  l_j ]$. The maximum bending stress in the segment $i$ is then given by the following formula:
+The moment of inertia of a segment is $I_i={b_i h_i^3}/{12}$ and the bending moment at the left end is $M_i=P[L+l_i- \sum_{j=1}^{i}  l_j ]$. The maximum bending stress in the segment $i$ is then given by the following formula:
 \begin{displaymath}
   \sigma_i=\frac{M_i h_i}{2I_i}
 \end{displaymath}
@@ -247,7 +247,7 @@ We are looking for a design with smallest volume $V = \sum_{i=1}^N b_i h_i l_i$.
     \min\limits_{ b,  h}V( b,  h) \\
     s.t.\;1.0\le b_i \le 10.0, \\
     5.0 \le h_i \le 100.0, \\
-    y_N\le 2/5, \\
+    y_N\le 2.5, \\
     \sigma_i \le \bar{\sigma}=14000, \\
     \frac{h_i}{b_i}\le 20.
   \end{array}
@@ -274,7 +274,7 @@ With $N=50$ segments (corresponding to 100 design variables) the SQP solution of
 \end{matrix}
 \]
 
-MAM obtained the solution $V = 63935.360\; cm^3$, using 1500 function evaluations (as compared to almost 8000 evaluations used by SQP). The number of points in a trust region used to build approximations was 150. The optimal values of design variables obtained by MAM are given below:
+MAM obtained the solution $V = 63935.360\; cm^3$, using 2201 function evaluations (as compared to almost 10000 evaluations used by SQP). The number of points in a trust region used to build approximations was 200. The optimal values of design variables obtained by MAM are given below:
 \[
 \begin{matrix}
 	b=&	\left[3.238,\right.&3.204,&3.202,&3.170,&3.176,&3.128,&3.108,&3.089,&3.057,&3.003 \\  
@@ -297,12 +297,9 @@ MAM obtained the solution $V = 63935.360\; cm^3$, using 1500 function evaluation
 The solution obtained by MAM is very close to the reference solution obtained by SQP, except for the last design variable (the height of the last segment), which indicates that the problem is insensitive to this variable near the optimum, making it hard for the metamodels to capture this dependence. Both SQP and MAM solutions are, however, feasible and differ only slightly in the value of the objective function.
 
 Next, let us compare the worktime of the sequential and parallel algorithms when solving the large scale problems. 
-The dimensionality of the problem being solved $N$ was varied from 100 up to 1000 design variables that corresponds to 50 to 500 segments of the cantilevered beam. The number of points in a trust region used to build the approximations was $1.5 N$. 
+The dimensionality of the problem being solved $N$ was varied from 100 up to 1000 design variables that corresponds to 50 to 500 segments of the cantilevered beam. The number of points in a trust region used to build the approximations was $2 N$. 
 Both algorithms was run on a single node of the cluster (the specifications of the node are listed below), the parallel algorithm employed all 16 processors cores available. Since the time of computing of the objective 
 function and constraints in the test problem being solved was negligible, these ones were computed on the same node.
-
-Table 1 reflects the worktime (in seconds) of the sequential algorithm and of the parallel one subject to the number of variables. In Table 2, the number of MAM iterations $I_{MAM}$ as well as the number of the function evaluations $F_{MAM}$ required for solving the problem are presented. For comparison, the number of the function value computations, which would be required to solve the initial (non-approximated) problem by SQP method $F_{SQP}$ is given also. In all conducted experiments, the objective function values in the sequential and parallel versions of the algorithm were the same (up to the accuracy of the computational error) and differed from the solution obtained by SQP negligibly. The reduction of the number of the function evaluations required to solve the problem using MAM as compared to the use of SQP was demonstrated 
-visibly.
 
 \begin{table}
 	\caption{Time and speedup}
@@ -314,7 +311,10 @@ visibly.
 		\hline\noalign{\smallskip}
 		100 & 15.4 & 11.9 & 1.3  \\
 		200 & 167 &  89 &  1.9 \\
-		500 & 5151 &  1520 & 3.4  \\
+		400 & 2476 &  837 &  3.0 \\
+%		500 & 5151 &  1520 & 3.4  \\
+		600 & 9678 &  2777 &  3.5 \\
+		800 & 27826 &  6948 &  4.0 \\
 		1000 & 67674 &  13771 & 4.9  \\
 		\noalign{\smallskip}\hline
 	\end{tabular}
@@ -330,11 +330,18 @@ visibly.
 		\hline\noalign{\smallskip}
 		100 & 10 &  2201 & 9901 \\
 		200 & 10 &  4402 & 28143 \\
-		500 &  &   &  115734 \\
-		1000 &  &   & 305308 \\
+		400 & 11 &  9599 &  84211 \\
+%		500 &  &   &  115734 \\
+		600 & 10 &  13200 &  146046 \\
+		800 & 10 &  17600 &  221079 \\
+		1000 & 10 &  22000 & 305308 \\
 		\noalign{\smallskip}\hline
 	\end{tabular}
 \end{table}
+
+Table 1 reflects the worktime (in seconds) of the sequential algorithm and of the parallel one subject to the number of variables. In Table 2, the number of MAM iterations $I_{MAM}$ as well as the number of the function evaluations $F_{MAM}$ required for solving the problem are presented. For comparison, the number of the function value computations, which would be required to solve the initial (non-approximated) problem by SQP method $F_{SQP}$ is given also. In all conducted experiments, the objective function values in the sequential and parallel versions of the algorithm were the same (up to the accuracy of the computational error) and differed from the solution obtained by SQP negligibly. The reduction of the number of the function evaluations required to solve the problem using MAM as compared to the use of SQP was demonstrated 
+visibly.
+
 
 Computational experiments were carried out on a high-performance cluster of Lobachevsky State University of Nizhny Novgorod. The cluster node included two Intel Sandy Bridge E5-2660 2.2 GHz CPUs and 64 Gb RAM. The CPU had 8 cores, i.e. a total of 16 physical cores were available in the node. MS Visual Studio 15 and Intel Fortran Compiler were used to implement the algorithm.
 
