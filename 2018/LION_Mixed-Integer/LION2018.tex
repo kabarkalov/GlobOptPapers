@@ -42,9 +42,9 @@ The paper presents .
 \Russian
 В работе рассматриваются mixed-integer global optimization problems и методы их решения. Задачи глобальной оптимизации обладают значительной вычислительной трудоемкостью, т.к. глобальный оптимум является интегральной характеристикой решаемой задачи и требует исследования всей области поиска. Как результат, поиск глобального оптимума сводится к построению некоторого покрытия (вообще говоря, неравномерного) в области параметров. Особый интерес представляют задачи, в которых часть параметров может принимать лишь целочисленные значения, т.к. для них сложнее построить оценки оптимума по сравнению с непрерывными задачами.
 
-Решению mixed-integer problems посвящена обширная литература (см., например, обзоры \cite{Burer,Boukouvala} и статьи, цитированные в них). Известные детерминированные методы решения задач данного класса основаны, как правило, на идеях Branch-and-Bound or Branch-and-Reduce. Также известен ряд метаэвристических и генетических алгоритмов, так или иначе основанных на идеях случайного поиска.
+Методам решения mixed-integer problems посвящена обширная литература (см., например, обзоры \cite{Burer,Boukouvala}). Известные детерминированные методы решения задач данного класса основаны, как правило, на идеях Branch-and-Bound or Branch-and-Reduce. Также известен ряд метаэвристических и генетических алгоритмов, так или иначе основанных на идеях случайного поиска.
 
-В данной работе нами предложен новый детерминированный метод решения mixed-integer problems, основанный на information-statistical approach к решению задач глобальной оптимизации, разработанном в ННГУ \cite{Strongin2000,Strongin2013}. Текст статьи, отражающей предварительные результаты исследования, построен следующим образом. Вначале рассмотрим подход к решению задач с непрерывными параметрами, затем будет предложено его обобщение для mixed-integer problems. В финальном разделе приведены результаты сравнения предложенного метода с известными аналогами.
+В данной работе нами предложен новый детерминированный метод решения mixed-integer problems, основанный на information-statistical approach к решению задач глобальной оптимизации \cite{Strongin2000,Strongin2013}. Текст статьи, отражающей предварительные результаты исследования, построен следующим образом. Вначале рассмотрим подход к решению задач с непрерывными параметрами, затем будет предложено его обобщение для mixed-integer problems. В финальном разделе приведены результаты сравнения предложенного метода с известными аналогами.
 
 \section{Global search algorithm and dimension reduction}
 
@@ -64,26 +64,9 @@ Using a continuous single-valued mapping $y(x)$  (Peano-type space-filling curve
 \begin{equation}\label{problem1}
 \varphi(y(x^\ast))=\min \left\{\varphi(y(x)): x \in [0,1], \; g_i(y(x))\leq 0, \; 1 \leq i \leq m\right\}.
 \end{equation}
-The reduction of dimensionality matches the multidimensional problem with a Lipschitzian objective function and Lipschitzian constraints with a one-dimensional problem where the respective functions satisfy the uniform H\"older condition (see \cite{Strongin2000})
-\[
-\left|g_i(y(x'))-g_i (y(x''))\right| \leq H_i \left|x'-x'' \right|^{1/N}, \; x',x''\in [0,1], \; 1\leq i \leq m+1.
-\]
-Here $N$ is the dimensionality of the initial multidimensional problem and the coefficients $H_i$ are related with the Lipschitz constants $L_i$ of the initial problem by the inequalities $H_i \leq 2L_i \sqrt{N+3}$. The issues around the numeric construction of a Peano-type curve and the corresponding theory are considered in detail in \cite{Strongin2000,Strongin2013}.
+The reduction of dimensionality matches the multidimensional problem with a Lipschitzian objective function and Lipschitzian constraints with a one-dimensional problem where the respective functions satisfy the uniform H\"older condition (see \cite{Strongin2000}).
 
-An efficient global search algorithm (GSA) for solving one-dimensional constrained optimization problem (\ref{problem1}) is developed in UNN. \Russian Основная схема алгоритма состоит в следующем.
-
-The first iteration $x^1 \in (0,1)$ is executed in an arbitrary internal point of the search interval. The choice of the next iteration point $x^{k+1}, \; k \geq 1,$ is performed according to the following rules.
-\begin{itemize}
-	\item Arrange the search information in the order of values of the iteration points executed earlier, i.e. 
-	\[ 
-	x_1 < x_2 <... <x_k.
-	\]
-	\item Compute a quantity $R(i)$ called a \textit{characteristic} of the interval for each interval $(x_{i-1},x_i), 1<i\leq k$.
-	\item Determine the interval $(x_{t-1},x_t)$ which the maximum characteristic $R(t)=\max{\{R(i): 1\leq i \leq k}\}$ corresponds to.
-	\item Compute the next iteration point $x^{k+1}$ in the interval with the maximum characteristic, i.e. $x^{k+1}\in (x_{t-1},x_t)$.
-\end{itemize}
-
-A detailed description of various variants of this algorithm is presented in \cite{ }.
+An efficient global search algorithm (GSA) for solving one-dimensional constrained optimization problem (\ref{problem1}) is considered in \cite{Strongin2000}. A detailed description of various variants of this algorithm is presented in \cite{ }.
 
 \section{Global search algorithm for mixed-integer problems}
 
@@ -95,22 +78,22 @@ A detailed description of various variants of this algorithm is presented in \ci
 D=\left\{a_i\leq y_i \leq b_i, \; 1\leq i \leq N, \; y_j \in Z, \; j \in J, \; y_i \in R, \; i \notin J \right\}.
 \end{gather}
 
-На основе задачи (\ref{problem_i}) сформируем набор задач 
+На основе задачи (\ref{problem_i}) сформируем множество задач 
 \begin{gather}\label{problem_is}
 \min{\left\{ g_{m+1}^s(y):y\in D^s, \; g_i^s(y)\leq 0, \; 1 \leq i \leq m\right\}},\\
 D^s=\left\{ a_i\leq y_i \leq b_i, \;  y_i \in R, \; i \notin J \right\}, \; s\in\{1,...,S\}, 
 \end{gather}
 каждая из которых соответствует исходной задаче (\ref{problem_i}) с фиксированным набором целочисленных параметров. Число задач $S$ будет соответствовать числу возможных комбинаций целочисленных параметров.
 
-Используя схему редукции размерности с помощью развертки $y(x)$ из (\ref{problem1}) можно составить единую задачу
+Используя схему редукции размерности с помощью развертки $y(x)$ на основе множества задач (\ref{ }) можно составить единую задачу
 \begin{equation}\label{problem_is1}
 \min \left\{g_{m+1}^s(y(x)): x \in [0,S], \; g_i^s(y^s(x)) \leq 0, \; 1 \leq i \leq m\right\},
 \end{equation}
-где отображение $y^s(x)$  формируется как на основе исходной развертки $y(x)$ следующим образом
+где отображение $y^s(x)$  формируется на основе исходной развертки $y(x)$ следующим образом
 \[
 y^s(x)=y(x-s), \; x\in[s-1,s],\; s\in\{1,...,S\}
 \]
-При этом objective function and constraints будут иметь разрыв в точках $s∈{1,...,S-1}$, поэтому данные точки рассматриваются как выколотые, значение objective function and constraints в них не определено.
+При этом функции $g_i^s(y^s(x))$ могут иметь разрывы в точках $s\in \{1,...,S-1\}$, поэтому данные точки рассматриваются как выколотые, значение objective function and constraints в них не определено.
 
 Для иллюстрации на рис. 1 изображены графики функций, соответствующих задаче с одним непрерывным и одним бинарным параметром.
 
