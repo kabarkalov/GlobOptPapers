@@ -12,15 +12,12 @@
 %\usepackage{amssymb}
 %\usepackage{epstopdf}
 %\usepackage{epsfig}
-\usepackage[T2A]{fontenc}
-\usepackage[utf8x]{inputenc}
-\usepackage[russian,english]{babel}
 
 \begin{document}
 
 \mainmatter 
 
-\title{A Global Optimization Algorithm for Non-Convex Constrained Mixed-Integer Problems}
+\title{A Global Optimization Algorithm for Non-Convex Mixed-Integer Problems}
 \author{Victor Gergel \and Konstantin Barkalov \and Ilya Lebedev %\Letter 
 \\
 \email{konstantin.barkalov@itmm.unn.ru}}
@@ -32,20 +29,42 @@ Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia
 \maketitle
 
 \begin{abstract}
-\Russian
-В работе рассматриваются mixed-integer global optimization problems. Предложен новый детерминированный алгоритм для решения задач данного класса, основанный на information-statistical approach к решению задач непрерывной глобальной оптимизации. Проведено сравнение данного алгоритма с известными аналогами, показывающее эффективность разработанного подхода. Устойчивая работа алгоритма подтверждена также решением серии из нескольких сотен mixed-integer global optimization problems. 
+In the present paper, the mixed-integer global optimization problems are considered. A novel 
+deterministic algorithm for solving the problems of this class based on the information-statistical 
+approach to solving the continuous global optimization problems has been proposed. The 
+comparison of this algorithm with well known analogs demonstrating the efficiency of the 
+developed approach has been conducted. The stable operation of the algorithm was confirmed 
+also by solving a series of several hundred mixed-integer global optimization problems. 
 
 \keywords global optimization, non-convex constraints, mixed-integer problems.
 
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
-\Russian
-В работе рассматриваются global optimization problems и методы их решения. Задачи глобальной оптимизации обладают значительной вычислительной трудоемкостью, т.к. глобальный оптимум является интегральной характеристикой решаемой задачи и требует исследования всей области поиска. Как результат, поиск глобального оптимума сводится к построению некоторого покрытия (вообще говоря, неравномерного) в области параметров. Особый интерес представляют задачи, в которых часть параметров может принимать лишь целочисленные значения (mixed-integer global optimization problems), т.к. для них сложнее построить оценки оптимума по сравнению с непрерывными задачами.
 
-Методам решения mixed-integer problems посвящена обширная литература (см., например, обзоры \cite{Burer,Boukouvala}). Известные детерминированные методы решения задач данного класса основаны, как правило, на подходах Branch-and-Bound or Branch-and-Reduce. Также известен ряд метаэвристических и генетических алгоритмов, так или иначе основанных на идеях случайного поиска.
+In the present paper, the global optimization problems and the method of solving these ones are 
+considered. The global optimization problems are the computation-costly ones since the global 
+optimum is an integral characteristic of the problem being solved and requires the investigation 
+of the whole search domain. 
+%As a result, the search of the global optimum is reduced to the construction of a coverage (in general, a nonuniform one) of the space of parameters. 
+The problems, in which some parameters can take the inter values only (mixed-integer global 
+optimization problems) are of special interest because for these ones it is more difficult to build 
+the estimates of the optimum as compared to the continuous problems.
 
-В данной работе нами предложен новый детерминированный метод решения mixed-integer problems, основанный на information-statistical approach к решению задач глобальной оптимизации \cite{Strongin2000,Strongin2013}. Текст статьи, отражающей предварительные результаты исследования, построен следующим образом. Вначале рассмотрен подход к решению задач с непрерывными параметрами, затем предложено его обобщение для mixed-integer problems. В финальном разделе приведены результаты сравнения предложенного метода с известными аналогами.
+A lot of publication have been devoted to the methods of solving the mixed-integer problems 
+(see, for example, the reviews~\cite{Burer,Boukouvala}). The well known deterministic 
+methods of solving the problems of this class are based, as a rule, on the Branch-and-Bound 
+approach or on the Branch-and-Reduce one. Also, a number of the metaheuristic and genetic 
+algorithms are known based 
+ones, anyway, based on the ideas of random search.
+
+In the present study, we proposed a novel deterministic method for solving the mixed-integer 
+problems based on the information-statistical approach to solving the global optimization 
+problems \cite{Strongin2000,Strongin2013}. The paper text reflecting the results of preliminary 
+studies is composed as follows. First, an approach to solving the problems with continuous 
+parameters has been considered, then its generalization for the mixed-integer problems was 
+proposed. In the final section, the results of comparison of the proposed method with the well 
+known analogs are presented.
 
 \section{Global search algorithm and dimension reduction}
 
@@ -56,10 +75,9 @@ D=\left\{y\in R^N: a_i\leq y_i \leq b_i, 1\leq i \leq N\right\}.\nonumber
 \end{gather}
 Suppose, that the objective function $\varphi(y)$ (henceforth denoted by $g_{m+1}(y)$) and
 the left-hand sides $g_i(y), \; 1\leq i \leq m$, of the constraints satisfy the Lipschitz condition
-\[ 
-\left|g_i(y')-g_i (y'')\right| \leq L_i \left\|y'-y'' \right\|, \; y',y''\in D, \; 1\leq i \leq m+1, 
-\]
-with constants $L_i, \; 1 \leq i \leq m+1$, respectively,  and may be multiextremal.
+%\[ \left|g_i(y')-g_i (y'')\right| \leq L_i \left\|y'-y'' \right\|, \; y',y''\in D, \; 1\leq i \leq m+1, \]
+%with constants $L_i, \; 1 \leq i \leq m+1$, respectively,  
+and may be multiextremal.
 
 Using a continuous single-valued mapping $y(x)$  (Peano-type space-filling curve) of the interval $[0,1]$ onto $D$, a multidimensional problem (\ref{problem}) can be reduced to a one-dimensional problem
 \begin{equation}\label{problem1}
@@ -67,56 +85,79 @@ Using a continuous single-valued mapping $y(x)$  (Peano-type space-filling curve
 \end{equation}
 The reduction of dimensionality matches the multidimensional problem with a Lipschitzian objective function and constraints with a one-dimensional problem where the respective functions satisfy the uniform H\"older condition (see \cite{Strongin2000}).
 
-%Проверить
-An efficient global search algorithm (GSA) for solving constrained optimization problem (\ref{problem1}) was developed at University of Nizhni Novgorod. A detailed description of the algorithm and the corresponding convergence theory are presented in \cite{Strongin2000}.
+An efficient global search algorithm (GSA) for solving the constrained optimization problem 
+(\ref{problem1}) has been developed at University of Nizhni Novgorod. A detailed description 
+of the algorithm and the corresponding convergence theory are presented in 
+\cite{Strongin2000}.
 
 \section{Global search algorithm for mixed-integer problems}
 
-\Russian
-Рассмотрим теперь способ адаптации GSA для решения mixed-integer global optimization problems 
-
+Now, let us consider a method of adaptation of GSA for solving the mixed-integer global 
+optimization problems 
 \begin{gather}\label{problem_i}
 \min{\left\{ g_{m+1}(y):y\in D, \; g_i(y)\leq 0, \; 1 \leq i \leq m\right\}},\\
 D=\left\{a_i\leq y_i \leq b_i, \; 1\leq i \leq N, \; y_j \in Z, \; j \in J, \; y_i \in R, \; i \notin J \right\}.\nonumber
 \end{gather}
 
-На основе задачи (\ref{problem_i}) сформируем множество задач 
+Let us formulate a set of problems based on the problem (\ref{problem_i})
 \begin{gather}\label{problem_is}
 \min{\left\{ g_{m+1}^s(y):y\in D^s, \; g_i^s(y)\leq 0, \; 1 \leq i \leq m\right\}},\\
-D^s=\left\{ a_i\leq y_i \leq b_i, \;  y_i \in R, \; i \notin J \right\}, \; s\in\{1,...,S\},\nonumber 
+D^s=\left\{ a_i\leq y_i \leq b_i, \;  y_i \in R, \; i \notin J \right\}, \; s\in\{1,...,S\}.\nonumber 
 \end{gather}
-каждая из которых соответствует исходной задаче (\ref{problem_i}) с фиксированным набором целочисленных параметров. Число задач $S$ будет соответствовать числу возможных комбинаций целочисленных параметров.
+Each of these problems corresponds to the initial problem (\ref{problem_i}) with fixed set of 
+integer parameters. The number of problems $S$ will correspond to the number of possible 
+combinations of the integer parameters.
 
-Используя схему редукции размерности с помощью развертки $y(x)$ на основе множества задач (\ref{problem_is}) можно составить единую задачу
+Using the dimensionality reduction scheme utilizing the evolvent $y(x)$ 
+%based on the set of problems (\ref{problem_is}),
+one can compose a united problem 
 \begin{equation}\label{problem_is1}
-\min \left\{g_{m+1}^s(y(x)): x \in [0,S], \; g_i^s(y^s(x)) \leq 0, \; 1 \leq i \leq m\right\},
+\min \left\{g_{m+1}^s(y^s(x)): x \in [0,S], \; g_i^s(y^s(x)) \leq 0, \; 1 \leq i \leq m\right\},
 \end{equation}
-где отображение $y^s(x)$  формируется на основе исходной развертки $y(x)$ следующим образом
+where the mapping $y^s(x)$ is formed on the basis of initial evolvent $y(x)$ as follows
 \[
 y^s(x)=y(x-s), \; x\in[s-1,s],\; s\in\{1,...,S\}.
 \]
-Функции $g_i^s(y^s(x))$ могут иметь разрывы в точках $s\in \{1,...,S-1\}$, поэтому данные точки рассматриваются как выколотые, значение objective function and constraints в них не определено.
+The functions $g_i^s(y^s(x))$ can have the breaks at the points $s\in \{1,...,S-1\}$, therefore, 
+these points were considered as the punctured ones, the values of the objective function and 
+constraints at these points remain undefined.
 
-Для иллюстрации на Fig. \ref{fig:1}  изображены графики функций, соответствующих задаче с одним непрерывным и одним бинарным параметром.
+As an illustration, in Fig. \ref{fig:1} presents the plots of the functions corresponding to a 
+problem with one continuous parameter and one binary parameter.
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.7\textwidth]{fig1.jpg}
+    \includegraphics[height=2.9cm,width=0.8\textwidth]{fig1.jpg}
     \caption{Mixed-integer global optimization problem}
     \label{fig:1}
 \end{figure}
 
-Применяя к решению задачи (\ref{problem_is1}) алгоритм глобального поиска, мы найдем решение задачи (\ref{problem_i}). При этом основная часть испытаний будет проведена в $s$-й подзадаче, решение которой соответствует решению исходной задачи (\ref{problem_i}). В остальных подзадачах будет проведена лишь незначительная часть испытаний, т.к. решения данных подзадач являются локально-оптимальными по отношению к решению $s$-й подзадачи. Сказанное подтверждается Fig. \ref{fig:1}, где штрихами обозначены точки испытаний, выполненных при решении данной задачи.
+Applying the global search algorithm to solving the problem (\ref{problem_is1}), we will find 
+the solution of the problem (\ref{problem_i}). In this case the major part of trials will conducted in 
+the $s$-th subproblem, the solving of which corresponds to the solving of the initial 
+problem (\ref{problem_i}). In the rest subproblems, a minor part of trials only will be performed 
+since the solutions of these subproblems are the locally optimal ones with respect to the solution 
+of the $s$-th subproblem. All the above is confirmed by Fig. \ref{fig:1}, where the 
+points of trials executed in the course of solving this problem are denoted by the dashes.
 
-Таким образом, мы сформировали Mixed-Integer Global Search Algorithm (MIGSA), основанный на сведении задачи MINLP путем к задаче NLP. Можно доказать, что условия сходимости данного алгоритма будут следовать из условий сходимости его прототипа (GSA).
+
+Thus,  we have constructed the \textit{Mixed-Integer Global Search Algorithm} (MIGSA) based on the  
+reduction of the MINLP to the NLP. 
+%It is possible to prove that the convergence conditions for this algorithm will follow from the convergence conditions of its prototype (GSA).
 
 \section{Results of experiments}
 
-\Russian
-Проведем сравнение предложенного метода MIGSA с genetic algorithm for solving mixed-integer optimization problems, реализованным в Matlab Global Optimization Toolbox. В Table \ref{tab:1} приведено число испытаний, потребовавшееся для решения известных тестовых mixed-integer problems данными методами. Для обоих методов была использована одинаковая точность поиска решения $10^{-2}$. Все вычислительные эксперименты были проведены на компьютере с процессором Intel Core i5-7300 2.5 GHz и 8 Gb RAM под управлением MS Windows 10. Результаты экспериментов показывают превосходство метода MIGSA как по числу итераций, так и по времени работы.
+Let us compare the proposed MIGSA method with a genetic algorithm for solving the mixed-
+integer optimization problems implemented in Matlab Global Optimization Toolbox. In Table 
+\ref{tab:1}, the numbers of trials required for solving the well-known test mixed-integer 
+problems by these methods are presented. For both methods, the same values of the accuracy of 
+the solution search $10^{-2}$ were used. All numerical experiments were conducted on a 
+computer with Intel Core i5-7300 2.5 GHz and 8 Gb RAM processor under MS Windows 10. The 
+results of experiments have demonstrated the advantage to the MIGSA method in the number 
+of iterations as well as in the execution time.
 
 \begin{table}
-	\caption{Сравнение эффективности методов MIGSA и GA}
+	\caption{Comparison of MIGSA and GA}
 	\label{tab:1}
 	\center
 	\begin{tabular}{cccccc}
@@ -135,9 +176,17 @@ y^s(x)=y(x-s), \; x\in[s-1,s],\; s\in\{1,...,S\}.
 	\end{tabular}
 \end{table}
 
-Для демонстрации надежности метода MIGSA нами были решены четыре серии по 100 многоэкстремальных mixed-integer problems, построенных на основе модифицированных классов задач Simple и Hard, сгенерированных генератором GKLS \cite{Gaviano}. 
-Данный генератор многоэкстремальных функций часто используется для исследования алгоритмов непрерывной оптимизации \cite{Paulavicius2014,SergeyevKvasov2015,Lebedev2015,Gergel2015}.
- В сгенерированных нами задачах было 5 целочисленных и 3 непрерывных параметра. Точность поиска решения равнялась $10^{-2}$ по координате. Все задачи из серии были успешно решены , при этом для решения задач на основе класса Simple потребовалось среднем 11988 trials, а для решения задач на основе класса Hard -- 24750 trials.
+In order to demonstrate the reliability of the MIGSA method, we have solved two series of 100 
+multiextremal mixed-integer problems each constructed on the basis of modified problems of 
+\textit{Simple} and \textit{Hard} classes generated by GKLS generator. %~\cite{Gaviano}. 
+This generator of multiextremal functions is often used for the investigations of the global optimization algorithms~ 
+\cite{Paulavicius2014,SergeyevKvasov2015,Lebedev2015,Gergel2015}.
+In the problems generated in our experiments, there were 5 integer parameters and 3 continuous 
+ones. The accuracy of the search %of the solution in the coordinates 
+was equal to $10^{-2}$. All  
+problems of the series have been solved successfully, at that, for solving the problems based on 
+the \textit{Simple} class 11988 trials in average were required whereas for solving the problems based 
+on the \textit{Hard} class 24750 trials were required.
 
 
 \textbf{Acknowledgments}. This study was supported by the Russian Science Foundation, project No 16-11-10150.
@@ -148,7 +197,7 @@ y^s(x)=y(x-s), \; x\in[s-1,s],\; s\in\{1,...,S\}.
 Burer, S., Letchford, A.N.: Non-convex mixed-integer nonlinear programming: A survey. Surveys in Operations Research and Management Science \textbf{17}, 97--106 (2012) 
 
 \bibitem{Boukouvala}
-Boukouvala, F., Misener, R., Floudas, C.A.: Global optimization advances in Mixed-Integer Nonlinear Programming, MINLP, and Constrained Derivative-Free Optimization, CDFO. European Journal of Operational Research \textbf{252}, 701--727 (2016) 
+Boukouvala, F., Misener, R., Floudas, C.A.: Global optimization advances in Mixed-Integer Nonlinear Programming, MINLP, and Constrained Derivative-Free Optimization, CDFO. European J. Oper. Res. \textbf{252}, 701--727 (2016) 
 
 \bibitem{Strongin2000}
 Strongin, R.G., Sergeyev, Y.D.: Global Optimization with Non-Convex Constraints. Sequential and Parallel Algorithms. Kluwer Academic Publishers, Dordrecht (2000) %; DOI: 10.1007/978-1-4615-4677-1
@@ -162,8 +211,7 @@ Floudas, C.A., Pardalos, P.M.:  Handbook of Test Problems in Local and Global Op
 \bibitem{Deep}
 Deep, K., Singh, K. P., Kansal, M.L., Mohan, C.: A real coded genetic algorithm for solving integer and mixed integer optimization problems. Appl. Math. Comput. \textbf{212}(2), 505--518 (2009)
 
-\bibitem{Gaviano}
-Gaviano, M., Kvasov, D.E, Lera, D., and Sergeyev, Ya.D.: Software for generation of classes of test functions with known local and global minima for global optimization. ACM Transactions on Mathematical Software \textbf{29}(4), 469--480 (2003)
+%\bibitem{Gaviano} Gaviano, M., Kvasov, D.E, Lera, D., and Sergeyev, Ya.D.: Software for generation of classes of test functions with known local and global minima for global optimization. ACM Transactions on Mathematical Software \textbf{29}(4), 469--480 (2003)
 
 \bibitem{Paulavicius2014} 
 Paulavi\v{c}ius, R., Sergeyev, Y., Kvasov, D., \v{Z}ilinskas, J.: Globally-biased DISIMPL algorithm for expensive global optimization. J. Glob. Optim. \textbf{59}(2-3), 545--567 (2014)
