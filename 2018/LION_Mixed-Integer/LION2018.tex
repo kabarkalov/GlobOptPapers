@@ -32,7 +32,7 @@ Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia
 In the present paper, the mixed-integer global optimization problems are considered. A novel 
 deterministic algorithm for solving the problems of this class based on the information-statistical 
 approach to solving the continuous global optimization problems has been proposed. The 
-comparison of this algorithm with well known analogs demonstrating the efficiency of the 
+comparison of this algorithm with known analogs demonstrating the efficiency of the 
 developed approach has been conducted. The stable operation of the algorithm was confirmed 
 also by solving a series of several hundred mixed-integer global optimization problems. 
 
@@ -47,7 +47,7 @@ considered. The global optimization problems are the computation-costly ones sin
 optimum is an integral characteristic of the problem being solved and requires the investigation 
 of the whole search domain. 
 %As a result, the search of the global optimum is reduced to the construction of a coverage (in general, a nonuniform one) of the space of parameters. 
-The problems, in which some parameters can take the inter values only (mixed-integer global 
+The problems, in which some parameters can take the integer values only (mixed-integer global 
 optimization problems) are of special interest because for these ones it is more difficult to build 
 the estimates of the optimum as compared to the continuous problems.
 
@@ -55,15 +55,15 @@ A lot of publication have been devoted to the methods of solving the mixed-integ
 (see, for example, the reviews~\cite{Burer,Boukouvala}). The well known deterministic 
 methods of solving the problems of this class are based, as a rule, on the Branch-and-Bound 
 approach or on the Branch-and-Reduce one. Also, a number of the metaheuristic and genetic 
-algorithms are known based 
-ones, anyway, based on the ideas of random search.
+algorithms are known, which are based one way or another on the random search concept.
+%  based ones, anyway, based on the ideas of random search.
 
 In the present study, we proposed a novel deterministic method for solving the mixed-integer 
 problems based on the information-statistical approach to solving the global optimization 
 problems \cite{Strongin2000,Strongin2013}. The paper text reflecting the results of preliminary 
 studies is composed as follows. First, an approach to solving the problems with continuous 
 parameters has been considered, then its generalization for the mixed-integer problems was 
-proposed. In the final section, the results of comparison of the proposed method with the well 
+proposed. In the final section, the results of comparison of the proposed method with the 
 known analogs are presented.
 
 \section{Global search algorithm and dimension reduction}
@@ -79,9 +79,10 @@ the left-hand sides $g_i(y), \; 1\leq i \leq m$, of the constraints satisfy the 
 %with constants $L_i, \; 1 \leq i \leq m+1$, respectively,  
 and may be multiextremal.
 
-Using a continuous single-valued mapping $y(x)$  (Peano-type space-filling curve) of the interval $[0,1]$ onto $D$, a multidimensional problem (\ref{problem}) can be reduced to a one-dimensional problem
+Using a continuous single-valued mapping $y(x)$  (Peano-type space-filling curve, or \textit{evolvent}) of the interval $[0,1]$ onto $D$, a multidimensional problem (\ref{problem}) can be reduced to a one-dimensional problem
 \begin{equation}\label{problem1}
-\varphi(y(x^\ast))=\min \left\{\varphi(y(x)): x \in [0,1], \; g_i(y(x))\leq 0, \; 1 \leq i \leq m\right\}.
+%\varphi(y(x^\ast))=
+\min \left\{g_{m+1}(y(x)): x \in [0,1], \; g_i(y(x))\leq 0, \; 1 \leq i \leq m\right\}.
 \end{equation}
 The reduction of dimensionality matches the multidimensional problem with a Lipschitzian objective function and constraints with a one-dimensional problem where the respective functions satisfy the uniform H\"older condition (see \cite{Strongin2000}).
 
@@ -101,11 +102,11 @@ D=\left\{a_i\leq y_i \leq b_i, \; 1\leq i \leq N, \; y_j \in Z, \; j \in J, \; y
 
 Let us formulate a set of problems based on the problem (\ref{problem_i})
 \begin{gather}\label{problem_is}
-\min{\left\{ g_{m+1}^s(y):y\in D^s, \; g_i^s(y)\leq 0, \; 1 \leq i \leq m\right\}},\\
-D^s=\left\{ a_i\leq y_i \leq b_i, \;  y_i \in R, \; i \notin J \right\}, \; s\in\{1,...,S\}.\nonumber 
+\min{\left\{ g_{m+1}^s(y):y\in D, \; g_i^s(y)\leq 0, \; 1 \leq i \leq m\right\}},\\
+D=\left\{ a_i\leq y_i \leq b_i, \;  y_i \in R, \; i \notin J \right\}, \; s\in\{1,...,S\}.\nonumber 
 \end{gather}
-Each of these problems corresponds to the initial problem (\ref{problem_i}) with fixed set of 
-integer parameters. The number of problems $S$ will correspond to the number of possible 
+Each of these problems corresponds to the initial problem (\ref{problem_i}) with some combination of 
+integer parameters. The number of problems $S$ will correspond to the number of all possible 
 combinations of the integer parameters.
 
 Using the dimensionality reduction scheme utilizing the evolvent $y(x)$ 
@@ -128,16 +129,17 @@ problem with one continuous parameter and one binary parameter.
 \begin{figure}[ht]
     \centering
     \includegraphics[height=2.9cm,width=0.8\textwidth]{fig1.jpg}
-    \caption{Mixed-integer global optimization problem}
+    \caption{Reduced mixed-integer global optimization problem}
     \label{fig:1}
 \end{figure}
 
 Applying the global search algorithm to solving the problem (\ref{problem_is1}), we will find 
 the solution of the problem (\ref{problem_i}). In this case the major part of trials will conducted in 
-the $s$-th subproblem, the solving of which corresponds to the solving of the initial 
+the subproblem, the solving of which corresponds to the solving of the initial 
 problem (\ref{problem_i}). In the rest subproblems, a minor part of trials only will be performed 
-since the solutions of these subproblems are the locally optimal ones with respect to the solution 
-of the $s$-th subproblem. All the above is confirmed by Fig. \ref{fig:1}, where the 
+since the solutions of these subproblems are the locally optimal ones.
+%with respect to the solution of the $s$-th subproblem. 
+All the above is confirmed by Fig. \ref{fig:1}, where the  
 points of trials executed in the course of solving this problem are denoted by the dashes.
 
 
@@ -147,12 +149,10 @@ reduction of the MINLP to the NLP.
 
 \section{Results of experiments}
 
-Let us compare the proposed MIGSA method with a genetic algorithm for solving the mixed-
-integer optimization problems implemented in Matlab Global Optimization Toolbox. In Table 
-\ref{tab:1}, the numbers of trials required for solving the well-known test mixed-integer 
-problems by these methods are presented. For both methods, the same values of the accuracy of 
-the solution search $10^{-2}$ were used. All numerical experiments were conducted on a 
-computer with Intel Core i5-7300 2.5 GHz and 8 Gb RAM processor under MS Windows 10. The 
+Let us compare the proposed MIGSA method with a genetic algorithm for solving the mixed-integer optimization problems implemented in Matlab Global Optimization Toolbox. In Table 
+\ref{tab:1}, the numbers of trials required for solving the known test mixed-integer 
+problems by these methods are presented. For both methods, the same accuracy of search $10^{-2}$ were used. All numerical experiments were conducted on a 
+computer with Intel Core i5-7300 2.5 GHz processor and 8 Gb RAM under MS Windows 10. The 
 results of experiments have demonstrated the advantage to the MIGSA method in the number 
 of iterations as well as in the execution time.
 
@@ -181,10 +181,10 @@ multiextremal mixed-integer problems each constructed on the basis of modified p
 \textit{Simple} and \textit{Hard} classes generated by GKLS generator. %~\cite{Gaviano}. 
 This generator of multiextremal functions is often used for the investigations of the global optimization algorithms~ 
 \cite{Paulavicius2014,SergeyevKvasov2015,Lebedev2015,Gergel2015}.
-In the problems generated in our experiments, there were 5 integer parameters and 3 continuous 
-ones. The accuracy of the search %of the solution in the coordinates 
+In the problems generated in our experiments, there were 5 integer  and 3 continuous parameters.
+The accuracy of the search %of the solution in the coordinates 
 was equal to $10^{-2}$. All  
-problems of the series have been solved successfully, at that, for solving the problems based on 
+problems of the series have been solved successfully and for solving the problems based on 
 the \textit{Simple} class 11988 trials in average were required whereas for solving the problems based 
 on the \textit{Hard} class 24750 trials were required.
 
