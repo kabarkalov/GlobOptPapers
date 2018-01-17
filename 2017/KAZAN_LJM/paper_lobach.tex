@@ -1,58 +1,56 @@
-%%%%%%%%%%%%%%%%%%%%%%% file template-ljm.tex %%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% This is a general template file for the LaTeX package ljm-auth
-% for Lobachevskii Journal of Mathematics 2009/07/20
-%
-% Copy it to a new file with a new name and use it as the basis
-% for your article. Delete % signs as needed.
-%
+\documentclass[
+11pt,%
+tightenlines,%
+twoside,%
+onecolumn,%
+nofloats,%
+nobibnotes,%
+nofootinbib,%
+superscriptaddress,%
+noshowpacs,%
+centertags]%
+{revtex4}
+\usepackage{ljm}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\documentclass[12pt]{amsart}
-
-\usepackage{ljm-auth}
-
-\usepackage{graphicx}
-
-\usepackage{cite}
-
-\newtheorem{definition}{Definition}
-\newtheorem{theorem}{Theorem}
-\newtheorem{corollary}{Corollary}
-\newtheorem{lemma}{Lemma}
-
-\author{Strongin R.G., Gergel V.P., Barkalov K.A., Sysoyev A.V.}
-\crauthor{Strongin, Gergel, Barkalov, Sysoyev} % for running heads
-
-\tit{Generalized Parallel Computational Schemes for Time-Consuming Global Optimization}
-\shorttit{Parallel Schemes for Global Optimization} %for running heads
-
-\setcounter{page}{1}
+\setcounter{page}{3}
 
 \begin{document}
+\titlerunning{Generalized Parallel Schemes for Global Optimization}
+\authorrunning{Strongin, Gergel, Barkalov, Sysoyev}
 
-\maketit
+\title{Generalized Parallel Computational Schemes\\
+for Time-Consuming Global Optimization}
 
-\address{Lobachevsky State University of Nizhni Novgorod}
+\author{\firstname{R.~G.}~\surname{Strongin}}
+\email[E-mail: ]{president@unn.ru}
+\affiliation{Lobachevsky State University of Nizhni Novgorod}
 
-\email{gergel@unn.ru}
+\author{\firstname{V.~P.}~\surname{Gergel}}
+\email[E-mail: ]{gergel@unn.ru}
+\affiliation{Lobachevsky State University of Nizhni Novgorod}
 
+\author{\firstname{K.~A.}~\surname{Barkalov}}
+\email[E-mail: ]{barkalov@vmk.unn.ru}
+\affiliation{Lobachevsky State University of Nizhni Novgorod}
 
-\abstract{This paper addresses computationally intensive global optimization problems, for solving of which the supercomputing systems with exaflops performance can be required. To overcome such computational complexity, the paper proposes the generalized parallel computational schemes, which may involve numerous efficient parallel algorithms of global optimization. The proposed schemes include various ways of multilevel decomposition of parallel computations to guarantee the computational efficiency of supercomputing systems with shared and distributed memory multiprocessors with thousands of processors to meet global optimization challenges.}
+\author{\firstname{A.~V.}~\surname{Sysoyev}}
+\email[E-mail: ]{sysoyev@vmk.unn.ru}
+\affiliation{Lobachevsky State University of Nizhni Novgorod}
 
-\notes{0}
-{
-%\subclass{} % 2010 Mathematical Subject Classification
+\firstcollaboration{(Submitted by ) }
 
-\keywords{
-global optimization, information-statistical theory, parallel computations, high-performance computing, supercomputing technologies
-}
+\received{}
 
-\thank{
-This research was supported by the Russian Science Foundation, project No 16-11-10150 ``Novel efficient methods and software tools for time-consuming decision making problems using supercomputers of superior performance''
-}
-}
+\begin{abstract}
+This paper addresses computationally intensive global optimization problems, for solving of which the supercomputing systems with exaflops performance can be required. To overcome such computational complexity, the paper proposes the generalized parallel computational schemes, which may involve numerous efficient parallel algorithms of global optimization. The proposed schemes include various ways of multilevel decomposition of parallel computations to guarantee the computational efficiency of supercomputing systems with shared and distributed memory multiprocessors with thousands of processors to meet global optimization challenges.
+\end{abstract}
+
+\subclass{90C26, 90C30}
+
+\keywords{global optimization, information-statistical theory, parallel computations, high-performance computing, supercomputing technologies}
+
+\maketitle
 
 
 \section{Introduction}
@@ -62,6 +60,8 @@ Forthcoming exascale supercomputing systems with exaflops performance are intend
 Undoubtedly, the global optimization problems arising in various areas of applications are computationally intensive ones, which may require the exascale supercomputing. These are the most complex problems of the theory and practice of optimal decision making. The optimized functions in these problems can be the multiextremal ones, i.e. can have numerous local optima with different values within the search domain. The multiextremality makes the optimization problems much more complicated as it requires the analysis of the entire feasible search domain. Even if the optimization problem dimensionality is small sufficiently, solving the global optimization problems requires a significant amount of computations (as few as several optimized variables can require the exascale supercomputing).
 
 In addition, the global optimization problems are usual in the most difficult optimal decision making cases, i.e. during the computer-aided design of complex devices and systems. In the context of such problems, the performance criteria are nonlinear mostly, the search domains may be disconnected, and, above all, computing the function values may be computational intensive.
+
+From all the above, it follows that solving the global optimization problems within reasonable times is possible only utilizing the exascale supercomputers, which use the high-performance parallel algorithms of global optimization
 
 The state-of-the-art in the field of global optimization is outlined in a number of key works – see, for instance, \cite{Floudas, Locatelli, Strongin1, Pardalos, Sergeyev1, Paulavicius}. The development of the theory and methods of use of the high-performance computing for solving the computationally intensive problems of global optimization is one of the trends developing rapidly \cite{Strongin1, Ciegis, Luque, Strongin2}.
 
@@ -74,7 +74,7 @@ The rest of the paper has the following structure. Chapter 2 formulates the mult
 
 A multidimensional global optimization problem can be stated as follows: to find a global minimum point $y^\ast \in R^N$ where the optimized function $\varphi(y)$ has the minimum value, i.e.
 \begin{equation}
-\varphi^\ast = \varphi(y^\ast) = \min \{\varphi(y): y\in D \},
+\varphi^\ast = \varphi(y^\ast) = min \{\varphi(y): y\in D \},
 \end{equation}
 where $D$ is the search domain with given boundary vectors $a$ and $b$
 \[
@@ -86,11 +86,29 @@ It is supposed that the objective function $\varphi(y)$ satisfies a Lipschitz co
 \end{equation}
 where $L > 0$ is the Lipschitz constant, and $\|\ast\|$ is the Euclidian norm in the space $R^N$. Satisfying the Lipschitz condition is important as it allows estimating the global minimum on the basis of the finite number of computed values of the optimized function.
 
+The numerical solution of a global optimization problem consists in finding a numerical estimate $\bar{y}^\ast$ of the global minimum point $y^\ast \in D$ with a required accuracy $\varepsilon > 0$, i.e.
+
+\[
+\|\bar{y}^\ast - y^\ast\| \leq \varepsilon.
+\]
+
 It is supposed also that the minimized function $\varphi(y)$ is defined by a computational procedure for computing the value $\varphi(y)$ at any point $y \in D$ (hereafter such computations will be called \textit{trials}). It should be pointed out that this procedure can be computationally intensive and, hence, the computational cost of solving the optimization problem (1) is determined mainly by the number of executed trials. 
 
-As it is well known (see, for example, \cite{Strongin1}), the numerical evaluation of the global optimum points of the minimized functions requires constructing a coverage of the search domain $D$. This results in a very high computational intensity of global optimization problems even in the case of small dimensionality.
+As it is well known (see, for example, \cite{Strongin1}), the numerical evaluation of the global optimum points of the minimized functions requires constructing a coverage of the search domain $D$. This results in a very high computational intensity of global optimization problems even in the case of small dimensionality. For example, if a uniform grid is used to cover the search domain, the number of grid nodes increases exponentially with increasing problem dimensionality, i.e. 
+\[
+K = K(\varepsilon) \approx \prod_{i=1}^N[(b_i - a_i) / \varepsilon],
+\]
+where $\varepsilon > 0$ is the uniform grid step (i.e. even for a grid with $10$ nodes per axis and $N = 20$, the total number of nodes is as large as $10^{20}$).
 
-The computational complexity can be reduced considerably if the computational grids resulting from covering the search domain are non-uniform, i.e. when the grid nodes are distributed denser around the global optimal point only. The construction of such non-uniform coverings may be ensured in the case of an adaptive computation, when in order to select the new trial points, all search information obtained in the course of computation (previous trial points and the values of the minimized function at these points) is used. This necessary condition complicates the computational schemes of the global optimization methods essentially as it involves the computationally intensive analysis of large amounts of the multidimensional search information. As a result, many optimization algorithms use various dimensionality reduction schemes to certain extent (see, for example, \cite{Strongin1, Strongin2, Sergeyev2}).
+The computational complexity can be reduced considerably if the computational grids resulting from covering the search domain are non-uniform, i.e. when the grid nodes are distributed denser around the global optimal point only (see Fig.~1). The construction of such non-uniform coverings may be ensured in the case of an adaptive computation, when in order to select the new trial points, all search information obtained in the course of computation (previous trial points and the values of the minimized function at these points) is used. This necessary condition complicates the computational schemes of the global optimization methods essentially as it involves the computationally intensive analysis of large amounts of the multidimensional search information. As a result, many optimization algorithms use various dimensionality reduction schemes to certain extent (see, for example, \cite{Strongin1, Strongin2, Sergeyev2}).
+
+\begin{figure}
+\centering
+\includegraphics[height=5.0cm]{Fig1a}
+\includegraphics[height=5.0cm]{Fig1b}
+\caption{Uniform and non-uniform grid}
+\label{fig:Fig1}
+\end{figure}
 
 In the framework of the information-statistical theory, the dimensionality reduction is provided by using the Peano space-filling curves $y(x)$, which map the interval $[0, 1]$ onto a $N$-dimensional domain $D$ \cite{Strongin1, Sergeyev2, Strongin3}. As a result of such reduction, the initial multidimensional global optimization problem (1) is reduced to a one-dimensional one:
 \begin{equation}
@@ -102,15 +120,45 @@ for which the function $\varphi(y(x))$ satisfies a uniform H\"older condition \c
 \end{equation}
 where the H\"older constant $H$ is determined as $H = 2L\sqrt{N + 3}$, $L$ is the Lipschitz constant from (2) and $N$ is the optimization problem dimension (1). A one-dimensional function $\varphi(y(x))$ is produced by reduction of the multi-dimensional function $\varphi(y)$. In order to calculate the values of $\varphi(y(x))$, the multidimensional image $y \in D$ should be computed first in accordance with the mapping $y(x)$, and then the value of the multidimensional function $\varphi(y)$ at the multidimensional point $y \in D$ should be evaluated. The resulting value $z = \varphi(y)$ is used further as the value of the one-dimensional function $\varphi(y(x))$.
 
+Fig.~2 shows an approximation of the Peano curve mapping a two-dimensional domain with the third mapping density level. The accuracy of the Peano curve approximation is determined by its construction density level. The order of mapping the two-dimensional domain $D$ is determined by the subdomain connection order resulting from the construction of the Peano curve approximation; the corresponding order of subintervals of the interval $[0, 1]$ is determined by their ordered placement from left to right (i.e. the subdomain $\Delta_1$ corresponds to the subinterval $\delta_1$, the subdomain $\Delta_2$ corresponds to the subinterval $\delta_2$, etc).
+
+\begin{figure}
+\centering
+\includegraphics[height=5.0cm]{Fig2}
+\caption{An example of the Peano curve approximation with the third density level}
+\label{fig:Fig2}
+\end{figure}
+
+It should be noted that reducing the multidimensional functions from (1) to the corresponding one-dimensional functions (3) using Peano-type curves preserves the uniform boundedness of the function value differences subject to the bounded argument variations, i. e. ensures the feasibility of the condition (4). Hence the computationally intensive analysis of the multidimensional subdomains to construct a non-uniform coverage of the search domain D can be replaced by a more simplified analysis of reduced one-dimensional data.
+
 
 \section{Multilevel parallel computational schemes for solving computationally intensive global optimization problems}
 
+A key distinctive feature of the global optimization problems is a limited opportunity to use parallelization methods used widely in the theory and practice or high-performance computing.
+\begin{itemize}
+\item \textit{Data parallelism} (distributing the computational domain among different computing units) is inefficient as in this case only one processor will process the subdomain that contains the sought global minimum while other processors will perform the redundant computations.
+
+\item \textit{Task parallelism} (parallelization of computational schemes) is also inefficient as computational costs of the execution of the optimization algorithm schemes are relatively low (in accordance with the initial supposition, the most time-consuming calculations in the course of global optimization consist in computing the optimized function values).
+
+\item \textit{Parallelization of time-consuming computations} to compute the optimized function values is not general (parallelization methods have to be developed from scratch every time a new optimization problem is solved).
+\end{itemize}
+
 The information-statistical theory proposes a general parallelization approach for solving the global optimization problems \textit{where parallelism is provided by simultaneous computations of the values for the minimized function $\varphi(y)$ at several different points in the search domain $D$} -- see, for example, \cite{Strongin1, Strongin2, Strongin4}. Such an approach ensures the parallelism of the most computationally intensive part of the global optimization and has a general nature as it is applicable to almost any global search method for solving any kind of global optimization problems.
 
+It should be noted that the proposed approach can also be applied for solving many other computationally intensive problems -- such as root finding in systems of nonlinear equations, integration of multidimensional integrals, approximation of the data dependencies etc.
+
+In accordance with the approach mentioned above, in this paper a generalized computational scheme of parallel computations to solve the global optimization problems are described as follows. To start with, in Subsection 3.1, the general computation scheme of global search algorithms is given. Then, in Subsection 3.2, the general scheme of parallel computations for the systems with shared memory is presented. In Subsection 3.3, a parallel computational scheme for the systems with distributed memory is described. Finally, in Subsection 3.4, a multilevel decomposition scheme for parallel computations for solving the global optimization problems is proposed.
 
 \subsection{General computational scheme of global optimization algorithms}
 
-The information-statistical theory \cite{Strongin1, Strongin3} formed a basis for many efficient global optimization methods -- see, for example \cite{Strongin2, Sergeyev4, Gergel1, Gergel2, Barkalov, Gergel3, Gergel4, Gergel5, Lera}. Moreover, a general computation scheme \cite{Strongin1, Strongin2, Strongin3, Grishagin1, Grishagin2} was proposed for all developed global search algorithms. This scheme can be represented as follows.
+The information-statistical theory \cite{Strongin1, Strongin3} formed a basis for many efficient global optimization methods -- see, for example \cite{Strongin2, Sergeyev4, Gergel1, Gergel2, Barkalov, Gergel3, Gergel4, Gergel5, Lera}. Moreover, a general computation scheme \cite{Strongin1, Strongin2, Strongin3, Grishagin1, Grishagin2} (see also Fig.~3) was proposed for all developed global search algorithms. This scheme can be represented as follows.
+
+\begin{figure}
+\centering
+\includegraphics[height=6.0cm]{Fig3}
+\caption{General computation scheme of global optimization algorithms}
+\label{fig:Fig3}
+\end{figure}
 
 The initial global search algorithm iteration takes place at an arbitrary point $x^1 \in (0,1)$. Let then $k, k > 1$, global search iterations have been executed. Selection of the trial point ($k + 1$) for the next iteration is subject to the following rules.
 
@@ -135,7 +183,7 @@ The stopping condition to terminate the optimization iterations is defined by th
 \end{equation}
 for the interval $t, 1 \leq i \leq k + 1$ with the maximum characteristic from (6) and $\varepsilon > 0$ is the required problem solving accuracy. If the stopping condition is not satisfied, the iteration number $k$ is incremented by unity, and a new global search iteration is executed.
 
-The computed characteristics $R(i), 1 \leq i \leq k + 1$ can be understood as the importance indicators for the intervals with respect to the global minimum point location. This provides the explanation for the interval selection scheme for executing the next trial: the point of every next global search iteration is selected in the interval with the maximum characteristic (i.e. in the interval, which is the most likely one to contain the global minimum point).
+In order to explain the computational scheme given above, the following can be noted. The computed characteristics $R(i), 1 \leq i \leq k + 1$ can be understood as the importance indicators for the intervals with respect to the global minimum point location. This provides the explanation for the interval selection scheme for executing the next trial: the point of every next global search iteration is selected in the interval with the maximum characteristic (i.e. in the interval, which is the most likely one to contain the global minimum point).
 
 According to this general scheme, specific global search algorithms are formulated by defining the formulas to compute the characteristics $R(i), 1 \leq i \leq k+1$, and the points of the next trials in the intervals with maximum characteristics. Thus, for a multidimensional general algorithm of global search (MGAGS) \cite{Strongin1}, the interval characteristic is defined as
 \begin{equation}
@@ -154,7 +202,7 @@ Additional information about the global optimization algorithms that can formula
 
 \subsection{Competitive parallel computational schemes for shared memory multiprocessors}
 
-As it has been noted above, the general approach to provide the parallel computations consists in simultaneous calculating the minimized function values at several different points of the searching domain $D$. As the interval characteristics $R(i), 1 \leq i \leq k + 1$ (see Subsection 3.1) are understood as the importance indicators for the intervals with respect to the global minimum point location, additional intervals for several trials to be run in parallel should be selected subject to the following values of the characteristics.
+As it has been noted above, the general approach to provide the parallel computations consists in simultaneous calculating the minimized function values at several different points of the searching domain $D$. For the shared memory computing systems, selecting the set of points for executing the parallel trials can be based on the characteristics $R(i), 1 \leq i \leq k + 1$ of the search intervals $(x_{i-1} ,x_i), 1 \leq i \leq k + 1$ introduced in the framework of the general computational scheme (see Subsection 3.1). As the characteristics are understood as the importance indicators for the intervals with respect to the global minimum point location, additional intervals for several trials to be run in parallel should be selected subject to the following values of the characteristics.
 
 As a result, a general scheme of the parallel algorithms of global optimization for systems with shared memory can be formulated on the basis of the scheme given in Subsection 3.1 where the following set of rules should be modified (see also \cite{Strongin1, Strongin2, Strongin4, Grishagin2}):
 
@@ -172,17 +220,16 @@ The algorithm stopping condition (7) should be checked for all intervals where t
 \end{equation}
 As it was mentioned above, if the stopping condition is not satisfied, the iteration number $k$ is incremented by $p$, and a new global search iteration should be executed.
 
-In general, the described general scheme of parallel algorithms of global optimization for systems with shared memory identifies the procedure for competitive parallel computations (see Fig.~1a) where the search intervals $(x_{i-1} ,x_i), 1 \leq i \leq k + 1$ compete with each other for the access to the processors to execute next global search iterations. Taking into account the possible number of processors/cores in computational nodes with homogeneous shared memory, the described approach enables the parallelism of about $10^2$ computing units.
+In general, the described general scheme of parallel algorithms of global optimization for systems with shared memory identifies the procedure for competitive parallel computations (see Fig.~4a) where the search intervals $(x_{i-1} ,x_i), 1 \leq i \leq k + 1$ compete with each other for the access to the processors to execute next global search iterations. Taking into account the possible number of processors/cores in computational nodes with homogeneous shared memory, the described approach enables the parallelism of about $10^2$ computing units.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=13.0cm]{Fig1}
+\includegraphics[width=13.0cm]{Fig4}
 \caption{Generalized computational scheme of parallel algorithms}
-\label{fig:Fig1}
+\label{fig:Fig4}
 \end{figure}
 
-The conditions of convergence and nonredundancy of the resulting parallel computations for the global optimization algorithms formulated in the framework of general scheme of parallel algorithms of global optimization are given in \cite{Strongin1, Strongin2, Strongin4, Grishagin2}.
-
+The conditions of convergence and nonredundancy of the resulting parallel computations for the global optimization algorithms formulated in the framework of general scheme of parallel algorithms of global optimization are given in \cite{Strongin1, Strongin2, Strongin4, Grishagin2}. Thus, in particular, when the convergence conditions are met, the parallel computing for the MGAGS algorithm is non-redundant involving up to $2^N$ processors (cores) where $N$ is the dimension of the global optimization problem to be solved.
 
 \subsection{Distributed parallel computations for high-performance systems}
 
@@ -202,7 +249,7 @@ allowing constructing the necessary family of optimization problems
 \end{equation}
 for which the global minimum points coincide with the solution of the initial problem (1), i.e. $ y^\ast = y^l(x_l^\ast), 1 \leq l \leq s$. It is important to note that a family of the one-dimensional problems $\phi(y^l(x)), 1 \leq l \leq s$ resulting from the dimensionality reduction is an information-linked one: the function values computed for some function $\phi(yl(x))$ can be used by all other problems of the family (14).
 
-Using such a parallelization approach can result in the following general scheme of parallel algorithms of global optimization for the systems with distributed and shared memory -- see also \cite{Gergel1} and Fig.~1b.
+Using such a parallelization approach can result in the following general scheme of parallel algorithms of global optimization for the systems with distributed and shared memory -- see also \cite{Gergel1} and Fig.~4b.
 
 \begin{enumerate}
 \item The family of one-dimensional reduced information-linked problems (14) is distributed among the computational nodes of high-performance system. One or more problems of the family $\overrightarrow{\Phi}(y)$ from (12) may be allocated to each separate node.
@@ -217,6 +264,8 @@ Using such a parallelization approach can result in the following general scheme
 \item Before starting the next global search iteration, the algorithm should accept the received data and include these ones into the search information (5).
 \end{itemize}
 \end{enumerate}
+
+It should be noted that this parallel computing scheme does not have any central control node. The number of computational nodes may vary during the global optimization, and removing any node will not lead to the loss in finding the global minimum of the optimization problem (1). In addition, the data communication may be asynchronous (the computational nodes should not wait until the optimization data are transmitted).
 
 The described general scheme of parallel global optimization algorithms enables the parallel computing for the high-performance systems, which may contain many multiprocessor (multicore) computational nodes with the distributed memory. In addition, the computers may also include Intel Xeon Phi or GPGPU-based accelerators. Taking into account the required interchange of the optimization data, the estimated number of the computational nodes with distributed memory, which the proposed scheme allows to use efficiently makes up to $10^3-10^4$ (or total up to $10^5-10^6$ computational cores). 
 
@@ -251,7 +300,7 @@ where the subdomains $D_i, 1 \leq i \leq M$, are the projections of the initial 
 \end{equation}
 are the multidimensional ones and can be reduced using the Peano curves as before.
 
-To enable the parallel computations, numerous nested optimization subproblems can be generated at once on each decomposition level for solving these ones in parallel \cite{Sergeyev7} (see Fig.~1c). The resulting number of parallel subproblems can be controlled using a predefined parallelization vector
+To enable the parallel computations, numerous nested optimization subproblems can be generated at once on each decomposition level for solving these ones in parallel \cite{Sergeyev7} (see Fig.~4c). The resulting number of parallel subproblems can be controlled using a predefined parallelization vector
 \begin{equation}
 \pi = (\pi_1, \pi_2, ..., \pi_M),
 \end{equation}
@@ -270,7 +319,7 @@ To carry out the computational experiments, the Globalizer system \cite{Sysoyev}
  
 The global optimization problems within the executed experiments were constructed by the GKLS-generator \cite{Gaviano}. This generator constructs the multiextremal optimization problems with predetermined properties such as the number of local minima, the global minimum point, the function value at this point, etc. In addition, this generator can construct two different types of the optimization problems, Simple (less difficult ones) and Hard (more difficult ones).
 
-To obtain more reliable estimates of the parallelization efficiency, 100 test problems of global optimization were solved. The maximum allowed number of parallel iterations was $Kmax = 10\,000$.
+To obtain more reliable estimates of the parallelization efficiency, 100 test problems of global optimization were solved. The global minima $y^\ast$ of the test problems were considered to be found if a trial point $y^k$ is generated in the $\delta$-vicinity of the global minimum, i.e. $\| y^k - y^ \ast \| \leq \delta$. The vicinity size was set equal to $\delta = 0.01 \|b - a \|$ , where $a$ and $b$ were the boundaries of the search domain $D$. The maximum allowed number of parallel iterations was $Kmax = 10\,000$.
 
 The computational experiments involved the use of $p$ nodes of the Lobachevsky supercomputer, each node used three NVIDIA Kepler K20Х graphic accelerators. Thus, for $p = 32$, the number of GPU accelerators were 96, each having $2\,688$ CUDA cores (i.e. total $258\,048$ CUDA cores). Table 1 shows the Globalizer execution time, while Table 2 gives obtained parallel speedup with respect to the execution time for single computational node.
 
@@ -295,7 +344,7 @@ Additional computational results for the proposed generalized parallel computati
 
 \begin{table}
 	\caption{Parallel speedup with respect to the execution time for single computational node}
-	\label{tab:tab2}
+	\label{tab:tab1}
 	\center
 	\begin{tabular}{|c|c|c|c|}
 	\hline 
@@ -313,12 +362,14 @@ Additional computational results for the proposed generalized parallel computati
 
 \section{Conclusion}
 
-The paper proposes a generalized computational scheme of parallel algorithms for solving global optimization problems, which require the exascale computations. The developed approach includes a competitive parallel computational scheme for the systems with shared memory, the distributed parallel computations based on using the multiple Peano curves for the dimensionality reduction, and the multilevel decomposition of the parallel computations for the exascale supercomputers. In addition, the supercomputers may include also Intel Xeon Phi or GPGPU-based accelerators. The proposed schemes ensure the computational efficiency of the supercomputing systems with shared and distributed memory with thousands of processors to address the global optimization challenges.
+The paper proposes a generalized computational scheme of parallel algorithms for solving global optimization problems, which require the exascale computations. The developed approach includes a competitive parallel computational scheme for the systems with shared memory, the distributed parallel computations based on using the multiple Peano curves for the dimensionality reduction, and the multilevel decomposition of the parallel computations for the exascale supercomputers. In addition, the supercomputers may include also Intel Xeon Phi or GPGPU-based accelerators. The proposed schemes ensure the computational efficiency of the supercomputing systems with shared and distributed memory with thousands of processors to address the global optimization challenges. The executed computational experiments confirm the potential of the proposed approach.
 
 A number of development trends are relevant to evolve the research. Additional theoretical analysis of the proposed parallel computation scheme should be evaluated. Also, a spectrum of parallel global optimization algorithms, which can be implemented in the framework of the proposed computational scheme, should be studied. Besides, additional computational experiments involving a larger number of computational units should be carried out to evaluate the efficiency of parallel computations for solving computationally intensive global optimization problems adequately.
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{acknowledgments}
+This research was supported by the Russian Science Foundation, project No 16-11-10150 "Novel efficient methods and software tools for time-consuming decision making problems using supercomputers of superior performance".
+\end{acknowledgments}
 
 \begin{thebibliography}{20}
 
@@ -383,7 +434,7 @@ V.~Gergel, V.~Grishagin and A.~Gergel, \textit{Adaptive nested optimization sche
 D.~Lera, Y.~D.~Sergeyev, \textit{Lipschitz and Holder global optimization using space-filling curves}, Appl. Numer. Math, \textbf{60} (1-2), 115--129, (2010).
 
 \bibitem{Grishagin1}
-V~A.~Grishagin, \textit{On convergence conditions for a class of global search algorithms}, Proceedings of the 3-rd All-Union seminar ``Numerical methods of nonlinear programming'', Kharkov, 82--84, (1979) [In Russian].
+V~A.~Grishagin, \textit{On convergence conditions for a class of global search algorithms}, Proceedings of the 3-rd All-Union seminar "Numerical methods of nonlinear programming", Kharkov, 82--84, (1979) [In Russian].
 
 \bibitem{Grishagin2}
 V.~A.~Grishagin, Y.~D.~Sergeyev and R.~G.~Strongin, \textit{Parallel characteristic algorithms for solving problems of global optimization}, Journal of Global Optimization, \textbf{10} (2), 185--206, (1997).
