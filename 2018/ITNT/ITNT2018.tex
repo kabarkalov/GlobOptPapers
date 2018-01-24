@@ -55,15 +55,14 @@ dimensionality of the problem being solved. The numerical methods allowing
 the efficient utilization of such reduction schemes had been developed 
 in details and substantiated in \cite{Strongin2000,Strongin2013}.
 
-In the algorithms considered in the present paper the objective function and constraints are assumed to be Lipschitzian that is typical for many other approaches to the development of the parallel optimization algorithms (see, for example, \cite{Jones,Zilinskas,Evtushenko}). This assumption is natural for many applied problems since the relative variations of the functions generally cannot exceed a certain threshold determined by the bounded energy of changes occurring in the system under study. Also, a standard assumption is that the execution of a single trial (the computing of the values of the objective function and constraints at a point in the search domain) is a time-consuming operation since it 
+In the algorithms considered in the present paper the objective function and constraints are assumed to be Lipschitzian that is typical for many other approaches to the development of the parallel optimization algorithms (see, for example, \cite{Jones,Zilinskas,Evtushenko2009,Evtushenko2014}). This assumption is natural for many applied problems since the relative variations of the functions generally cannot exceed a certain threshold determined by the bounded energy of changes occurring in the system under study. Also, a standard assumption is that the execution of a single trial (the computing of the values of the objective function and constraints at a point in the search domain) is a time-consuming operation since it 
 utilized the results of numerical modeling. 
 
 An assumption on different costs of computing the problem functions subject to 
 various components of the vector of parameters is a novel element investigated in the present work. 
 It is assumed that it is possible to select the ``difficult'' and ``easy'' parts 
-of the functions connected with each other. Then, the solving of the 
-``difficult'' part of the problem (for which the execution of time-consuming algorithms is required to conduct the trials) can be performed on CPU using an efficient index global optimization algorithm. The ``easy'' part 
-of the problem (the execution of which doesn't require the complex algorithms 
+of the functions connected with each other. An example of a problem of this type has been considered in \cite{Strongin2017}.
+Then, the solving of the ``difficult'' part of the problem (for which the execution of time-consuming algorithms is required to conduct the trials) can be performed on CPU using an efficient index global optimization algorithm. The ``easy'' part of the problem (the execution of which doesn't require the complex algorithms 
 and can be transferred to an accelerator easily) can be solved on GPU using 
 the uniform grid technique. Obviously, in this case a major portion of the trials 
 will be carried out on GPU, and the minor one will be carried out on CPU. However, 
@@ -81,14 +80,14 @@ Let us consider the $N$-dimensional global optimization problem
 \leq m\right\}}
 \end{equation}
 with search domain
-\begin{equation}\label{D}
+\[
 D=\left\{y\in R^N: a_j\leq y_j \leq b_j, 1\leq j \leq N \right\}.
 %D=\left\{y\in R^N: a_i\leq y_i \leq b_i, 1\leq i \leq N\right\}.
-\end{equation}
+\]
 
 The objective function $\varphi(y)$ (henceforth denoted by $g_{m+1}(y)$) and
 the left-hand sides $g_i(y), \; 1\leq i \leq m$, of the constraints
-satisfy the Lipschitz conditions with constants $L_i, \; 1 \leq i \leq
+satisfy the Lipschitz conditions with constants $L_i$, $1 \leq i \leq
 m+1$, respectively, and may be multiextremal. It is assumed that the
 functions $g_i(y),\; 1 \leq i \leq m+1$, are defined and computable only in 
 the corresponding domains
@@ -131,10 +130,10 @@ of the index algorithm are described briefly in the next section.
 \subsection{Dimensionality reduction using space-filling curves}
 
 The use of Peano curve $y(x)$ 
-\begin{equation}
+\[
 \left\{y\in R^N: -2^{-1}\leq y_i \leq 2^{-1}, 1 \leq i \leq 
 N\right\}=\left\{y(x):0\leq x \leq 1 \right\}
-\end{equation}
+\]
 unambiguously mapping the interval of real axis $[0,1]$ onto a $N$-dimensional cube is the first of the dimensionality reduction methods considered.  To implement this method of dimensionality reduction a 
 numerically constructed curve (\textit{evolvent}) is used. The evolvent is 
 $2^{-m}$ accurate approximation of the theoretical Peano curve in $L_\infty$ 
@@ -164,18 +163,18 @@ the initial problem by the inequalities $H_i \leq 2L_i \sqrt{N+3}$.
 \subsection{Nested optimization scheme}
 
 Nested optimization scheme is based on relation (see \cite{Strongin2013})
-\begin{equation}\label{nested}
+\[
 \min_{y \in D}{\left\{\varphi(y): \; g_i(y)\leq 0, \; 1 \leq i \leq 
 m\right\}}= \min_{u_1\in D_1}\min_{u_2\in D_2}...\min_{u_M\in D_M 
 }{\left\{\varphi(y): \; g_i(y)\leq 0, \; 1 \leq i \leq m\right\}},
-\end{equation}
+\]
 which allows replacing the solving of multidimensional problem 
 (\ref{problem}) by solving a family of subproblems related to each other 
 recursively.
 Here we consider vector $y$ as a vector of block variables
-\begin{equation}
+\[
 y=(y_1,y_2,...,y_N)=(u_1,u_2,...,u_M),
-\end{equation}
+\]
 where the $i$-th block variable $u_i$ is a vector of $N_i$ components of 
 vector $y$, taken serially, i.e. $u_1=(y_1,y_2,...,y_{N_1})$, 
 $u_2=(y_{N_1+1},y_{N_1+2},...,y_{N_1+N_2})$,..., $u_M=(y_{N-N_M+1},y_{N-
@@ -186,11 +185,11 @@ domain $D$ onto the subspaces corresponding to the variables $u_i, 1 \leq i
 
 In the present study, this scheme has been applied for $M=2$, i.e. only one 
 nesting level has been used
-\begin{equation}
+\[
 \min_{y \in D}{\left\{\varphi(y): \; g_i(y)\leq 0, \; 1 \leq i \leq 
 m\right\}}= \min_{u_1\in D_1}\min_{u_2\in D_2}{\left\{\varphi(y): \; 
 g_i(y)\leq 0, \; 1 \leq i \leq m\right\}}.
-\end{equation}
+\]
 
 \section{Organization of parallel computing}\label{sec:4}
 
@@ -368,11 +367,18 @@ combination of Lipschitz bounds / R. Paulavi\v{c}ius, J. \v{Z}ilinskas, A.
 Grothey // Optimization Methods \& Software. --- 2011. --- Vol. 26(3). --- P. 
 487--498.
 
-\bibitem{Evtushenko}
+\bibitem{Evtushenko2009}
 Evtushenko, Yu.G. Parallel global optimization of functions of several 
 variables / Yu.G. Evtushenko, V.U. Malkova, A.A. Stanevichyus // 
 Computational Mathematics and Mathematical Physics. --- 2009. --- Vol. 49 
 (2). --- P. 246--260.
+
+\bibitem{Evtushenko2014}
+Evtushenko, Yu.G. Method of non-uniform coverages to solve the multicriteria optimization problems with guaranteed accuracy / Yu.G. Evtushenko, M. A. Posypkin // Automation and Remote Control. --- 2014. --- Vol. 75(6). --- P. 1025--1040.
+
+
+\bibitem{Strongin2017}
+Barkalov, K.A. Test problems for parallel algorithms of constrained global optimization / K.A. Barkalov, R.G. Strongin // Lecture Notes in Computer Science. --- 2017. --- Vol. 10556. --- P. 18--33.
 
 \bibitem{Sysoyev}
 Sysoyev, A.V. MPI implementation of dimension reduction multilevel scheme for 
