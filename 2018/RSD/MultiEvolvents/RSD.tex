@@ -96,11 +96,105 @@ It should be noted that standard approaches to algorithm parallelization are not
 The following approach looks more promising. The algorithm can be modified to run several trials in parallel. This approach provides the efficiency (as paral-lelization is applied to the most computation-intensive part of the problem solv-ing process) and generality (in that it applies to a wide range of global optimiza-tion algorithms). The approach, described in  \cite{Two_Level_Parallel} for unconstrained optimization, was used in this work for parallelizing constrained optimization algorithms.
 
 \section{Statement of Multidimensional Global Optimization Problem}
+In this paper, the core class of optimization problems, which can be solved using
+Globalizer, is formulated. This class involves the multidimensional global
+optimization problems without constraints, which can be defined in the following way:
+\begin{equation}
+\label{eq:task}
+\begin{array}{cr}\\
+  \varphi(y^*)=\min\{\varphi(y):y\in D\}, \\
+  D=\{y\in \mathbf{R}^N:a_i\leq y_i\leq{b_i}, 1\leq{i}\leq{N}\}
+\end{array}
+\end{equation}
+with the given boundary vectors  $a$ and  $b$. It is supposed, that the objective function \(\varphi(y)\) satisfies the Lipschitz condition
+\begin{equation}
+\label{eq:lip}
+|\varphi(y_1)-\varphi(y_2)|\leq L\Vert y_1-y_2\Vert,y_1,y_2\in D,
+\end{equation}
+where \(L>0\) is the Lipschitz constant, and \(||\cdot||\) denotes the norm in \(\mathbf{R}^N\) space.
+\par
+Usually, the minimized function \(\varphi(y)\) is defined as a computational procedure,
+according to which the value \(\varphi(y)\) can be calculated for any vector \(y\in D\)
+(let us further call such a calculation \textit{a trial}). It is supposed that this procedure
+is a time-consuming one. As a result, the overall time of solving the optimization
+problem (\ref{eq:task}) is determined, first of all by the number of executed trials.
+It should also be noted that the requirement of the Lipschitz condition (\ref{eq:lip})
+is highly important, since an estimate of the global minimum can be constructed on the
+basis of a finite number of computed values of the optimized function only in this case .
+\par
+As it has been shown earlier by many researchers
+(see, for instance, \cite{floudasPardalosGOState}, \cite{horstTuyGO}, \cite{pinterGO}, \cite{strSergGO}),
+finding the numerical estimate of the global optimum implies constructing a coverage of
+the search domain \(D\). As a result, the computational costs of solving the global
+optimization problems are readily very high even for a small number of varied parameters
+(the dimensionality of the problem). A notable reduction in the volume of computations
+can be achieved when the coverage of the search domain is non-uniform, i. e. the series
+of trial points is only dense in a vicinity of the global optimum point. The construction
+of such a non-uniform coverage could be provided in an adaptive way, when the selection
+of the next trial points is determined by using the search information (the preceding
+trial points and the values of the minimized function at these points) obtained in the course
+of computations. This necessary condition complicates considerably the computational schemes
+of global optimization methods since it implies a complex analysis of a large amount
+of multidimensional search information. As a result, many optimization algorithms use
+various approaches to the dimensional reduction \cite{pinterGO}, \cite{sergeyevStronginLera2013}, \cite{strongin1978}, \cite{stronginGergelBarkalovParGO}, \cite{strSergGO}.
 
 \section{Methods of Dimension Reduction}
-
 \subsection{Базовый алгоритм}
-s
+
+Within the framework of the information-statistical global optimization theory,
+the Peano space-filling curves (or evolvents) \(y(x)\) mapping the interval \([0,1]\)
+onto an \(N\)-dimensional hypercube \(D\) unambiguously are used for the dimensionality
+reduction \cite{sergeyevStronginLera2013}, \cite{strongin1978}, \cite{stronginGergelBarkalovParGO}, \cite{strSergGO}.
+\par
+As a result of the reduction, the initial multidimensional global optimization
+problem (\ref{eq:task}) is reduced to the following one-dimensional problem:
+\begin{equation}
+\label{eq:oneDimTask}
+\varphi(y(x^*))=\min\{\varphi(y(x)):x\in [0,1]\}.
+\end{equation}
+\par
+It is important to note that this dimensionality reduction scheme transforms the minimized
+Lipschitzian function from (\ref{eq:task}) to the corresponding one-dimensional
+function \(\varphi(y(x))\), which satisfies the uniform H{\"o}lder condition, i. e.
+\begin{equation}
+\label{eq:holder}
+|\varphi(y(x_1))-\varphi(y(x_2))|\leq H{|x_1-x_2|}^{\frac{1}{N}}, x_1,x_2\in[0,1],
+\end{equation}
+where the constant $H$ is defined by the relation \(H=2L\sqrt{N+3}\), \(L\) is the Lipschitz
+constant from (\ref{eq:lip}), and \(N\) is the dimensionality of the optimization problem (\ref{eq:task}).
+\par
+The algorithms for the numerical construction of the Peano curve approximations are
+given in \cite{strSergGO}. As an illustration, an approximation of the Peano curve
+for the third density level is shown in Figure \ref{fig:peanoC}. Figure \ref{fig:peanoC}
+demonstrates the movement order in a two-dimensional domain to construct the Peano
+curve approximation; the precision of the Peano curve approximation is determined by the
+density level used in the construction.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.85\textwidth]{pictures/peanoC.eps}
+    \caption{A Peano curve approximation for the third density level}
+    \label{fig:peanoC}
+\end{figure}
+
+\par
+The computational scheme obtained as a result of the dimensionality reduction consists of the following
+(see Figure \ref{fig:peanoCUsage}):
+\begin{itemize}
+  \item The optimization algorithm performs the minimization of the reduced one-dimensional
+  function \(\varphi(y(x))\) from (\ref{eq:oneDimTask}),
+  \item After determining the next trial point \(x\), a multidimensional image \(y\) is calculated by using the
+mapping \(y(x)\),
+  \item The value of the initial multidimensional function \(\varphi(y)\) is calculated at the point \(y\in D\),
+  \item The calculated value \(z=\varphi(y)\) is used further as the value of the reduced one-dimensional function \(\varphi(y(x))\) at the point \(x\).
+\end{itemize}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.55\textwidth]{pictures/peanoCUsage.eps}
+    \caption{The computational scheme for obtaining the value of the reduced one-dimensional function \(\varphi(y(x))\)}
+    \label{fig:peanoCUsage}
+\end{figure}
+
 \subsection{Сдвиговые}
 s
 \subsection{Вращаемые}
@@ -111,9 +205,124 @@ s
 s
 \section{Parallel Computations for Solving Global Optimization Problems.}
 \subsection{Core Multidimensional Algorithm of Global Search}
-s
+
+The information-statistical theory of global optimization formulated in \cite{strongin1978}, \cite{strSergGO} has
+served as a basis for the development of a large number of efficient multiextremal optimization
+methods \cite{barkalovGergel2014}, \cite{gergel1996}, \cite{gergel1997}, \cite{grishaginStrongin1984}, \cite{Pizzuti}, \cite{sergeyev1995}, \cite{sergeyev1999}, \cite{sergeyevGrishagin2001}, \cite{sergeyevStronginLera2013}, \cite{Famularo2001}.
+\par
+The optimization methods applied in Globalizer are based on the MAGS method, which can be presented as follows --- see \cite{strongin1978}, \cite{strSergGO}.
+\par
+Let us introduce a simpler notation for the optimization problem being solved
+\begin{equation}
+\label{eq:oneDimFunc}
+f(x) = \varphi(y(x)):x\in [0,1].
+\end{equation}
+\par
+The initial iteration of the algorithm is performed at an arbitrary point \mbox{\(x^1\in(0,1)\)}.
+Then, let us suppose that \(k\), \(k\ge 1\), optimization iterations have been completed already.
+The selection of the trial point \(x^{k+1}\) for the next iteration is performed according to the following rules.
+\par
+\textit{Rule 1}. Renumber the points of the preceding trials by the lower indices in order of increasing value of coordinates
+\begin{equation}
+  \label{step1}
+0=x_0<x_1<...<x_{k+1}=1,
+\end{equation}
+the points \(x_0\), \(x_{k+1}\) were introduced additionally for the convenience of further
+explanation, the values of the minimized function \(z_0\), \(z_{k+1}\) at these points are undefined.
+\par
+\textit{Rule 2}. Compute the current estimate of the H{\"o}lder constant \(H\) from (\ref{eq:holder})
+\begin{equation} \label{step2}
+M=\max_{1 < i\leq k}\frac{|z_i-z_{i-1}|}{\rho_i}, \;
+m = \left\{
+   \begin{array}{lr}
+     rM, & M > 0,\\
+     1, & M = 0,
+   \end{array}
+  \right.
+\end{equation}
+as the maximum of the relative differences of the minimized function values on the
+set of previously executed trial points \(x_i,1\leq i\leq k\) from (\ref{step1}).
+Hereafter, \(\rho_i=(x_i-x_{i-1})^\frac{1}{N},1\leq i\leq k+1\). The
+constant \(r\), \(r>1\), is the reliability parameter of the algorithm.
+\par
+\textit{Rule 3}. Compute the characteristics \(R(i)\) for each interval \((x_{i-1},x_i),1\leq i\leq k+1\), where
+\[
+R(i)=2\rho_i-4\frac{z_i}{m},\quad i=1,
+\]
+\begin{equation} \label{step3}
+R(i)=\rho_i+\frac{(z_i-z_{i-1})^2}{m^2\rho_i}-2\frac{z_i+z_{i-1}}{m},\quad 1<i<k+1, \\
+\end{equation}
+\[
+R(i)=2\rho_{i}-4\frac{z_{i-1}}{m},\quad i=k+1.
+\]
+
+\par
+\textit{Rule 4}. Determine the interval with the maximum characteristic
+\begin{equation} \label{step4}
+R(t)=\max_{1\leq i \leq k+1}R(i).
+\end{equation}
+\par
+\textit{Rule 5}. Execute a new trial at the point \(x^{k+1}\) located within the interval
+with the maximum characteristic from (\ref{step4})
+\begin{equation} \label{step5}
+  x^{k+1}=\frac{x_t+x_{t-1}}{2}-\mathrm{sign}(z_{t}-z_{t-1})\frac{1}{2r}\left[\frac{r|z_{t}-z_{t-1}|}{m}\right]^N,\; \textrm{ if } 1<t<k+1,
+\end{equation}
+\[
+  x^{k+1}=\frac{x_t+x_{t-1}}{2},\; \textrm{ if } t=1 \textrm{ or } t=k+1.
+\]
+
+\par
+The stopping condition, which terminated the trials, is defined by the inequality
+\begin{equation}
+  \label{eq:stop_1}
+\rho_t<\varepsilon
+\end{equation}
+for the interval with the maximum characteristic from (\ref{step4}) and \(\varepsilon >0\) is the predefined
+accuracy of the optimization problem solution. If the stopping condition is not satisfied,
+the index \(k\) is incremented by 1, and the new global optimization iteration is executed.
+\par
+In order to explain the algorithm presented above, let us note the following.
+The characteristics \(R(i), 1\leq i\leq k+1\), calculated according to (\ref{step3}) could
+be interpreted as some measures of importance of the intervals with respect to the
+expected location of the global minimum point. Thus, the rules (\ref{step4}) and (\ref{step5}) for selecting
+the interval of the next trial become more clear --- the point of every next
+global optimization iteration is selected within the interval, where the global minimum
+point can be found most likely.
+\par
+The convergence conditions of the described algorithm are given, for example, in \cite{strSergGO}.
+
 \subsection{Параллельные множественные отображения}
-s
+
+The reduction of the multidimensional problems to the one-dimensional ones using evolvents has such important properties as the continuity and preservation of boundedness of function divided differences. However, a partial loss of in-formation on the nearness of the points in the multidimensional space takes place since a point \mbox{\(x\in[0,1]\)} has only the left and the right neighbors while the corresponding point  \mbox{\(y(x)\in R^N\)} has the neighbors in \(2N\) directions. As a result, when using the mappings like Peano curve the images \(y',y''\), which are close to each other in the N-dimensional space can correspond to the preimages \(x',x''\), which can be far away from each other in the interval [0,1]. This property results in the excess computations since several limit points \(x',x''\) of the trial sequence generated by the index method in the interval [0,1] can correspond to a single limit point y in the \(N\)-dimensional space.
+\par
+One of the possible ways to overcome this disadvantage consists in using the multiple mapping \(Y^S (x)={y^1 (x),…,y^S (x)}\) instead of single evolvent \(y(x)\). To construct the set \(Y^S (x)\) different approaches can be used. For example, in \cite{strSergGO} a scheme was implemented, according to which each evolvent \(y^i (x)\) from \(Y^S (x)\) is constructed as a result of shifting the original evolvent \(y^0 (x)\) along the main diagonal of the hypercube \(D\). The set of Peano curves thus constructed allows one to obtain \(y',y''\) from \(D\) for any close multidimensional images, which differ only in one coordinate, close preimages \(x',x''\) from the interval [0,1] for the evolvent \(y^s (x),1≤s≤S\).
+Using the multiple mapping allows solving initial problem (1) by parallel solving the problems
+\par
+
+\[
+\min\{\varphi(y^s(x)):x\in [0,1]\}, 1≤s≤S
+\]
+
+on a set of intervals [0,1] by the index method. Each one-dimensional problem is solved on a separate processor. The trial results at the point \(x^k\) obtained for the problem being solved by particular processor are interpreted as the results of the trials in the rest problems (in the corresponding points \(x^(k_1 ),…,x^(k_S ))\). In this approach, a trial at the point \(x^k \in [0,1]\) executed in the framework of the \(s\)-th problem, consists in the following sequence of operations.
+\par
+1. Determine the image \(y^k=y^s (x^k)\) for the evolvent \(y^s (x)\).
+\par
+2. Inform the rest of processors about the start of the trial execution at the point\( y^k\) (the blocking of the point \(y^k\) ).
+\par
+3. Determine the preimages \(x{}^{k_s}  \in [0,1], 1≤s≤S\), of the point \(y^k\) and interpret the trial executed at the point \(y^k \in D \) as the execution of the trials in the \(S\) points \(x{}^{k_1} ,…,x{}^{k_s} \) 
+\par
+4. Inform the rest of processors about the trial results at the point \(y^k\).
+\par
+
+The decision rules for the proposed parallel algorithm, in general, are the same as the rules of the sequential algorithm (except the method of the trial execution). Each processor has its own copy of the software realizing the computations of the problem functions and the decision rule of the index algorithm. For the organization of the interactions among the processors, the queues are created on each processor, where the processors store the information on the executed iterations in the form of the tuples: the processor number \(s\), the trial point \(x{}^{k_s}\).
+\par
+The proposed parallelization scheme was implemented with the use of MPI technology. Main features of implementation consist in the following. A separate MPI-process is created for each of \(S\) one-dimensional problems being solved, usually, one process per one processor employed. Each process can use p threads, usually one thread per an accessible core.
+\par
+At every iteration of the method, the process with the index \(s,0≤ s< S\) performs p trials in parallel at the points \(x^(s+iS),0≤i<p\). At that, each process stores all \(S_p\) points, and an attribute indicating whether this point is blocked by another process or not is stored for each point. Let us remind that the point is blocked if the process starts the execution of a trial at this point.
+\par
+At every iteration of the algorithm, operating within the \(s\)-th process, determines the coordinates of p «its own» trial points. Then, the interchange of the coordinates of images of the trial points \(y^(s+iS),0≤i<p, 0≤ s< S\) is performed (from each process to each one). After that, the preimages \(x^(q+iS),0≤ q<S,q≠s\) of the points received by the \(s\)-th process from the neighbor ones are determined with the use of the evolvent \(y^s (x)\). The points blocked within the \(s\)-th process will correspond to the preimages obtained. Then, each process performs the trials at the non-blocked points, the computations are performed in parallel using OpenMP. The results of the executed trials (the index of the point, the computed values of the problem functions, and the attribute of unblocking of this point) are transferred to all rest processes. All the points are added to the search information database, and the transition to the next iteration is performed.
+\par
+
 \section{Results of Numerical Experiments}
 s
 \subsection{Сравнение последовательных сдвиговых и вращаемых разверток}
