@@ -468,7 +468,7 @@ characteristic of a method goes to the left from that of another method, the for
 method requires fewer resources to achieve the same reliability.
 
 \subsection{Сравнение последовательных разверток}
-С целью понять, обладает ли какой-либо из перечисленных ранее типов развёрток существенным преимуществом над другими, были построены операционные характеристики индексного метода с различными типами развёрток на классах GKLS 2d Simple и GKLS 3d Simple. The global minimum was considered to be found if the algorithm generates a trial point $y^k$ in the $\delta$-vicinity of the global minimizer, i.e. $\left\|y^k-y^\ast\right\|_\infty\leq\delta$. The size of the vicinity was selected as $\delta = 0.01\left\|b-a\right\|$. In case of GKLS $\delta=0.01$.
+С целью понять, обладает ли какой-либо из перечисленных ранее типов развёрток существенным преимуществом над другими, были построены операционные характеристики индексного метода с различными типами развёрток на классах GKLS 2d Simple и GKLS 3d Simple. The global minimum was considered to be found if the algorithm generates a trial point $y^k$ in the $\delta$-vicinity of the global minimizer, i.e. $\left\|y^k-y^\ast\right\|_\infty\leq\delta$. The size of the vicinity was selected as $\delta = 0.01\left\|b-a\right\|_\infty$. In case of GKLS $\delta=0.01$.
 
 Во всех экспериментах параметр плотности построения развёрток $m=12$. Минимальное значение пераметра надёжности \(r\) было найдено для каждого типа развёртки перебором по равномерной сетке с шагом \(0.1\).
 
@@ -480,7 +480,7 @@ method requires fewer resources to achieve the same reliability.
     \caption{Operating characteristics on GKLS 2d Simple class}
 \end{figure}
 
-На классе GKLS 2d Simple при минимальном \(r\) неинъективная и множественные развёртки имеют значительное преимущество над единственной развёрткой. Значение \(r=4.5\) является завышенным для вращаемой и сдвиговой развёрток.
+На классе GKLS 2d Simple при минимальном \(r\) неинъективная и множественные развёртки имеют значительное преимущество над единственной развёрткой (рис. \ref{fig:gkls3d_opt}). Значение \(r=4.5\) является завышенным для вращаемой и сдвиговой развёрток (рис. \ref{fig:gkls3d_acc}).
 
 \begin{figure}[ht]
     \centering
@@ -490,8 +490,84 @@ method requires fewer resources to achieve the same reliability.
 \end{figure}
 
 \paragraph{Накладные расходы при использовании сдвиговой развёртки.}
+Во всех представленных выше экспериментах при построении операционной характеристики учитывалось количество вычислений целевой функции из класса GKLS, однако в случае сдвиговой развёртки индексный метод решает задачу с ограничением \(g_0\) из (\ref{6_g0}). В точках, где \(g_0\) нарушено, значение целевой функции не вычисляется. Эти точки, тем не менее, хранятся в поисковой информации, создавая дополнительные расходы вычислительных ресурсов. В таблице \ref{tab:shifted_g0} приведено среднее количество обращение к \(g_0\) и целевой функции. При \(L=3\) ограниение \(g_0\) вычисляется почти в 20 раз чаще, чем целевая функция \(\varphi\), т. е. \(95\%\) всей поисковой информации приходится на вспомогательные точки. Такие накладные расходы приемлемы при решении задач малой размерности с трудоёмкими целевыми функциями, но при росте размерности и общего количества испытаний выгоднее использовать другие типы развёрток.
+
+\begin{table}
+\begin{center}
+\caption{Среднее количество вычислений \(g_0\) и \(\varphi\) при решении задач класса GKLS 3d Simple с помощью сдвиговой развёртки}
+  \begin{tabular}{|l|{c}|{c}|{c}|}
+    \hline
+  $L$ & Constraint & Objective (shifted) & $\frac{calc(g_0)}{calc(\varphi)}$ ratio \\
+  \hline
+  2 & 96247.9  & 6840.14 & 14.07\\
+  \hline
+  3 & 153131.0 & 7702.82 & 19.88\\
+  \hline
+  \end{tabular}
+  \label{tab:shifted_g0}
+\end{center}
+\end{table}
 
 \subsection{Параллельные вращаемые развертки}
+\begin{table}
+  \centering
+  \caption{Averaged numbers of iterations executed by GPMAGS for solving the test optimization problems}
+  \label{tab:4}
+  \begin{tabular}{cccccccc}
+    \cline{3-8}\noalign{\smallskip}
+    \multicolumn{2}{c}{  } & \textit{p} & \multicolumn{2}{c}{$N=4$} & & \multicolumn{2}{c}{$N=5$}   \\
+    \noalign{\smallskip} \cline{4-5} \cline{7-8}  \noalign{\smallskip}
+    \multicolumn{2}{c}{  } & & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard}  \\
+    \noalign{\smallskip}\hline
+    I &
+    \parbox{0.25\textwidth}{
+    \begin{center}
+    \textbf{1 cluster node}
+    \end{center}		}
+      & 1 & 11953 & 25263 & & 15920 & \(>\)148342 (4)  \\
+    &  & 32 & 11953 & 25263 & & 15920 & \(>\)148342 (4)  \\
+    \hline \noalign{\smallskip}
+II  & \textbf{4 cluster nodes}  %\multirow{3}{*}{}
+  & 1 & 4762 & 11178 & & 13378 & 109075 \\
+&   & 32 & 2372 & 5972 & & 5203 & 51868 \\
+    \noalign{\smallskip}\hline	\noalign{\smallskip}
+III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
+  & 1  & 171 & 393 & & 382 & 3452  \\
+&    & 32 & 85 & 182 & & 249 & 1306 \\
+
+    \noalign{\smallskip}\hline
+  \end{tabular}
+\end{table}
+
+\begin{table}
+  \centering
+  \caption{Speedup of parallel computations executed by GMAGS}
+  \label{tab:4}
+  \begin{tabular}{cccccccc}
+    \cline{3-8}\noalign{\smallskip}
+    \multicolumn{2}{c}{  } & \textit{p} & \multicolumn{2}{c}{$N=4$} & & \multicolumn{2}{c}{$N=5$}   \\
+    \noalign{\smallskip} \cline{4-5} \cline{7-8}  \noalign{\smallskip}
+    \multicolumn{2}{c}{  } & & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard}  \\
+    \noalign{\smallskip}\hline
+    I &
+    \parbox{0.25\textwidth}{
+    \begin{center}
+    \textbf{1 cluster node}
+    \end{center}		}
+      & 1 & 11953 & 25263 & & 15920 & \(>\)148342 (4)  \\
+    &  & 32 & 11953 & 25263 & & 15920 & \(>\)148342 (4)  \\
+    \hline \noalign{\smallskip}
+II  & \textbf{4 cluster nodes}  %\multirow{3}{*}{}
+  & 1 & 4762 & 11178 & & 13378 & 109075 \\
+&   & 32 & 2372 & 5972 & & 5203 & 51868 \\
+    \noalign{\smallskip}\hline	\noalign{\smallskip}
+III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
+  & 1  & 171 & 393 & & 382 & 3452  \\
+&    & 32 & 85 & 182 & & 249 & 1306 \\
+
+    \noalign{\smallskip}\hline
+  \end{tabular}
+\end{table}
 
 \section{Вывод о целесообразности применения того или иного вида разверток для того или иного вида задач}
 s
