@@ -13,6 +13,7 @@
 \usepackage{subfig}
 \usepackage{graphicx}
 \usepackage{amsfonts}
+\usepackage{amssymb}
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
 %
@@ -93,8 +94,8 @@ complexity of these ones. The user should actively control the global search
 process that implies an adequate level of qualification in the field of optimization
 (particularly, the user should know and understand the global optimization methods well).
 \par
-In this work, the authors consider an approach to minimizing multiextremal functions  developed in ...????????
-This allows problems to be solved in which function values may not be deter-mined for the entire search domain. Under this approach, solving multidimen-sional problems is reduced (using Peano-type space-filling curves) to solving equivalent one-dimensional problems.
+In this work, the authors consider an approach to minimizing multiextremal functions developed in ...????????
+This allows problems to be solved in which function values may not be determined for the entire search domain. Under this approach, solving multidimen-sional problems is reduced (using Peano-type space-filling curves) to solving equivalent one-dimensional problems.
 It should be noted that standard approaches to algorithm parallelization are not quite applicable to global optimization. For example, the rules for selecting an-other iteration point are quite simple and do not require parallelization (as over-heads associated with organizing parallel computations will nullify any possible acceleration). Some acceleration can be achieved by parallelizing the computa-tion of function values describing the object to be optimized; however, this ap-proach is specific to each individual problem being solved.
 The following approach looks more promising. The algorithm can be modified to run several trials in parallel. This approach provides the efficiency (as paral-lelization is applied to the most computation-intensive part of the problem solv-ing process) and generality (in that it applies to a wide range of global optimiza-tion algorithms). The approach, described in  \cite{Two_Level_Parallel} for unconstrained optimization, was used in this work for parallelizing constrained optimization algorithms.
 
@@ -180,8 +181,8 @@ density level used in the construction.
 \end{figure}
 
 \par
-The computational scheme obtained as a result of the dimensionality reduction consists of the following
-(see Figure \ref{fig:peanoCUsage}):
+The computational scheme obtained as a result of the dimensionality reduction consists of the following:
+%(see Figure \ref{fig:peanoCUsage}):
 \begin{itemize}
   \item The optimization algorithm performs the minimization of the reduced one-dimensional
   function \(\varphi(y(x))\) from (\ref{eq:oneDimTask}),
@@ -191,12 +192,12 @@ mapping \(y(x)\),
   \item The calculated value \(z=\varphi(y)\) is used further as the value of the reduced one-dimensional function \(\varphi(y(x))\) at the point \(x\).
 \end{itemize}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.55\textwidth]{pictures/peanoCUsage.eps}
-    \caption{The computational scheme for obtaining the value of the reduced one-dimensional function \(\varphi(y(x))\)}
-    \label{fig:peanoCUsage}
-\end{figure}
+%\begin{figure}
+%    \centering
+%    \includegraphics[width=0.55\textwidth]{pictures/peanoCUsage.eps}
+%    \caption{The computational scheme for obtaining the value of the reduced one-dimensional function \(\varphi(y(x))\)}
+%    \label{fig:peanoCUsage}
+%\end{figure}
 
 \subsection{Сдвиговые}
 \label{sec:shifted}
@@ -272,7 +273,6 @@ Proof of this theorem is given in \cite{strSergGO}.
 
 The conditions of the theorem single out a specific vicinity of the point $y^\ast$. This vicinity includes only the points, which can be obtained by the shift of $y^\ast$ parallel to one of the coordinate axes with a displacement not more than $2^{-p}$. By changing  $j,\ 1\leq j\leq N,$ in the theorem conditions it is possible to obtain the neighbours in any $N$ coordinate directions. According to the statement, the closeness of the points in the $N$-dimensional space in a particular direction will be reflected by the closeness of their preimages in one of the univariate problems. The information on the closeness of the points results, first, in more precise estimate of Lipschitz constants and, second, in the increase of the characteristics of the intervals, the images of the end points of which are close to each other in the $N$-dimensional space.
 
-
 \subsection{Вращаемые}
 The application of the scheme for building the multiple evolvents (hereinafter called the shifted evolvents or $S$-evolvents) described in Subsection \ref{sec:shifted} allows to preserve the information on the nearness of the points in the multidimensional space and, therefore, to provide more precise (as compared to a single evolvent) estimate of Lipschitz constant in the search process. However, this approach has serious restrictions, which narrow the applicability of the parallel algorithms, designed on the base of the $S$-evolvents.
 
@@ -282,35 +282,16 @@ Also, it follows from the algorithm for building the shifted evolvents that solv
 
 To overcome the disadvantages mentioned above and to preserve the information on the nearness of the points in the $N$-dimensional space, a novel scheme of building of the multiple mappings is proposed. The building of a set of Peano curves not by the shift along the main diagonal of the hypercube but by rotation of the evolvents around the coordinate origin is a distinctive feature of the proposed scheme \cite{Gergel2009}. In the initial non-rotated mapping for close points $y', y''$ in the multidimensional space their preimages  $x', x''$ in the interval $[0,1]$ can be far away from each other. In the rotated scheme there exists a mapping $y^i(x)$ according to which preimages $x', x''$ will be located nearer. The evolvents generated according to the novel scheme will be hereinafter called the rotated evolvents or $R$-evolvents.
 
-In Fig.~\ref{6_fig_9} two evolvents being the approximations to Peano curves for the case $N=2$ are presented as an illustration. The maximum number of various rotations of the evolvents mapping the $N$-dimensional hypercube onto a one-dimensional interval is $2^N$. The employment of all possible rotations might appear to be redundant. In this case, one can select only a part of all rotations.
+In Fig.~\ref{6_fig_9} two evolvents being the approximations to Peano curves for the case $N=2$ are presented as an illustration.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.8\linewidth]{pictures/rotated_1.pdf}
+  \includegraphics[width=0.6\linewidth]{pictures/rotated_1.pdf}
   \caption{Two rotated evolvents on the same plane}
   \label{6_fig_9}
 \end{figure}
 
-As a possible approach, one can propose to generate the new evolvents by the rotation of the initial evolvents on the angle of $\pm\pi/2$ in each of the coordinate planes. For example, the rotation matrices in the plane $(y_2,y_4)$ for  $N=5$ are presented below.
-\begin{eqnarray*}
- \begin{pmatrix}
-  1 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & -1 & 0 \\
-  0 & 0 & 1 & 0 & 0 \\
-  0 & 1 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 1
- \end{pmatrix}
-\qquad \qquad
- \begin{pmatrix}
-  1 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 1 & 0 \\
-  0 & 0 & 1 & 0 & 0 \\
-  0 & -1 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 & 1
- \end{pmatrix}
-\end{eqnarray*}
-
-The number of such pairs of rotations is determined by the number of the coordinate planes in the space, which equals to  $N(N-1)/2$. The total number of the transformations equals to $N(N-1)$. Taking into account the initial mapping, one can conclude that this method allows to build up to $N(N-1)+1$ evolvents for mapping the $N$-dimensional domain onto the corresponding one-dimensional intervals. Moreover, the additional constraint  $g_0(y) \leq 0$ with $g_0(y)$ from (\ref{6_g0}), which arises in shifted evolvents, is absent. This method for building a set of mappings can be ``scaled'' easily to obtain more evolvents (up to $2^N$) if necessary.
+Taking into account the initial mapping, one can conclude that current implementation of the method allows to build up to $N(N-1)+1$ evolvents for mapping the $N$-dimensional domain onto the corresponding one-dimensional intervals. Moreover, the additional constraint  $g_0(y) \leq 0$ with $g_0(y)$ from (\ref{6_g0}), which arises in shifted evolvents, is absent. This method for building a set of mappings can be ``scaled'' easily to obtain more evolvents (up to $2^N$) if necessary.
 
 The use of the set of mappings $Y_L(x)=\{y^1(x),...,y^L(x)\}$ results in the appearing of the corresponding set of the one-dimensional multiextremal problems
 \begin{equation}\label{6_problem_lr}
@@ -324,20 +305,32 @@ Each problem from this set can be solved independently. Any computation of the v
 
 Кривая типа Пеано, используемая в (\ref{eq:oneDimTask}) для редукции размерности, определяется через предельный переход,
 поэтому не может быть вычислена непосредтвенно. При численной оптимизации используется некоторое её приближение, являющееся
-инъективной кусочно-линейной кривой. В \cite{strongin1978} было предложено неинъективное отображение сетки на отрезка $[0,1]$ на сетку в гиперкубе $D$. Каждый многомерный узел может иметь до $2^N$ одномерных прообразов. На рис. \ref{fig:noninjective} изображена кривая с самопересечениями, полученная при соединении узлов грубой многомерной сетки в порядке следования их прообразов из отрезка $2^N$, а также отмечана точка, имеющая 3 прообраза.
+инъективной кусочно-линейной кривой. В \cite{strongin1978} было предложено неинъективное отображение равномерной сетки на отрезка $[0,1]$ на равномерную сетку в гиперкубе $D$. Каждый многомерный узел может иметь до $2^N$ одномерных прообразов. На рис. \ref{fig:noninjective} изображена кривая с самопересечениями, полученная при соединении узлов грубой многомерной сетки в порядке следования их прообразов из отрезка $[0,1]$, а также отмечана точка, имеющая 3 прообраза.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.6\linewidth]{pictures/noninjective.pdf}
-  \caption{Numerical non injective evolvent}
-  \label{fig:noninjective}
-\end{figure}
+%\begin{figure}[t]
+%  \centering
+%  \includegraphics[width=0.6\linewidth]{pictures/noninjective.pdf}
+%  \caption{Numerical non injective evolvent}
+%  \label{fig:noninjective}
+%\end{figure}
 
 Недостатком неинъективной развёртки является потенциально большое количетво прообразов (до $2^N$) и невозможность использования параллельной схемы для множественных отображений из секции \ref{sec:parallel_evolvents}.
 
 \subsection{Smooth evolvent}
 
+%\begin{figure}[t]
+%  \centering
+%  \includegraphics[width=0.6\linewidth]{pictures/smooth.pdf}
+%  \caption{Smooth evolvent}
+%  \label{fig:smooth}
+%\end{figure}
 
+\begin{figure}[ht]
+    \centering
+    \subfloat[Smooth evolvent]{{\includegraphics[width=.6\textwidth]{pictures/smooth.pdf}}\label{fig:smooth}}
+    \subfloat[Numerical non injective evolvent]{{\includegraphics[width=.4\textwidth]{pictures/noninjective.pdf}}\label{fig:noninjective}}
+    \caption{Different evolvents}
+\end{figure}
 
 \section{Parallel Computations for Solving Global Optimization Problems.}
 \subsection{Core Multidimensional Algorithm of Global Search}
@@ -429,16 +422,10 @@ The convergence conditions of the described algorithm are given, for example, in
 
 \subsection{Параллельные множественные отображения}
 \label{sec:parallel_evolvents}
-The reduction of the multidimensional problems to the one-dimensional ones using evolvents has such important properties as the continuity and preservation of boundedness of function divided differences. However, a partial loss of in-formation on the nearness of the points in the multidimensional space takes place since a point \mbox{\(x\in[0,1]\)} has only the left and the right neighbors while the corresponding point  \mbox{\(y(x)\in R^N\)} has the neighbors in \(2N\) directions. As a result, when using the mappings like Peano curve the images \(y',y''\), which are close to each other in the N-dimensional space can correspond to the preimages \(x',x''\), which can be far away from each other in the interval [0,1]. This property results in the excess computations since several limit points \(x',x''\) of the trial sequence generated by the index method in the interval [0,1] can correspond to a single limit point y in the \(N\)-dimensional space.
-\par
-One of the possible ways to overcome this disadvantage consists in using the multiple mapping \(Y^S (x)={y^1 (x),…,y^S (x)}\) instead of single evolvent \(y(x)\). To construct the set \(Y^S (x)\) different approaches can be used. For example, in \cite{strSergGO} a scheme was implemented, according to which each evolvent \(y^i (x)\) from \(Y^S (x)\) is constructed as a result of shifting the original evolvent \(y^0 (x)\) along the main diagonal of the hypercube \(D\). The set of Peano curves thus constructed allows one to obtain \(y',y''\) from \(D\) for any close multidimensional images, which differ only in one coordinate, close preimages \(x',x''\) from the interval [0,1] for the evolvent \(y^s (x),1≤s≤S\).
 Using the multiple mapping allows solving initial problem (1) by parallel solving the problems
-\par
-
 \[
 \min\{\varphi(y^s(x)):x\in [0,1]\}, 1≤s≤S
 \]
-
 on a set of intervals [0,1] by the index method. Each one-dimensional problem is solved on a separate processor. The trial results at the point \(x^k\) obtained for the problem being solved by particular processor are interpreted as the results of the trials in the rest problems (in the corresponding points \(x^(k_1 ),…,x^(k_S ))\). In this approach, a trial at the point \(x^k \in [0,1]\) executed in the framework of the \(s\)-th problem, consists in the following sequence of operations.
 \par
 1. Determine the image \(y^k=y^s (x^k)\) for the evolvent \(y^s (x)\).
@@ -454,19 +441,58 @@ The decision rules for the proposed parallel algorithm, in general, are the same
 \par
 The proposed parallelization scheme was implemented with the use of MPI technology. Main features of implementation consist in the following. A separate MPI-process is created for each of \(S\) one-dimensional problems being solved, usually, one process per one processor employed. Each process can use p threads, usually one thread per an accessible core.
 \par
-At every iteration of the method, the process with the index \(s,0≤ s< S\) performs p trials in parallel at the points \(x^(s+iS),0≤i<p\). At that, each process stores all \(S_p\) points, and an attribute indicating whether this point is blocked by another process or not is stored for each point. Let us remind that the point is blocked if the process starts the execution of a trial at this point.
+At every iteration of the method, the process with the index \(s,0\leqslant s< S\) performs p trials in parallel at the points \(x^{(s+i_S)},0\leqslant i<p\). At that, each process stores all \(S_p\) points, and an attribute indicating whether this point is blocked by another process or not is stored for each point. Let us remind that the point is blocked if the process starts the execution of a trial at this point.
 \par
-At every iteration of the algorithm, operating within the \(s\)-th process, determines the coordinates of p «its own» trial points. Then, the interchange of the coordinates of images of the trial points \(y^(s+iS),0≤i<p, 0≤ s< S\) is performed (from each process to each one). After that, the preimages \(x^(q+iS),0≤ q<S,q≠s\) of the points received by the \(s\)-th process from the neighbor ones are determined with the use of the evolvent \(y^s (x)\). The points blocked within the \(s\)-th process will correspond to the preimages obtained. Then, each process performs the trials at the non-blocked points, the computations are performed in parallel using OpenMP. The results of the executed trials (the index of the point, the computed values of the problem functions, and the attribute of unblocking of this point) are transferred to all rest processes. All the points are added to the search information database, and the transition to the next iteration is performed.
+At every iteration of the algorithm, operating within the \(s\)-th process, determines the coordinates of p «its own» trial points. Then, the interchange of the coordinates of images of the trial points \(y^{(s+i_S)},0\leqslant i<p, 0\leqslant s< S\) is performed (from each process to each one). After that, the preimages \(x^{(q+i_S)},0\leqslant q<S,q\not=s\) of the points received by the \(s\)-th process from the neighbor ones are determined with the use of the evolvent \(y^s (x)\). The points blocked within the \(s\)-th process will correspond to the preimages obtained. Then, each process performs the trials at the non-blocked points, the computations are performed in parallel using OpenMP. The results of the executed trials (the index of the point, the computed values of the problem functions, and the attribute of unblocking of this point) are transferred to all rest processes. All the points are added to the search information database, and the transition to the next iteration is performed.
 \par
 
 \section{Results of Numerical Experiments}
-s
-\subsection{Сравнение последовательных сдвиговых и вращаемых разверток}
-s
+The computational experiments have been carried out on the Lobachevsky supercomputer at
+State University of Nizhny Novgorod. A computational node included 2 Intel
+Sandy Bridge E5-2660 2.2 GHz processors, 64 GB RAM. The CPUs had 8 cores (i. e. total 16 cores
+were available per a node). Все рассматриваемые алгортимы и развёртки были реализованы на языке C++ в рамках программной системы Globalizer.
+Для реализации параллелизма на одном узле использована технология OpenMP, а для параллелизма на несколько узлов --- стандарт MPI.
+
+Сравнение алгоритмов глобальной оптимизации проведено путём оценки качества решения алгоритмами выборки задач из некоторого тестового класса.
+В данной статье рассматривается тестовый класс, порождаемый генератором GKLS \cite{Gaviano2003}. Данные генератор позволяет конструировать сложные многоэкстремальные задачи различной размерности. В работе рассматриваются выборки по 100 задач классов размерности 2, 3, 4, 5. Каждый класс имеет две степени сложности --- \textit{Simple} и \textit{Hard}. Параметры генератора для рассматриваемых классов приведены в \cite{Gaviano2003}.
+
+In order to evaluate the efficiency of an algorithm on a given set of 100 problems, we will use the
+operating characteristics \cite{grishaginClass}, which are defined by a set of
+points on the \((K, P)\) plane where \(K\) is the average number of search trials
+conducted before satisfying the termination condition when minimizing a function
+from a given class, and \(P\) is the proportion of problems solved successfully.
+If at a given \(K\), the operating characteristic of a method goes higher than one
+from another method, it means that at fixed search costs, the former method has a
+greater probability of finding the solution. If some value of \(P\) is fixed, and the
+characteristic of a method goes to the left from that of another method, the former
+method requires fewer resources to achieve the same reliability.
+
+\subsection{Сравнение последовательных разверток}
+С целью понять, обладает ли какой-либо из перечисленных ранее типов развёрток существенным преимуществом над другими, были построены операционные характеристики индексного метода с различными типами развёрток на классах GKLS 2d Simple и GKLS 3d Simple. The global minimum was considered to be found if the algorithm generates a trial point $y^k$ in the $\delta$-vicinity of the global minimizer, i.e. $\left\|y^k-y^\ast\right\|_\infty\leq\delta$. The size of the vicinity was selected as $\delta = 0.01\left\|b-a\right\|$. In case of GKLS $\delta=0.01$.
+
+Во всех экспериментах параметр плотности построения развёрток $m=12$. Минимальное значение пераметра надёжности \(r\) было найдено для каждого типа развёртки перебором по равномерной сетке с шагом \(0.1\).
+
+На классе GKLS 2d Simple при минимальном \(r\) неинъективная и гладкая развёртка обеспечивают более быструю сходимость (рис. \ref{fig:gkls2d_opt}). То же самое, наблюдается и при \(r=5.0\) (рис. \ref{fig:gkls2d_acc}). В последнем случае сдвиговая и вращаемая развёртки начинают отставать от остальных, т.к. значение \(r=5.0\) является завышенным для них.
+\begin{figure}[ht]
+    \centering
+    \subfloat[$r=5.0$]{{\includegraphics[width=.5\textwidth]{pictures/gklsS2d_same_r_opt_pt_op.pdf}}\label{fig:gkls2d_acc}}
+    \subfloat[Minimal $r$]{{\includegraphics[width=.5\textwidth]{pictures/gklsS2d_opt_pt_op.pdf}}\label{fig:gkls2d_opt}}
+    \caption{Operating characteristics on GKLS 2d Simple class}
+\end{figure}
+
+На классе GKLS 2d Simple при минимальном \(r\) неинъективная и множественные развёртки имеют значительное преимущество над единственной развёрткой. Значение \(r=4.5\) является завышенным для вращаемой и сдвиговой развёрток.
+
+\begin{figure}[ht]
+    \centering
+    \subfloat[$r=4.5$]{{\includegraphics[width=.5\textwidth]{pictures/gklsS3d_same_r_opt_pt_op.pdf}}\label{fig:gkls3d_acc}}
+    \subfloat[Minimal $r$]{{\includegraphics[width=.5\textwidth]{pictures/gklsS3d_opt_pt_op.pdf}}\label{fig:gkls3d_opt}}
+    \caption{Operating characteristics on GKLS 3d Simple class}
+\end{figure}
+
+\paragraph{Накладные расходы при использовании сдвиговой развёртки.}
+
 \subsection{Параллельные вращаемые развертки}
-s
-\subsection{Параллельные вращаемые развертки для задач большой размерности}
-s
+
 \section{Вывод о целесообразности применения того или иного вида разверток для того или иного вида задач}
 s
 
@@ -479,7 +505,6 @@ s
 % \bibliography{mybibliography}
 %
 \begin{thebibliography}{107}
-
 
 \bibitem{barkalovGergel2014}
 \newblock K. Barkalov and V. Gergel,
@@ -764,5 +789,12 @@ Strongin, R.G.: Algorithms for multi-extremal mathematical programming problems 
 
 \bibitem{Gergel2009}
 Strongin, R.G., Gergel, V.P., Barkalov, K.A.: Parallel methods for global optimization problem solving. Journal of instrument engineering. \textbf{52}, 25--33 (2009) (In Russian)
+
+\bibitem{Gaviano2003}
+Gaviano, M., Kvasov, D.E, Lera, D., and Sergeyev, Ya.D.: Software for generation of classes of test functions with known local and global minima for global optimization. ACM Transactions on Mathematical Software 29(4), 469--480 (2003)
+
+\bibitem{grishaginClass}
+Grishagin, V.A.: Operating Characteristics of Some Global Search Algorithms. Problems of Statistical Optimization 7, 198--206 (1978) (In Russian)
+
 \end{thebibliography}
 \end{document}
