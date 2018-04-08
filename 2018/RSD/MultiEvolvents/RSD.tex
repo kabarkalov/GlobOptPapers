@@ -101,7 +101,7 @@ The following approach looks more promising. The algorithm can be modified to ru
 
 \section{Statement of Multidimensional Global Optimization Problem}
 In this paper, the core class of optimization problems, which can be solved using
-Globalizer, is formulated. This class involves the multidimensional global
+Globalizer\cite{globalizerSystem}, is formulated. This class involves the multidimensional global
 optimization problems without constraints, which can be defined in the following way:
 \begin{equation}
 \label{eq:task}
@@ -450,7 +450,7 @@ At every iteration of the algorithm, operating within the \(s\)-th process, dete
 The computational experiments have been carried out on the Lobachevsky supercomputer at
 State University of Nizhny Novgorod. A computational node included 2 Intel
 Sandy Bridge E5-2660 2.2 GHz processors, 64 GB RAM. The CPUs had 8 cores (i. e. total 16 cores
-were available per a node). Все рассматриваемые алгортимы и развёртки были реализованы на языке C++ в рамках программной системы Globalizer.
+were available per a node). Все рассматриваемые алгортимы и развёртки были реализованы на языке C++ в рамках программной системы Globalizer\cite{globalizerSystem}.
 Для реализации параллелизма на одном узле использована технология OpenMP, а для параллелизма на несколько узлов --- стандарт MPI.
 
 Сравнение алгоритмов глобальной оптимизации проведено путём оценки качества решения алгоритмами выборки задач из некоторого тестового класса.
@@ -497,7 +497,7 @@ method requires fewer resources to achieve the same reliability.
 \caption{Среднее количество вычислений \(g_0\) и \(\varphi\) при решении задач класса GKLS 3d Simple с помощью сдвиговой развёртки}
   \begin{tabular}{|l|{c}|{c}|{c}|}
     \hline
-  $L$ & Constraint & Objective (shifted) & $\frac{calc(g_0)}{calc(\varphi)}$ ratio \\
+  $L$ & $calc(g_0)$ & $calc(\varphi)$ & $\frac{calc(g_0)}{calc(\varphi)}$ ratio \\
   \hline
   2 & 96247.9  & 6840.14 & 14.07\\
   \hline
@@ -509,10 +509,14 @@ method requires fewer resources to achieve the same reliability.
 \end{table}
 
 \subsection{Параллельные вращаемые развертки}
+Чтобы оценить эффективность параллельного алгортима из секции \ref{sec:parallel_evolvents} были проведены вычислительные эксперименты на классах GKLS 4d (Hard, Simple) и GKLS 5d (Hard, Simple). Значения \(r\) во всех экспериментах равно 5.0, размер \(\delta\)-окрестности известного решения увеличен до 0.3. При решении серий задач использовалось до 8 узлов кластера и до 32 вычислительных потоков на каждом узле.
+
+В таблице \ref{tab:iterations} приведено среднее количество итераций при решении 100 задач из каждого из рассматриваемых классов. При увеличении числа узлов и числа потоков на каждом узле количество итераций заметно сокращается (за исключением класса GKLS 4d Simple при переходе с 1 узла на 4 узла в однопоточном режиме).
+
 \begin{table}
   \centering
-  \caption{Averaged numbers of iterations executed by GPMAGS for solving the test optimization problems}
-  \label{tab:4}
+  \caption{Averaged numbers of iterations executed by the parallel algorithm for solving the test optimization problems}
+  \label{tab:iterations}
   \begin{tabular}{cccccccc}
     \cline{3-8}\noalign{\smallskip}
     \multicolumn{2}{c}{  } & \textit{p} & \multicolumn{2}{c}{$N=4$} & & \multicolumn{2}{c}{$N=5$}   \\
@@ -524,25 +528,26 @@ method requires fewer resources to achieve the same reliability.
     \begin{center}
     \textbf{1 cluster node}
     \end{center}		}
-      & 1 & 11953 & 25263 & & 15920 & \(>\)148342 (4)  \\
-    &  & 32 & 11953 & 25263 & & 15920 & \(>\)148342 (4)  \\
+      & \textit{1} & 12167 & 25635 & & 20979 & 187353  \\
+    &  & \textit{32} & 328 & 1268  & &   898 & 12208 \\
     \hline \noalign{\smallskip}
 II  & \textbf{4 cluster nodes}  %\multirow{3}{*}{}
-  & 1 & 4762 & 11178 & & 13378 & 109075 \\
-&   & 32 & 2372 & 5972 & & 5203 & 51868 \\
+  & \textit{1} & 25312 & 11103 & & 1472 & 17009 \\
+&   & \textit{32} & 64 &   913 & & 47 & 345 \\
     \noalign{\smallskip}\hline	\noalign{\smallskip}
 III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
-  & 1  & 171 & 393 & & 382 & 3452  \\
-&    & 32 & 85 & 182 & & 249 & 1306 \\
-
+  & \textit{1}  & 810 & 4351 & & 868 & 5697  \\
+& & \textit{32} & 34  & 112  & & 35  & 868 \\
     \noalign{\smallskip}\hline
   \end{tabular}
 \end{table}
 
+Если считать, что затраты на параллелизм пренебрежимо малы по сравнению с затратами на вычисление целевых функций в задачах оптимизации, то ускорение по времени от использования параллельного метода будет равно ускорению по итерациям. Однако, в действительности это предположение не всегда справедливо. Во всех численных экспериментах время вычисления целевой функции занимает примерно $10^{-3}$с. В таблице \ref{tab:speedup} приведено ускорение по итерациям и в куглых скобках ускорение по времени. В первой строке таблицы, соответствующей последовательному режиму, в скобках приведено среднее время решения одной задачи. Из таблицы видно, что для класов GKLS 4d выгоднее использовать один узел в многопоточном режиме, тогда как для решения более сложных пятимерных задач лучше использовать несколько узлов, каждый из которых работает в параллельном режиме.
+
 \begin{table}
   \centering
-  \caption{Speedup of parallel computations executed by GMAGS}
-  \label{tab:4}
+  \caption{Speedup of parallel computations executed by the parallel algorithm}
+  \label{tab:speedup}
   \begin{tabular}{cccccccc}
     \cline{3-8}\noalign{\smallskip}
     \multicolumn{2}{c}{  } & \textit{p} & \multicolumn{2}{c}{$N=4$} & & \multicolumn{2}{c}{$N=5$}   \\
@@ -554,23 +559,22 @@ III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
     \begin{center}
     \textbf{1 cluster node}
     \end{center}		}
-      & 1 & 11953 & 25263 & & 15920 & \(>\)148342 (4)  \\
-    &  & 32 & 11953 & 25263 & & 15920 & \(>\)148342 (4)  \\
-    \hline \noalign{\smallskip}
+    & \textit{1}   & 12167(10.58s) & 25635(22.26s) & & 20979(22.78s) & 187353(205.83s)  \\
+  &  & \textit{32} & 37.1(18.03) & 20.2(8.55)  & &  23.3(8.77) & 15.4(9.68) \\
+  \hline \noalign{\smallskip}
 II  & \textbf{4 cluster nodes}  %\multirow{3}{*}{}
-  & 1 & 4762 & 11178 & & 13378 & 109075 \\
-&   & 32 & 2372 & 5972 & & 5203 & 51868 \\
-    \noalign{\smallskip}\hline	\noalign{\smallskip}
+& \textit{1} &        0.5(0.33) & 2.3(0.86)  & & 14.3(6.61) & 11.0(6.06) \\
+&   & \textit{32} & 190.1(9.59) & 28.1(1.08) & & 446.4(19.79) & 543.0(43.60) \\
+  \noalign{\smallskip}\hline	\noalign{\smallskip}
 III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
-  & 1  & 171 & 393 & & 382 & 3452  \\
-&    & 32 & 85 & 182 & & 249 & 1306 \\
-
+& \textit{1}    & 15.0(6.05)  & 5.9(2.36)   & & 24.2(17.56)  & 32.9(24.87)  \\
+& & \textit{32} & 357.9(2.36) & 228.9(2.64) & & 582.8(20.96) & 793.0(33.89) \\
     \noalign{\smallskip}\hline
   \end{tabular}
 \end{table}
 
 \section{Вывод о целесообразности применения того или иного вида разверток для того или иного вида задач}
-s
+
 
 % ---- Bibliography ----
 %
@@ -871,6 +875,10 @@ Gaviano, M., Kvasov, D.E, Lera, D., and Sergeyev, Ya.D.: Software for generation
 
 \bibitem{grishaginClass}
 Grishagin, V.A.: Operating Characteristics of Some Global Search Algorithms. Problems of Statistical Optimization 7, 198--206 (1978) (In Russian)
+
+\bibitem{globalizerSystem}
+Gergel V.P., Barkalov K.A., and Sysoyev A.V: Globalizer: A novel supercomputer software system for solving time-consuming global optimization problems. Numerical Algebra, Control \& Optimization 8(1), 47--62, 2018
+
 
 \end{thebibliography}
 \end{document}
