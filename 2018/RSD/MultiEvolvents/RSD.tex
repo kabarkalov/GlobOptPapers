@@ -52,10 +52,8 @@ This work considers a parallel algorithms for solving multi-extremal optimizatio
 
 \keywords{Global optimization \and  Dimension reduction \and Parallel algorithms  \and Multidimensional multiextremal optimization  \and Global search algorithms  \and Parallel computations }
 \end{abstract}
-%
-%
-%
 
+%------------------------------------------------------------------------------
 \section{Introduction}\label{sec:intro}
 
 Global (or multiextremal) optimization problems are among the most complex problems
@@ -99,6 +97,7 @@ This allows problems to be solved in which function values may not be determined
 It should be noted that standard approaches to algorithm parallelization are not quite applicable to global optimization. For example, the rules for selecting an-other iteration point are quite simple and do not require parallelization (as over-heads associated with organizing parallel computations will nullify any possible acceleration). Some acceleration can be achieved by parallelizing the computa-tion of function values describing the object to be optimized; however, this ap-proach is specific to each individual problem being solved.
 The following approach looks more promising. The algorithm can be modified to run several trials in parallel. This approach provides the efficiency (as paral-lelization is applied to the most computation-intensive part of the problem solv-ing process) and generality (in that it applies to a wide range of global optimiza-tion algorithms). The approach, described in  \cite{Two_Level_Parallel} for unconstrained optimization, was used in this work for parallelizing constrained optimization algorithms.
 
+%------------------------------------------------------------------------------
 \section{Statement of Multidimensional Global Optimization Problem}
 In this paper, the core class of optimization problems, which can be solved using
 Globalizer\cite{globalizerSystem}, is formulated. This class involves the multidimensional global
@@ -142,6 +141,7 @@ of global optimization methods since it implies a complex analysis of a large am
 of multidimensional search information. As a result, many optimization algorithms use
 various approaches to the dimensional reduction \cite{pinterGO}, \cite{sergeyevStronginLera2013}, \cite{strongin1978}, \cite{stronginGergelBarkalovParGO}, \cite{strSergGO}.
 
+%------------------------------------------------------------------------------
 \section{Methods of Dimension Reduction}
 \subsection{Базовый алгоритм}
 
@@ -199,6 +199,7 @@ mapping \(y(x)\),
 %    \label{fig:peanoCUsage}
 %\end{figure}
 
+%------------------------------------------------------------------------------
 \subsection{Сдвиговые}
 \label{sec:shifted}
 
@@ -273,6 +274,7 @@ Proof of this theorem is given in \cite{strSergGO}.
 
 The conditions of the theorem single out a specific vicinity of the point $y^\ast$. This vicinity includes only the points, which can be obtained by the shift of $y^\ast$ parallel to one of the coordinate axes with a displacement not more than $2^{-p}$. By changing  $j,\ 1\leq j\leq N,$ in the theorem conditions it is possible to obtain the neighbours in any $N$ coordinate directions. According to the statement, the closeness of the points in the $N$-dimensional space in a particular direction will be reflected by the closeness of their preimages in one of the univariate problems. The information on the closeness of the points results, first, in more precise estimate of Lipschitz constants and, second, in the increase of the characteristics of the intervals, the images of the end points of which are close to each other in the $N$-dimensional space.
 
+%------------------------------------------------------------------------------
 \subsection{Вращаемые}
 The application of the scheme for building the multiple evolvents (hereinafter called the shifted evolvents or $S$-evolvents) described in Subsection \ref{sec:shifted} allows to preserve the information on the nearness of the points in the multidimensional space and, therefore, to provide more precise (as compared to a single evolvent) estimate of Lipschitz constant in the search process. However, this approach has serious restrictions, which narrow the applicability of the parallel algorithms, designed on the base of the $S$-evolvents.
 
@@ -299,6 +301,7 @@ The use of the set of mappings $Y_L(x)=\{y^1(x),...,y^L(x)\}$ results in the app
 \end{equation}
 Each problem from this set can be solved independently. Any computation of the value $z=g_\nu(y'),\ y'=y^i(x')$ of the function $g_\nu(y)$ in the $i$-th problem can be interpreted as a computation of the value $z=g_\nu(y'),\ y'=y^s(x'')$ for any other $s$-th problem without time-comsuming computations of the functions $g_\nu(y)$. Such information integrity allows to solve  initial problem (\ref{eq:task}) by solving $L$ problems (\ref{6_problem_lr}) on a set of intervals $[0,1]$ in parallel by the index method.
 
+%------------------------------------------------------------------------------
 \subsection{Non injective evolvent}
 
 Как уже было сказано в секции \ref{sec:shifted}, потеря информации о близости точек в многомерном пространстве может быть частично скомпенсирована использованием множественных отображений $Y_L(x)=\{y^1(x),...,y^L(x)\}$. Однако, сама по себе кривая типа Пеано сохраняет в себе часть этой информации: она не является инъективым отображением, поэтому имея один образ $y(x)\in \mathbb{R}^N$, можно получить несколько несколько отличных $x$ прообразов $t_j\in[0,1], t_j \not = x$, которые затем могут быть добавлены в поисковую информацию индексного метода.
@@ -316,6 +319,7 @@ Each problem from this set can be solved independently. Any computation of the v
 
 Недостатком неинъективной развёртки является потенциально большое количетво прообразов (до $2^N$) и невозможность использования параллельной схемы для множественных отображений из секции \ref{sec:parallel_evolvents}.
 
+%------------------------------------------------------------------------------
 \subsection{Smooth evolvent}
 
 %\begin{figure}[t]
@@ -420,6 +424,7 @@ point can be found most likely.
 \par
 The convergence conditions of the described algorithm are given, for example, in \cite{strSergGO}.
 
+%------------------------------------------------------------------------------
 \subsection{Параллельные множественные отображения}
 \label{sec:parallel_evolvents}
 Using the multiple mapping allows solving initial problem (1) by parallel solving the problems
@@ -446,6 +451,7 @@ At every iteration of the method, the process with the index \(s,0\leqslant s< S
 At every iteration of the algorithm, operating within the \(s\)-th process, determines the coordinates of p «its own» trial points. Then, the interchange of the coordinates of images of the trial points \(y^{(s+i_S)},0\leqslant i<p, 0\leqslant s< S\) is performed (from each process to each one). After that, the preimages \(x^{(q+i_S)},0\leqslant q<S,q\not=s\) of the points received by the \(s\)-th process from the neighbor ones are determined with the use of the evolvent \(y^s (x)\). The points blocked within the \(s\)-th process will correspond to the preimages obtained. Then, each process performs the trials at the non-blocked points, the computations are performed in parallel using OpenMP. The results of the executed trials (the index of the point, the computed values of the problem functions, and the attribute of unblocking of this point) are transferred to all rest processes. All the points are added to the search information database, and the transition to the next iteration is performed.
 \par
 
+%------------------------------------------------------------------------------
 \section{Results of Numerical Experiments}
 The computational experiments have been carried out on the Lobachevsky supercomputer at
 State University of Nizhny Novgorod. A computational node included 2 Intel
@@ -467,7 +473,9 @@ greater probability of finding the solution. If some value of \(P\) is fixed, an
 characteristic of a method goes to the left from that of another method, the former
 method requires fewer resources to achieve the same reliability.
 
+%------------------------------------------------------------------------------
 \subsection{Сравнение последовательных разверток}
+\label{sec:seq_comp}
 С целью понять, обладает ли какой-либо из перечисленных ранее типов развёрток существенным преимуществом над другими, были построены операционные характеристики индексного метода с различными типами развёрток на классах GKLS 2d Simple и GKLS 3d Simple. The global minimum was considered to be found if the algorithm generates a trial point $y^k$ in the $\delta$-vicinity of the global minimizer, i.e. $\left\|y^k-y^\ast\right\|_\infty\leq\delta$. The size of the vicinity was selected as $\delta = 0.01\left\|b-a\right\|_\infty$. In case of GKLS $\delta=0.01$.
 
 Во всех экспериментах параметр плотности построения развёрток $m=12$. Минимальное значение пераметра надёжности \(r\) было найдено для каждого типа развёртки перебором по равномерной сетке с шагом \(0.1\).
@@ -508,7 +516,9 @@ method requires fewer resources to achieve the same reliability.
 \end{center}
 \end{table}
 
+%------------------------------------------------------------------------------
 \subsection{Параллельные вращаемые развертки}
+\label{sec:results_parallel}
 Чтобы оценить эффективность параллельного алгортима из секции \ref{sec:parallel_evolvents} были проведены вычислительные эксперименты на классах GKLS 4d (Hard, Simple) и GKLS 5d (Hard, Simple). Значения \(r\) во всех экспериментах равно 5.0, размер \(\delta\)-окрестности известного решения увеличен до 0.3. При решении серий задач использовалось до 8 узлов кластера и до 32 вычислительных потоков на каждом узле.
 
 В таблице \ref{tab:iterations} приведено среднее количество итераций при решении 100 задач из каждого из рассматриваемых классов. При увеличении числа узлов и числа потоков на каждом узле количество итераций заметно сокращается (за исключением класса GKLS 4d Simple при переходе с 1 узла на 4 узла в однопоточном режиме).
@@ -573,8 +583,17 @@ III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
   \end{tabular}
 \end{table}
 
-\section{Вывод о целесообразности применения того или иного вида разверток для того или иного вида задач}
+%------------------------------------------------------------------------------
+\section{Conclusions}
+В работе рассмотрены 5 различных отображений типа кривой Пеано, применяемых для редукции размерности в задачах глобальной оптимизации.
+Из предварительного сравнения, проведенного в секции \ref{sec:seq_comp}, можно сделать слудующие выводы:
+\begin{itemize}
+  \item гладкая и неинъективная развёртки показывают наилучший результат в задачах малой размерности и могут быть успешно применены при решении задач с трудоемкими целевыми функциями. Особенности этих развёрток не позволяют создать на их основе масштабируемый на несколько узлов кластера алгоритм оптимизации.
+  \item сдвиговые развёртки привносят большие накладные расходы на работу метода из-за того, что требуется добавления в задачу (\ref{eq:task}) вспомогательного функционального ограничения. Эксперименты показали, что до 95\% поисковой информации приходится на точки, в которых вичисляется только вспомогательное ограничение. Сдвиговые развёртки могут быть использованы в качестве основы для параллельного алгоритма из секции \ref{sec:parallel_evolvents}, однако расходы на обработку дополнительных точек, скорее всего, приведут к малому коэффициенту ускорения от параллельности. Однако, при достаточно трудоёмкой целевой функции их использование может иметь смысл.
+  \item вращаемые развёртки обеспечили приемлемую скорость сходимости на задачах малой размерности в последовательном случае. Их использование не приводит к введению дополнительных ограничений, что позволяет построить эффективный параллельный алгоритм на их основе.
+\end{itemize}
 
+В секции \ref{sec:results_parallel} приведены результаты численных экспериментов, которые показывают, что алгоритм из раздела \ref{sec:parallel_evolvents} на основе вращаемых развёрток позволяет получить ускорение до 43 раз при решении серии задач с использованием нескольких узлов вычислитеьного кластера. Стоит заметить, что в расматриваемых задачах целевые функции не являются трудоёмкими (среднее время вычисления $10^{-3}$с) и в случае более сложных задач показатели ускорения по времени будут приближаться к ускорению по итерациям. 
 
 % ---- Bibliography ----
 %
