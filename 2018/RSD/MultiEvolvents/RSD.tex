@@ -20,6 +20,10 @@
 % If you use the hyperref package, please uncomment the following line
 % to display URLs in blue roman font according to Springer's eBook style:
 % \renewcommand\UrlFont{\color{blue}\rmfamily}
+\setlength{\textfloatsep}{4pt plus 1.0pt minus 1.5pt}
+\setlength{\floatsep}{4pt plus 1.0pt minus 1.5pt}
+%\setlength{\abovedisplayskip}{3pt}
+%\setlength{\belowdisplayskip}{3pt}
 
 \begin{document}
 %
@@ -56,46 +60,6 @@ This work considers a parallel algorithms for solving multi-extremal optimizatio
 %------------------------------------------------------------------------------
 \section{Introduction}\label{sec:intro}
 
-Global (or multiextremal) optimization problems are among the most complex problems
-in both theory and practice of optimal decision making. In these kinds of problems,
-the optimization criterion can have several local optima within the search domain.
-The existence of several local optima makes
-finding the global optimum difficult essentially, since it requires examining the whole feasible
-search domain. The volume of computations for solving global optimization problems
-can increase exponentially with increasing number of varied parameters.
-\par
-These global optimization problem features impose special requirements on the quality
-of the optimization methods and on the software to implement these ones. The global
-optimization methods should be highly efficient, and the software systems should be developed on
-a good professional basis. In general, the global optimization problems can be solved at
-a reasonable time by employing parallel computations on modern supercomputing systems only.
-\par
-The general state of the art in the field of global optimization is presented in a
-number of key monographs  \cite{floudasPardGO}, \cite{horstTuyGO}, \cite{locatelliSchoenGO}, \cite{pinterGO}, \cite{strSergGO}, \cite{zilinskTornGO}, \cite{zhigljavskyRandGO}.
-The development of optimization methods, which use the high-performance computational
-systems to solve the time-consuming global optimization problems, is an area of
-intensive research --- see, for instance, \cite{censorZeniosParGO}, \cite{ciegisHentyParGO},
-\cite{luqueAlbaGA}, \cite{stronginGergelBarkalovParGO}, \cite{strSergGO}. The obtained
-theoretical results provide the efficient solutions of many applied global
-optimization problems in various fields of scientific and technical applications \cite{Famularo1999}, \cite{fasanoPinter2013},
-\cite{floudasPardalosGOState}, \cite{Kvasov2015}, \cite{Menniti}, \cite{locatelliSchoenGO},
-\cite{luqueAlbaGA}, \cite{pardalosZhigljavskyZilinskas2016}, \cite{pinterGO}.
-\par
-At the same time, the practical implementation of these global optimization algorithms
-within the framework of industrial software systems is quite limited. In many cases,
-software implementations are experimental in nature and are used by the developers
-themselves to obtain the results from the computational experiments required for the
-scientific publications. This situation originates from high development costs of the
-professional software systems, which can be used by numerous users. In addition, the global
-optimization problems could be solved in an automatic mode rarely because of the
-complexity of these ones. The user should actively control the global search
-process that implies an adequate level of qualification in the field of optimization
-(particularly, the user should know and understand the global optimization methods well).
-\par
-In this work, the authors consider an approach to minimizing multiextremal functions developed in ...????????
-This allows problems to be solved in which function values may not be determined for the entire search domain. Under this approach, solving multidimensional problems is reduced (using Peano-type spacefilling curves) to solving equivalent one-dimensional problems.
-It should be noted that standard approaches to algorithm parallelization are not quite applicable to global optimization. For example, the rules for selecting another iteration point are quite simple and do not require parallelization (as overheads associated with organizing parallel computations will nullify any possible acceleration). Some acceleration can be achieved by parallelizing the computa-tion of function values describing the object to be optimized; however, this approach is specific to each individual problem being solved.
-The following approach looks more promising. The algorithm can be modified to run several trials in parallel. This approach provides the efficiency (as parallelization is applied to the most computation-intensive part of the problem solving process) and generality (in that it applies to a wide range of global optimiza-tion algorithms). The approach, described in  \cite{Two_Level_Parallel} for unconstrained optimization, was used in this work for parallelizing constrained optimization algorithms.
 
 %------------------------------------------------------------------------------
 \section{Statement of Multidimensional Global Optimization Problem}
@@ -106,7 +70,7 @@ optimization problems without constraints, which can be defined in the following
 \label{eq:task}
 \begin{array}{cr}\\
   \varphi(y^*)=\min\{\varphi(y):y\in D\}, \\
-  D=\{y\in \mathbf{R}^N:a_i\leq y_i\leq{b_i}, 1\leq{i}\leq{N}\}
+  D=\{y\in \mathbb{R}^N:a_i\leq y_i\leq{b_i}, 1\leq{i}\leq{N}\}
 \end{array}
 \end{equation}
 with the given boundary vectors  $a$ and  $b$. It is supposed, that the objective function \(\varphi(y)\) satisfies the Lipschitz condition
@@ -124,22 +88,6 @@ problem (\ref{eq:task}) is determined, first of all by the number of executed tr
 It should also be noted that the requirement of the Lipschitz condition (\ref{eq:lip})
 is highly important, since an estimate of the global minimum can be constructed on the
 basis of a finite number of computed values of the optimized function only in this case .
-\par
-As it has been shown earlier by many researchers
-(see, for instance, \cite{floudasPardalosGOState}, \cite{horstTuyGO}, \cite{pinterGO}, \cite{strSergGO}),
-finding the numerical estimate of the global optimum implies constructing a coverage of
-the search domain \(D\). As a result, the computational costs of solving the global
-optimization problems are readily very high even for a small number of varied parameters
-(the dimensionality of the problem). A notable reduction in the volume of computations
-can be achieved when the coverage of the search domain is non-uniform, i. e. the series
-of trial points is only dense in a vicinity of the global optimum point. The construction
-of such a non-uniform coverage could be provided in an adaptive way, when the selection
-of the next trial points is determined by using the search information (the preceding
-trial points and the values of the minimized function at these points) obtained in the course
-of computations. This necessary condition complicates considerably the computational schemes
-of global optimization methods since it implies a complex analysis of a large amount
-of multidimensional search information. As a result, many optimization algorithms use
-various approaches to the dimensional reduction \cite{pinterGO}, \cite{sergeyevStronginLera2013}, \cite{strongin1978}, \cite{stronginGergelBarkalovParGO}, \cite{strSergGO}.
 
 %------------------------------------------------------------------------------
 \section{Methods of Dimension Reduction}
@@ -168,21 +116,10 @@ where the constant $H$ is defined by the relation \(H=2L\sqrt{N+3}\), \(L\) is t
 constant from (\ref{eq:lip}), and \(N\) is the dimensionality of the optimization problem (\ref{eq:task}).
 \par
 The algorithms for the numerical construction of the Peano curve approximations are
-given in \cite{strSergGO}. As an illustration, an approximation of the Peano curve
-for the third density level is shown in Figure \ref{fig:peanoC}. Figure \ref{fig:peanoC}
-demonstrates the movement order in a two-dimensional domain to construct the Peano
-curve approximation; the precision of the Peano curve approximation is determined by the
-density level used in the construction.
-\begin{figure}
-    \centering
-    \includegraphics[width=0.85\textwidth]{pictures/peanoC.eps}
-    \caption{A Peano curve approximation for the third density level}
-    \label{fig:peanoC}
-\end{figure}
+given in \cite{strSergGO}.
 
 \par
 The computational scheme obtained as a result of the dimensionality reduction consists of the following:
-%(see Figure \ref{fig:peanoCUsage}):
 \begin{itemize}
   \item The optimization algorithm performs the minimization of the reduced one-dimensional
   function \(\varphi(y(x))\) from (\ref{eq:oneDimTask}),
@@ -191,13 +128,6 @@ mapping \(y(x)\),
   \item The value of the initial multidimensional function \(\varphi(y)\) is calculated at the point \(y\in D\),
   \item The calculated value \(z=\varphi(y)\) is used further as the value of the reduced one-dimensional function \(\varphi(y(x))\) at the point \(x\).
 \end{itemize}
-
-%\begin{figure}
-%    \centering
-%    \includegraphics[width=0.55\textwidth]{pictures/peanoCUsage.eps}
-%    \caption{The computational scheme for obtaining the value of the reduced one-dimensional function \(\varphi(y(x))\)}
-%    \label{fig:peanoCUsage}
-%\end{figure}
 
 %------------------------------------------------------------------------------
 \subsection{Shifted evolvents}
@@ -211,28 +141,9 @@ Y_L(x)=\left\{y^0(x),\ y^1(x),...,\ y^L(x)\right\}
 \end{equation}
 instead of single Peano curve $y(x)$ (see \cite{Strongin1991,Strongin1992,strSergGO}).
 
-Let us consider a family of the hypercubes
-\begin{equation}\label{6_hypercubes}
-D_l= \left\{y \in R^N: -2^{-1} \leq y_i+2^{-l} \leq 3 \cdot 2^{-1},\ 1\leq i\leq N\right\},\ 0 \leq l \leq L,
-\end{equation}
-where the hypercube $D_{l+1}$ is obtained by the translation of the hypercube $D_l$ along the main diagonal with displacement equal to $2^{-l}$ in each coordinate. In Fig.~\ref{fig:shifted_ev} the hypercubes $D_0,...,D_3$ for the case $N=2,\ L=3$ are presented.
+Such set of evolvents can be produced by shifting the source evolvent $y^0(x)$ by $2^{-l},0 \leq l \leq L$ on each coordinate. Each evolvent has it's own corresponding hypercude $D_l= \left\{y \in R^N: -2^{-1} \leq y_i+2^{-l} \leq 3 \cdot 2^{-1},\ 1\leq i\leq N\right\},\ 0 \leq l \leq L$.
 
-\begin{figure}[ht]
-    \centering
-    \subfloat[Two mappings]{{\includegraphics[width=.6\textwidth]{pictures/shifted.pdf}}\label{fig:shifted_ev}}
-    \subfloat[Hypercubes $D_l$]{{\includegraphics[width=.4\textwidth]{pictures/shifted_cube.png}}\label{fig:shifted_cube}}
-    \caption{Multiple mappings}
-\end{figure}
-
-Let us assume that the evolvent $y^0(x)$  maps the interval $[0,1]$ onto the hypercube $D_0$ from (\ref{6_hypercubes}), i.e.,
-\[
-D_0 = \left\{y^0(x) : x \in [0,1]\right\}.
-\]
-Then, the evolvents $y^l(x)=\left\{y_1^l(x),...,y_N^l(x)\right\}$, the coordinates of which are defined by the conditions
-\[
-y_i^l(x)=y_i^{l-1}(x)+2^{-l},\ 1\leq i\leq N, \ 1\leq l\leq L,
-\]
-map the interval $[0,1]$ onto the corresponding hypercubes $D_l,\ 1\leq l \leq L$. In Fig.~\ref{fig:shifted_ev} the image of the interval $[0,1]$ obtained by the curve $y^0(x),\ x\in [0,1],$ is shown as the dashed line. Since the hypercube $D$ from (\ref{eq:task}) is included in the common part of the family of hypercubes (\ref{6_hypercubes}) (the boundaries of hypercube $D$ are highlighted in Fig.~\ref{fig:shifted_cube}), having introduced an additional constraint function
+In Fig.~\ref{fig:shifted_ev} the image of the interval $[0,1]$ obtained by the curve $y^0(x),\ x\in [0,1],$ is shown as the dashed line. Since the hypercube $D$ from (\ref{eq:task}) is included in the common part of the family of hypercubes $D_l$ (the boundaries of hypercube $D$ are highlighted in Fig.~\ref{fig:shifted_cube}), having introduced an additional constraint function
 \begin{equation}\label{6_g0}
 g_0(y)=\max\left\{\left|y_i\right| - 2^{-1}:\ 1\leq i\leq N\right\},
 \end{equation}
@@ -247,44 +158,21 @@ Thus, each evolvent $y^l(x),\ 0\leq l \leq L,$ generates its own problem of the 
 \min{\left\{\varphi(y^l(x)):x\in [0,1], \; g_j(y^l(x))\leq 0, \; 0 \leq j \leq m\right\}}, \ 0 \leq l \leq L.
 \end{equation}
 
-The problems (\ref{6_problem_l}) correspond to the domains $Q_0^l=[0,1]$ and $Q_{j+1}^l, 0 \leq j \leq m,$ defined by the expression
-\[
-Q_{j+1}^l = \left\{x \in Q_j^l:g_j(y^l(x))\leq 0\right\},\ 0\leq j\leq m,
-\]
-for the corresponding evolvents $y^l(x)$. The application of a multiple mapping defines the following relation for the nearness in the multidimensional search domain and in the one-dimensional one.
-
-\begin{theorem}
-Let a point $y^\ast$ from the domain $D$ be contained in the line segment with the end-points $y',y'' \in D$ meeting the requirements
-\[
-\left|y'_j - y''_j\right|\leq 2^{-p},\ y'_i=y''_i=y^\ast_i, \ 1\leq i \leq N,\ i \neq j,
-\]
-where $p$ is an integer  and $1\leq p \leq L$, i.e., the line segment is collinear with the $j$-th axis in $R^N$. Then, there exist at least one mapping $y^l(x),\ 0\leq l\leq L$, and the preimages $x^\ast,\; x',\; x''\in [0,1]$ such that
-\[
-y^\ast = y^l(x^\ast),\ y'=y^l(x'),\ y'' = y^l(x'')
-\]
-and
-\[
-\max \left\{ \left|x'-x^\ast\right|,\; \left|x''-x^\ast\right|,\; \left|x'-x''\right|\right\} \leq 2^{-pN}.
-\]
-\end{theorem}
-\begin{proof}
-Proof of this theorem is given in \cite{strSergGO}.
-\qed
-\end{proof}
-
-The conditions of the theorem single out a specific vicinity of the point $y^\ast$. This vicinity includes only the points, which can be obtained by the shift of $y^\ast$ parallel to one of the coordinate axes with a displacement not more than $2^{-p}$. By changing  $j,\ 1\leq j\leq N,$ in the theorem conditions it is possible to obtain the neighbours in any $N$ coordinate directions. According to the statement, the closeness of the points in the $N$-dimensional space in a particular direction will be reflected by the closeness of their preimages in one of the univariate problems. The information on the closeness of the points results, first, in more precise estimate of Lipschitz constants and, second, in the increase of the characteristics of the intervals, the images of the end points of which are close to each other in the $N$-dimensional space.
+\begin{figure}[ht]
+    \centering
+    \subfloat[Two mappings]{{\includegraphics[width=.6\textwidth]{pictures/shifted.pdf}}\label{fig:shifted_ev}}
+    \subfloat[Hypercubes $D_l$]{{\includegraphics[width=.4\textwidth]{pictures/shifted_cube.png}}\label{fig:shifted_cube}}
+    \caption{Multiple mappings}
+\end{figure}
 
 %------------------------------------------------------------------------------
 \subsection{Rotated evolvents}
-The application of the scheme for building the multiple evolvents (hereinafter called the shifted evolvents or $S$-evolvents) described in Subsection \ref{sec:shifted} allows to preserve the information on the nearness of the points in the multidimensional space and, therefore, to provide more precise (as compared to a single evolvent) estimate of Lipschitz constant in the search process. However, this approach has serious restrictions, which narrow the applicability of the parallel algorithms, designed on the base of the $S$-evolvents.
+The application of the scheme for building the multiple evolvents (hereinafter called the shifted evolvents or $S$-evolvents) described in Subsection \ref{sec:shifted} allows to preserve the information on the nearness of the points in the multidimensional space and, therefore, to provide more precise (as compared to a single evolvent) estimate of Lipschitz constant in the search process. However, this approach has serious restrictions, which narrow the applicability of the parallel algorithms, designed on the base of the $S$-evolvents (see te end of the section \ref{sec:seq_comp}).
 
-Because a shifted evolvent is built as a result of the shift of a hypercube $D$ along the main diagonal, and the shift step decreases 2 times for the building of each subsequent mapping, the number of such shifts is limited by the evolvent density $m$. In the case when the shift step is less than $2^{-m}$, the next evolvent coincides with the previous one. Thus, the applicable number of the evolvents $L$ and, hence, the number of processors are limited by $m$ ($L\leq m$), where $m$ is the density of the evolvents.
-
-Also, it follows from the algorithm for building the shifted evolvents that solving the initial problem in the domain $D$ is reduced to solving a set of problems in the extended domains $D_l$ from (\ref{6_hypercubes}) with additional constraint (\ref{6_g0}). As a result, the structure of the search domain becomes more complicated, and the exponential decrease of the volume of the search domain $D$ in relation to the volumes of the domains $D_l$ with increasing dimensionality of the problem takes place.
-
-To overcome the disadvantages mentioned above and to preserve the information on the nearness of the points in the $N$-dimensional space, a novel scheme of building of the multiple mappings is proposed. The building of a set of Peano curves not by the shift along the main diagonal of the hypercube but by rotation of the evolvents around the coordinate origin is a distinctive feature of the proposed scheme \cite{Gergel2009}. In the initial non-rotated mapping for close points $y', y''$ in the multidimensional space their preimages  $x', x''$ in the interval $[0,1]$ can be far away from each other. In the rotated scheme there exists a mapping $y^i(x)$ according to which preimages $x', x''$ will be located nearer. The evolvents generated according to the novel scheme will be hereinafter called the rotated evolvents or $R$-evolvents.
+To overcome the $S$-evolvent and to preserve the information on the nearness of the points in the $N$-dimensional space, a novel scheme of building of the multiple mappings is proposed. The building of a set of Peano curves not by the shift along the main diagonal of the hypercube but by rotation of the evolvents around the coordinate origin is a distinctive feature of the proposed scheme \cite{Gergel2009}. In the initial non-rotated mapping for close points $y', y''$ in the multidimensional space their preimages  $x', x''$ in the interval $[0,1]$ can be far away from each other. In the rotated scheme there exists a mapping $y^i(x)$ according to which preimages $x', x''$ will be located nearer. The evolvents generated according to this scheme are called the rotated evolvents or $R$-evolvents.
 
 In Fig.~\ref{6_fig_9} two evolvents being the approximations to Peano curves for the case $N=2$ are presented as an illustration.
+Taking into account the initial mapping, one can conclude that current implementation of the method allows to build up to $N(N-1)+1$ evolvents for mapping the $N$-dimensional domain onto the corresponding one-dimensional intervals. Moreover, the additional constraint  $g_0(y) \leq 0$ with $g_0(y)$ from (\ref{6_g0}), which arises in shifted evolvents, is absent. This method for building a set of mappings can be ``scaled'' easily to obtain more evolvents (up to $2^N$) if necessary.
 
 \begin{figure}[t]
   \centering
@@ -292,14 +180,6 @@ In Fig.~\ref{6_fig_9} two evolvents being the approximations to Peano curves for
   \caption{Two rotated evolvents on the same plane}
   \label{6_fig_9}
 \end{figure}
-
-Taking into account the initial mapping, one can conclude that current implementation of the method allows to build up to $N(N-1)+1$ evolvents for mapping the $N$-dimensional domain onto the corresponding one-dimensional intervals. Moreover, the additional constraint  $g_0(y) \leq 0$ with $g_0(y)$ from (\ref{6_g0}), which arises in shifted evolvents, is absent. This method for building a set of mappings can be ``scaled'' easily to obtain more evolvents (up to $2^N$) if necessary.
-
-The use of the set of mappings $Y_L(x)=\{y^1(x),...,y^L(x)\}$ results in the appearing of the corresponding set of the one-dimensional multiextremal problems
-\begin{equation}\label{6_problem_lr}
-  \min{\left\{\varphi(y^l(x)):x\in [0,1], \; g_j(y^l(x))\leq 0, \; 1 \leq j \leq m\right\}}, \ 1 \leq l \leq L.
-\end{equation}
-Each problem from this set can be solved independently. Any computation of the value $z=g_\nu(y'),\ y'=y^i(x')$ of the function $g_\nu(y)$ in the $i$-th problem can be interpreted as a computation of the value $z=g_\nu(y'),\ y'=y^s(x'')$ for any other $s$-th problem without time-comsuming computations of the functions $g_\nu(y)$. Such information integrity allows to solve  initial problem (\ref{eq:task}) by solving $L$ problems (\ref{6_problem_lr}) on a set of intervals $[0,1]$ in parallel by the index method.
 
 %------------------------------------------------------------------------------
 \subsection{Non injective evolvent}
@@ -310,24 +190,10 @@ Each problem from this set can be solved independently. Any computation of the v
 поэтому не может быть вычислена непосредтвенно. При численной оптимизации используется некоторое её приближение, являющееся
 инъективной кусочно-линейной кривой. В \cite{strongin1978} было предложено неинъективное отображение равномерной сетки на отрезка $[0,1]$ на равномерную сетку в гиперкубе $D$. Каждый многомерный узел может иметь до $2^N$ одномерных прообразов. На рис. \ref{fig:noninjective} изображена кривая с самопересечениями, полученная при соединении узлов грубой многомерной сетки в порядке следования их прообразов из отрезка $[0,1]$, а также отмечана точка, имеющая 3 прообраза.
 
-%\begin{figure}[t]
-%  \centering
-%  \includegraphics[width=0.6\linewidth]{pictures/noninjective.pdf}
-%  \caption{Numerical non injective evolvent}
-%  \label{fig:noninjective}
-%\end{figure}
-
 Недостатком неинъективной развёртки является потенциально большое количетво прообразов (до $2^N$) и невозможность использования параллельной схемы для множественных отображений из секции \ref{sec:parallel_evolvents}.
 
 %------------------------------------------------------------------------------
 \subsection{Smooth evolvent}
-
-%\begin{figure}[t]
-%  \centering
-%  \includegraphics[width=0.6\linewidth]{pictures/smooth.pdf}
-%  \caption{Smooth evolvent}
-%  \label{fig:smooth}
-%\end{figure}
 
 \begin{figure}[ht]
     \centering
@@ -339,99 +205,37 @@ Each problem from this set can be solved independently. Any computation of the v
 \section{Parallel Computations for Solving Global Optimization Problems.}
 \subsection{Core Multidimensional Algorithm of Global Search}
 
-The information-statistical theory of global optimization formulated in \cite{strongin1978}, \cite{strSergGO} has
-served as a basis for the development of a large number of efficient multiextremal optimization
-methods \cite{barkalovGergel2014}, \cite{gergel1996}, \cite{gergel1997}, \cite{grishaginStrongin1984}, \cite{Pizzuti}, \cite{sergeyev1995}, \cite{sergeyev1999}, \cite{sergeyevGrishagin2001}, \cite{sergeyevStronginLera2013}, \cite{Famularo2001}.
-\par
-The optimization methods applied in Globalizer are based on the MAGS method, which can be presented as follows --- see \cite{strongin1978}, \cite{strSergGO}.
-\par
-Let us introduce a simpler notation for the optimization problem being solved
-\begin{equation}
-\label{eq:oneDimFunc}
-f(x) = \varphi(y(x)):x\in [0,1].
-\end{equation}
+The optimization methods applied in Globalizer to solve the reduced problem (\ref{eq:oneDimTask}) are based on the MAGS method, which can be presented as follows --- see \cite{strongin1978}, \cite{strSergGO}.
 \par
 The initial iteration of the algorithm is performed at an arbitrary point \mbox{\(x^1\in(0,1)\)}.
 Then, let us suppose that \(k\), \(k\ge 1\), optimization iterations have been completed already.
 The selection of the trial point \(x^{k+1}\) for the next iteration is performed according to the following rules.
-\par
+
 \textit{Rule 1}. Renumber the points of the preceding trials by the lower indices in order of increasing value of coordinates
-\begin{equation}
-  \label{step1}
-0=x_0<x_1<...<x_{k+1}=1,
-\end{equation}
-the points \(x_0\), \(x_{k+1}\) were introduced additionally for the convenience of further
-explanation, the values of the minimized function \(z_0\), \(z_{k+1}\) at these points are undefined.
-\par
-\textit{Rule 2}. Compute the current estimate of the H{\"o}lder constant \(H\) from (\ref{eq:holder})
-\begin{equation} \label{step2}
-M=\max_{1 < i\leq k}\frac{|z_i-z_{i-1}|}{\rho_i}, \;
-m = \left\{
-   \begin{array}{lr}
-     rM, & M > 0,\\
-     1, & M = 0,
-   \end{array}
-  \right.
-\end{equation}
-as the maximum of the relative differences of the minimized function values on the
-set of previously executed trial points \(x_i,1\leq i\leq k\) from (\ref{step1}).
-Hereafter, \(\rho_i=(x_i-x_{i-1})^\frac{1}{N},1\leq i\leq k+1\). The
-constant \(r\), \(r>1\), is the reliability parameter of the algorithm.
-\par
-\textit{Rule 3}. Compute the characteristics \(R(i)\) for each interval \((x_{i-1},x_i),1\leq i\leq k+1\), where
-\[
-R(i)=2\rho_i-4\frac{z_i}{m},\quad i=1,
-\]
-\begin{equation} \label{step3}
-R(i)=\rho_i+\frac{(z_i-z_{i-1})^2}{m^2\rho_i}-2\frac{z_i+z_{i-1}}{m},\quad 1<i<k+1, \\
-\end{equation}
-\[
-R(i)=2\rho_{i}-4\frac{z_{i-1}}{m},\quad i=k+1.
-\]
+$0=x_0<x_1<...<x_{k+1}=1$.
 
-\par
-\textit{Rule 4}. Determine the interval with the maximum characteristic
-\begin{equation} \label{step4}
-R(t)=\max_{1\leq i \leq k+1}R(i).
-\end{equation}
-\par
-\textit{Rule 5}. Execute a new trial at the point \(x^{k+1}\) located within the interval
-with the maximum characteristic from (\ref{step4})
-\begin{equation} \label{step5}
-  x^{k+1}=\frac{x_t+x_{t-1}}{2}-\mathrm{sign}(z_{t}-z_{t-1})\frac{1}{2r}\left[\frac{r|z_{t}-z_{t-1}|}{m}\right]^N,\; \textrm{ if } 1<t<k+1,
-\end{equation}
-\[
-  x^{k+1}=\frac{x_t+x_{t-1}}{2},\; \textrm{ if } t=1 \textrm{ or } t=k+1.
-\]
+\textit{Rule 2}. Compute the characteristics \(R(i)\) for each interval \((x_{i-1},x_i),1\leq i\leq k+1\).
 
-\par
-The stopping condition, which terminated the trials, is defined by the inequality
-\begin{equation}
-  \label{eq:stop_1}
-\rho_t<\varepsilon
-\end{equation}
-for the interval with the maximum characteristic from (\ref{step4}) and \(\varepsilon >0\) is the predefined
+\textit{Rule 4}. Determine the interval with the maximum characteristic $R(t)=\max_{1\leq i \leq k+1}R(i)$.
+
+\textit{Rule 5}. Execute a new trial at the point \(x^{k+1}\) located within the interval with the maximum characteristic from the previous step
+  $x^{k+1}=d(x_t)$.
+
+The stopping condition, which terminated the trials, is defined by the inequality $\rho_t<\varepsilon$
+for the interval with the maximum characteristic from Step 4 and \(\varepsilon >0\) is the predefined
 accuracy of the optimization problem solution. If the stopping condition is not satisfied,
 the index \(k\) is incremented by 1, and the new global optimization iteration is executed.
-\par
-In order to explain the algorithm presented above, let us note the following.
-The characteristics \(R(i), 1\leq i\leq k+1\), calculated according to (\ref{step3}) could
-be interpreted as some measures of importance of the intervals with respect to the
-expected location of the global minimum point. Thus, the rules (\ref{step4}) and (\ref{step5}) for selecting
-the interval of the next trial become more clear --- the point of every next
-global optimization iteration is selected within the interval, where the global minimum
-point can be found most likely.
-\par
-The convergence conditions of the described algorithm are given, for example, in \cite{strSergGO}.
+
+The convergence conditions and exact formulas for descision rules $R(i)$ and $d(x)$ of the described algorithm are given, for example, in \cite{strSergGO}.
 
 %------------------------------------------------------------------------------
-\subsection{Параллельные множественные отображения}
+\subsection{Parallel algorithm exploiting a set of evolvents}
 \label{sec:parallel_evolvents}
-Using the multiple mapping allows solving initial problem (1) by parallel solving the problems
+Using the multiple mapping allows solving initial problem (\ref{eq:task}) by parallel solving the problems
 \[
-\min\{\varphi(y^s(x)):x\in [0,1]\}, 1≤s≤S
+\min\{\varphi(y^s(x)):x\in [0,1]\}, 1\leqslant s\leqslant S
 \]
-on a set of intervals [0,1] by the index method. Each one-dimensional problem is solved on a separate processor. The trial results at the point \(x^k\) obtained for the problem being solved by particular processor are interpreted as the results of the trials in the rest problems (in the corresponding points \(x^(k_1 ),…,x^(k_S ))\). In this approach, a trial at the point \(x^k \in [0,1]\) executed in the framework of the \(s\)-th problem, consists in the following sequence of operations.
+on a set of intervals $[0,1]$ by the index method. Each one-dimensional problem is solved on a separate processor. The trial results at the point \(x^k\) obtained for the problem being solved by particular processor are interpreted as the results of the trials in the rest problems (in the corresponding points \(x^(k_1 ),\dots,x^(k_S))\). In this approach, a trial at the point \(x^k \in [0,1]\) executed in the framework of the \(s\)-th problem, consists in the following sequence of operations.
 \par
 1. Determine the image \(y^k=y^s (x^k)\) for the evolvent \(y^s (x)\).
 \par
@@ -605,36 +409,6 @@ III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
 %
 \begin{thebibliography}{107}
 
-\bibitem{barkalovGergel2014}
-\newblock K. Barkalov and V. Gergel,
-\newblock \emph{\emph{Multilevel scheme of dimensionality reduction for parallel global search algorithms}},
-\newblock in \emph{Proceedings of the 1st International Conference on Engineering and Applied Sciences Optimization}, (2014), 2111--2124.
-
-\bibitem{barkalovGergel2015}% (MR3539505) [10.1007/s10898-016-0411-y]
-\newblock K. Barkalov and V. Gergel,
-\newblock \emph{\emph{Parallel global optimization on GPU}},
-\newblock \emph{J. Glob. Optim.}, \textbf{66} (2016), 3--20.
-
-\bibitem{barkalovGergelLebedev2015} %[10.1007/978-3-319-21909-7_31]
-\newblock K. Barkalov, V. Gergel and I. Lebedev,
-\newblock \emph{\emph{Use of Xeon Phi coprocessor for solving global optimization problems}},
-\newblock \emph{LNCS}, \textbf{9251} (2015), 307--318.
-
-\bibitem{barkalovGergelLebedevSysoev2015}
-\newblock K. Barkalov, V. Gergel, I. Lebedev and A. Sysoev,
-\newblock \emph{\emph{Solving the global optimization problems on heterogeneous cluster systems}},
-\newblock in \emph{CEUR Workshop Proceedings}, \textbf{1482} (2015), 411--419.
-
-\bibitem{Barkalov2013}% [10.1007/978-3-642-39958-9_14]
-\newblock K. Barkalov, A. Polovinkin, I. Meyerov, S. Sidorov and N. Zolotykh,
-\newblock \emph{\emph{SVM regression parameters optimization using parallel global search algorithm}},
-\newblock \emph{LNCS}, \textbf{7979} (2013), 154--166.
-
-\bibitem{bussieckMeeraus2004} (MR3618583)% [10.1007/978-1-4613-0215-5_8]
-\newblock M. R. Bussieck and A. Meeraus,
-\newblock \emph{\emph{General algebraic modeling system (GAMS)}},
-\newblock in \emph{Modeling Languages in Mathematical Optimization} (ed. J. Kallrath), Springer, (2004), 137--157.
-
 \bibitem{censorZeniosParGO}% (MR1486040)
 \newblock Y. Censor and S. A. Zenios,
 \newblock \emph{Parallel Optimization: Theory, Algorithms, and Applications},
@@ -644,11 +418,6 @@ III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
 \newblock R. \v Ciegis, D. Henty, B. K\aa gstr\"om and J. \v Zilinskas,
 \newblock \emph{Parallel Scientific Computing and Optimization: Advances and Applications},
 \newblock Springer, 2009.
-
-\bibitem{iosoDescription}
-\newblock I. N. Egorov, G. V. Kretinin, I. A. Leshchenko and S. V. Kuptzov,
-\newblock \emph{\emph{IOSO optimization toolkit --- novel software to create better design}},
-\newblock in \emph{9th AIAA/ISSMO Symposium on Multidisciplinary Analysis and Optimization}, 2002. Available from \url{http://www.iosotech.com/text/2002\_4329.pdf}.
 
 \bibitem{Famularo1999} %(MR1827451) [10.1016/S0005-1098(99)00058-8]
 \newblock D. Famularo, P. Pugliese and Y. D. Sergeyev,
@@ -675,70 +444,10 @@ III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
 \newblock \emph{\emph{A locally-biased form of the DIRECT algorithm}},
 \newblock \emph{J. Glob. Optim.}, \textbf{21} (2001), 27--37.
 
-\bibitem{gavianoKvasovLeraSergeev2003} %(MR2077342) [10.1145/962437.962444]
-\newblock M. Gaviano, D. E. Kvasov, D. Lera and Y. D. Sergeev,
-\newblock \emph{\emph{Software for generation of classes of test functions with known local and global minima for global optimization}},
-\newblock \emph{ACM Trans. Math. Software}, \textbf{29} (2003), 469--480.
-
-\bibitem{gergelLebedev2015}% [10.1016/j.procs.2015.11.008]
-\newblock V. Gergel and I. Lebedev,
-\newblock \emph{\emph{Heterogeneous parallel computations for solving global optimization problems}},
-\newblock \emph{Procedia Comput. Sci.}, \textbf{66} (2015), 53--62.
-
-\bibitem{gergel1993}
-\newblock V. Gergel,
-\newblock \emph{\emph{A software system for multi-extremal optimization}},
-\newblock \emph{Eur. J. Oper. Res.}, \textbf{65} (1993), 305--313.
-
-\bibitem{gergel1996}% (MR1399766)
-\newblock V. Gergel,
-\newblock \emph{\emph{A method for using derivatives in the minimization of multiextremum functions}},
-\newblock \emph{Comput. Math. Math. Phys.}, \textbf{36} (1996), 729--742.
-
-\bibitem{gergel1997} %(MR1443089) [10.1023/A:1008290629896]
-\newblock V. Gergel,
-\newblock \emph{\emph{A global optimization algorithm for multivariate functions with Lipschitzian first derivatives}},
-\newblock \emph{J. Glob. Optim.}, \textbf{10} (1997), 257--281.
-
-\bibitem{gergel2013} %[doi:10.1016/j.procs.2013.05.164]
-\newblock V. Gergel, et al.,
-\newblock \emph{\emph{High performance computing in biomedical applications}},
-\newblock \emph{Procedia Computer Science}, \textbf{18} (2013), 10--19.
-
-\bibitem{gergel2015}% [10.15866/ireaco.v8i1.4935]
-\newblock V. Gergel, et al.,
-\newblock \emph{\emph{Recognition of surface defects of cold-rolling sheets based on method of localities}},
-\newblock \emph{International Review of Automatic Control, } \textbf{8} (2015), 51--55.
-
-\bibitem{gergelSidorov2015}% [10.1007/978-3-319-21909-7_49]
-\newblock V. Gergel and S. Sidorov,
-\newblock \emph{\emph{A two-level parallel global search algorithm for solving computationally intensive multi-extremal optimization problems}},
-\newblock \emph{LNCS}, \textbf{9251} (2015), 505--515.
-
-\bibitem{grishaginStrongin1984}% (MR785497)
-\newblock V. A. Grishagin and R. G. Strongin,
-\newblock \emph{\emph{Optimization of multi-extremal functions subject to monotonically unimodal constraints}},
-\newblock \emph{Engineering Cybernetics}, \textbf{5} (1984), 117--122.
-
-\bibitem{holmstromEdvall2004}% [10.1007/978-1-4613-0215-5_19]
-\newblock K. Holmstrm and M. M. Edvall,
-\newblock \emph{\emph{The TOMLAB optimization environment}},
-\newblock \emph{Modeling Languages in Mathematical Optimization}, Springer, (2004), 369--376.
-
 \bibitem{horstTuyGO}% (MR1102239) [10.1007/978-3-662-03199-5]
 \newblock R. Horst and H. Tuy,
 \newblock \emph{Global Optimization: Deterministic Approaches},
 \newblock Springer-Verlag, Berlin, 1990.
-
-\bibitem{Jones} (MR1246501)% [10.1007/BF00941892]
-\newblock D. R. Jones, C. D. Perttunen and B. E. Stuckman,
-\newblock \emph{\emph{Lipschitzian optimization without the Lipschitz constant}},
-\newblock \emph{J. Optim. Theory Appl.}, \textbf{79} (1993), 157--181.
-
-\bibitem{kearfott2009}%(MR2554906) [10.1080/10556780802614051]
-\newblock R. B. Kearfott,
-\newblock \emph{\emph{GlobSol user guide}},
-\newblock \emph{Optim. Methods Softw.}, \textbf{24} (2009), 687--708.
 
 \bibitem{Kvasov2015}% (MR3585540) [10.1016/j.advengsoft.2014.09.014]
 \newblock D. E. Kvasov and Y. D. Sergeyev,
@@ -751,22 +460,6 @@ III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
  efficient domain partitions}},
 \newblock \emph{Electric Power Systems Research}, \textbf{78} (2008), 1217--1229.
 
-\bibitem{Pizzuti}% (MR1971214) [10.1007/s00211-002-0419-8]
-\newblock D. E. Kvasov, C. Pizzuti and Y. D. Sergeyev,
-\newblock \emph{\emph{Local tuning and partition strategies for diagonal GO methods}},
-\newblock \emph{Numerische Mathematik}, \textbf{94} (2003), 93--106.
-
-\bibitem{liberti2009}% (MR2206955) [10.1007/0-387-30528-9_8]
-\newblock L. Liberti,
-\newblock \emph{\emph{Writing global optimization software}},
-\newblock in \emph{Nonconvex Optimization and Its Applications}, Springer, \textbf{84} (2006), 211--262.
-
-
-\bibitem{linSchrage2009}% (MR2554904) [10.1080/10556780902753221]
-\newblock Y. Lin and L. Schrage,
-\newblock \emph{\emph{The global solver in the LINDO API}},
-\newblock \emph{Optim. Methods Softw.}, \textbf{24} (2009), 657--668.
-
 \bibitem{locatelliSchoenGO}% (MR3136805) [10.1137/1.9781611972672]
 \newblock M. Locatelli and F. Schoen,
 \newblock \emph{Global Optimization: Theory, Algorithms and Applications},
@@ -776,16 +469,6 @@ III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
 \newblock G. Luque and E. Alba,
 \newblock \emph{Parallel Genetic Algorithms. Theory and Real World Applications},
 \newblock Springer-Verlag, Berlin, 2011.
-
-\bibitem{mongeauKarsentyRouze2000} %(MR1785196) [10.1080/10556780008805783]
-\newblock M. Mongeau, H. Karsenty, V. Rouz$\acute{e}$ and J. B. Hiriart-Urruty,
-\newblock \emph{\emph{Comparison of public-domain software for black box global optimization}},
-\newblock \emph{Optim. Methods Softw.}, \textbf{13} (2000), 203--226.
-
-\bibitem{mullen2014} %[10.18637/jss.v060.i06]
-\newblock K. M. Mullen,
-\newblock \emph{\emph{Continuous global optimization in R}},
-\newblock \emph{J. Stat. Softw.}, \textbf{60} (2014).
 
 \bibitem{pardalosZhigljavskyZilinskas2016}% (MR2361744) [10.1007/978-3-319-29975-4]
 \newblock M. P. Pardalos, A. A. Zhigljavsky and J. \v Zilinskas,
@@ -797,57 +480,17 @@ III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
 \newblock \emph{Global Optimization in Action (Continuous and Lipschitz Optimization: Algorithms, Implementations and Applications)},
 \newblock Kluwer Academic Publishers, Dordrecht, 1996.
 
-\bibitem{pinter2009}% (MR2528693)
-\newblock J. D. Pint\'er,
-\newblock \emph{\emph{Software development for global optimization}},
-\newblock \emph{Lectures on Global Optimization. Fields Institute Communications}, \textbf{55} (2009), 183--204.
-
-\bibitem{riosSahinidis2013} %(MR3070154) [10.1007/s10898-012-9951-y]
-\newblock L. M. Rios and N. V. Sahinidis,
-\newblock \emph{\emph{Derivative-free optimization: a review of algorithms and comparison of software implementations}},
-\newblock \emph{J. Glob. Optim.}, \textbf{56} (2013), 1247--1293.
-
-\bibitem{sahinidis1996} %(MR1376505) [10.1007/BF00138693]
-\newblock N. V. Sahinidis,
-\newblock \emph{\emph{BARON: A general purpose global optimization software package}},
-\newblock \emph{J. Glob. Optim.}, \textbf{8} (1996), 201--205.
-
-\bibitem{sergeyev1995} %(MR1358808) [10.1137/0805041]
-\newblock Y. D. Sergeyev,
-\newblock \emph{\emph{An information global optimization algorithm with local tuning}},
-\newblock \emph{SIAM J. Optim.}, \textbf{5} (1995), 858--870.
-
-\bibitem{sergeyev1999}% (MR1699326)
-\newblock Y. D. Sergeyev,
-\newblock \emph{\emph{Multidimensional global optimization using the first derivatives}},
-\newblock \emph{Comput. Math. Math. Phys.}, \textbf{39} (1999), 743--752.
-
-\bibitem{sergeyevKvasov2006}% (MR2197562) [10.1137/040621132]
-\newblock Y. D. Sergeyev and D. E. Kvasov,
-\newblock \emph{\emph{Global search based on efficient diagonal partitions and a set of Lipschitz constants}},
-\newblock \emph{SIAM Journal on Optimization}, \textbf{16} (2006), 910--937.
-
-\bibitem{sergeyevGrishagin2001}% (MR1825071) [10.1023/A:1010185125012]
-\newblock Y. D. Sergeyev and V. A. Grishagin,
-\newblock \emph{\emph{Parallel asynchronous global search and the nested optimization scheme}},
-\newblock \emph{J. Comput. Anal. Appl.}, \textbf{3} (2001), 123--145.
-
 \bibitem{sergeyevStronginLera2013}% (MR3113120) [10.1007/978-1-4614-8042-6]
 \newblock Y. D. Sergeyev, R. G. Strongin and D. Lera,
 \newblock \emph{Introduction to Global Optimization Exploiting Space-filling Curves},
 \newblock Springer, 2013.
-
-\bibitem{Famularo2001}% (MR1866703) [10.1023/A:1012391611462]
-\newblock Y. D. Sergeyev, D. Famularo and P. Pugliese,
-\newblock \emph{\emph{Index branch-and-bound algorithm for Lipschitz univariate global optimization with multiextremal constraints}},
-\newblock \emph{J. Glob. Optim.}, \textbf{21} (2001), 317--341.
 
 \bibitem{strongin1978}% (MR509033)
 \newblock R. G. Strongin,
 \newblock \emph{Numerical Methods in Multi-Extremal Problems (Information-Statistical Algorithms)},
 \newblock Moscow: Nauka, In Russian, 1978.
 
-\bibitem{strongin1992}% (MR1263606) [10.1007/BF00122428]
+\bibitem{Strongin1992}% (MR1263606) [10.1007/BF00122428]
 \newblock R. G. Strongin,
 \newblock \emph{\emph{Algorithms for multi-extremal mathematical programming problems employing a set of joint space-filling curves}},
 \newblock \emph{J. Glob. Optim.}, \textbf{2} (1992), 357--378.
@@ -867,24 +510,13 @@ III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
 \newblock \emph{Global Optimization},
 \newblock Springer, 1989.
 
-\bibitem{venkataraman2009}
-\newblock P. Venkataraman,
-\newblock \emph{Applied Optimization with MATLAB Programming},
-\newblock John Wiley \& Sons, 2009.
-
 \bibitem{zhigljavskyRandGO}% (MR1187048) [10.1007/978-94-011-3436-1]
 \newblock A. A. Zhigljavsky,
 \newblock \emph{Theory of Global Random Search},
 \newblock Kluwer Academic Publishers, Dordrecht, 1991.
 
-\bibitem{Two_Level_Parallel}
-Gergel, V., Sidorov, S.: A Two-Level Parallel Global Search Algorithm for Solution of Computationally Intensive Multiextremal Optimization Problems. In: Malyshkin, V. (Ed.) PaCT 2015, LNCS, vol. 9251, pp. 505-515. Springer, Heidelberg (2015)
-
 \bibitem{Strongin1991}
 Strongin, R.G.: Parallel multi-extremal optimization using a set of evolvents. Comp. Math. Math. Phys. \textbf{31(8)}, 37--46 (1991)
-
-\bibitem{Strongin1992}
-Strongin, R.G.: Algorithms for multi-extremal mathematical programming problems employing the set of joint space-filling curves. J. Global Optim. \textbf{2(4)}, 357--378 (1992)
 
 \bibitem{Gergel2009}
 Strongin, R.G., Gergel, V.P., Barkalov, K.A.: Parallel methods for global optimization problem solving. Journal of instrument engineering. \textbf{52}, 25--33 (2009) (In Russian)
@@ -897,7 +529,6 @@ Grishagin, V.A.: Operating Characteristics of Some Global Search Algorithms. Pro
 
 \bibitem{globalizerSystem}
 Gergel V.P., Barkalov K.A., and Sysoyev A.V: Globalizer: A novel supercomputer software system for solving time-consuming global optimization problems. Numerical Algebra, Control \& Optimization 8(1), 47--62, 2018
-
 
 \end{thebibliography}
 \end{document}
