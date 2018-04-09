@@ -60,6 +60,13 @@ This work considers a parallel algorithms for solving multi-extremal optimizatio
 %------------------------------------------------------------------------------
 \section{Introduction}\label{sec:intro}
 
+В данной статье рассматриваются параллельные алгоритмы решения задач многоэкстремальной оптимизации. В многоэкстремальных задачах возможность достоверной оценки глобального оптимума принципиально основана на наличии априорной информации о функции, позволяющей связать возможные значения оптимизируемой функции с известными значениями в точках осуществленных поисковых испытаний. Весьма часто такая информация о решаемой задаче представляется в виде предположения, что целевая функция $\varphi(y)$ удовлетворяет Lipschitz condition с неизвестной априори константой $L$ (см., например, \cite{Jones,Gablonsky,Evtushenko}). При этом целевая функция может быть задана программно, т.е. представлять собой “black-box”-функцию. Подобные задачи широко распространены в приложениях (problems of optimal design of objects and technological processes in various fields of technology, problems of model fitting according to observed data in scientific research, and so on).
+
+Многие методы, предназначенные для решения задач указанного класса, явно или неявно сводят решение многомерной задачи к решению одномерных подзадач (см., например, методы diagonal partitions \cite{Sergeyev2006,SergeyevKvasov2015} или simplicial partitions \cite{Zilinskas2008,Zilinskas2014}). В данной работе мы будем использовать подход, разработанный в ННГУ им. Н.И. Лобачевского и основанный на идее редукции размерности с помощью кривой Пеано $y(x)$, непрерывно и однозначно отображающей отрезок вещественной оси $[0,1]$ на $n$-мерный куб. 
+
+В работах [ссылки] было предложено несколько способов построения разверток, аппроксимирующих теоретическую кривую Пеано. Указанные способы были реализованы в программной системе Globalizer. Целью настоящего исследования ставилось сравнения свойств разверток и выбор из них наиболее подходящей для использования в параллельных алгоритмах глобальной оптимизации.
+
+
 %------------------------------------------------------------------------------
 \section{Statement of Multidimensional Global Optimization Problem}
 In this paper, the core class of optimization problems, which can be solved using
@@ -193,6 +200,8 @@ Taking into account the initial mapping, one can conclude that current implement
 
 %------------------------------------------------------------------------------
 \subsection{Smooth evolvent}
+
+Рассмотренные в предыдущих пунктах способы построения развертки строят кривую $y(x)$, которая не является гладкой (см. рис. NN). Отсутствие гладкости может негативно сказаться на свойствах редуцированной одномерной функции $\varphi(y(x))$, т.к. гладкая кривая более качественно передает информации о возрастании/убывании исходной функции. На основе исходного алгоритма построения негладкой развертки было предложен обобщенный алгоритм, позволяющий строить гладкую space-filling. Для иллюстрации на рис. изображена гладкая развертка в двумерном случае.  
 
 \begin{figure}[ht]
     \centering
@@ -457,6 +466,33 @@ Grishagin, V.A.: Operating Characteristics of Some Global Search Algorithms. Pro
 
 \bibitem{globalizerSystem}
 Gergel V.P., Barkalov K.A., and Sysoyev A.V: Globalizer: A novel supercomputer software system for solving time-consuming global optimization problems. Numerical Algebra, Control \& Optimization 8(1), 47--62, 2018
+
+\bibitem{Sergeyev2006}
+Sergeyev, Ya.D., Kvasov, D.E.: Global search based on efficient diagonal partitions and a set of Lipschitz constants. SIAM J. Optim 16(3), 910–937 (2006)
+
+\bibitem{SergeyevKvasov2015} 
+Sergeyev, Y.D., Kvasov, D.E.: A deterministic global optimization using smooth diagonal auxiliary functions. Communications in Nonlinear Science and Numerical Simulation. 21(1-3), 99--111 (2015)
+
+\bibitem{Zilinskas2008}
+\v Zilinskas, J.: Branch and bound with simplicial partitions for global optimization. Math. Model. Anal.
+13(1), 145–159 (2008)
+
+\bibitem{Zilinskas2014}
+Paulavi\v cius, R., \v Zilinskas, J.: Simplicial Lipschitz optimization without the Lipschitz constant. J. Glob. Optim. 59(1), 23-40 (2014) 
+
+\bibitem{Jones}
+Jones, D.R.: The direct global optimization algorithm. In: Floudas, C.A., Pardalos, P.M.
+(eds.) The Encyclopedia of Optimization, 2nd edn., pp. 725--735. Springer, Heidelberg
+(2009).
+
+\bibitem{Gablonsky}
+Gablonsky, J.M., Kelley, C.T.: A locally-biased form of the DIRECT algorithm. J. Glob. Optim., 21(1), 27--37 (2001)
+
+\bibitem{Evtushenko}
+Evtushenko, Y., Posypkin, M.: A deterministic approach to global box-constrained
+optimization. Optim. Lett. 7(4), 819--829 (2013)
+
+
 
 \end{thebibliography}
 \end{document}
