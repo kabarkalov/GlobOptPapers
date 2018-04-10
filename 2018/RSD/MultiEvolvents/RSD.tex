@@ -59,18 +59,19 @@ This work considers a parallel algorithms for solving multi-extremal optimizatio
 
 %------------------------------------------------------------------------------
 \section{Introduction}\label{sec:intro}
+\begin{Russian}
 
 В данной статье рассматриваются параллельные алгоритмы решения задач многоэкстремальной оптимизации. В многоэкстремальных задачах возможность достоверной оценки глобального оптимума принципиально основана на наличии априорной информации о функции, позволяющей связать возможные значения оптимизируемой функции с известными значениями в точках осуществленных поисковых испытаний. Весьма часто такая информация о решаемой задаче представляется в виде предположения, что целевая функция $\varphi(y)$ удовлетворяет Lipschitz condition с неизвестной априори константой $L$ (см., например, \cite{Jones,Gablonsky,Evtushenko}). При этом целевая функция может быть задана программно, т.е. представлять собой “black-box”-функцию. Подобные задачи широко распространены в приложениях (problems of optimal design of objects and technological processes in various fields of technology, problems of model fitting according to observed data in scientific research, and so on).
 
-Многие методы, предназначенные для решения задач указанного класса, явно или неявно сводят решение многомерной задачи к решению одномерных подзадач (см., например, методы diagonal partitions \cite{Sergeyev2006,SergeyevKvasov2015} или simplicial partitions \cite{Zilinskas2008,Zilinskas2014}). В данной работе мы будем использовать подход, разработанный в ННГУ им. Н.И. Лобачевского и основанный на идее редукции размерности с помощью кривой Пеано $y(x)$, непрерывно и однозначно отображающей отрезок вещественной оси $[0,1]$ на $n$-мерный куб. 
+Многие методы, предназначенные для решения задач указанного класса, явно или неявно сводят решение многомерной задачи к решению одномерных подзадач (см., например, методы diagonal partitions \cite{Sergeyev2006,SergeyevKvasov2015} или simplicial partitions \cite{Zilinskas2008,Zilinskas2014}). В данной работе мы будем использовать подход, разработанный в ННГУ им. Н.И. Лобачевского и основанный на идее редукции размерности с помощью кривой Пеано $y(x)$, непрерывно и однозначно отображающей отрезок вещественной оси $[0,1]$ на $n$-мерный куб.
 
-В работах [ссылки] было предложено несколько способов построения разверток, аппроксимирующих теоретическую кривую Пеано. Указанные способы были реализованы в программной системе Globalizer. Целью настоящего исследования ставилось сравнения свойств разверток и выбор из них наиболее подходящей для использования в параллельных алгоритмах глобальной оптимизации.
+В работах \cite{strongin1978,Strongin1992,Gergel2009,Goryachih2017} было предложено несколько способов построения разверток, аппроксимирующих теоретическую кривую Пеано. Указанные способы были реализованы в программной системе Globalizer \cite{globalizerSystem}. Целью настоящего исследования ставилось сравнения свойств разверток и выбор из них наиболее подходящей для использования в параллельных алгоритмах глобальной оптимизации.
 
-
+\end{Russian}
 %------------------------------------------------------------------------------
 \section{Statement of Multidimensional Global Optimization Problem}
 In this paper, the core class of optimization problems, which can be solved using
-Globalizer\cite{globalizerSystem}, is formulated. This class involves the multidimensional global
+Globalizer, is formulated. This class involves the multidimensional global
 optimization problems without constraints, which can be defined in the following way:
 \begin{equation}
 \label{eq:task}
@@ -189,19 +190,23 @@ Taking into account the initial mapping, one can conclude that current implement
 
 %------------------------------------------------------------------------------
 \subsection{Non injective evolvent}
+\begin{Russian}
 
 Как уже было сказано в секции \ref{sec:shifted}, потеря информации о близости точек в многомерном пространстве может быть частично скомпенсирована использованием множественных отображений $Y_L(x)=\{y^1(x),...,y^L(x)\}$. Однако, сама по себе кривая типа Пеано сохраняет в себе часть этой информации: она не является инъективым отображением, поэтому имея один образ $y(x)\in \mathbb{R}^N$, можно получить несколько несколько отличных $x$ прообразов $t_j\in[0,1], t_j \not = x$, которые затем могут быть добавлены в поисковую информацию индексного метода.
 
 Кривая типа Пеано, используемая в (\ref{eq:oneDimTask}) для редукции размерности, определяется через предельный переход,
 поэтому не может быть вычислена непосредтвенно. При численной оптимизации используется некоторое её приближение, являющееся
-инъективной кусочно-линейной кривой. В \cite{strongin1978} было предложено неинъективное отображение равномерной сетки на отрезка $[0,1]$ на равномерную сетку в гиперкубе $D$. Каждый многомерный узел может иметь до $2^N$ одномерных прообразов. На рис. \ref{fig:noninjective} изображена кривая с самопересечениями, полученная при соединении узлов грубой многомерной сетки в порядке следования их прообразов из отрезка $[0,1]$, а также отмечана точка, имеющая 3 прообраза.
+инъективной кусочно-линейной кривой. В \cite{strongin1978} было предложено неинъективное отображение равномерной сетки на отрезка $[0,1]$ на равномерную сетку в гиперкубе $D$. Каждый многомерный узел может иметь до $2^N$ одномерных прообразов. На рис. \ref{fig:noninjective} крестиками обозначена сетка в пространесве $\mathbb{R}^2$, для двух узлов которой указаны соответствующие им одномерное прообразы из $[0,1]$ (отмечены квадратами и кругами). Каждый указанный узел имеет по 3 прообраза.
 
 Недостатком неинъективной развёртки является потенциально большое количетво прообразов (до $2^N$) и невозможность использования параллельной схемы для множественных отображений из секции \ref{sec:parallel_evolvents}.
+
 
 %------------------------------------------------------------------------------
 \subsection{Smooth evolvent}
 
-Рассмотренные в предыдущих пунктах способы построения развертки строят кривую $y(x)$, которая не является гладкой (см. рис. NN). Отсутствие гладкости может негативно сказаться на свойствах редуцированной одномерной функции $\varphi(y(x))$, т.к. гладкая кривая более качественно передает информации о возрастании/убывании исходной функции. На основе исходного алгоритма построения негладкой развертки было предложен обобщенный алгоритм, позволяющий строить гладкую space-filling. Для иллюстрации на рис. изображена гладкая развертка в двумерном случае.  
+Рассмотренные в предыдущих пунктах способы построения развертки строят кривую $y(x)$, которая не является гладкой (см. рис. \ref{fig:shifted_ev}). Отсутствие гладкости может негативно сказаться на свойствах редуцированной одномерной функции $\varphi(y(x))$, т.к. гладкая кривая более качественно передает информации о возрастании/убывании исходной функции. На основе исходного алгоритма построения негладкой развертки было предложен обобщенный алгоритм \cite{Goryachih2017}, позволяющий строить гладкую space-filling curve. Для иллюстрации на рис. \ref{fig:smooth} изображена гладкая развертка в двумерном случае. Недостатком гладкой развёртки является в несколько раз большая сложность вычисления по сравнению с кусочно-линейными кривыми (требуется вычислять нелинейные гладкие функции). Причём с ростом точности аппроксимации и размерности количество интервалов гладкости увеличивается и сложность вычисления кривой нарастает.
+
+\end{Russian}
 
 \begin{figure}[ht]
     \centering
@@ -265,6 +270,8 @@ At every iteration of the algorithm, operating within the \(s\)-th process, dete
 
 %------------------------------------------------------------------------------
 \section{Results of Numerical Experiments}
+\begin{Russian}
+
 The computational experiments have been carried out on the Lobachevsky supercomputer at
 State University of Nizhny Novgorod. A computational node included 2 Intel
 Sandy Bridge E5-2660 2.2 GHz processors, 64 GB RAM. The CPUs had 8 cores (i. e. total 16 cores
@@ -273,6 +280,8 @@ were available per a node). Все рассматриваемые алгорти
 
 Сравнение алгоритмов глобальной оптимизации проведено путём оценки качества решения алгоритмами выборки задач из некоторого тестового класса.
 В данной статье рассматривается тестовый класс, порождаемый генератором GKLS \cite{Gaviano2003}. Данные генератор позволяет конструировать сложные многоэкстремальные задачи различной размерности. В работе рассматриваются выборки по 100 задач классов размерности 2, 3, 4, 5. Каждый класс имеет две степени сложности --- \textit{Simple} и \textit{Hard}. Параметры генератора для рассматриваемых классов приведены в \cite{Gaviano2003}.
+
+\end{Russian}
 
 In order to evaluate the efficiency of an algorithm on a given set of 100 problems, we will use the
 operating characteristics \cite{grishaginClass}, which are defined by a set of
@@ -288,6 +297,7 @@ method requires fewer resources to achieve the same reliability.
 %------------------------------------------------------------------------------
 \subsection{Сравнение последовательных разверток}
 \label{sec:seq_comp}
+\begin{Russian}
 С целью понять, обладает ли какой-либо из перечисленных ранее типов развёрток существенным преимуществом над другими, были построены операционные характеристики индексного метода с различными типами развёрток на классах GKLS 2d Simple и GKLS 3d Simple. The global minimum was considered to be found if the algorithm generates a trial point $y^k$ in the $\delta$-vicinity of the global minimizer, i.e. $\left\|y^k-y^\ast\right\|_\infty\leq\delta$. The size of the vicinity was selected as $\delta = 0.01\left\|b-a\right\|_\infty$. In case of GKLS $\delta=0.01$.
 
 Во всех экспериментах параметр плотности построения развёрток $m=12$. Минимальное значение пераметра надёжности \(r\) было найдено для каждого типа развёртки перебором по равномерной сетке с шагом \(0.1\).
@@ -406,6 +416,7 @@ III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
 \end{itemize}
 
 В секции \ref{sec:results_parallel} приведены результаты численных экспериментов, которые показывают, что алгоритм из раздела \ref{sec:parallel_evolvents} на основе вращаемых развёрток позволяет получить ускорение до 43 раз при решении серии задач с использованием нескольких узлов вычислитеьного кластера. Стоит заметить, что в расматриваемых задачах целевые функции не являются трудоёмкими (среднее время вычисления $10^{-3}$с) и в случае более сложных задач показатели ускорения по времени будут приближаться к ускорению по итерациям.
+\end{Russian}
 
 % ---- Bibliography ----
 %
@@ -447,6 +458,11 @@ III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
 \newblock \emph{Global Optimization},
 \newblock Springer, 1989.
 
+\bibitem{Goryachih2017}
+\newblock Goryachih, A.
+\newblock A class of smooth modification of space-filling curves for global optimization problems
+\newblock Springer Proceedings in Mathematics and Statistics, 197, pp. 57-65, 2017
+
 \bibitem{zhigljavskyRandGO}% (MR1187048) [10.1007/978-94-011-3436-1]
 \newblock A. A. Zhigljavsky,
 \newblock \emph{Theory of Global Random Search},
@@ -470,7 +486,7 @@ Gergel V.P., Barkalov K.A., and Sysoyev A.V: Globalizer: A novel supercomputer s
 \bibitem{Sergeyev2006}
 Sergeyev, Ya.D., Kvasov, D.E.: Global search based on efficient diagonal partitions and a set of Lipschitz constants. SIAM J. Optim 16(3), 910–937 (2006)
 
-\bibitem{SergeyevKvasov2015} 
+\bibitem{SergeyevKvasov2015}
 Sergeyev, Y.D., Kvasov, D.E.: A deterministic global optimization using smooth diagonal auxiliary functions. Communications in Nonlinear Science and Numerical Simulation. 21(1-3), 99--111 (2015)
 
 \bibitem{Zilinskas2008}
@@ -478,7 +494,7 @@ Sergeyev, Y.D., Kvasov, D.E.: A deterministic global optimization using smooth d
 13(1), 145–159 (2008)
 
 \bibitem{Zilinskas2014}
-Paulavi\v cius, R., \v Zilinskas, J.: Simplicial Lipschitz optimization without the Lipschitz constant. J. Glob. Optim. 59(1), 23-40 (2014) 
+Paulavi\v cius, R., \v Zilinskas, J.: Simplicial Lipschitz optimization without the Lipschitz constant. J. Glob. Optim. 59(1), 23-40 (2014)
 
 \bibitem{Jones}
 Jones, D.R.: The direct global optimization algorithm. In: Floudas, C.A., Pardalos, P.M.
