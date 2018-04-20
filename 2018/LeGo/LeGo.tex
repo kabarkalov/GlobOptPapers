@@ -5,6 +5,13 @@
 \usepackage{graphicx}
 \pdfmapfile{+txfonts.map}
 
+%%%%%ДОБАВИЛ ДЛЯ РУССКОГО ТЕКСТА
+\usepackage[utf8x]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{cmap}
+%%%%%
+
+
 % Document starts
 \begin{document}
 
@@ -102,7 +109,26 @@ where $\alpha$ is a positive integer number and $\beta>0$ is selected in such a 
 \beta>(h_{max}-h_{min})/(H_{max}-q)^\alpha,
 \]
 where $h_{max}$ and $h_{min}$ are the maximum and minimum values of the function $f_{m+1}(y)$ respectively.
+\end{enumerate}
 
+\Russian
+Одним из важных свойств, характеризующих прикладные задачи условной оптимизации, является расположение условного минимума на границе feasible domain. При генерации задач по схеме, описанной в \cite{Gergel2017}, условный минимум будет, вообще говоря, находиться внутри feasible domain. Поэтому в новой версиии генератора задач была добавлена возможность как смещения условного минимума на границу, так и выбора числа активных ограничений в нем.
+
+Смещение условного минимума на границу feasible domain осуществляется следующим образом.
+\begin{enumerate}
+	\item Генерируется задача с произвольным расположением условного минимума $\overline{y}$;
+	\item Из точки $\overline{y}$ с заданным шагом $h$ осуществляется покоординатный поиск допустимой точки $y^*$, для которой хотя бы одно из ограничений является активным, т.е. существует такой номер $j, 1 \leq j\leq m$, что $\left|g_j(y^*)\right| \leq \delta$. 
+	\item Полученное грубое значение $y^*$ уточняется локальным методом. 
+	\item Выполняется преобразование координат, переводящее точку $\overline{y}$ в точку $y^*$. Тем самым целевая функция достигает своего минимума на границе feasible domain. 
+\end{enumerate}
+
+Отметим, что так как поиск точки $y^*$ осуществляется по каждой координате в отдельности, то трудоемкость поиска будет возрастать линейно при увеличении размерности задачи.
+
+В случае, если нужно сгенерировать задачу с заданным числом $S$ активных ограничений в точке условного минимума, то тогда правило 2 меняется следующим образом 
+\begin{enumerate}
+	\item В области поиска строится uniform grid с числом точек $\min \left\{10^7, 10^{2N} \right\}$, в каждой из которых вычисляются значения ограничений. 
+	\item Определяется множество точек $\{y^t\}$, в которых активными являются $S$ ограничений; т.е. существуют такие номера $j_1, ...,j_S$, что $\left|g_{j_s}(y^t)\right|\leq \delta, \; 1\leq s \leq S$. В случае отсутствия такой точки, генерируется задача с произвольным числом активных ограничений и пользователь информируется об этом.
+	\item Выбирается точка $y^* = \min_{t} \{\left\|\overline{y} - y^t\right\|\}$. Полученное грубое значение $y^*$ уточняется локальным методом. 
 \end{enumerate}
 
 
@@ -110,7 +136,7 @@ where $h_{max}$ and $h_{min}$ are the maximum and minimum values of the function
 
 As an illustration, the level lines of the objective functions and the zero-level lines of the constraints for problems constructed on the base of functions (\ref{VAG}) with $\alpha = 3, \beta = 1$ and the volume fractions of the feasible domains $\Delta = 0.4, 0.6$ are shown in Fig.~\ref{fig:VAG}. The feasible domains are highlighted by green. The change of volume and, at the same time, the increase of complexity of the feasible domains are seen clearly. Fig.~\ref{fig:VAG} (a,b) also shows the points of 628 and 764 trials, correspondingly, performed by the \textit{index method} for solving constrained global optimization problems until the required accuracy $\epsilon=10^{-2}$ was achieved. The conditional optimizer is shown as a red point and the best estimation of the optimizer is shown as a blue point.
 
-The index method has been proposed and developed in \cite{Strongin2000,Sergeyev2001,Barkalov2002}. The approach is based on a separate accounting for each constraint of the problem and is not related to the use of the penalty functions. According to the rules of index method, every iteration includes a sequential checking of fulfillment of the problem constraints at this point. The first occurrence of violation of any constraint terminates the trial and initiates the transition to the next iteration. This allows: (i) accounting for the information on each constraint separately and (ii) solving the problems, in which the function values may be undefined out of the feasible domain.  It should be noted, that the index method can be efficiently parallelized for accelerators \cite{Barkalov2015,Barkalov2016}.
+The index method has been proposed and developed in \cite{Strongin2000,Sergeyev2001,Barkalov2002}. The approach is based on a separate accounting for each constraint of the problem and is not related to the use of the penalty functions. According to the rules of index method, every iteration includes a sequential checking of fulfillment of the problem constraints at this point. The first occurrence of violation of any constraint terminates the trial and initiates the transition to the next iteration. This allows: (i) accounting for the information on each constraint separately and (ii) solving the problems, in which the function values may be undefined out of the feasible domain. It should be noted, that the index method can be efficiently parallelized for accelerators \cite{Barkalov2015,Barkalov2016}.
 
 \begin{figure}
 \begin{minipage}{0.5\linewidth}
