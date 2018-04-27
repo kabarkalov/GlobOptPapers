@@ -2,14 +2,17 @@
 
 \usepackage[numbers]{natbib}
 \usepackage{rotating}
+\usepackage{subfig}
 \usepackage{graphicx}
+\usepackage{tabularx}
 \usepackage{enumitem}
+
 %\pdfmapfile{+txfonts.map}
 
-%%%%%ДОБАВИЛ ДЛЯ РУССКОГО ТЕКСТА
-\usepackage[utf8x]{inputenc}
-\usepackage[english,russian]{babel}
-\usepackage{cmap}
+%%%%%������� ��� �������� ������
+%\usepackage[utf8x]{inputenc}
+%\usepackage[english,russian]{babel}
+%\usepackage{cmap}
 %%%%%
 
 
@@ -29,133 +32,232 @@
 \author{Maria Rachinskaya}
 \author{Alexander Sysoyev}
 
-\affil{Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia.}
+\affil{Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia}
 
 \corresp[cor1]{Corresponding author: konstantin.barkalov@itmm.unn.ru}
 
 \maketitle
 
 \begin{abstract}
-\Russian
-В работе рассматривается дальнейшее развитие подхода к построению тестовых задач глобальной оптимизации с нелинейными ограничениями. Для порождаемых задач расположение глобального минимума является известным.
-Отличительной чертой рассматриваемого генератора является возможность указания желаемого количества ограничений и доли допустимой области относительно все области глобального поиска. В обновленной версии генератора добавлена возможность формирования задач с условным минимумом, расположенным на границе допустимой области, и указания числа ограничений, активных в точке минимума. Демонстрация разработанного подхода приводится на примере известного индексного метода для решения сложных многоэкстремальных задач оптимизации с нелинейными ограничениями.
+In the present work, further development of an approach to constructing the test global 
+optimization problems with nonlinear constraints is considered. In the generated problems, the 
+location of the global minimum is known. The considered generator is featured by an option of 
+specifying desired number of constraints and the fraction of feasible domain relative to the 
+whole global search domain. In the updated version of the generator, the options of forming the 
+problems with a conditional minimum located at the boundary of the feasible domain and of 
+specifying the number of constraints active in the minimum points have been added. The 
+demonstration of the developed approach is given on the example of a known index method for 
+solving the complex multiextremal optimization problems with nonlinear constraints.
 \end{abstract}
 
 % Head 1
 \section{INTRODUCTION}
 
-In the present paper, the methods for generating the global optimization test problems with non-convex constraints
+In the present paper, the methods for generating the global optimization test problems with non-
+convex constraints
 \begin{eqnarray}
-&\varphi(y^\ast)=\min{\left\{\varphi(y):y\in D, \; g_i(y)\leq 0, \; 1 \leq i \leq m\right\}}, \label{i_problem} \\
+&\varphi(y^\ast)=\min{\left\{\varphi(y):y\in D, \; g_i(y)\leq 0, \; 1 \leq i \leq m\right\}}, 
+\label{i_problem} \\
 &D=\left\{y\in R^N: a_i\leq y_i \leq b_i, 1\leq i \leq N\right\} \label{D}
 \end{eqnarray}
-are considered. The objective function $\varphi(y)$ (henceforth denoted by $g_{m+1}(y)$) and the left-hand sides $g_i(y), \; 1\leq i \leq m,$ of the constraints are supposed to satisfy the Lipschitz condition
+are considered. The objective function $\varphi(y)$ (henceforth denoted by $g_{m+1}(y)$) and 
+the left-hand sides $g_i(y), \; 1\leq i \leq m,$ of the constraints are supposed to satisfy the 
+Lipschitz condition
 \[ \left|g_i(y')-g_i (y'')\right| \leq L_i \left\|y'-y'' \right\|, \; y',y''\in D, \; 1\leq i \leq m+1. \]
-with the Lipschitz constants unknown a priori. The analytical formulae of the problem functions may be unknown, i.e. these ones may be defined by an algorithm for computing the function values in the search domain (so called ``black-box''-functions). It is supposed that even a single computing of a problem function value may be a time-consuming operation since it is related to the necessity of numerical modeling in the applied problems (see, for example, \cite{Menniti2008,Kvasov2015,Modorskii2017}).
+with the Lipschitz constants unknown a priori. The analytical formulae of the problem functions 
+may be unknown, i.e. these ones may be defined by an algorithm for computing the function 
+values in the search domain (so called ``black-box''-functions). It is supposed that even a single 
+computing of a problem function value may be a time-consuming operation since it is related to 
+the necessity of numerical modeling in the applied problems (see, for example, 
+\cite{Menniti2008,Kvasov2015,Modorskii2017}).
 
-The evaluation of efficiency of the developed methods is one of the key problems in the optimization theory and applications. Unfortunately, it is difficult to obtain any theoretical estimates in many cases. As a result, the comparison of the methods is performed by carrying out the computational experiments on solving some test optimization problems in most cases. In order to obtain a reliable evaluation of the efficiency of the methods, the sets of test problems should be diverse and representative enough. The problem of choice of the test problems has been considered in a lot of works (see, for example, \cite{Floudas1999,Gaviano2003,Ali2005,Addis2007}). Unfortunately, in many cases, the proposed sets contain a small number of test problems, and it is difficult to obtain the problems with desired properties. The most important drawback consists of the fact that the constraints are absent in the proposed test problems as a rule (or the constraints are relatively simple: linear, convex, etc.).
-\Russian
-В данной работе проводится дальнейшее развитие подхода для порождения задач глобальной оптимизации с нелинейными ограничениями, первоначально предложенного в \cite{Gergel2017}. При генерации тестовых задач может быть указано необходимое количество ограничений и желаемая доля допустимой области относительно все области глобального поиска. При этом для порождаемых задач расположение глобального минимума является известным, что существенно упрощает оценку результатов выполненных вычислительных экспериментов. В очередную версию генератора, в дополнение к указанным свойствам, были добавлены следующие возможности.
+The evaluation of efficiency of the developed methods is one of the key problems in the 
+optimization theory and applications. Unfortunately, it is difficult to obtain any theoretical 
+estimates in many cases. As a result, the comparison of the methods is performed by carrying 
+out the computational experiments on solving some test optimization problems in most cases. In 
+order to obtain a reliable evaluation of the efficiency of the methods, the sets of test problems 
+should be diverse and representative enough. The problem of choice of the test problems has 
+been considered in a lot of works (see, for example, 
+\cite{Floudas1999,Gaviano2003,Ali2005,Addis2007}). Unfortunately, in many cases, the 
+proposed sets contain a small number of test problems, and it is difficult to obtain the problems 
+with desired properties. The most important drawback consists of the fact that the constraints 
+are absent in the proposed test problems as a rule (or the constraints are relatively simple: linear, 
+convex, etc.).
+
+In the present work, further development of the approach to generating the global optimization 
+problems with nonlinear constraints proposed originally in Ref.~\cite{Gergel2017} has been 
+conducted.
+When generating the test problems, the necessary number of constraints and the desired fraction 
+of the feasible domain relative to the whole global search domain can be specified. 
+At that, the location of the global minimum is known for the generated problems that simplifies 
+evaluating the results of the numerical experiments essentially. 
+in addition to the specified options, 
+the following functions have been added in the current version of the generator: 
+
 \begin{itemize}
-	\item Возможность генерации задач с точкой условного минимума, расположенной на границе допустимой области.
-	\item Возможность указания числа ограничений, активных в точке оптимума.
+\item The possibility to generate the problems with the conditional minimum point located at the 
+boundary of the feasible domain.
+\item The possibility to specify the number of constraints active in the optimum point.
 \end{itemize}
 
-Указанные возможности позволяют более качественно имитировать свойства прикладных задач условной глобальной оптимизации.
+The above capabilities allow emulating the properties of the applied constrained global 
+optimization problems more adequately.
 
 
 \section{TEST PROBLEM CLASSES}
-A well-known approach to investigating and comparing the multiextremal optimization algorithms is based on testing these methods by solving a set of problems, chosen randomly from some specially designed class. 
+A well-known approach to investigating and comparing the multiextremal optimization 
+algorithms is based on testing these methods by solving a set of problems, chosen randomly 
+from some specially designed class. 
 
-For example, one generator for random samples of two-dimensional test functions has been described in \cite{Grishagin2015}. 
+For example, one generator for random samples of two-dimensional test functions has been 
+described in \cite{Grishagin2015}. 
 %This generator produces two-dimensional functions according to the formula
 %\begin{equation} \label{VAG}
-%\varphi(y)= -\left\{\left(\sum^{7}_{i=1}\sum^{7}_{j=1}A_{ij}g_{ij}(y)+B_{ij}h_{ij}(y)\right)^2 + \left(\sum^{7}_{i=1}\sum^{7}_{j=1}C_{ij}g_{ij}(y)+D_{ij}h_{ij}(y)\right)^2\right\}^{1/2},
+%\varphi(y)= -
+%\left\{\left(\sum^{7}_{i=1}\sum^{7}_{j=1}A_{ij}g_{ij}(y)+B_{ij}h_{ij}(y)\right)^2 + 
+%\left(\sum^{7}_{i=1}\sum^{7}_{j=1}C_{ij}g_{ij}(y)+D_{ij}h_{ij}(y)\right)^2\right\}^{1/2},
 %\end{equation}
-%where $g_{ij}(y)=\sin(i\pi y_1)\sin(j\pi y_2)$, $h_{ij}(y)=\cos(i\pi y_1)\cos(j\pi y_2)$, $y=(y_1,y_2)\in R^2, \; 0 \leq y_1,y_2 \leq 1$, and coefficients $A_{ij}, B_{ij}, C_{ij}, D_{ij}$  are taken uniformly in the interval $[-1,1]$.
-Another generator (\textit{GKLS generator}) for the functions of arbitrary dimensionality with known properties (the number of local minima, the size of their domains of attraction, the global minimizer, etc.) has been proposed in \cite{Gaviano2003}.  Application of this generator for studying some unconstrained optimization algorithms has been described in \cite{Paulavicius2014,Sergeyev2015}. 
+%where $g_{ij}(y)=\sin(i\pi y_1)\sin(j\pi y_2)$, $h_{ij}(y)=\cos(i\pi y_1)\cos(j\pi y_2)$, 
+%$y=(y_1,y_2)\in R^2, \; 0 \leq y_1,y_2 \leq 1$, and coefficients $A_{ij}, B_{ij}, C_{ij}, 
+%D_{ij}$  are taken uniformly in the interval $[-1,1]$.
+Another generator (\textit{GKLS generator}) for the functions of arbitrary dimensionality with 
+known properties (the number of local minima, the size of their domains of attraction, the global 
+minimizer, etc.) has been proposed in \cite{Gaviano2003}.  Application of this generator for 
+studying some unconstrained optimization algorithms has been described in 
+\cite{Paulavicius2014,Sergeyev2015}. 
 
-The generator GCGen (Global Constrained optimization problem Generator) which allows to generate the test global optimization problems with $m$ constraints на основе функций заданного класса, has been proposed in \cite{Gergel2017}. В данной статье были были предложены the rules, which allow formulating the constrained global optimization problems so that:
+The generator GCGen (Global Constrained optimization problem Generator) which allows to 
+generate the test global optimization problems with $m$ constraints based on the functions of 
+this class has been proposed in Ref.~\cite{Gergel2017}. In the present paper, the rules, which 
+allow formulating the constrained global optimization problems have been proposed so that:
 \begin{itemize}
-	\item one could control the size of feasible domain with respect to the whole domain of the parameters' variation;
-	\item the global minimizer of the objective function would be known a priori taking into account the constraints;
-	\item the global minimizer of the objective function without accounting for the constraints would be out of the feasible domain.
+	\item one could control the size of feasible domain with respect to the whole domain of 
+the parameters' variation;
+	\item the global minimizer of the objective function would be known a priori taking into 
+account the constraints;
+	\item the global minimizer of the objective function without accounting for the 
+constraints would be out of the feasible domain.
 \end{itemize}
 
 
-\Russian
+The location of the conditional minimum at the boundary of the feasible domain is an important 
+property featuring the applied constrained optimization problems. 
+When generating the problems according to the scheme described in Ref.~\cite{Gergel2017}, 
+the conditional minimum, in general, will be located inside the feasible domain. Therefore, the 
+options of shifting the conditional minimum to the boundary of the feasible domain as well of 
+specifying the number of the active constraints in this one have been added in the new version 
+of the problem generator.
 
-Одним из важных свойств, характеризующих прикладные задачи условной оптимизации, является расположение условного минимума на границе feasible domain. При генерации задач по схеме, описанной в \cite{Gergel2017}, условный минимум будет, вообще говоря, находиться внутри feasible domain. Поэтому в новой версиии генератора задач была добавлена возможность как смещения условного минимума на границу, так и выбора числа active constraints в нем.
-
-Смещение условного минимума на границу feasible domain осуществляется следующим образом.
+The shifting of the conditional minimum to the boundary of the feasible domain is performed in 
+the following way.
 \begin{enumerate}
-	\item Генерируется задача с произвольным расположением условного минимума $\overline{y}$;
-	\item Из точки $\overline{y}$ с заданным шагом $h$ осуществляется покоординатный поиск допустимой точки $y^*$, для которой хотя бы одно из ограничений является активным, т.е. существует такой номер $j, 1 \leq j\leq m$, что $\left|g_j(y^*)\right| \leq \delta$. 
-	\item Полученное грубое значение $y^*$ уточняется локальным методом. 
-	\item Выполняется преобразование координат, переводящее точку $\overline{y}$ в точку $y^*$. Тем самым целевая функция достигает своего минимума на границе feasible domain. 
+\item A problem with an arbitrary location of the constrained minimum $\overline{y}$ is 
+generated;
+\item From the point $\overline{y}$, a coordinate search of a feasible point $y^*$, for which at 
+least one constraint is active i.e. there is such index $j, 1 \leq j\leq m$ that $\left|g_j(y^*)\right| 
+\leq \delta$ is performed with given step $h$. 
+\item A rough estimate of $y^*$ obtained is refined by a local method. 
+\item The coordinate transformation transferring the point $\overline{y}$ to the point $y^*$ is 
+performed. This way, the objective function reaches its minimum at the boundary of feasible 
+domain. 
 \end{enumerate}
 
-Отметим, что так как поиск точки $y^*$ осуществляется по каждой координате в отдельности, то трудоемкость поиска будет возрастать линейно при увеличении размерности задачи.
+Note that since the search of the point $y^*$ is performed in each coordinate separately, the 
+computation costs would increase linearly with increasing the dimensionality of the problem.
 
-
-В случае, если нужно сгенерировать задачу с заданным числом $S$ активных ограничений в точке условного минимума, то тогда правила меняются следующим образом.
+In the case, when it is necessary to generate a problem with a predefined number of active 
+constraints $S$ in the constrained minimum point, the rules are modified as follows.
 \begin{enumerate}
-	\item Генерируется задача с произвольным расположением условного минимума $\overline{y}$;
-	\item Из точки $\overline{y}$ с заданным шагом $h$ осуществляется покоординатный поиск допустимой точки $y^*$, для которой хотя бы одно из ограничений является активным, т.е. существует такой номер $j, 1 \leq j\leq m$, что $\left|g_j(y^*)\right| \leq \delta$.  
-	\item Полученное грубое значение $y^*$ уточняется локальным методом. 
-	\item Определяется число $K$ ограничений, активных в точке $y^*$.
-	\item Если $K>S$, то из числа активных выбираются $K-S$ ограничений, и путем вычитания положительного параметра $q$ из правой части они переводятся в неактивные.
-	\item Если $K<S$, то из числа неактивных выбираются $S-K$ ограничений, и путем прибавления положительного параметра $q$ в правой части они переводятся в активные.
-	\item Выполняется преобразование координат, переводящее точку $\overline{y}$ в точку $y^*$. Тем самым целевая функция достигает своего минимума на границе feasible domain с заданным числом активных ограничений. 
+\item A problem with an arbitrary location of a conditional minimum $\overline{y}$ is 
+generated;
+\item From the point $\overline{y}$, a coordinate search of a feasible point $y^*$, for which at 
+least one constraint is active i. e. there is such index $j, 1 \leq j\leq m$ that $\left|g_j(y^*)\right| 
+\leq \delta$ is performed with a predefined step $h$.
+\item A rough estimate $y^*$ obtained is refined by a local method. 
+\item The number $K$ of the constraints active at the point $y^*$ is determined.
+\item If $K>S$, $K-S$ constraints are selected from the set of active constraints, and these ones 
+are set to be inactive by subtracting a positive parameter $q$ from the right hand side.
+\item If $K<S$, $S-K$ constraints are selected from the set of the inactive ones, and and these 
+ones are set to be the active by adding a positive parameter $q$ to the right hand side.
+\item The coordinate transformation transferring the point $\overline{y}$ to the point $y^*$ is 
+performed. This way, the objective function reaches its minimum at the boundary of the feasible 
+domain with the predefined number of active constraints. 
 \end{enumerate}
 
 \section{NUMERICAL RESULTS}
 
-As an illustration, the level lines of the objective functions and the zero-level lines of four constraints for the problem constructed on the base of functions (\ref{VAG}) with the volume fraction of the feasible domains $\Delta = 0.5$ are shown in Fig.~\ref{fig:VAG}. The feasible domains are highlighted by green. 
-\Russian
-Fig.~\ref{fig:VAG} (a,b,c,d) соответствуют разным способам генерации тестовых задач.
+As an illustration, the level lines of the objective functions and the zero-level lines of four 
+constraints for the problem constructed on the base of functions from \cite{Grishagin2015} with the volume 
+fraction of the feasible domains $\Delta = 0.5$ are shown in Fig.~\ref{fig:VAG}. The feasible 
+domains are highlighted by green. 
+
+Fig.~\ref{fig:VAG} (a,b,c,d) correspond to different methods of generating the test problems.
 
 \begin{enumerate}[label=(\alph*)]
-	\item Задача сгенерирована с расположением constrained optimizer внутри feasible domain.
-	\item Модификация задачи из п. (a): unconstrained optimizer находится вне feasible domain.
-	\item Модификация задачи из п. (b): constrained optimizer находится на границе feasible domain, число активных ограничений не задано.
-	\item Модификация задачи из п. (c): число активных ограничений задано равным двум.
+	\item The problem has been generated with the constrained optimizer located inside the 
+feasible domain.
+\item A modification of the problem from item (a): unconstrained optimizer is located outside 
+the feasible domain.
+\item A modification of the problem from item (b): constrained optimizer is located at the 
+boundary of the feasible domain, the number of active constraints is not defined.
+\item A modification of the problem from item (c): the number of active constraints is defined 
+to be two.
 \end{enumerate}
 
 
-Fig.~\ref{fig:VAG} (a,b,c,d) also shows the points of XXX, YYY, ZZZ and TTT trials, correspondingly, performed by the \textit{index method} for solving constrained global optimization problems until the required accuracy $\epsilon=10^{-2}$ was achieved. The conditional optimizer is shown as a red point and the best estimation of the optimizer is shown as a blue point.
-
-The index method has been proposed and developed in \cite{Strongin2000,Sergeyev2001,Barkalov2002}. The approach is based on a separate accounting for each constraint of the problem and is not related to the use of the penalty functions. According to the rules of index method, every iteration includes a sequential checking of fulfillment of the problem constraints at this point. The first occurrence of violation of any constraint terminates the trial and initiates the transition to the next iteration. This allows: (i) accounting for the information on each constraint separately and (ii) solving the problems, in which the function values may be undefined out of the feasible domain. 
-%It should be noted, that the index method can be efficiently parallelized for accelerators \cite{Barkalov2015,Barkalov2016}.
-
-\begin{figure}
-\begin{minipage}{0.5\linewidth}
-\center{\includegraphics[width=1.0\linewidth]{vag_04.png} \\ (a)}
-\end{minipage}
-\hfill
-\begin{minipage}{0.5\linewidth}
-\center{\includegraphics[width=1.0\linewidth]{vag_06.png} \\ (b)}
-\end{minipage}
-\caption{The problems based on functions (\ref{VAG}) }
-\label{fig:VAG}
+\begin{figure}[ht]
+  \centering
+  \begin{tabular}[b]{cc}
+    \includegraphics[width=.44\linewidth]{1.png} & \includegraphics[width=.44\linewidth]{2.png}\\
+    \small (a) & \small (b) \\
+    \includegraphics[width=.44\linewidth]{3.png} & \includegraphics[width=.44\linewidth]{4.png}\\
+    \small (c) & \small (d) 
+  \end{tabular}
+  \caption{The test problems generated by GCGen}
+	\label{fig:VAG}
 \end{figure}
+
+Fig.~\ref{fig:VAG} (a,b,c,d) also shows the points of 425, 381, 289 and 188 trials, 
+correspondingly, performed by the \textit{index method} for solving constrained global 
+optimization problems until the required accuracy $\epsilon=10^{-2}$ was achieved. The 
+conditional optimizer is shown as a red point and the best estimation of the optimizer is shown 
+as a blue point.
+
+The index method has been proposed and developed in 
+\cite{Strongin2000,Sergeyev2001,Barkalov2002}. The approach is based on a separate 
+accounting for each constraint of the problem and is not related to the use of the penalty 
+functions. According to the rules of index method, every iteration includes a sequential 
+checking of fulfillment of the problem constraints at this point. The first occurrence of violation 
+of any constraint terminates the trial and initiates the transition to the next iteration. This allows: 
+(i) accounting for the information on each constraint separately and (ii) solving the problems, in 
+which the function values may be undefined out of the feasible domain. 
+%It should be noted, that the index method can be efficiently parallelized for accelerators 
+%\cite{Barkalov2015,Barkalov2016}.
 
 
 \section {Conclusion}
-\Russian
-This paper considers the method for generating global optimization test problems with non-convex constraints that allows:
-\begin{itemize}
-	\item to control the size of feasible domain with respect to the whole domain of the parameters' variation;
-	\item to known a priori the conditional global minimizer of the objective function;
 
-	\item to generate the unconditional global minimizer of the objective function out of the feasible domain;
-	\item генерировать задачи с точкой условного минимума, расположенной на границе допустимой области;
-	\item задавать число ограничений, активных в точке оптимума.
+This paper considers the method for generating the global optimization test problems with non-
+convex constraints, which allows:
+\begin{itemize}
+	\item controlling the size of the feasible domain with respect to the whole domain of the 
+parameters' variation;
+	\item knowing \textit{a priori} the conditional global minimizer of the objective 
+function;
+	\item generating the unconditional global minimizer of the objective function out of the 
+feasible domain;
+	\item generating the problems with a conditional minimum point located at the boundary 
+of the feasible domain;
+	\item defining the number of constraints active at the optimum point.
 \end{itemize}
 
-The demonstration of the developed approach in application to well-known index method for solving complex multiextremal optimization problems with non-convex constraints is considered.
+The demonstration of the developed approach in application to well-known index method for 
+solving complex multiextremal optimization problems with non-convex constraints is 
+considered.
 
-The developed approach allows generating any number of test global optimization problems with non-convex constraints for performing multiple computational experiments in order to obtain a reliable evaluation of the efficiency of the developed optimization algorithms.
+The developed approach allows generating any number of test global optimization problems 
+with non-convex constraints for performing multiple computational experiments in order to 
+obtain a reliable evaluation of the efficiency of the developed optimization algorithms.
 
 % Acknowledgement
 \section{ACKNOWLEDGMENTS}
@@ -169,3 +271,4 @@ This research was supported by the Russian Science Foundation, project No 16-11-
 
 
 \end{document}
+
