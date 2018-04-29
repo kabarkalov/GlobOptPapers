@@ -39,7 +39,7 @@
 %
 \begin{document}
 
-\title{Parallel Algorithm for Solving Constrained Global Optimization Problems
+\title{Parallel Computing for Constrained Global Optimization Problems
 \thanks{The study was supported by the Russian Science Foundation, project No 16-11-10150.}
 }
 %\subtitle{Do you have a subtitle?\\ If so, write it here}
@@ -53,11 +53,11 @@
 %\authorrunning{Short form of author list} % if too long for running head
 
 \institute{K. Barkalov  \at
-               Institute of Information Technology, Mathematics and Mechanics\\ Lobachevsky State University of Nizhni Novgorod\\ Nizhni Novgorod, Russia \\
+               Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia \\
               \email{konstantin.barkalov@itmm.unn.ru} 
            \and
            I. Lebedev \at
-					Institute of Information Technology, Mathematics and Mechanics\\ Lobachevsky State University of Nizhni Novgorod\\ Nizhni Novgorod, Russia \\
+					Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia \\
 							\email{ilya.lebedev@itmm.unn.ru} 
 }
 
@@ -122,9 +122,9 @@ Q_1=[0,1], \; Q_{i+1}=\left\{x \in Q_i : g_i(y(x)) \leq 0 \right\}, \; 1 \leq i 
 \]
 
 These conditions allows to introduce a classification of the points $x \in [0,1]$ according to the number $\nu (x)$ of the constraints computed at this point. The \textit{index} $\nu(x)$ can also be defined by the conditions
-\[
+\begin{equation}\label{nu}
 g_i(y(x)) \leq 0, \; 1 \leq i < \nu, \; g_\nu(y(x))>0,
-\]
+\end{equation}
 where the last inequality is inessential if $\nu=m+1$.
 
 The considered dimensionality reduction scheme juxtaposes to a multidimensional problem with lipschitzian functions a one-dimensional problem, where the corresponding functions satisfy uniform H{\"o}lder condition (see \cite{Sergeyev2013}), i.e.,
@@ -136,16 +136,9 @@ Here $N$ is the dimensionality of the initial multidimensional problem and the c
 Thus, \textit{a trial} at a point $x^k \in [0,1]$ executed at the $k$-th iteration of the algorithm will consist in the following sequence of operations:
 \begin{itemize}
 	\item Determine the \textit{image} $y^k=y(x^k)$ in accordance with the mapping $y(x)$;
-	\item Compute the values $g_1(y^k),...,g_\nu(y^k),$ where the index $\nu \leq m$ is determined by the conditions
-	\[
-		g_i(y^k )\leq 0, \; 1 \leq i < \nu, \; g_\nu(y^k)>0, \; \nu \leq m.
-	\]
+	\item Compute the values $g_1(y^k),..., g_\nu(y^k),$ where $\nu = \nu(x^k)$ is from (\ref{nu}). 
 \end{itemize}
-The occurrence of the first violation of the constraint terminates the trial. In the case, when the point $y^k$ is a feasible one, i.e. when $x^k \in Q_{m+1},$ the trial includes the computation of the values of all problem functions and the index is accepted to be $\nu=m+1$. The pair of values
-\[
-\nu=\nu(x^k), \; z^k=g_\nu(y(x^k))
-\]
-is a \textit{trial result}.
+The pair of values $ \{ \nu=\nu(x^k), \; z^k=g_\nu(y(x^k)) \} $ is a \textit{trial result}.
 
 The scheme of the serial index algorithm is as follows. The first trial is executed at an arbitrary internal point $x_1 \in (0,1)$. The selection of the point $x^{k+1}, \; k \geq 1,$ of any next trial is determined by the following steps.
 
@@ -212,22 +205,22 @@ is the result of the trial at the point $x^k$.
 
 The decision rules for the proposed parallel algorithm, in general, are the same as the rules of the sequential algorithm (except the method of the trial execution). For the organization of the interactions among the processors, the queues are created on each processor, where the processors store the information on the executed iterations in the form of the tuples: the processor number $s$, the trial point $x^{k_s}$, the index $\nu(x^{k_s})$, and the value $g_\nu(y^s (x^{k_s} ) )$. Moreover, the index of the blocked point is assumed to be equal to $-1$; the function value at this point is undefined.
 
-The proposed parallelization scheme was implemented with the use of MPI technology. Main features of implementation consist in the following. A separate MPI-process is created for each of $S$ one-dimensional problems being solved, usually, one process per one processor employed. Each process can use $p$ threads, usually one thread per an accessible core.
+The proposed parallelization scheme was implemented with the use of MPI and OpenMP technologies. A separate MPI-process is created for each of $S$ one-dimensional problems being solved, one process per one processor employed. Each process use $p$ threads for solving one-dimensional problem, one thread per an accessible core.
 
-At every iteration of the method, the process with the index $s, 0\leq s < S,$ performs $p$ trials in parallel at the points $x^{s+iS}, 0\leq i < p$. At that, each process stores all $S\cdot p$ points, and an attribute indicating whether this point is blocked by another process or not is stored for each point. Let us remind that the point is blocked if the process starts the execution of a trial at this point.
+%At every iteration of the method, the process with the index $s, 0\leq s < S,$ performs $p$ trials in parallel at the points $x^{s+iS}, 0\leq i < p$. At that, each process stores all $S\cdot p$ points, and an attribute indicating whether this point is blocked by another process or not is stored for each point. Let us remind that the point is blocked if the process starts the execution of a trial at this point.
 
-At every iteration of the algorithm, operating within the $s$-th process, determines the coordinates of $p$ ``its own'' trial points. Then, the interchange of the coordinates of images of the trial points $y^{s+iS},\; 0\leq i<p,\; 0\leq s< S$ is performed (from each process to each one). After that, the preimages $x^{q+iS},\; 0\leq q<S,\; q\neq s$ of the points received by the $s$-th process from the neighbor ones are determined with the use of the evolvent $y^s(x)$. The points blocked within the $s$-th process will correspond to the preimages obtained. Then, each process performs the trials at the non-blocked points, the computations are performed in parallel using OpenMP. The results of the executed trials (the index of the point, the computed values of the problem functions, and the attribute of unblocking of this point) are transferred to all rest processes. All the points are added to the search information database, and the transition to the next iteration is performed.
+%At every iteration of the algorithm, operating within the $s$-th process, determines the coordinates of $p$ ``its own'' trial points. Then, the interchange of the coordinates of images of the trial points $y^{s+iS},\; 0\leq i<p,\; 0\leq s< S$ is performed (from each process to each one). After that, the preimages $x^{q+iS},\; 0\leq q<S,\; q\neq s$ of the points received by the $s$-th process from the neighbor ones are determined with the use of the evolvent $y^s(x)$. The points blocked within the $s$-th process will correspond to the preimages obtained. Then, each process performs the trials at the non-blocked points, the computations are performed in parallel using OpenMP. The results of the executed trials (the index of the point, the computed values of the problem functions, and the attribute of unblocking of this point) are transferred to all rest processes. All the points are added to the search information database, and the transition to the next iteration is performed.
 
 \section{Results of Numerical Experiments}
 \label{sec:4}
 
 A well-known approach to the investigation and comparing of the multiextremal optimization algorithms is based on testing these methods by solving a set of problems, chosen randomly from some specially designed class.
 
-GKLS generator for the functions of arbitrary dimensionality with known properties (the number of local minima, the size of their domains of attraction, the global minimizer, etc.) has been proposed in \cite{Gaviano2003}. Four GKLS classes of differentiable test functions of the dimensions $N = 4$ and $5$, have been used. For each dimension, both \textit{Hard} and \textit{Simple} classes have been considered. The difficulty of a class was increased either by decreasing the radius of the attraction region of the global minimizer, or by decreasing the distance from the global minimizer $y^*$ to the domain boundaries. Application of the generator for studying some optimization algorithms has been described in \cite{Paulavicius2014,Sergeyev2015}.
+%GKLS generator for the functions of arbitrary dimensionality with known properties (the number of local minima, the size of their domains of attraction, the global minimizer, etc.) has been proposed in \cite{Gaviano2003}. Four GKLS classes of differentiable test functions of the dimensions $N = 4$ and $5$, have been used. For each dimension, both \textit{Hard} and \textit{Simple} classes have been considered. The difficulty of a class was increased either by decreasing the radius of the attraction region of the global minimizer, or by decreasing the distance from the global minimizer $y^*$ to the domain boundaries. Application of the generator for studying some optimization algorithms has been described in \cite{Paulavicius2014,Sergeyev2015}.
 
-In this study we will use GKLS generator to produce the constrained problems. The scheme that allows to form the constrained global optimization problems is proposed in \cite{Gergel2017}. In the previous investigations, the index method has been confirmed experimentally to be not inferior to well-known analogues. The comparing of the method to well known DIRECT one \cite{Jones2001} in solving the unconstrained optimization problems has been performed in \cite{Barkalov2015,Barkalov2016}. In the present study, an experimental investigation of the speedup, which is obtained by the use of the index method in combination with the two-level parallelization scheme from \cite{Sidorov2015}.
+In this study we will use GKLS generator of the functions of arbitrary dimensionality proposed in \cite{Gaviano2003} to produce the constrained problems. The scheme that allows to form the constrained global optimization problems is proposed in \cite{Gergel2017}. In the previous investigations, the index method has been confirmed experimentally to be not inferior to well-known analogues. The comparing of the method to well known DIRECT one \cite{Jones2001} in solving the unconstrained optimization problems has been performed in \cite{Barkalov2015,Barkalov2016}. In the present study, an experimental investigation of the speedup, which is obtained by the use of the index method in combination with the two-level parallelization scheme from \cite{Sidorov2015}.
 
-The experiments have been carried out by solving a series of $100$ problems with two constraints and the objective functions from the \textit{Simple} and \textit{Hard} GKLS classes with the dimensionalities $N=4$, $N=5$. The number of the used cluster nodes $S$ and, correspondingly, the number of evolvents as well as the number of cores $p$ employed at each node have been varied. The problem was considered to be solved, if the algorithm generated trial point $y^k$ in $\delta$-vicinity of the global minimum, i.e., $\left\|y^k-y^*\right\|\leq \delta$. The size of the vicinity was selected as $\delta=0.03\left\|b-a\right\|$, where $a$ and $b$ are borders of the search domain. For the purpose of simulation of the computational complexity inherent to applied problems of optimization, calculation of the problem functions in all performed experiments was made more complex by additional calculations without changing the type of function and arrangement of its minima (series summation of $80$ thousand elements).
+The experiments have been carried out by solving a series of $100$ problems with two constraints and the objective functions from the \textit{Simple} and \textit{Hard} GKLS classes with the dimensionalities $N=4$, $N=5$. The number of the used cluster nodes $S$ and, correspondingly, the number of evolvents as well as the number of cores $p$ employed at each node have been varied. The problem was considered to be solved, if the algorithm generated trial point $y^k$ in $\delta$-vicinity of the global minimum, i.e., $\left\|y^k-y^*\right\|\leq \delta$. The size of the vicinity was selected as $\delta=0.03\left\|b-a\right\|$, where $a$ and $b$ are boundaries of the search domain. For the purpose of simulation of the computational complexity inherent to applied problems of optimization, calculation of the problem functions in all performed experiments was made more complex by additional calculations without changing the type of function and arrangement of its minima (series summation of $80$ thousand elements).
 
 The average time and number of iterations, which were required to solve the problems of the series at various parallelization parameters are reflected in Tables 1 and 2. Here \textit{Node(core)} are the numbers of employed nodes and cores per a node, correspondingly.
 
@@ -277,6 +270,7 @@ The average time and number of iterations, which were required to solve the prob
 
 
 The results demonstrate the presence of the speedup when using shared memory at a node (performing several trials within a problem in parallel) as well as the distributed memory (parallel solving of several subproblems at different nodes). At that, the highest time speedup was 10 (when using 64 cored on 4 cluster nodes), the highest iteration speedup was 95 (when using 128 cores on 8 cluster nodes). The difference in the speedups in time and in the number of iterations can be explained by the effect of the overheads of the data transmission between the processes. Note that when solving the applied optimization problems, the computing of the problem function values even in one point is a computation costly operation. The data transfer overheads will not affect the total computational costs predominately in this case, and the time speedup will not differ from the iteration one so strongly.
+%Описание инфраструктуры
 
 \section{Conclusions}
 \label{sec:5}
@@ -332,11 +326,9 @@ Gaviano, M., Lera, D., Kvasov, D.E., Sergeyev, Ya.D.: Software for generation of
 
 %\bibitem{Sergeyev2006} Sergeyev, Ya.D., Kvasov, D.E.: Global search based on efficient diagonal partitions and a set of Lipschitz constants. SIAM J. Optim. 16(3), 910--937 (2006)
 
-\bibitem{Paulavicius2014}
-Paulavi\v cius, R., Sergeyev, Y.D., Kvasov, D.E., \v Zilinskas, J. Globally-biased \textsc{Disimpl} algorithm for expensive global optimization. J. Glob. Optim. 59(2), 545--567 (2014)
+%\bibitem{Paulavicius2014} Paulavi\v cius, R., Sergeyev, Y.D., Kvasov, D.E., \v Zilinskas, J. Globally-biased \textsc{Disimpl} algorithm for expensive global optimization. J. Glob. Optim. 59(2), 545--567 (2014)
 
-\bibitem{Sergeyev2015}
-Sergeyev, Y.D., Kvasov, D.E.: A deterministic global optimization using smooth diagonal auxiliary functions. Communications in Nonlinear Science and Numerical Simulation. 21(1-3), 99–111 (2015)
+%\bibitem{Sergeyev2015} Sergeyev, Y.D., Kvasov, D.E.: A deterministic global optimization using smooth diagonal auxiliary functions. Communications in Nonlinear Science and Numerical Simulation. 21(1-3), 99–111 (2015)
 
 \bibitem{Gergel2017}
 Gergel, V.: An approach for generating test problems of constrained global optimization. Lecture Notes in Computer Science. 10556, 314--319 (2017)
