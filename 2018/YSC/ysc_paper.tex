@@ -51,7 +51,7 @@
 %%
 % Regular title as in the article class.
 %
-\title{Comparison of dimensionality reduction schemes for parallel global optimization
+\title{Comparison of dimensionality reduction schemes for direct global optimization
 algorithms}
 
 % \titlerunning{} has to be set to either the main title or its shorter
@@ -59,34 +59,32 @@ algorithms}
 % EasyChair, this command is mandatory: a document without \titlerunning
 % will be rejected by EasyChair
 
-\titlerunning{Dimension reduction schemes in parallel GO}
+\titlerunning{Dimension reduction schemes in direct GO}
 
 % Authors are joined by \and. Their affiliations are given by \inst, which indexes into the list
 % defined using \institute
 %
 \author {
-Vladislav Sovrasov \and
-Ilya Lebedev
+Vladislav Sovrasov
 }
 
 % Institutes for affiliations are also joined by \and,
 \institute  {
   Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia
   \email{sovrasov.vlad@gmail.com}\\
-  \email{ilya.lebedev@itmm.unn.ru}\\
 }
 %  \authorrunning{} has to be set for the shorter version of the authors' names;
 % otherwise a warning will be rendered in the running heads. When processed by
 % EasyChair, this command is mandatory: a document without \authorrunning
 % will be rejected by EasyChair
 
-\authorrunning{Sovrasov V., Lebedev I.}
+\authorrunning{Sovrasov V.}
 
 \begin{document}
 
 \maketitle
 
-\keywords{Global optimization, Dimension reduction, Parallel algorithms,
+\keywords{Global optimization, Dimension reduction,
 Multidimensional multiextremal optimization, Global search algorithms}
 
 \begin{abstract}
@@ -296,7 +294,6 @@ $2^N$) if necessary.
 
 %------------------------------------------------------------------------------
 \subsection{Non-Univalent evolvent}
-%\begin{Russian}
 
 As it has been already mentioned above (Sec.~\ref{sec:shifted}), the loss of information on the
 proximity of the points in the multidimensional space could be compensated in part by the use
@@ -315,9 +312,7 @@ two nodes of which the corresponding one-dimensional preimages from $[0,1]$ are 
 (marked by the squares and circles). Each node mentioned above has 3 preimages.
 
 A potentially large number of preimages (up to $2^N$) and the inability to use the parallel
-scheme for the multiple mappings form Sec.~\ref{sec:parallel_evolvents} are the disadvantages
-of the non-univalent evolvent.
-
+scheme for the multiple mappings are the disadvantages of the non-univalent evolvent.
 
 %------------------------------------------------------------------------------
 \subsection{Smooth evolvent}
@@ -337,8 +332,6 @@ functions.
 %computations of the curve increases with increasing accuracy of approximation and
 %space dimension.
 
-%\end{Russian}
-
 \begin{figure}[ht]
     \centering
     \subfloat[Smooth evolvent]{{\includegraphics[width=.6\textwidth]{pictures/smooth.pdf}}\label{fig:smooth}}
@@ -347,8 +340,7 @@ evolvent]{{\includegraphics[width=.4\textwidth]{pictures/noninjective.pdf}}\labe
     \caption{Different evolvents built with low density}
 \end{figure}
 
-\section{Parallel Computations for Solving Global Optimization Problems.}
-\subsection{Core Multidimensional Algorithm of Global Search (MAGS)}
+\section{Core Multidimensional Algorithm of Global Search}
 
 The optimization methods applied in Globalizer to solve the reduced problem
 (\ref{eq:oneDimTask}) are based on the MAGS method, which can be presented as follows ---
@@ -384,63 +376,6 @@ The convergence conditions and exact formulas for descision rules $R(i)$ and $d(
 described algorithm are given, for example, in \cite{strSergGO}.
 
 %------------------------------------------------------------------------------
-\subsection{Parallel algorithm exploiting a set of evolvents}
-\label{sec:parallel_evolvents}
-Using the multiple mapping allows solving initial problem (\ref{eq:task}) by parallel solving the
-problems
-\[
-\min\{\varphi(y^s(x)):x\in [0,1]\}, 1\leqslant s\leqslant S
-\]
-on a set of intervals $[0,1]$ by the index method. Each one-dimensional problem is solved on a
-separate processor. The trial results at the point \(x^k\) obtained for the problem being solved by
-particular processor are interpreted as the results of the trials in the rest problems (in the
-corresponding points \(x^(k_1 ),\dots,x^(k_S))\). In this approach, a trial at the point \(x^k \in
-[0,1]\) executed in the framework of the \(s\)-th problem, consists in the following sequence of
-operations.
-\par
-1. Determine the image \(y^k=y^s (x^k)\) for the evolvent \(y^s (x)\).
-\par
-2. Inform the rest of processors about the start of the trial execution at the point\( y^k\) (the
-blocking of the point \(y^k\) ).
-\par
-3. Determine the preimages \(x{}^{k_s}  \in [0,1], 1\leqslant s\leqslant S\), of the point \(y^k\) and interpret the
-trial executed at the point \(y^k \in D \) as the execution of the trials in the \(S\) points
-\(x{}^{k_1} ,\dots,x{}^{k_s} \)
-\par
-4. Inform the rest of processors about the trial results at the point \(y^k\).
-\par
-
-The decision rules for the proposed parallel algorithm, in general, are the same as the rules of the
-sequential algorithm (except the method of the trial execution). Each processor has its own copy
-of the software realizing the computations of the problem functions and the decision rule of the
-index algorithm. For the organization of the interactions among the processors, the queues are
-created on each processor, where the processors store the information on the executed iterations
-in the form of the tuples: the processor number \(s\), the trial point \(x{}^{k_s}\).
-\par
-The proposed parallelization scheme was implemented with the use of MPI technology. Main
-features of implementation consist in the following. A separate MPI-process is created for each
-of \(S\) one-dimensional problems being solved, usually, one process per one processor
-employed. Each process can use $p$ threads, usually one thread per an accessible core.
-\par
-At every iteration of the method, the process with the index \(s,0\leqslant s< S\) performs p
-trials in parallel at the points \(x^{(s+iS)},0\leqslant i<p\). At that, each process stores all
-\(S_p\) points, and an attribute indicating whether this point is blocked by another process or
-not is stored for each point. Let us remind that the point is blocked if the process starts the
-execution of a trial at this point.
-\par
-At every iteration of the algorithm, operating within the \(s\)-th process, determines the
-coordinates of \(p\) ``its own" trial points. Then, the interchange of the coordinates of images of
-the trial points \(y^{(s+iS)},0\leqslant i<p, 0\leqslant s< S\) is performed (from each process to
-each one). After that, the preimages \(x^{(q+iS)},0\leqslant q<S,q\not=s\) of the points
-received by the \(s\)-th process from the neighbor ones are determined with the use of the
-evolvent \(y^s (x)\). The points blocked within the \(s\)-th process will correspond to the
-preimages obtained. Then, each process performs the trials at the non-blocked points, the
-computations are performed in parallel using OpenMP. The results of the executed trials (the
-index of the point, the computed values of the problem functions, and the attribute of
-unblocking of this point) are transferred to all rest processes. All the points are added to the
-search information database, and the transition to the next iteration is performed.
-
-%------------------------------------------------------------------------------
 \section{Results of Numerical Experiments}
 %\begin{Russian}
 
@@ -449,9 +384,6 @@ State University of Nizhni Novgorod. A computational node included 2 Intel
 Sandy Bridge E5-2660 2.2 GHz processors, 64 GB RAM. The CPUs had 8 cores (i. e. total 16
 cores were available per a node). All considered algorithms and evolvents were implemented
 using C++ within the Globalizer software system~\cite{globalizerSystem}.
-In order to enable the parallelism,
-OpenMP was used on a single node, and MPI was used for the parallelization on
-several nodes.
 
 The comparison of the global optimization algorithms was performed by the evaluation of the
 quality of solving a set of problems from some test class.
@@ -461,8 +393,6 @@ dimensions. In the present work, the series of 100 problems from the classes of 
 of 2, 3, 4, and 5 were considered.
 Each class had two degrees of complexity --- \textit{Simple} and \textit{Hard}. The parameters
 of the generator for the considered classes were given in Ref.~\cite{Gaviano2003}.
-
-%\end{Russian}
 
 In order to evaluate the efficiency of an algorithm on a given set of 100 problems, we will use
 the operating characteristics \cite{grishaginClass}, which are defined as a
@@ -543,97 +473,6 @@ problems from GKLS 3d Simple class using the shifted evolvent}
 \end{table}
 
 %------------------------------------------------------------------------------
-\subsection{Parallel rotated evolvents}
-\label{sec:results_parallel}
-In order to evaluate the efficiency of the parallel algorithm from
-Sec.~\ref{sec:parallel_evolvents}, the numerical experiments on the GKLS 4d (Hard, Simple)
-classes and on the GKLS 5d (Hard, Simple) ones were conducted. The value of \(r\) in all
-experiments was equal to 5.0, the size of the \(\delta\)-vicinity of the known solution was
-increased up to 0.3. When solving the series of problems, up to 8 cluster nodes and up to 32
-computational threads on each node were employed.
-
-In Table~\ref{tab:iterations}, an averaged number of iterations when solving 100 problems from
-each considered class is presented.
-The number of iterations is reduced considerably with increasing the number of nodes and the
-number of threads on each node (except the GKLS 4d Simple class at the transition from 1
-node to 4 ones in the single thread mode).
-
-\begin{table}
-  \centering
-  \caption{Averaged numbers of iterations executed by the parallel algorithm for solving the test
-optimization problems}
-  \label{tab:iterations}
-  \begin{tabular}{cccccccc}
-    \cline{3-8}\noalign{\smallskip}
-    \multicolumn{2}{c}{  } & \textit{p} & \multicolumn{2}{c}{$N=4$} & &
-\multicolumn{2}{c}{$N=5$}   \\
-    \noalign{\smallskip} \cline{4-5} \cline{7-8}  \noalign{\smallskip}
-    \multicolumn{2}{c}{  } & & \textit{Simple} & \textit{Hard} & & \textit{Simple} &
-\textit{Hard}  \\
-    \noalign{\smallskip}\hline
-    I &
-    \parbox{0.25\textwidth}{
-    \begin{center}
-    \textbf{1 cluster node}
-    \end{center}		}
-      & \textit{1} & 12167 & 25635 & & 20979 & 187353  \\
-    &  & \textit{32} & 328 & 1268  & &   898 & 12208 \\
-    \hline \noalign{\smallskip}
-II  & \textbf{4 cluster nodes}  %\multirow{3}{*}{}
-  & \textit{1} & 25312 & 11103 & & 1472 & 17009 \\
-&   & \textit{32} & 64 &   913 & & 47 & 345 \\
-    \noalign{\smallskip}\hline	\noalign{\smallskip}
-III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
-  & \textit{1}  & 810 & 4351 & & 868 & 5697  \\
-& & \textit{32} & 34  & 112  & & 35  & 868 \\
-    \noalign{\smallskip}\hline
-  \end{tabular}
-\end{table}
-
-If one assumes the costs of parallelization to be negligible as compared to the costs of
-computing the objective functions in the optimization problems, the speedup in time due to the
-use of the parallel method would be equal to the speedup with respect to the number of
-iterations. However, actually this suggestion is not always true. In all numerical experiment the
-time of computing the objective function was approximately $10^{-3}$ sec. In
-Table~\ref{tab:speedup}, the speedups in iterations and in time (in the pendent brackets) are
-presented. In the first row of the table corresponding to the sequential mode, the averaged time
-of solving a single problem is presented in the pendent brackets. One can see from the table that
-for the GKLS 4d classes it is more efficient to utilize a single node in the multithread mode
-whereas for solving more complex five-dimensional problems, the use of several nodes is better,
-each node is operating in the parallel mode.
-
-\begin{table}
-  \centering
-  \caption{Speedup of parallel computations executed by the parallel algorithm}
-  \label{tab:speedup}
-  \begin{tabular}{cccccccc}
-    \cline{3-8}\noalign{\smallskip}
-    \multicolumn{2}{c}{  } & \textit{p} & \multicolumn{2}{c}{$N=4$} & &
-\multicolumn{2}{c}{$N=5$}   \\
-    \noalign{\smallskip} \cline{4-5} \cline{7-8}  \noalign{\smallskip}
-    \multicolumn{2}{c}{  } & & \textit{Simple} & \textit{Hard} & & \textit{Simple} &
-\textit{Hard}  \\
-    \noalign{\smallskip}\hline
-    I &
-    \parbox{0.25\textwidth}{
-    \begin{center}
-    \textbf{1 cluster node}
-    \end{center}		}
-    & \textit{1}   & 12167(10.58s) & 25635(22.26s) & & 20979(22.78s) & 187353(205.83s)  \\
-  &  & \textit{32} & 37.1(18.03) & 20.2(8.55)  & &  23.3(8.77) & 15.4(9.68) \\
-  \hline \noalign{\smallskip}
-II  & \textbf{4 cluster nodes}  %\multirow{3}{*}{}
-& \textit{1} &        0.5(0.33) & 2.3(0.86)  & & 14.3(6.61) & 11.0(6.06) \\
-&   & \textit{32} & 190.1(9.59) & 28.1(1.08) & & 446.4(19.79) & 543.0(43.60) \\
-  \noalign{\smallskip}\hline	\noalign{\smallskip}
-III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
-& \textit{1}    & 15.0(6.05)  & 5.9(2.36)   & & 24.2(17.56)  & 32.9(24.87)  \\
-& & \textit{32} & 357.9(2.36) & 228.9(2.64) & & 582.8(20.96) & 793.0(33.89) \\
-    \noalign{\smallskip}\hline
-  \end{tabular}
-\end{table}
-
-%------------------------------------------------------------------------------
 \section{Conclusions}
 In the present work, 5 different Peano curve-type mappings applied to the dimensionality
 reduction in the global optimization problems were considered.
@@ -647,9 +486,7 @@ developing the optimization algorithms scalable onto several cluster nodes based
   \item the shifted evolvents introduce large overhead costs on the operation of the method due
 to the requirement to adding an auxiliary functional constraint into the problem (\ref{eq:task}).
 The experiments have demonstrated that up to 95\% of the search information account for the
-points, in which the auxiliary constraint is computed only. The shifted evolvents can be used as
-the base for the parallel algorithm from Sec.~\ref{sec:parallel_evolvents}. However, the costs of
-processing the auxiliary points would result likely in a small speedup from the parallelization.
+points, in which the auxiliary constraint is computed only.
 However, if the objective function is computation-costly enough, the use of these evolvents
 could make sense.
   \item the rotated evolvents have provided an acceprable speed of convergence in the problems
@@ -658,13 +495,6 @@ introduction of the auxiliary constraints that allows constructing an efficient 
 based on these evolvents.
 \end{itemize}
 
-In Sec.~\ref{sec:results_parallel} the results of the numerical experiments are presented, which
-have demonstrated the algorithm from Sec.~\ref{sec:parallel_evolvents} based on the rotated
-evolvents allowed obtaining the speedup up to 43 times when solving the problem series
-employing several nodes of the computer cluster. It is worth noting that the objective functions
-in the considered problems are not computation-costly (the averaged computation time was
-$10^{-3}$ sec). In the case of more complex problems,the speedup in time could approach the
-speedup with respect to the number of iterations.
 %------------------------------------------------------------------------------
 % Index
 %\printindex
