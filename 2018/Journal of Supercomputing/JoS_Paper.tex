@@ -69,7 +69,7 @@
 \maketitle
 
 \begin{abstract}
-This paper considers a parallel algorithm for solving multiextremal problems with non-convex constrains. Within the framework of the approach proposed here, the solution of the initial multidimensional problem is reduced solving a set of linked one-dimensional problems in parallel. The parallelization scheme does not require a single control process since the solution of any one-dimensional problem is a solution of the initial multidimensional one. The non-convex constraints are accounted for by a novel index scheme without utilizing the ideas of penalty functions. The efficiency of the parallel algorithm was confirmed experimentally by solving numerically of several hundred multidimensional multiextremal problems with non-convex constrains generated randomly.
+This paper considers a parallel algorithm for solving multiextremal problems with non-convex constrains. Within the framework of the approach proposed here, the solution of the initial multidimensional problem is reduced to solving a set of linked one-dimensional problems in parallel. The parallelization scheme does not require a single control process since the solution of any one-dimensional problem is a solution of the initial multidimensional one. The non-convex constraints are accounted for by a novel index scheme without utilizing the ideas of penalty functions. The efficiency of the parallel algorithm was confirmed experimentally by solving numerically of several hundred multidimensional multiextremal problems with non-convex constrains generated randomly.
 \keywords{Global optimization \and Constrained problems \and Non-convex constraints \and Dimensionality reduction \and Parallel algorithms}
 % \PACS{PACS code1 \and PACS code2 \and more}
 % \subclass{MSC code1 \and MSC code2 \and more}
@@ -83,7 +83,7 @@ The aim of this paper is to examine parallel methods for solving global optimiza
 
 The numerical algorithms for solving the problems of the above-mentioned class are noted for an exponential growth of the computational costs with increasing dimensionality (the so-called ``curse of dimensionality''). The use of supercomputers expands the field of application of the global optimization methods and, however, at the same time, it gives rise to the problem of efficient parallelization of the search process.
 
-Parallel algorithms utilizing heuristic approaches and based in one way or another on the idea of random search are at present quite popular (see \cite{RefFerreiro,RefZhu,Korosec,Guerrero}). However, because of their probabilistic nature, the algorithms of such type guarantee the convergence to the global optimum solution in the probabilistic sense only, which makes them less attractive than deterministic parallel global optimization algorithms \cite{Jones2001,Paulavicius2011,Evtushenko2013}. As a rule, efficient deterministic algorithms are intended to solve unconstrained optimization problems. The problems with constraints are solved using the penalty function method that has a number of disadvantages. In particular, this method cannot be applied to the problems with the \textit{partially defined functions} (i.e. when any constraint is violated, the values of all the other functions of the problem remain undefined).
+Parallel algorithms utilizing heuristic approaches and based in one way or another on the idea of random search are at present quite popular (see \cite{RefFerreiro,RefZhu,Korosec,Guerrero}). However, because of their probabilistic nature, the algorithms of such type guarantee the convergence to the global optimum solution in the probabilistic sense only, which makes them less attractive than deterministic parallel global optimization algorithms \cite{Jones2001,Paulavicius2011,Evtushenko2013,Strongin2000}. As a rule, efficient deterministic algorithms are intended to solve unconstrained optimization problems. The problems with constraints are solved using the penalty function method that has a number of disadvantages. In particular, this method cannot be applied to the problems with the \textit{partially defined functions} (i.e. when any constraint is violated, the values of all the other functions of the problem remain undefined).
 
 Among the examples of such problems are the optimal control problems described through systems of ordinary differential equations with a certain matrix $A$ on the right side \cite{Balandin2011,Balandin2017}. It is only possible to calculate the optimality criteria for these problems if the matrix $A$ is a Hurwitz matrix, i.e. every eigenvalue of $A$ has a strictly negative real part. Otherwise, the value of the criteria is indeterminate.
 
@@ -166,7 +166,7 @@ A detailed description of this algorithm and the corresponding theory of converg
 
 The reduction of the multidimensional problems to the one-dimensional ones using evolvents has such important properties as the continuity and preservation of boundedness of function's divided differences. However, a partial loss of information on the nearness of the points in the multidimensional space occurs in this case since a point $x \in [0,1]$ has only the left and the right neighbors while the corresponding point $y(x) \in R^N$ has the neighbors in $2N$ directions. As a result, when using the mappings like a Peano curve, the images $y', y''$, which are close to each other in the $N$-dimensional space can correspond to the preimages $x', x''$, which can be far away from each other in the interval $[0,1]$. This property results in excess computations since several limit points $x', x''$ of the trial sequence generated by the index method in the interval $[0,1]$ can correspond to a single limit point $y$ in the $N$-dimensional space.
 
-One of the possible ways to overcome this disadvantage consists in using the multiple mapping $Y^S(x)=\{ y^1 (x),...,y^S(x)\}$ instead of the single evolvent $y(x)$. To construct the set $Y^S(x)$, different approaches can be used. For example, in \cite{Strongin2000} a scheme was implemented, according to which each evolvent $y^i(x)$ from $Y^S(x)$ is constructed as a result of shifting the original evolvent $y(x)$ along the main diagonal of the hypercube $D$. The set of Peano curves thus constructed allows one to obtain $y', y''$ from $D$ for any close multidimensional images, which differ only in one coordinate, close preimages $x', x''$ from the interval $[0,1]$ for the evolvent $y^s(x), 1\leq s \leq S$.
+One of the possible ways to overcome this disadvantage consists in using the multiple mapping $Y^S(x)=\{ y^1 (x),...,y^S(x)\}$ instead of the single evolvent $y(x)$. To construct the set $Y^S(x)$, different approaches can be used. For example, in \cite{Strongin2000} a scheme was implemented, according to which each evolvent $y^i(x)$ from $Y^S(x)$ is constructed as a result of shifting the original evolvent $y(x)$ along the main diagonal of the hypercube $D$. The set of Peano curves thus constructed allows one to obtain close preimages $x', x''$ from the interval $[0,1]$ for the evolvent $y^s(x), 1\leq s \leq S$ for any close multidimensional images $y', y''$ from $D$, which differ only in one coordinate.
 
 With the use of multiple mapping, it is possible to solve the initial problem (\ref{problem}) (1) by solving in parallel the problems
 \[
@@ -217,7 +217,7 @@ A well-known approach to investigating and comparing the multiextremal optimizat
 
 %GKLS generator for the functions of arbitrary dimensionality with known properties (the number of local minima, the size of their domains of attraction, the global minimizer, etc.) has been proposed in \cite{Gaviano2003}. Four GKLS classes of differentiable test functions of the dimensions $N = 4$ and $5$, have been used. For each dimension, both \textit{Hard} and \textit{Simple} classes have been considered. The difficulty of a class was increased either by decreasing the radius of the attraction region of the global minimizer, or by decreasing the distance from the global minimizer $y^*$ to the domain boundaries. Application of the generator for studying some optimization algorithms has been described in \cite{Paulavicius2014,Sergeyev2015}.
 
-In this study, we will use a GKLS generator of the functions of arbitrary dimensionality proposed in \cite{Gaviano2003} to produce constrained problems. The scheme for generating constrained global optimization problems is proposed in \cite{Gergel2017}. Previous investigations have confirmed experimentally that the index method is not inferior to well-known analogues. A comparison of the method with the well known DIRECT method \cite{Jones2001} in solving unconstrained optimization problems has been performed in \cite{Barkalov2015,Barkalov2016}. In the present study, an experimental investigation is carried out of the speedup, which is obtained by the use of the index method in combination with the two-level parallelization scheme from \cite{Sidorov2015}.
+In this study, we will use a GKLS generator of the functions of arbitrary dimensionality proposed in \cite{Gaviano2003} to produce constrained problems. The scheme for generating constrained global optimization problems is proposed in \cite{Gergel2017}. Previous investigations have confirmed experimentally that the index method is not inferior to well-known analogues. A comparison of the method with the well known DIRECT method \cite{Jones2001} in solving unconstrained optimization problems has been performed in \cite{Barkalov2015}. In the present study, an experimental investigation is carried out of the speedup, which is obtained by the use of the index method in combination with the two-level parallelization scheme from \cite{Sidorov2015}.
 
 The experiments have been carried out by solving a series of $100$ problems with two constraints and the objective functions from the \textit{Simple} and \textit{Hard} GKLS classes with the dimensionalities $N=4$, $N=5$. The number of the used cluster nodes $S$ and, correspondingly, the number of evolvents as well as the number of cores $p$ employed at each node have been varied. The problem was considered to be solved, if the algorithm generated a trial point $y^k$ in the $\delta$-vicinity of the global minimum, i.e., $\left\|y^k-y^*\right\|\leq \delta$. The size of the vicinity was selected as $\delta=0.03\left\|b-a\right\|$, where $a$ and $b$ are the boundaries of the search domain. For the purpose of simulation of the computational complexity inherent to applied optimization problems, calculation of the problem functions in all performed experiments was made more complex by additional calculations without changing the type of function and arrangement of its minima (a series summation of $80$ thousand elements).
 
@@ -313,14 +313,16 @@ Paulavi\v cius, R., \v Zilinskas, J., Grothey, A.: Parallel branch and bound for
 \bibitem{Evtushenko2013}
 Evtushenko, Y.G., Posypkin, M.A.: A deterministic approach to global box-constrained optimization. Optim. Lett. 7(4), 819--829 (2013)
 
+\bibitem{Strongin2000}
+Strongin, R.G., Sergeyev, Ya.D.: Global Optimization with Non-Convex Constraints. Sequential and Parallel Algorithms. Kluwer Academic Publishers, Dordrecht (2000)
+
+
 \bibitem{Balandin2011}
 Balandin, D.V., Kogan, M.M.: Optimal linear-quadratic control: From matrix equations to linear matrix inequalities. Automation and Remote Control. 72(11), 2276--2284 (2011)
 
 \bibitem{Balandin2017}
 Balandin, D.V., Kogan, M.M.: Pareto-optimal generalized $H_2$-control and vibroprotection problems. Automation and Remote Control. 78(8), 1417--1429 (2017)
 
-\bibitem{Strongin2000}
-Strongin, R.G., Sergeyev, Ya.D.: Global Optimization with Non-Convex Constraints. Sequential and Parallel Algorithms. Kluwer Academic Publishers, Dordrecht (2000)
 
 \bibitem{Sergeyev2001}
 Sergeyev, Y.D., Famularo D., Pugliese P. Index Branch-and-Bound Algorithm for Lipschitz univariate global optimization with multiextremal constraints. J. Glob. Optim. 21(3), 317--341 (2001) 
@@ -349,8 +351,7 @@ Gergel, V.: An approach for generating test problems of constrained global optim
 \bibitem{Barkalov2015}
 Barkalov, K., Gergel, V., Lebedev, I.: Use of Xeon Phi coprocessor for solving global optimization problems. Lecture Notes in Computer Science. 9251, 307--318 (2015)
 
-\bibitem{Barkalov2016}
-Barkalov, K., Gergel, V.: Parallel global optimization on GPU. J. Glob. Optim. 66(1), 3--20 (2016)
+%\bibitem{Barkalov2016} Barkalov, K., Gergel, V.: Parallel global optimization on GPU. J. Glob. Optim. 66(1), 3--20 (2016)
 
 
 
