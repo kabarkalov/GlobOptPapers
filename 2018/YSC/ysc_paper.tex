@@ -51,7 +51,7 @@
 %%
 % Regular title as in the article class.
 %
-\title{Comparison of dimensionality reduction schemes for direct global optimization
+\title{Comparison of dimensionality reduction schemes for dervative-free global optimization
 algorithms}
 
 % \titlerunning{} has to be set to either the main title or its shorter
@@ -84,16 +84,16 @@ Vladislav Sovrasov
 
 \maketitle
 
-\keywords{Global optimization, Dimension reduction,
-Multidimensional multiextremal optimization, Global search algorithms}
+\keywords{Global optimization, Dimension reduction, Derivative-free algorithms, Global search algorithms}
 
 \begin{abstract}
-This work considers a parallel algorithms for solving multi-extremal optimization problems.
-Algorithms are developed within the framework of the information-statistical approach and
-implemented in a parallel solver Globalizer. The optimization problem is solved by reducing
-the multidimensional problem to a set of joint one-dimensional problems that are solved in
-parallel. Five types of Peano-type space-filling curves are employed to reduce dimension. The
-results of computational experiments carried out on several hundred test problems are discussed.
+  A common approach to solving global optimization problems is to use
+  univariate optimization algorithms in combination with dimensional reduction schemes.
+  The paper considers five types of Peano-like space-filling curves (evolvents), which are used
+  to reduce the dimension in the derivative-free algorithm of global optimization. The algorithm
+  is univariate and developed within the framework of the information-statistical approach.
+  This work is the first one, where convergence rates and implementations details
+  of these five evolvents are considered together and directly compared.
 \end{abstract}
 
 
@@ -112,20 +112,14 @@ results of computational experiments carried out on several hundred test problem
 %------------------------------------------------------------------------------
 \section{Introduction}
 \label{sec:intro}
-
-In the present paper, the parallel algorithms for solving the multiextremal optimization problems
-are considered. In the multiextremal problems, the opportunity of reliable estimate of the global
+In the present paper, the algorithms for solving the multiextremal optimization problems
+are considered. In the multiextremal problems, the opportunity of a reliable estimate of the global
 optimum is based principally on the availability of some information on the function known
 {\textit a priori} allowing relating the probable values of the optimized function to the known
 values at the points of performed trials. Very often, such an information on the problem being
 solved is represented in the form of suggestion that the objective function $\varphi(y)$ satisfies
 Lipschitz condition with the constant $L$ not known a priori (see, for example,
-\cite{Jones2009,Gablonsky2001,Evtushenko2013}). At that, the objective function could be defined by a
-program code i. e. could represent a ``black-box''-function. Such problems are presented in the
-applications widely (problems of optimal design of objects and technological processes in
-various fields of technology, problems of model fitting according to observed data in scientific
-research, etc.).
-
+\cite{Jones2009,Gablonsky2001,Evtushenko2013}). At that, the objective function could be represented by a ``black-box''-function.
 Many methods destined to solving the problems of the class specified above reduce the solving
 of a multidimensional problem to solving the one-dimensional subproblems implicitly (see, for
 example, the methods of diagonal partitions \cite{Sergeyev2006,SergeyevKvasov2015} or
@@ -134,16 +128,19 @@ approach developed in Lobachevsky State University of Nizhni Novgorod based on t
 the dimensionality reduction with the use of Peano space-filling curves $y(x)$ mapping the
 interval $[0,1]$ of the real axis onto an $n$-dimensional cube continuously and unambiguously.
 
-Several methods of constructing the evolvents approximating the theoretical Peano curve have
-been proposed in \cite{strongin1978,Strongin1992,Goryachih2017,Gergel2009}. These
-methods were implemented in the Globalizer software system \cite{globalizerSystem}. The goal
-of the present study was comparing the properties of the evolvents and the selecting the most
-suitable ones for the use in the parallel global optimization algorithms.
+In recent years several methods of constructing Peano-type space-filling curves (\textit{evolvents})
+have been proposed \cite{strongin1978,Strongin1992,Goryachih2017,Gergel2009}. Some of them were
+succesful used to build large-scale parallel algorithms \cite{stronginGergelBarkalovParGO}.
+Presented paper numerically compares different evolvents in terms of convergence rates and
+computational efficiency. The comparison is done by solving sets consisting of hundreds of test problems and collecting
+different characteristics of convergence. As a result, practical recommendations about
+the usage of each evolvent type are given. For example, some evolvents are suitable for parallel computations,
+while others are quite useful in case of sequential solving of problems with time-consuming objective functions.
 
 %------------------------------------------------------------------------------
 \section{Statement of Multidimensional Global Optimization Problem}
 In this paper, the core class of optimization problems, which can be solved using
-Globalizer, is formulated. This class involves the multidimensional global
+univariate algorithm of global search \cite{strongin1978}, is formulated. This class involves the multidimensional global
 optimization problems without constraints, which can be defined in the following way:
 \begin{equation}
 \label{eq:task}
@@ -489,8 +486,8 @@ The experiments have demonstrated that up to 95\% of the search information acco
 points, in which the auxiliary constraint is computed only.
 However, if the objective function is computation-costly enough, the use of these evolvents
 could make sense.
-  \item the rotated evolvents have provided an acceprable speed of convergence in the problems
-of small dimensionality in the sequential mode. The use of these ones donï¿½t result in the
+  \item the rotated evolvents have provided an acceptable speed of convergence in the problems
+of small dimensionality in the sequential mode. The use of these ones doesn't result in the
 introduction of the auxiliary constraints that allows constructing an efficient parallel algorithm
 based on these evolvents.
 \end{itemize}
