@@ -4,6 +4,8 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
+
+
 \begin{document}
 \title{High performance computing for global optimization problems}
 
@@ -43,7 +45,7 @@ global minimizer and more sparse far away from this one. In the
 present paper, the results of scalability investigation of the parallel 
 index global optimization algorithm developed in Lobachevsky State 
 University of Nizhny Novgorod \cite{Strongin2000,Strongin2013} and implemented in the Globalizer 
-system \cite{Globalizer} are presented.
+system \cite{Globalizer,Globalizer1} are presented.
 
 Within the framework of the discussed approach, the solving of the 
 multidimensional problems is reduced to the solving of a set of the connected 
@@ -118,13 +120,103 @@ $\nu=m+1$. The pair of values
 \]
 is a \textit{trial result}.
 
-The parallel index algorithm, which can be applied to solving such problems 
-with partially defined functions and which has been implemented in the 
-Globalizer system, described in details in \cite{Strongin2013}. The main idea of the algorithm 
-consists in the reduction of the initial multidimensional problem to a set of 
-the nested subproblems of less dimensionality and the solving of these ones 
-in parallel. The dimensionality reduction schemes utilized in the operation 
-of the index algorithm are described briefly in the next section.
+The main idea of the index algorithm which can be applied to solving such problems 
+with partially defined functions consists in the reduction of the initial multidimensional problem to a set of 
+the subproblems of less dimensionality and the solving of these ones 
+in parallel. The index method and dimensionality reduction schemes are described briefly in the next sections.
+
+
+\section{Parallel index method}
+
+In this section we consider a one-dimensional multiextremal optimization problem
+\[
+\varphi(x^\ast)=\min{\left\{\varphi(x): x \in [a,b], \; g_i(x)\leq 0, \; 1 \leq i \leq m\right\}}.
+\]
+Let us describe a rules of parallel index method for the case when the algorithm carries out during one iteration $p>1$ trials simultaneously (each trial in a separate thread or process). Let $k(n)$ be the total number of trials, carried out after $n$ parallel iterations.
+
+Suppose $n\geq 1$  iterations of the method have been carried out, in which trials were performed at $k=k(n)$ points $x^i,1\leq i \leq k$. Then points $x^{k+1},\dots,x^{k+p}$  of search trials of the next $n+1$ iteration are determined according to the following rules.
+
+Rule 1. Renumber the points $x^1,...,x^k$ of the preceding trials by the
+lower indices in ascending order of coordinate values, i.e.
+\[
+0=x_0<x_1<\dots <x_k<x_{k+1}=1,
+\]
+and juxtapose to them the values $z_i=g_\nu(x_i), \; \nu=\nu(x_i), \; 1
+\leq i \leq k$, computed at these points. The points $x_0=0$ and
+$x_{k+1}=1$ are introduced additionally, while the values $z_0$ and
+$z_{k+1}$ are not defined.
+
+Rule 2. Classify the indices $i, \; 1 \leq i \leq k$, of the trial points
+according to the number of the problem constraints fulfilled at these
+points, by constructing the sets
+\[
+I_\nu =\left\{i:1 \leq i \leq k, \; \nu=\nu(x_i) \right\}, \; 1 \leq \nu \leq m+1,
+\]
+containing the numbers of all the points $x_i, \; 1 \leq i \leq k$, with
+the same values of $\nu$. The end points $x_0=0$ and $x_{k+1}=1$ are
+interpreted as the ones having indices equal to zero. An additional set,
+$I_0=\left\{0,k+1\right\}$, corresponds to them.
+
+Determine the maximum value of the index:
+\[
+M=\max\left\{\nu(x_i), \; 1 \leq i \leq k \right \}.
+\]
+
+Rule 3. Compute the current lower estimates,
+\begin{equation}\label{Rule_Mu}
+\mu = \max\left\{ \frac{\left|z_i-z_j\right|}{ x_i - x_j }, \; i,j \in I_\nu, \; i>j \right\},
+\end{equation}
+for the unknown Lipschitz constants $L_\nu$ of the functions $g_\nu(x),1
+\leq \nu \leq m+1$. If a set $I_\nu$ contains less than two elements, or
+if $\mu_\nu$ is equal to zero, then assume $\mu_\nu=1$.
+
+Rule 4. For all nonempty sets $I_\nu, \; 1 \leq \nu \leq m+1$, compute the
+estimates
+\[
+z_\nu^\ast = \left\{
+   \begin{array}{lr}
+     -\epsilon_\nu, & \nu < M,\\
+     \min\{ g_\nu(x_i): i\in I_\nu \}, & \nu = M,
+   \end{array}
+\right.
+ \]
+where the nonnegative numbers $(\epsilon_1,...,\epsilon_m)$ are parameters
+of the algorithm.
+
+Rule 5. For each interval ($x_{i-1},x_i), \; 1 \leq i \leq k+1,$ compute
+the \textit{characteristics} $R(i)$ :
+\[
+R(i)=2\Delta_i-4\frac{z_i-z_\nu^\ast}{r_\nu \mu_\nu}, \; \nu=\nu(x_i)>\nu(x_{i-1}),
+\]
+\begin{equation}\label{Rule_R}
+R(i)=\Delta_i+\frac{(z_i-z_{i-1})^2}{r_\nu^2 \mu_\nu^2\Delta_i}-2\frac{z_i+z_{i-1}-2z_\nu^\ast}{r_\nu \mu_\nu}, \;  \nu=\nu(x_i)=\nu(x_{i-1}),
+\end{equation}
+\[
+R(i)=2\Delta_i-4\frac{z_{i-1}-z_\nu^\ast}{r_\nu \mu_\nu}, \; \nu=\nu(x_{i-1})>\nu(x_i),
+\]
+where $\Delta_i=x_i - x_{i-1}$. The values $r_\nu > 1, \; 1 \leq
+\nu \leq m+1,$ are parameters of the algorithm. An appropriate selection
+of $r_\nu$ allows to consider the product $r_\nu \mu_\nu$ as an estimate
+of the Lipschitz constants $L_\nu, \; 1 \leq \nu \leq m+1$.
+
+Rule 6. Arrange characteristics  $R(i), 1 \leq i \leq k+1$, in decreasing order 
+\begin{equation}\label{Rule_Max}
+R(t_1)\geq R(t_2)\geq \dots \geq R(t_{k}) \geq R(t_{k+1})
+\end{equation}
+and select $p$ maximum characteristics with interval numbers $t_j, 1\leq j \leq p$.
+
+Rule 7. Carry out new trials at points $x^{k+j}\in(x_{t_j-1},x_{t_j}), 1\leq j\leq p$, calculated using the formulae
+\[
+x^{k+j} = \frac{x_{t_j} + x_{t_j-1}}{2}, \textrm{ if } \nu(x_{t{_j}-1}) \neq \nu(x_{t_j}),
+\]
+\begin{equation}\label{Rule_X}
+x^{k+j} = \frac{x_{t_j}+x_{t_j-1}}{2} - \frac{z_{t_j}-z_{t_j-1}}{2r_\nu \mu_\nu}, \textrm{ if } \nu=\nu(x_{t_j-1})=\nu(x_{t_j}).
+\end{equation}
+
+The algorithm terminates if the condition $\Delta_{t_j}<\epsilon$ is satisfied at least for one number $t_j, 1 \leq j \leq p$ ; $\epsilon>0$ is the predefined accuracy.
+
+This method of parallelization has the following justification. The characteristics of intervals (\ref{Rule_R}) used in the index method can be considered as probability measures of the global minimum point location in these intervals. Inequalities (\ref{Rule_Max}) arrange intervals according to their characteristics, and trials are carried out in parallel in the first $p$ intervals with the largest probabilities.
+
 
 \section{Dimensionality reduction}
 
@@ -153,13 +245,25 @@ The considered dimensionality reduction scheme juxtaposes a
 multidimensional problem with lipschitzian functions to a univariate
 problem where the corresponding functions satisfy the uniform H{\"o}lder
 condition (see \cite{Strongin2000}), i.e.
-\[
+\begin{equation}\label{holder}
 \left|g_i(y(x'))-g_i (y(x''))\right| \leq H_i \left|x'-x'' \right|^{1/N}, \; 
 x',x''\in [0,1], \; 1\leq i \leq m+1.
-\]
+\end{equation}
 Here $N$ is the dimensionality of the initial multidimensional problem and
 the coefficients $H_i$ are related with the Lipschitz constants $L_i$ of
 the initial problem by the inequalities $H_i \leq 2L_i \sqrt{N+3}$.
+
+Relation (\ref{holder}) allows modification of the parallel index algorithm described in previous section for solving multidimensional problems reduced to one-dimensional ones. For this purpose the intervals lengths $\Delta_i$ from the rules (\ref{Rule_Mu}) and (\ref{Rule_R}) of the index method are replaced with the lengths in a new metric
+\[
+\Delta_i = \left(x_i-x_{i-1}\right)^{1/N},
+\]
+and formula (\ref{Rule_X}) is replaced by the expression
+\[
+x^{k+j} = \frac{x_{t_j}+x_{t_j-1}}{2} - \frac{\mathrm{sign}(z_{t_j}-z_{t_j-1})}{2r_\nu}\left[\frac{\left|z_{t_j}-z_{t_j-1}\right|}{\mu_\nu}\right]^N, \; \nu=\nu(x_{t_j-1})=\nu(x_{t_j}).
+\]
+
+Various modifications of this algorithm and the corresponding theory of convergence are given in \cite{Strongin2000,Strongin2013,Gergel2005}.
+
 
 \subsection{Nested optimization scheme}
 
@@ -182,15 +286,17 @@ $u_2=(y_{N_1+1},y_{N_1+2},...,y_{N_1+N_2})$,..., $u_M=(y_{N-N_M+1},y_{N-
 N_M+2},...,y_{N})$, at that $N_1+N_2+...+N_M=N$. 
 The subdomains $D_i, 1 \leq i \leq M$, are projections of initial search 
 domain $D$ onto the subspaces corresponding to the variables $u_i, 1 \leq i 
-\leq M$. 
+\leq M$.
 
-In the present study, this scheme has been applied for $M=2$, i.e. only one 
-nesting level has been used
+The number of vectors $M$ and the quantity of components in each vector $N_1, N_2,...,N_M$ are the parameters of the nested optimization scheme and can be used for the forming of the subproblems with necessary properties. For example, if  $M=N$ i.e. $u_i=y_i, 1\leq i \leq N,$ each nested subproblem is a one-dimensional one. If $M=1$, i.e. $u=u_1=y$ , the solving of the problem is equivalent to solving this one using a single evolvent mapping $[0,1]$ into $D$; the nested subproblems are absent. 
+
+In the present study, this scheme has been applied for $M=2$
 \[
 \min_{y \in D}{\left\{\varphi(y): \; g_i(y)\leq 0, \; 1 \leq i \leq 
 m\right\}}= \min_{u_1\in D_1}\min_{u_2\in D_2}{\left\{\varphi(y): \; 
-g_i(y)\leq 0, \; 1 \leq i \leq m\right\}}.
+g_i(y)\leq 0, \; 1 \leq i \leq m\right\}},
 \]
+i.e. only one nesting level has been used.
 
 \section{Organization of parallel computing}\label{sec:4}
 
@@ -215,7 +321,7 @@ the use CPU at the upper nesting level and GPU at the lower one.
 
 The recursive scheme of solving the global optimization problems has been 
 implemented in the Globzlizer solver developed in Lobachevsky State 
-University of Nizhny Novgorod \cite{Globalizer}. The global search methods and various 
+University of Nizhny Novgorod \cite{Globalizer,Globalizer1}. The global search methods and various 
 dimensionality reduction schemes make the algorithmic base for the 
 Globalizer. The numerical experiments, the results of which are presented in 
 \cite{BarkalovGergelLebedev,BarkalovGergel} demonstrate these methods, at least, are not worse than the well known 
@@ -229,7 +335,7 @@ generating the constrained global optimization problems with the following
 properties:
 \begin{itemize}
 	\item one could control the size of the feasible domain $Q_{m+1}$ with 
-respect to the whole domain $D$;
+respect to the whole search domain $D$;
 	\item the global minimizer of the objective function is known a priori 
 taking into account the constraints;
 	\item the global minimizer of the objective function without accounting 
@@ -333,10 +439,13 @@ two Intel Sandy Bridge E5-2660 2.2 GHz CPUs, 64 Gb RAM, and three NVIDIA
 Kepler K20 GPUs (2688 CUDA cores, 6 Gb GDDR5). 
 The results of experiments demonstrate that the parallel index algorithm combined with the nested optimization scheme provides a good speedup on the considered problem class. 
 
-%The results of experiments performed on a series of test problems of the constrained global optimization with different time of computing the the problem functions demonstrate the index global optimization algorithm combined with the block recursive scheme for the dimensionality reduction to provide a good speedup on the considered problem class. The directions of further investigations include the expansion of the number of algorithms used for solving the subproblems on the GPUs.
+%The results of experiments performed on a series of test problems of the constrained global optimization with different time of computing the problem functions demonstrate the index global optimization algorithm combined with the block recursive scheme for the dimensionality reduction to provide a good speedup on the considered problem class. The directions of further investigations include the expansion of the number of algorithms used for solving the subproblems on the GPUs.
 
 \section*{Acknowledgments}
-This study was supported by the Russian Science Foundation, project No 16-11-10150.
+This research was supported by the Russian Science Foundation, project No 16-11-10150 ``Novel efficient methods
+and software tools for the time consuming decision making problems with using supercomputers of superior performance''.
+
+\bigskip
 
 \section*{References}
 
@@ -352,37 +461,43 @@ and Parallel Algorithms} (Dordrecht: Kluwer Academic Publishers)
 Strongin R G, Gergel V P, Grishagin V A and Barkalov K A 2013  \textit{Parallel Computing in Global Optimization Problems} (Moscow: Moscow State University Press) (in Russian).
 
 \bibitem{Globalizer}
-Sysoyev A V, Barkalov K A, Sovrasov V V, Lebedev I G and Gergel V P 2017 \textit{Lecture Notes in Computer Science} \textbf{10421} 492--99
+Sysoyev A V, Barkalov K A, Sovrasov V V, Lebedev I G and Gergel V P 2017 \textit{Lect. Notes Comput. Science} \textbf{10421} 492--499
+
+\bibitem{Globalizer1}
+Gergel  V, Barkalov K and Sysoyev A 2018 \textit{Numer. Algebra Contr. Optim.} \textbf{8(1)} 47--62
 
 \bibitem{Jones}
-Floudas C A and Pardalos P M 2009 \textit{The Encyclopedia of Optimization } (Heidelberg: Springer) p 725--35 
+Floudas C A and Pardalos P M 2009 \textit{The Encyclopedia of Optimization } (Heidelberg: Springer) p 725--735 
 
 \bibitem{Zilinskas}
-Paulavi\v{c}ius R, \v{Z}ilinskas J and Grothey A 2011 \textit{Optim. Meth. Soft.} \textbf{26(3)} 487--98
+Paulavi\v{c}ius R, \v{Z}ilinskas J and Grothey A 2011 \textit{Optim. Meth. Soft.} \textbf{26(3)} 487--498
 
 \bibitem{Evtushenko2009}
-Evtushenko Yu G, Malkova V U and Stanevichyus A A 2009 \textit{Comput. Math. Math. Phys.} \textbf{49(2)} 246--60.
+Evtushenko Yu G, Malkova V U and Stanevichyus A A 2009 \textit{Comput. Math. Math. Phys.} \textbf{49(2)} 246--260.
 
 \bibitem{Evtushenko2014}
-Evtushenko Yu G and Posypkin M A 2014 \textit{Autom. Remote Control} \textbf{75(6)} 1025--40
+Evtushenko Yu G and Posypkin M A 2014 \textit{Autom. Remote Control} \textbf{75(6)} 1025--1040
 
 \bibitem{Strongin2017}
-Barkalov K A and Strongin R G 2017 \textit{Lecture Notes in Computer Science} \textit{10556} 18--33
+Barkalov K A and Strongin R G 2017 \textit{Lect. Notes Comput. Science} \textit{10556} 18--33
 
 \bibitem{Sysoyev}
 Sysoyev A V, Barkalov K A, Gergel V P and Lebedev I G 2015 \textit{CEUR Workshop Proceedings} \textbf{1482} 61--68
 
 \bibitem{BarkalovLebedev}
-Barkalov K A and Lebedev I G 2016 \textit{Communications in Computer and Information Science} \textbf{687} 224--35
+Barkalov K A and Lebedev I G 2016 \textit{Commun. Comp. Inf. Science} \textbf{687} 224--235
+
+\bibitem{Gergel2005}
+Gergel V P and Strongin R G 2005 \textit{Lect. Notes Comput. Science} \textit{2763} 76--88
+
+\bibitem{BarkalovGergelLebedev}
+Barkalov K, Gergel V, Lebedev I 2015 \textit{Lect. Notes Comput. Science} \textbf{9251} 307--318
 
 \bibitem{BarkalovGergel}
 Barkalov K and Gergel V 2016 \textit{J. Glob. Optim.} \textbf{66(1)} 3--20
 
-\bibitem{BarkalovGergelLebedev}
-Barkalov K, Gergel V, Lebedev I 2015 \textit{Lecture Notes in Computer Science} \textbf{9251} 307--18
-
 \bibitem{Gergel2017}
-Gergel V 2017 \textit{Lecture Notes in Computer Science} \textbf{10556} 314--19
+Gergel V 2017 \textit{Lect. Notes Comput. Science} \textbf{10556} 314--319
 
 \bibitem{Gergel2016}
 Gergel V, Grishagin V and Gergel A 2016 \textit{J. Glob. Optim.} \textbf{66(1)} 35--51
