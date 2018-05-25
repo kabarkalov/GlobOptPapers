@@ -12,8 +12,8 @@
 
 \author{K.A. Barkalov, V.P. Gergel}
 
-\address{National Research Lobachevsky State University of Nizhny Novgorod, Gagarin avenue 23, 
-Nizhny Novgorod, Russia, 603950}
+\address{Lobachevsky State University of Nizhni Novgorod, Gagarin avenue 23, 
+Nizhnш Novgorod, Russia, 603950}
 
 \ead{konstantin.barkalov@itmm.unn.ru}
 
@@ -22,8 +22,7 @@ Nizhny Novgorod, Russia, 603950}
 In the present work, the multiextremal optimization problems and a high-
 performance parallel algorithm for solving these ones are considered. The 
 investigation of the algorithm scalability has been carried out on the 
-problem class, in which the computation costs of the functions depended on 
-the iteration point. The algorithm proposed in the present work can utilize 
+problem class, in which the computation costs of the function value evaluations can be varied at different iteration points. The algorithm proposed in the present work can utilize 
 the CPUs (for solving more complex subproblems) as well as the GPUs (for 
 solving the simple subproblems). The results of numerical experiments 
 demonstrating the speedup when solving a series of multiextremal constrained 
@@ -36,7 +35,7 @@ the parallel methods for solving these ones are considered. The fact that the
 global extremum is an integral characteristic of a problem is an important 
 feature of the multiextremal problems. Thus, its finding is related to the 
 construction of a coverage of the search domain and the computing the 
-optimized function values at all points of this coverage. The dimensionality 
+ function values at all points of this coverage. The dimensionality 
 affects the difficulty of solving the problems of considered class crucially: 
 the computational costs grow with increasing this one exponentially, 
 therefore, for solving such problems, the methods are required, which 
@@ -44,7 +43,7 @@ generate a nonuniform grid in the search domain, denser near the
 global minimizer and more sparse far away from this one. In the 
 present paper, the results of scalability investigation of the parallel 
 index global optimization algorithm developed in Lobachevsky State 
-University of Nizhny Novgorod \cite{Strongin2000,Strongin2013} and implemented in the Globalizer 
+University of Nizhni Novgorod \cite{Strongin2000,Strongin2013} and implemented in the Globalizer 
 system \cite{Globalizer,Globalizer1} are presented.
 
 Within the framework of the discussed approach, the solving of the 
@@ -73,7 +72,7 @@ because of the difference in the difficulties of the subproblems solved on
 different units, a speedup of the algorithm as a whole can be expected. 
 The proposed approach has been implemented in Globalizer parallel software 
 system for solving the global optimization problem developed in Lobachevsky 
-State University of Nizhny Novgorod. 
+State University of Nizhni Novgorod. 
 
 \section{Problem statement}
 
@@ -82,7 +81,7 @@ Let us consider the $N$-dimensional global optimization problem
 \varphi(y^\ast)=\min{\left\{\varphi(y): y \in D, \; g_i(y)\leq 0, \; 1 \leq i 
 \leq m\right\}}
 \end{equation}
-with search domain
+with the search domain
 \[
 D=\left\{y\in R^N: a_j\leq y_j \leq b_j, 1\leq j \leq N \right\}.
 %D=\left\{y\in R^N: a_i\leq y_i \leq b_i, 1\leq i \leq N\right\}.
@@ -105,7 +104,7 @@ computed at this point.
 
 Thus, a \textit{trial} at a point $y^k \in D$ executed at the $k$-th
 iteration of the algorithm will consist in computing the values 
-$g_1(y),...,g_\nu(y),$ where the
+$g_1(y^k),...,g_\nu(y^k),$ where the
 index $\nu \leq m$ is determined by the conditions
 \[
 	g_i(y^k )\leq 0, \; 1 \leq i < \nu, \; g_\nu(y^k)>0, \; \nu \leq m.
@@ -162,9 +161,9 @@ Determine the maximum value of the index:
 M=\max\left\{\nu(x_i), \; 1 \leq i \leq k \right \}.
 \]
 
-Rule 3. Compute the current lower estimates,
+Rule 3. Compute the current lower estimates
 \begin{equation}\label{Rule_Mu}
-\mu = \max\left\{ \frac{\left|z_i-z_j\right|}{ x_i - x_j }, \; i,j \in I_\nu, \; i>j \right\},
+\mu_\nu = \max\left\{ \frac{\left|z_i-z_j\right|}{ x_i - x_j }, \; i,j \in I_\nu, \; i>j \right\}, \; 1 \leq \nu \leq m+1,
 \end{equation}
 for the unknown Lipschitz constants $L_\nu$ of the functions $g_\nu(x),1
 \leq \nu \leq m+1$. If a set $I_\nu$ contains less than two elements, or
@@ -300,12 +299,12 @@ y=(y_1,y_2,...,y_N)=(u_1,u_2,...,u_M),
 where the $i$-th block variable $u_i$ is a vector of $N_i$ components of 
 vector $y$, taken serially, i.e. $u_1=(y_1,y_2,...,y_{N_1})$, 
 $u_2=(y_{N_1+1},y_{N_1+2},...,y_{N_1+N_2})$,..., $u_M=(y_{N-N_M+1},y_{N-
-N_M+2},...,y_{N})$, at that $N_1+N_2+...+N_M=N$. 
+N_M+2},...,y_{N})$, and $N_1+N_2+...+N_M=N$. 
 The subdomains $D_i, 1 \leq i \leq M$, are projections of initial search 
 domain $D$ onto the subspaces corresponding to the variables $u_i, 1 \leq i 
 \leq M$.
 
-The number of vectors $M$ and the quantity of components in each vector $N_1, N_2,...,N_M$ are the parameters of the nested optimization scheme and can be used for the forming of the subproblems with necessary properties. For example, if  $M=N$ i.e. $u_i=y_i, 1\leq i \leq N,$ each nested subproblem is a one-dimensional one. If $M=1$, i.e. $u=u_1=y$ , the solving of the problem is equivalent to solving this one using a single evolvent mapping $[0,1]$ into $D$; the nested subproblems are absent. 
+The number of vectors $M$ and the quantity of components in each vector $N_1, N_2,...,N_M$ are the parameters of the nested optimization scheme and can be used to form the subproblems with necessary properties. For example, if  $M=N$ i.e. $u_i=y_i, 1\leq i \leq N,$ each nested subproblem is a one-dimensional one. If $M=1$, i.e. $u=u_1=y$ , the solving of the problem is equivalent to solving this one using a single evolvent mapping $[0,1]$ into $D$; the nested subproblems are absent. 
 
 In the present study, this scheme has been applied for $M=2$
 \[
@@ -319,29 +318,29 @@ i.e. only one nesting level has been used.
 
 The organization of parallel computing with the use of the recursive 
 optimization scheme has been considered in details for the shared/distributed 
-memory as well as for the accelerators in \cite{Sysoyev,BarkalovLebedev}. However, in these works the 
+memory as well as for the accelerators in \cite{BarkalovGergelLebedev2016,BarkalovLebedev}. However, in these works the 
 problems were considered, in which the time of the trial execution didn't 
 depend on the trial point. Here, the problem is considered assuming that in 
 the function $\varphi(y_1,...,y_N)$ it is possible to select more difficult 
 part $f(y_1,...,y_s)$ (depending on a part of the parameters only) and a simpler 
 part $g(y_1,...,y_N)$ (depending on all problem parameters), for 
-example, $\varphi(y)= f(y)g(y)$.
+example, $\varphi(y_1,...,y_N)= f(y_1,...,y_s)g(y_1,...,y_N)$.
 
 The difficult part of the function implies performing some  
 computations related to the numerical simulation, which can be performed on the 
 CPUs only. The simple part doesn't imply the complex computations and can be 
 computed on an accelerator, for example, GPU. For solving a problem with such 
-a structure, one can apply the parallel recursive optimization scheme with 
+a structure, one can apply the recursive optimization scheme in parallel with 
 the use CPU at the upper nesting level and GPU at the lower one.
 
 \section{Numerical experiments}\label{sec:5}
 
 The recursive scheme of solving the global optimization problems has been 
 implemented in the Globzlizer solver developed in Lobachevsky State 
-University of Nizhny Novgorod \cite{Globalizer,Globalizer1}. The global search methods and various 
+University of Nizhni Novgorod \cite{Globalizer,Globalizer1}. The global search methods and various 
 dimensionality reduction schemes make the algorithmic base for the 
 Globalizer. The numerical experiments, the results of which are presented in 
-\cite{BarkalovGergelLebedev,BarkalovGergel} demonstrate these methods, at least, are not worse than the well known 
+\cite{GergelLebedev,GergelSidorov} demonstrate these methods, at least, are not worse than the well known 
 methods applied for similar purposes, and even overcome these ones with 
 respect to some parameters. 
 
@@ -420,7 +419,7 @@ Problems & Time (sec) \\
 
 Let us conduct the next experiment employing $p$ nodes each including three 
 graphic accelerators. Thus, at $p=32$ total 96 GPU accelerators were employed 
-each including 2688 CUDA cores. In tables \ref{tab:2} and \ref{tab:3} the average time and the speedup with respect to the run 
+each including 2688 CUDA cores; 258048 CUDA cores in all. In tables \ref{tab:2} and \ref{tab:3} the average time and the speedup with respect to the run 
 on a single node are presented.
 
 \begin{table}
@@ -453,10 +452,6 @@ Problems & $p = 8$ & $p=16$ & $p=32$ \\
 \end{center}
 \end{table}
 
-Computational experiments were carried out on a high-performance cluster of 
-Lobachevsky State University of Nizhny Novgorod. The cluster node included 
-two Intel Sandy Bridge E5-2660 2.2 GHz CPUs, 64 Gb RAM, and three NVIDIA 
-Kepler K20 GPUs (2688 CUDA cores, 6 Gb GDDR5). 
 The results of experiments demonstrate that the parallel index algorithm combined with the nested optimization scheme provides a good speedup on the considered problem class. 
 
 %The results of experiments performed on a series of test problems of the constrained global optimization with different time of computing the problem functions demonstrate the index global optimization algorithm combined with the block recursive scheme for the dimensionality reduction to provide a good speedup on the considered problem class. The directions of further investigations include the expansion of the number of algorithms used for solving the subproblems on the GPUs.
@@ -501,20 +496,20 @@ Evtushenko Yu G and Posypkin M A 2014 \textit{Autom. Remote Control} \textbf{75(
 \bibitem{Strongin2017}
 Barkalov K A and Strongin R G 2017 \textit{Lect. Notes Comput. Science} \textit{10556} 18--33
 
-\bibitem{Sysoyev}
-Sysoyev A V, Barkalov K A, Gergel V P and Lebedev I G 2015 \textit{CEUR Workshop Proceedings} \textbf{1482} 61--68
+\bibitem{BarkalovGergelLebedev2016}
+Barkalov K, Gergel V and Lebedev I  2016 \textit{AIP Conf. Proc.} \textbf{1738} 400006
 
 \bibitem{BarkalovLebedev}
 Barkalov K A and Lebedev I G 2016 \textit{Commun. Comp. Inf. Science} \textbf{687} 224--235
 
 \bibitem{Gergel2005}
-Gergel V P and Strongin R G 2005 \textit{Lect. Notes Comput. Science} \textit{2763} 76--88
+Gergel V P and Strongin R G 2003 \textit{Lect. Notes Comput. Science} \textit{2763} 76--88
 
-\bibitem{BarkalovGergelLebedev}
-Barkalov K, Gergel V, Lebedev I 2015 \textit{Lect. Notes Comput. Science} \textbf{9251} 307--318
+\bibitem{GergelLebedev}
+Gergel V and Lebedev I 2015 \textit{Proc. Comput. Science} \textbf{66} 53--62
 
-\bibitem{BarkalovGergel}
-Barkalov K and Gergel V 2016 \textit{J. Glob. Optim.} \textbf{66(1)} 3--20
+\bibitem{GergelSidorov}
+Gergel V and Sidorov S 2015 \textit{Lect. Notes Comput. Science} \textbf{9251} 505--515
 
 \bibitem{Gergel2017}
 Gergel V 2017 \textit{Lect. Notes Comput. Science} \textbf{10556} 314--319
