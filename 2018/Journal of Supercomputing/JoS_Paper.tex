@@ -19,7 +19,11 @@
 %\documentclass[smallcondensed]{svjour3}     % onecolumn (ditto)
 \documentclass[smallextended]{svjour3}       % onecolumn (second format)
 %\documentclass[twocolumn]{svjour3}          % twocolumn
-%
+
+\usepackage[utf8x]{inputenc}
+\usepackage[english,russian]{babel}
+
+
 \smartqed  % flush right qed marks, e.g. at end of proof
 %
 \usepackage{graphicx}
@@ -79,13 +83,15 @@ This paper considers a parallel algorithm for solving multiextremal problems wit
 \label{intro}
 
 The aim of this paper is to examine parallel methods for solving global optimization problems with non-convex constraints. The objective function and constraints are assumed to satisfy the Lipschitz condition with a priori unknown Lipschitz constants. The analytical form of the problem's functions may also be unknown, i.e. they can be set by an algorithm computing their values at various points within the search domain (the so-called ``black-box'' functions). It is also supposed that even a single computation of the function value can be time-consuming, since it requires performing numerical simulation in applied problems. 
-%These assumptions are typical for many approaches to building parallel algorithms for unconstrained global optimization \cite{Jones2001,Paulavicius2011,Evtushenko2013}.
 
 The numerical algorithms for solving the problems of the above-mentioned class are noted for an exponential growth of the computational costs with increasing dimensionality (the so-called ``curse of dimensionality''). The use of supercomputers expands the field of application of the global optimization methods and, however, at the same time, it gives rise to the problem of efficient parallelization of the search process.
 
 Parallel algorithms utilizing heuristic approaches and based in one way or another on the idea of random search are at present quite popular (see \cite{RefFerreiro,RefZhu,Korosec,Guerrero}). However, because of their probabilistic nature, the algorithms of such type guarantee the convergence to the global optimum solution in the probabilistic sense only, which makes them less attractive than deterministic parallel global optimization algorithms \cite{Jones2001,Paulavicius2011,Evtushenko2013,Strongin2000}. As a rule, efficient deterministic algorithms are intended to solve unconstrained optimization problems. The problems with constraints are solved using the penalty function method that has a number of disadvantages. In particular, this method cannot be applied to the problems with the \textit{partially defined functions} (i.e. when any constraint is violated, the values of all the other functions of the problem remain undefined).
 
-Among the examples of such problems are the optimal control problems described through systems of ordinary differential equations with a certain matrix $A$ on the right side \cite{Balandin2011,Balandin2017}. It is only possible to calculate the optimality criteria for these problems if the matrix $A$ is a Hurwitz matrix, i.e. every eigenvalue of $A$ has a strictly negative real part. Otherwise, the value of the criteria is indeterminate.
+\Russian
+Данная ситуация является типичной для многих задач оптимального проектирования, когда при нарушении некоторых условий функционирования моделируемого объекта другие его характеристики оказываются неопределенными.
+
+Among the examples of such problems are the optimal control problems described through systems of ordinary differential equations with a certain matrix $A$ on the right side \cite{Balandin2017}. It is only possible to calculate the optimality criteria for these problems if the matrix $A$ is a Hurwitz matrix, i.e. every eigenvalue of $A$ has a strictly negative real part. Otherwise, the value of the criteria is indeterminate.
 
 In this study, we used a novel approach to the minimization of multiextremal functions with non-convex constraints developed in \cite{Strongin2000,Sergeyev2001,Barkalov2002}. The approach referred to as the index method of accounting for the constraints is based on accounting for each constraint of the problem separately and is not related to the use of the penalty functions. The solution of the initial multidimensional problem is reduced (by using the Peano-type space-filling curves) to solving an equivalent set of one-dimensional problems, which can be solved in parallel in such a way that each of these processes shares the information obtained by the other processes. The proposed scheme was implemented on the Lobachevsky supercomputer with the use of the distributed memory as well as the shared one.
 
@@ -160,6 +166,9 @@ Step 5. Check termination condition $\left|x_t-x_{t-1}\right|^{1/N}\leq \epsilon
 
 A detailed description of this algorithm and the corresponding theory of convergence are presented in \cite{Strongin2000,Sergeyev2001,Barkalov2002}.
 
+\Russian
+В статье \cite{Barkalov2017} приведено сравнение двух разных способа учета ограничений - классического метода штрафных функций и индексной схемы. Экспериментально подтрвеждено превосходство индексного метода над методом штрафных функций как по числу итераций, так и по числу вычсислений ограничений и целевой функции. Для решения задачи с заданной точностью индексному методу требовалось в 3-5 раз меньше итераций (в зависимости от размерности задачи и доли допусимой области). Одновременно с этим значение целевой функции вычислялось в среднем лишь на каждой пятой итерации индексного метода, в отличие от метода штрафных функций, в котором значения целевой функции вычисляются на каждой итерации.
+
 
 \section{Parallel Index Algorithm with a Set of Evolvents}
 \label{sec:3}
@@ -167,6 +176,10 @@ A detailed description of this algorithm and the corresponding theory of converg
 The reduction of the multidimensional problems to the one-dimensional ones using evolvents has such important properties as the continuity and preservation of boundedness of function's divided differences. However, a partial loss of information on the nearness of the points in the multidimensional space occurs in this case since a point $x \in [0,1]$ has only the left and the right neighbors while the corresponding point $y(x) \in R^N$ has the neighbors in $2N$ directions. As a result, when using the mappings like a Peano curve, the images $y', y''$, which are close to each other in the $N$-dimensional space can correspond to the preimages $x', x''$, which can be far away from each other in the interval $[0,1]$. This property results in excess computations since several limit points $x', x''$ of the trial sequence generated by the index method in the interval $[0,1]$ can correspond to a single limit point $y$ in the $N$-dimensional space.
 
 One of the possible ways to overcome this disadvantage consists in using the multiple mapping $Y^S(x)=\{ y^1 (x),...,y^S(x)\}$ instead of the single evolvent $y(x)$. To construct the set $Y^S(x)$, different approaches can be used. For example, in \cite{Strongin2000} a scheme was implemented, according to which each evolvent $y^s(x)$ from $Y^S(x)$ is constructed as a result of shifting the original evolvent $y(x)$ along the main diagonal of the hypercube $D$. The set of Peano curves thus constructed allows one to obtain close preimages $x', x''$ from the interval $[0,1]$ for the evolvent $y^s(x), 1\leq s \leq S$, for any close multidimensional images $y', y''$ from $D$, which differ only in one coordinate.
+
+Another scheme of building of the multiple mapping was proposed  in \cite{6_Gergel2009}. The building of a set of Peano curves not by the shift along the main diagonal of the hypercube but by rotation of the evolvents around the coordinate origin is a distinctive feature of the proposed scheme. In the initial non-rotated mapping for close points $y', y''$ in the multidimensional space their preimages  $x', x''$ in the interval $[0,1]$ can be far away from each other. In the rotated scheme there exists a mapping $y^i(x)$ according to which preimages $x', x''$ will be located nearer. The maximum number of various rotations of the evolvents mapping the $N$-dimensional hypercube onto a one-dimensional interval is $2^N$. The employment of all possible rotations might appear to be redundant. In this case, we can select only a part of all rotations. As a possible approach, we propose to generate the new evolvents by the rotation of the initial evolvent on the angle of $\pm\pi/2$ in each of the coordinate planes. Taking into account the initial evolvent the total number of such evolvents for mapping the $N$-dimensional domain onto the corresponding one-dimensional intervals equals to $N(N-1)+1$. 
+\Russian
+Именно такой подход к построению multiple mapping был использован в данной статье при проведении вычислительных экспериментов
 
 With the use of multiple mapping, it is possible to solve the initial problem (\ref{problem}) by solving in parallel the problems
 \[
@@ -206,20 +219,19 @@ The decision rules for the proposed parallel algorithm, in general, are the same
 
 The proposed parallelization scheme was implemented with the use of MPI and OpenMP technologies. A separate MPI-process is created for each of $S$ one-dimensional problems being solved, one process per one processor employed. Each process uses $p$ threads for solving a one-dimensional problem, one thread per an accessible core.
 
-%At every iteration of the method, the process with the index $s, 0\leq s < S,$ performs $p$ trials in parallel at the points $x^{s+iS}, 0\leq i < p$. At that, each process stores all $S\cdot p$ points, and an attribute indicating whether this point is blocked by another process or not is stored for each point. Let us remind that the point is blocked if the process starts the execution of a trial at this point.
-
-%At every iteration of the algorithm, operating within the $s$-th process, determines the coordinates of $p$ ``its own'' trial points. Then, the interchange of the coordinates of images of the trial points $y^{s+iS},\; 0\leq i<p,\; 0\leq s< S$ is performed (from each process to each one). After that, the preimages $x^{q+iS},\; 0\leq q<S,\; q\neq s$ of the points received by the $s$-th process from the neighbor ones are determined with the use of the evolvent $y^s(x)$. The points blocked within the $s$-th process will correspond to the preimages obtained. Then, each process performs the trials at the non-blocked points, the computations are performed in parallel using OpenMP. The results of the executed trials (the index of the point, the computed values of the problem functions, and the attribute of unblocking of this point) are transferred to all rest processes. All the points are added to the search information database, and the transition to the next iteration is performed.
-
 \section{Results of Numerical Experiments}
 \label{sec:4}
 
 A well-known approach to investigating and comparing the multiextremal optimization algorithms is based on testing these methods by solving a set of problems, chosen randomly from some specially designed class.
 
-%GKLS generator for the functions of arbitrary dimensionality with known properties (the number of local minima, the size of their domains of attraction, the global minimizer, etc.) has been proposed in \cite{Gaviano2003}. Four GKLS classes of differentiable test functions of the dimensions $N = 4$ and $5$, have been used. For each dimension, both \textit{Hard} and \textit{Simple} classes have been considered. The difficulty of a class was increased either by decreasing the radius of the attraction region of the global minimizer, or by decreasing the distance from the global minimizer $y^*$ to the domain boundaries. Application of the generator for studying some optimization algorithms has been described in \cite{Paulavicius2014,Sergeyev2015}.
+In this study, we will use a GKLS generator of the functions of arbitrary dimensionality proposed in \cite{Gaviano2003} to produce constrained problems. The scheme for generating constrained global optimization problems is proposed in \cite{Gergel2017}. 
+\Russian
+Тестовые задачи с ограничениями, полученные с помощью данной схемы, обладают важным свойством, присущим прикладным задачам оптимизации: условный глобальный минимум находится на границе допустимой области, в то время как глобальный минимум целевой функции без ограничений находится вне допустимой области. При этом можно варьировать объем допустимой области, а также число ограничений, активных в точке минимума.
 
-In this study, we will use a GKLS generator of the functions of arbitrary dimensionality proposed in \cite{Gaviano2003} to produce constrained problems. The scheme for generating constrained global optimization problems is proposed in \cite{Gergel2017}. Previous investigations have confirmed experimentally that the index method is not inferior to well-known analogues. A comparison of the method with the well known DIRECT method \cite{Jones2001} in solving unconstrained optimization problems has been performed in \cite{Barkalov2015}. In the present study, an experimental investigation is carried out of the speedup, which is obtained by the use of the index method in combination with the two-level parallelization scheme from \cite{Sidorov2015}.
+%Previous investigations have confirmed experimentally that the index method is not inferior to well-known analogues. A comparison of the method with the well known DIRECT method \cite{Jones2001} in solving unconstrained optimization problems has been performed in \cite{Barkalov2015}. 
+In the present study, an experimental investigation is carried out of the speedup, which is obtained by the use of the index method in combination with the two-level parallelization scheme from \cite{Sidorov2015}.
 
-The experiments have been carried out by solving a series of $100$ problems with two constraints and the objective functions from the \textit{Simple} and \textit{Hard} GKLS classes with the dimensionalities $N=4$, $N=5$. The number of the used cluster nodes $S$ and, correspondingly, the number of evolvents as well as the number of cores $p$ employed at each node have been varied. The problem was considered to be solved, if the algorithm generated a trial point $y^k$ in the $\delta$-vicinity of the global minimum, i.e., $\left\|y^k-y^*\right\|\leq \delta$. The size of the vicinity was selected as $\delta=0.03\left\|b-a\right\|$, where $a$ and $b$ are the boundaries of the search domain. For the purpose of simulation of the computational complexity inherent to applied optimization problems, calculation of the problem functions in all performed experiments was made more complex by additional calculations without changing the type of function and arrangement of its minima (a series summation of $80$ thousand elements).
+The experiments have been carried out by solving a series of $100$ problems with two constraints and one objective function from the \textit{Simple} and \textit{Hard} GKLS classes with the dimensionalities $N=4$, $N=5$. The number of the used cluster nodes $S$ and, correspondingly, the number of evolvents as well as the number of cores $p$ employed at each node have been varied. The problem was considered to be solved, if the algorithm generated a trial point $y^k$ in the $\delta$-vicinity of the global minimum, i.e., $\left\|y^k-y^*\right\|\leq \delta$. The size of the vicinity was selected as $\delta=0.03\left\|b-a\right\|$, where $a$ and $b$ are the boundaries of the search domain. For the purpose of simulation of the computational complexity inherent to applied optimization problems, calculation of the problem functions in all performed experiments was made more complex by additional calculations without changing the type of function and arrangement of its minima (a series summation of $100$ thousand elements).
 
 Computational experiments were carried out on a high-performance cluster of Lobachevsky State University of Nizhni Novgorod. The cluster node included two Intel Sandy Bridge E5-2660 2.2 GHz CPUs and 64 Gb RAM. The CPU had 8 cores, i.e. each node had a total of 16 cores.
 
@@ -243,35 +255,63 @@ The average time and the number of iterations, which were required to solve the 
 4(16)	&	20.9	&	45	&	&	206	&	925.7	\\
 8(1)	&	99.3	&	141.8	&	&	700.1	&	897.3	\\
 8(16)	&	31	&	77.7	&	&	264.6	&	374	\\
+12(1)	&	99.3	&	141.8	&	&	700.1	&	897.3	\\
+12(16)	&	31	&	77.7	&	&	264.6	&	374	\\
 		\noalign{\smallskip}\hline
 	\end{tabular}
 \end{table}
+
+%\begin{table}
+	%\caption{Average number of iterations}
+	%\label{tab:2}
+	%\center
+	%\begin{tabular}{cccccc}
+		%\hline\noalign{\smallskip}
+		%\multirow{2}{*}{\textit{Node(core)}}	 & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} \\
+		%\noalign{\smallskip} \cline{2-3} \cline{5-6} \noalign{\smallskip}
+		 %& \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard}  \\
+		%\noalign{\smallskip} \hline \noalign{\smallskip}
+%1(1)	&	58320	&	84546	&	&	266943	&	287102	\\
+%1(16)	&	4297	&	6601	&	&	22655	&	56754	\\
+%2(1)	&	34791	&	52126	&	&	188465	&	241369	\\
+%2(16)	&	2029	&	3239	&	&	16689	&	40763	\\
+%4(1)	&	22223	&	47771	&	&	135734	&	180489	\\
+%4(16)	&	1281	&	2483	&	&	9241	&	35024	\\
+%8(1)	&	13844	&	18933	&	&	77748	&	94563	\\
+%8(16)	&	608	&	1473	&	&	5820	&	23033	\\
+%12(1)	&	13844	&	18933	&	&	77748	&	94563	\\
+%12(16)	&	608	&	1473	&	&	5820	&	23033	\\
+		%\noalign{\smallskip}\hline
+	%\end{tabular}
+%\end{table}
 
 \begin{table}
 	\caption{Average number of iterations}
 	\label{tab:2}
 	\center
-	\begin{tabular}{cccccc}
+	\begin{tabular}{ccccccccc}
 		\hline\noalign{\smallskip}
-		\multirow{2}{*}{\textit{Node(core)}}	 & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} \\
-		\noalign{\smallskip} \cline{2-3} \cline{5-6} \noalign{\smallskip}
-		 & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard}  \\
+		\multirow{2}{*}{\textit{Node(core)}}	 & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$}& & \multicolumn{2}{c}{$N=6$} \\
+		\noalign{\smallskip} \cline{2-3} \cline{5-6} \cline{8-9} \noalign{\smallskip}
+		 & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard}  \\
 		\noalign{\smallskip} \hline \noalign{\smallskip}
-1(1)	&	58320	&	84546	&	&	266943	&	287102	\\
-1(16)	&	4297	&	6601	&	&	22655	&	56754	\\
-2(1)	&	34791	&	52126	&	&	188465	&	241369	\\
-2(16)	&	2029	&	3239	&	&	16689	&	40763	\\
-4(1)	&	22223	&	47771	&	&	135734	&	180489	\\
-4(16)	&	1281	&	2483	&	&	9241	&	35024	\\
-8(1)	&	13844	&	18933	&	&	77748	&	94563	\\
-8(16)	&	608	&	1473	&	&	5820	&	23033	\\
+1(1)	&	58320	&	84546	&	&	266943	&	287102 & & 1 & 2	\\
+1(16)	&	4297	&	6601	&	&	22655	&	56754	& &  & \\
+2(1)	&	34791	&	52126	&	&	188465	&	241369	& &  &\\
+2(16)	&	2029	&	3239	&	&	16689	&	40763	& &  &\\
+4(1)	&	22223	&	47771	&	&	135734	&	180489 & &  &	\\
+4(16)	&	1281	&	2483	&	&	9241	&	35024	& &  &\\
+8(1)	&	13844	&	18933	&	&	77748	&	94563	& &  &\\
+8(16)	&	608	&	1473	&	&	5820	&	23033	& &  &\\
+12(1)	&	13844	&	18933	&	&	77748	&	94563	& &  &\\
+12(16)	&	608	&	1473	&	&	5820	&	23033	& &  &\\
 		\noalign{\smallskip}\hline
 	\end{tabular}
 \end{table}
 
 
 The results demonstrate the speedup achieved when using the shared memory at a node (performing several trials within a problem in parallel) as well as the distributed memory (solving in parallel several subproblems at different nodes). In this case, the highest time speedup was 10 (when using 64 cores on 4 cluster nodes), the highest iteration speedup was 95 (when using 128 cores on 8 cluster nodes). The difference in the speedups in time and in the number of iterations can be explained by the effect of the overheads of the data transmission between the processes. Note that when solving applied optimization problems, the computation of the problem function values even in one point is a computationally costly operation. In this case, the data transfer overheads will not affect significantly the total computational costs, and the difference between the time speedup and the iteration speedup will not be so great.
-%Описание инфраструктуры
+
 
 \section{Conclusions}
 \label{sec:5}
@@ -284,6 +324,8 @@ The parallel index method for solving constrained global optimization problems c
 \end{itemize}
 
 The parallel algorithm has demonstrated a speedup with respect to the number of processors/cores employed. This was confirmed by the results of solving numerically of several hundred test problems using 128 cores of the Lobachevsky supercomputer. 
+\Russian
+Что-то про применение алгоритма. 
 %The direction of further research is the generalization of the considered parallel algorithm for solving multicriteria problems.
 
 
@@ -314,9 +356,7 @@ Evtushenko, Y.G., Posypkin, M.A.: A deterministic approach to global box-constra
 \bibitem{Strongin2000}
 Strongin, R.G., Sergeyev, Ya.D.: Global Optimization with Non-Convex Constraints. Sequential and Parallel Algorithms. Kluwer Academic Publishers, Dordrecht (2000)
 
-
-\bibitem{Balandin2011}
-Balandin, D.V., Kogan, M.M.: Optimal linear-quadratic control: From matrix equations to linear matrix inequalities. Automation and Remote Control. 72(11), 2276--2284 (2011)
+%\bibitem{Balandin2011} Balandin, D.V., Kogan, M.M.: Optimal linear-quadratic control: From matrix equations to linear matrix inequalities. Automation and Remote Control. 72(11), 2276--2284 (2011)
 
 \bibitem{Balandin2017}
 Balandin, D.V., Kogan, M.M.: Pareto-optimal generalized $H_2$-control and vibroprotection problems. Automation and Remote Control. 78(8), 1417--1429 (2017)
@@ -335,13 +375,19 @@ Sergeyev, Ya.D., Strongin, R.G., Lera, D.: Introduction to Global Optimization E
 Gaviano, M., Lera, D., Kvasov, D.E., Sergeyev, Ya.D.: Software for generation of classes of test functions with known local and global minima for global optimization. ACM Trans. Math. Software 29, 469--480 (2003)
 
 \bibitem{Gergel2017}
-Gergel, V.: An approach for generating test problems of constrained global optimization. Lecture Notes in Computer Science. 10556, 314--319 (2017)
+Gergel, V.: An approach for generating test problems of constrained global optimization. LNCS. 10556, 314--319 (2017)
 
-\bibitem{Barkalov2015}
-Barkalov, K., Gergel, V., Lebedev, I.: Use of Xeon Phi coprocessor for solving global optimization problems. Lecture Notes in Computer Science. 9251, 307--318 (2015)
+%\bibitem{Barkalov2015} Barkalov, K., Gergel, V., Lebedev, I.: Use of Xeon Phi coprocessor for solving global optimization problems. LNCS. 9251, 307--318 (2015)
 
 \bibitem{Sidorov2015}
-Gergel, V., Sidorov, S.: A two-level parallel global search algorithm for solution of computationally intensive multiextremal optimization problems. Lecture Notes in Computer Science. 9251, 505--515 (2015)
+Gergel, V., Sidorov, S.: A two-level parallel global search algorithm for solution of computationally intensive multiextremal optimization problems. LNCS. 9251, 505--515 (2015)
+
+\bibitem{Barkalov2017}
+Barkalov, K., Lebeled, I.: Comparing Two Approaches for Solving Constrained Global Optimization Problems. LNCS. 10556, 301--306 (2017)
+
+\bibitem{6_Gergel2009}
+Strongin, R.G., Gergel, V.P., Barkalov, K.A.: Parallel methods for global optimization problem solving. Journal of instrument engineering. 52, 25--33 (2009) (In Russian)
+
 
 
 %
