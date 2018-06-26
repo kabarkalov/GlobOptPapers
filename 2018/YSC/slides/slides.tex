@@ -12,6 +12,9 @@
 \usepackage{amsfonts}
 \usepackage{subfig}
 
+\captionsetup[subfigure]{labelformat=empty}
+\captionsetup[figure]{labelformat=empty}
+
 \setromanfont{CMU Serif}
 %\setsansfont{CMU Sans Serif}
 \setmathfont{Latin Modern Math}
@@ -24,7 +27,7 @@
 \DeclareMathOperator{\sign}{sign}
 \DeclareMathOperator{\re}{Re}
 
-\graphicspath{ {../paper/images/}{img/} }
+\graphicspath{ {../pictures/}{img/} }
 %set pages numeration
 \setbeamertemplate{footline}[frame number]
 \setbeamertemplate{headline}{}
@@ -41,40 +44,150 @@
 \end{frame}
 
 \begin{frame}
-  \begin{center}
   \frametitle{Problem statement}
-
-  \begin{displaymath}
-    \min\{f(y): y\in D\}, D=\{y\in \mathbb{R}^n: a_i \leqslant y_i \leqslant b_i, 1\leqslant i \leqslant n \},
-  \end{displaymath}
-where \(f(y)\) is a vector-function.
-
-\enspace
-Solution of the problem is a set of non-dominated points (Slater set):
-  \begin{displaymath}
-    S(D) = \{y\in D: \nexists z\in D, f_i(z)<f_i(y),1\leqslant i \leqslant m\}
-  \end{displaymath}
-Assume objectives to satisfy Lipschitz condition in \(D\):
-  \begin{displaymath}
-    |f_i(y_1)-f_i(y_2)|\leqslant L_i\Vert y_1-y_2\Vert,y_1,y_2\in D,0<L_i<\infty,1\leqslant i\leqslant m
-  \end{displaymath}
-
-\end{center}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{displaymath}
+        \begin{array}{cr}\\
+          \varphi(y^*)=\min\{\varphi(y):y\in D\}, \\
+          D=\{y\in \mathbb{R}^N:a_i\leq y_i\leq{b_i}, 1\leq{i}\leq{N}\}
+        \end{array}
+      \end{displaymath}
+      \(\varphi(y)\) is multiextremal objective function, which satisfies the Lipschitz condition:
+      \begin{displaymath}
+        |\varphi(y_1)-\varphi(y_2)|\leq L\Vert y_1-y_2\Vert,y_1,y_2\in D,
+      \end{displaymath}
+      where \(L>0\) is the Lipschitz constant, and \(||\cdot||\) denotes \(l_2\) norm in \(\mathbb{R}^N\)
+      space.
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centerline{\includegraphics[width=0.9\textwidth]{img/gkls.png}}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \begin{frame}
   \frametitle{Dimension reduction}
-  Peano-type curve \(y(x)\) allows to reduce dimension of the original multi-objective problem:
+  Peano-type curve \(y(x)\) allows to reduce the dimension of the original problem:
   \begin{gather}
     \lbrace y\in \mathbb{R}^N:-2^{-1}\leqslant y_i\leqslant 2^{-1},1\leqslant i\leqslant N\rbrace=\{y(x):0\leqslant x\leqslant 1\} \nonumber \\
     \min\{f(y): y\in D\}=\min\{f(y(x)): x\in [0,1]\} \nonumber
   \end{gather}
 
-  %\begin{figure}[ht]
-  %  \subfloat{{\includegraphics[width=.35\textwidth]{img/peano3d.png} }}
-  %  \subfloat{{\includegraphics[width=.35\textwidth]{img/peano2d.png} }}
-  %\end{figure}
+  \begin{figure}[ht]
+    \subfloat{{\includegraphics[width=.35\textwidth]{peano3d.png} }}
+    \subfloat{{\includegraphics[width=.35\textwidth]{peano2d.png} }}
+  \end{figure}
 \end{frame}
+
+\begin{frame}
+  \frametitle{}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Smooth evolvent}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centerline{\includegraphics[width=0.9\textwidth]{smooth.pdf}}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Shifted evolvent}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centerline{\includegraphics[width=0.9\textwidth]{shifted.pdf}}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Rotated evolvent}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centerline{\includegraphics[width=0.9\textwidth]{rotated.pdf}}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Optimization method}
+  Optimization method generates search sequence \(\{x_k\}\) and consists of the following steps:
+  \begin{enumerate}
+    \setlength{\itemindent}{.1in}
+    \item[Step 1.] Sort the search information (one-dimensional points) in increasing order.
+    \item[Step 2.] Compute the evolvent \(y(x)\) and the function \(\varphi(y(x))\).
+    \item[Step 3.] For each interval \((x_{i-1}, x_i)\) compute quantity \(R(i)\), called characteristic.
+    \item[Step 4.] Choose an interval \((x_{t-1}, x_t)\) with the greatest characteristic and
+    compute objective \(f(y(x))\) in the point chosen using the decision rule \(d\):
+    \begin{displaymath}
+      x^{k+1}=d(t)\in (x_{t-1}, x_t)
+    \end{displaymath}
+    \item[Step 5.] If \(x_{t}-x_{t-1}<\varepsilon\) stop the method.
+  \end{enumerate}
+  \textit{\footnotesize	{Detailed description: Strongin R.G., Sergeyev Ya.D.: Global optimization with non-convex constraints. Sequential and parallel algorithms (2000), Chapter 7}}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Test problems}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      Generator GKLS was employed to construct the sets of test problems:
+      \begin{displaymath}
+        \begin{matrix}
+          f(x)=
+          \left\{
+          \begin{matrix}
+          C_i(x), x \in S_i, i\in 2,\dots ,m \\
+          \Vert x-T \Vert^2 + t, x\not\in S_2,\dots,S_m
+          \end{matrix} \right.
+        \end{matrix}
+      \end{displaymath}
+
+      The generator allows to adjust:
+      \begin{itemize}
+        \item the number of local minimas;
+        \item the size of the global minima attraction region;
+        \item the space dimension.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centerline{\includegraphics[width=0.9\textwidth]{gkls_color.png}}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Results of comparison}
+  \begin{figure}[ht]
+    \hspace*{-0.9cm}
+    \subfloat[Minimal \(r\)]{{\includegraphics[width=.55\textwidth]{gklsS2d_opt_pt_op.pdf} }}
+    \subfloat[\(r=5.0\)]{{\includegraphics[width=.55\textwidth]{gklsS2d_same_r_opt_pt_op.pdf} }} \hspace*{4cm}
+    \caption{Operating characteristics on GKLS 2d Simple class}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Results of comparison}
+  \begin{figure}[ht]
+    \hspace*{-0.9cm}
+    \subfloat[Minimal \(r\)]{{\includegraphics[width=.55\textwidth]{gklsS3d_opt_pt_op.pdf} }}
+    \subfloat[\(r=4.5\)]{{\includegraphics[width=.55\textwidth]{gklsS2d_same_r_opt_pt_op.pdf} }}
+    \caption{Operating characteristics on GKLS 3d Simple class}
+  \end{figure}
+\end{frame}
+
 
 \begin{frame}
   \frametitle{Conclusion and future work}
