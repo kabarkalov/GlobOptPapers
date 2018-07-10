@@ -30,9 +30,16 @@
 
 \graphicspath{ {../pictures/}{img/} }
 %set pages numeration
-\setbeamertemplate{footline}[frame number]
+%\setbeamertemplate{footline}[frame number]
+%\setlength\abovecaptionskip{-3pt}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber
+}
 \setbeamertemplate{headline}{}
-\setlength\abovecaptionskip{-1pt}
 
 \title{Comparison of dimensionality reduction schemes for derivative-free global optimization algorithms}
 \author{\textbf{Vladislav~Sovrasov}}
@@ -92,7 +99,7 @@
   \begin{displaymath}
     |\varphi(y(x_1))-\varphi(y(x_2))|\leq H{|x_1-x_2|}^{\frac{1}{N}}, x_1,x_2\in[0,1],
   \end{displaymath}
-  \(\varphi(y(x))\) is non-smooth and has multiple local extremums even if \(\varphi(y)\) is unimodal.
+  \(\varphi(y(x))\) is non-smooth and has multiple local and \textbf{global} extremums even if \(\varphi(y)\) is unimodal.
   The latter problem is caused by loss of the information about \(N\)-d neighborhood after the transformation to the \(1\)-d space.
 
   \begin{figure}[ht]
@@ -107,17 +114,18 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Smooth evolvent and non-univalent evolvent}
-      %\centerline{\includegraphics[width=0.9\textwidth]{smooth.pdf}}
+  \frametitle{Non-univalent evolvent}
+    One can try to recover all preimages of \(y\in\mathbb{R}^N\) and make optimization method aware of their existence\footnote{R.G. Strongin. Numerical Methods in Multiextremal Problems (in Russian), 1978}. This allows reducing the effect of growing amount of local minimas after dimension reduction.
+    According to the theory of Peano-type curves, each \(N\)-d point could have up to \(2^N\) preimages. For large \(N\) such preimages mining would be expensive.
       \begin{figure}[ht]
-        %\vspace*{-0.5cm}
-        \subfloat{\raisebox{.02\textheight}{\includegraphics[width=.35\textwidth]{smooth.pdf} }}
-        \subfloat{{\includegraphics[width=.25\textwidth]{noninjective.pdf} }}
+        \includegraphics[width=.25\textwidth]{noninjective.pdf}
       \end{figure}
 \end{frame}
 
 \begin{frame}
   \frametitle{Shifted and rotated evolvents}
+  To create a fixed amount of preimages one can use a pre-defined set of different evolvents. These evolvents could be shifted or rotated versions of the original one. Set of shifted evolvents\footnote{Strongin, R.G., Gergel, V.P., Barkalov, K.A. Parallel methods for global optimization problem
+solving (in Russian), 2009} is theoretically proven to generate at least one pair of close preimages if images are close and it perform better than the set of rotated curves.
   \begin{figure}[ht]
     %\vspace*{-0.5cm}
     \subfloat{\raisebox{.0\textheight}{\includegraphics[width=.35\textwidth]{shifted.pdf} }}
@@ -134,15 +142,12 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Rotated evolvent}
-  \begin{columns}
-    \begin{column}{0.5\textwidth}
+  \frametitle{Smooth evolvent}
+  Smooth functions are more predictable for optimizer, so smooth approximation of the Peano-like \(y(x)\) curve could impove convergence rate \footnote{Goryachih, A. A class of smooth modification of space-filling curves for global optimization problems, NET 2016}.
+  \begin{figure}[ht]
+    \includegraphics[width=0.45\textwidth]{smooth.pdf}
+  \end{figure}
 
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \centerline{\includegraphics[width=0.9\textwidth]{rotated.pdf}}
-    \end{column}
-  \end{columns}
 \end{frame}
 
 \begin{frame}
@@ -151,7 +156,7 @@
   \begin{enumerate}
     \setlength{\itemindent}{.1in}
     \item[Step 1.] Sort the search information (one-dimensional points) in increasing order.
-    \item[Step 2.] Compute the evolvent \(y(x)\) and the function \(\varphi(y(x))\).
+    \item[Step 2.] Compute the evolvent \(y(x^k)\) and the function \(\varphi(y(x^k))\).
     \item[Step 3.] For each interval \((x_{i-1}, x_i)\) compute quantity \(R(i)\), called characteristic.
     \item[Step 4.] Choose an interval \((x_{t-1}, x_t)\) with the greatest characteristic and
     compute objective \(f(y(x))\) in the point chosen using the decision rule \(d\):
@@ -214,15 +219,17 @@
 
 
 \begin{frame}
-  \frametitle{Conclusion and future work}
-    Already done:
+  \frametitle{Conclusions}
+    %Already done:
     \begin{itemize}
-      \item
+      \item the smooth evolvent and the non-univalent one demonstrate the best result in the problems of small dimensionality and can be applied successfully in solving the problems with the computational costly objective functions.
+      \item the shifted evolvents introduce large overhead costs on the execution of the method due to the requirement to adding an auxiliary constraint. About 95\% of iterations are overhead to fight the auxiliary constraint.
+      \item rotated evolvents perform almost the same as the shifted ones but without overhead.
     \end{itemize}
-    Future work:
-    \begin{itemize}
-      \item
-    \end{itemize}
+    %Future work:
+    %\begin{itemize}
+    %  \item
+    %\end{itemize}
 \end{frame}
 
 \begin{frame}{{}}
