@@ -44,7 +44,7 @@ location of the global minimum is known. The considered generator is featured by
 specifying desired number of constraints and the fraction of feasible domain relative to the 
 whole global search domain. In the updated version of the generator, the options of forming the 
 problems with a conditional minimum located at the boundary of the feasible domain and of 
-specifying the number of constraints active at the minimizer have been added. The 
+controlling the number of constraints active at the minimizer have been added. The 
 demonstration of the developed approach is given on the example of a known index method for 
 solving complex multiextremal optimization problems with non-convex constraints.
 \end{abstract}
@@ -52,7 +52,7 @@ solving complex multiextremal optimization problems with non-convex constraints.
 % Head 1
 \section{INTRODUCTION}
 
-In the present paper, the methods for generating the global optimization test problems with non-convex constraints
+In the present paper, the methods for generating global optimization test problems with non-convex constraints
 \begin{eqnarray}
 &\varphi(y^\ast)=\min{\left\{\varphi(y):y\in D, \; g_i(y)\leq 0, \; 1 \leq i \leq m\right\}}, 
 \label{i_problem} \\
@@ -61,9 +61,9 @@ In the present paper, the methods for generating the global optimization test pr
 are considered. The objective function $\varphi(y)$ (henceforth denoted by $g_{m+1}(y)$) and 
 the left-hand sides $g_i(y), \; 1\leq i \leq m,$ of the constraints are supposed to satisfy the 
 Lipschitz condition
-\[ \left|g_i(y')-g_i (y'')\right| \leq L_i \left\|y'-y'' \right\|, \; y',y''\in D, \; 1\leq i \leq m+1. \]
+\[ \left|g_i(y')-g_i (y'')\right| \leq L_i \left\|y'-y'' \right\|, \; y',y''\in D, \; 1\leq i \leq m+1, \]
 with the Lipschitz constants unknown a priori. The analytical formulae of the problem functions 
-may be unknown, i.e. these ones may be defined by an algorithm for computing the function 
+may be unknown, i.e. they may be defined by an algorithm for computing the function 
 values in the search domain (so called ``black-box''-functions). 
 
 %\Russian
@@ -73,13 +73,12 @@ values in the search domain (so called ``black-box''-functions).
 %На основе генератора GKLS был предложен подход к построению задач с ограничениями (Emmental-type GKLS-based test problems, \cite{Sergeyev2017}. В данном генераторе в качестве целевой функции используется модифицированная GKLS-функция, ограничениями являются exterior of a ball с заданными центрами и радиусами. Использование иных целевых функций и/или ограничений недоступно, что является недостатком данного генератора.
 
 The problem of developing the generators of the multiextremal test problems with non-convex 
-constraints is a relevant one since standard approach to investigating and comparing the 
-global optimization algorithms is based on solving a series of test problems.
-Well known generators generate the problems without constraints as a rule. For example, a 
+constraints is relevant since classes of test problems are used usually for investigating and comparing global optimization algorithms.
+Well known generators construct the problems without constraints as a rule. For example, a 
 method for constructing two-dimensional test functions has been proposed by Grishagin (its 
 description can be found in \cite{Grishagin1997,Grishagin2015}). Another generator 
 (\textit{GKLS generator}) for the functions of arbitrary dimensionality has been proposed in 
-\cite{Gaviano2003}.  GKLS generator has been successfully applied in the investigation of some global 
+\cite{Gaviano2003}.  GKLS generator has been successfully applied in the investigation of several global 
 optimization methods \cite{Paulavicius2014,Sergeyev2015,Grishagin2018}.
 Based on the GKLS generator, an approach to constructing the constrained problems has been 
 proposed (Emmental-type GKLS-based test problems \cite{Sergeyev2017}). In this generator, 
@@ -99,7 +98,7 @@ In addition to the specified options, the following functions have been added in
 \begin{itemize}
 \item The possibility to generate the problems with the constrained minimizer located at the 
 boundary of the feasible domain.
-\item The possibility to control the number of constraints active in the optimum point.
+\item The possibility to control the number of constraints active at the optimum point.
 \end{itemize}
 
 The above capabilities allow emulating the properties of the applied constrained global 
@@ -109,14 +108,15 @@ optimization problems more adequately.
 \section{TEST PROBLEM CLASSES}
 
 The generator GCGen (Global Constrained optimization problem Generator) which allows to 
-generate the test global optimization problems with $m$ constraints has been proposed in \cite{Gergel2017}. In this paper, the rules, which allow formulating the constrained global optimization problems have been proposed so that:
+generate the test global optimization problems with $m$ constraints has been proposed in \cite{Gergel2017}. In the mentioned paper the rules which allow formulating the constrained global optimization problems have been proposed so that:
 \begin{itemize}
 	\item one could control the size of feasible domain with respect to the whole domain of 
 the parameters' variation;
 	\item the global minimizer of the objective function would be known a priori taking into 
 account the constraints;
 	\item the global minimizer of the objective function without accounting for the 
-constraints would be out of the feasible domain.
+constraints would be out of the feasible domain;
+	\item the value of the gradient at the global solution of the constrained problems is zero.
 \end{itemize}
 
 The location of the minimizer at the boundary of the feasible domain is an important 
@@ -124,7 +124,7 @@ property featuring the applied constrained optimization problems.
 When generating the problems according to the scheme described in \cite{Gergel2017}, 
 the constrained minimum point, in general, will be located inside the feasible domain. Therefore, the 
 options of shifting the minimizer to the boundary of the feasible domain as well of 
-controlling the number of the active constraints in this one have been added in the new version 
+controlling the number of the active constraints at the global solution have been added in the new version 
 of the problem generator.
 
 The shifting of the minimizer to the boundary of the feasible domain is performed in 
@@ -148,16 +148,16 @@ At that, no more than $2N\left\|b-a\right\|/h$ computations of the objective fun
 constraints values will be required.
 
 In the case, when it is necessary to generate a problem with a number of active 
-constraints in the minimizer not less than $S$, the rules are modified as follows.
+constraints at the minimizer not less than $S$, the rules are modified as follows.
 \begin{enumerate}
 \item A problem with an arbitrary location of a constrained minimizer $\overline{y}$ is 
 generated;
 \item From the point $\overline{y}$, a coordinate search of a feasible point $y^*$, for which at 
-least one constraint is active i. e. there is such index $j, 1 \leq j\leq m$ that $\left|g_j(y^*)\right| 
-\leq \delta$ is performed with a predefined step $h$.
+least one constraint is active (i.e. there is such index $j, 1 \leq j\leq m$, that $\left|g_j(y^*)\right| 
+\leq \delta$) is performed with a predefined step $h$.
 \item A rough estimate $y^*$ obtained is refined by a local method. 
 \item The number $K$ of the constraints active at the point $y^*$ is determined.
-\item If $K<S$, $S-K$ constraints are selected from the set of the inactive ones, and and these 
+\item If $K<S$, $S-K$ constraints are selected from the set of the inactive ones, and these 
 ones are set to be the active by adding a positive parameter $q$ to the right hand side.
 \item The coordinate transformation transferring the point $\overline{y}$ to the point $y^*$ is 
 performed. This way, the objective function reaches its minimum at the boundary of the feasible 
