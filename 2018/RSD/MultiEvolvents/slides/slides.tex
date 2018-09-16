@@ -19,6 +19,7 @@
 \setromanfont{CMU Serif}
 %\setsansfont{CMU Sans Serif}
 \setmathfont{Latin Modern Math}
+\setlength{\tabcolsep}{1pt}
 
 \usepackage{polyglossia}
 %\setbeamertemplate{itemize item}{\color{black}$\blacktriangleright$}
@@ -147,21 +148,40 @@ solving (in Russian), 2009} is theoretically proven to generate at least one pai
   \begin{enumerate}
     \setlength{\itemindent}{.1in}
     \item[Step 1.] Sort the search information (one-dimensional points) in increasing order.
-    \item[Step 2.] Compute the evolvent \(y(x^k)\) and the function \(\varphi(y(x^k))\).
+    \item[Step 2.] Compute the evolvent \(y(x^{k+j})\) and the function \(\varphi(y(x^{k+j}))\), \(j=\overline{1,p}\).
     \item[Step 3.] For each interval \((x_{i-1}, x_i)\) compute quantity \(R(i)\), called characteristic.
-    \item[Step 4.] Choose an interval \((x_{t-1}, x_t)\) with the greatest characteristic and
-    compute objective \(f(y(x))\) in the point chosen using the decision rule \(d\):
+    \item[Step 4.] Choose \(p\) intervals \((x_{t_j-1}, x_{t_j})\) with the greatest characteristics and
+    compute objective \(f(y(x^{k+j}))\) in points chosen using the decision rule \(d\):
     \begin{displaymath}
-      x^{k+1}=d(t)\in (x_{t-1}, x_t)
+      x^{k+1+j}=d(t)\in (x_{t_j-1}, x_{t_j}),\:j=\overline{1,p}
     \end{displaymath}
-    \item[Step 5.] If \(x_{t}-x_{t-1}<\varepsilon\) stop the method.
+    \item[Step 5.] If \(x_{t_j}-x_{t_j-1}<\varepsilon\) for one of \(j=\overline{1,p}\), stop the method.
   \end{enumerate}
   \textit{\footnotesize	{Detailed description: Strongin R.G., Sergeyev Ya.D.: Global optimization with non-convex constraints. Sequential and parallel algorithms (2000), Chapter 7}}
 \end{frame}
 
 \begin{frame}
   \frametitle{Parallel optimization method with multiple evolvents}
-
+  Using the multiple mapping allows solving initial problem by parallel solving the problems
+  \[
+  \min\{\varphi(y^s(x)):x\in [0,1]\}, 1\leqslant s\leqslant S
+  \]
+  on a set of intervals $[0,1]$ by the index method. Each one-dimensional problem is solved on a
+  separate processor. The trial results at the point \(x^k\) obtained for the problem being solved by
+  particular processor are interpreted as the results of the trials in the rest problems (in the
+  corresponding points \(x^{k_1},\dots,x^{k_S})\). In this approach, a trial at the point \(x^k \in
+  [0,1]\) executed in the framework of the \(s\)-th problem, consists in the following sequence of
+  operations:
+  \begin{enumerate}
+    \setlength{\itemindent}{.1in}
+    \item[Step 1.] Determine the image \(y^k=y^s (x^k)\) for the evolvent \(y^s (x)\).
+    \item[Step 2.] Inform the rest of processors about the start of the trial execution at the point \( y^k\) (the
+    blocking of the point \(y^k\) ).
+    \item[Step 3.] Determine the preimages \(x{}^{k_s}  \in [0,1], 1\leqslant s\leqslant S\), of the point \(y^k\) and interpret the
+    trial executed at the point \(y^k \in D \) as the execution of the trials in the \(S\) points
+    \(x{}^{k_1} ,\dots,x{}^{k_s} \)
+    \item[Step 4.] Inform the rest of processors about the trial results at the point \(y^k\).
+  \end{enumerate}
 \end{frame}
 
 \begin{frame}
@@ -215,7 +235,22 @@ solving (in Russian), 2009} is theoretically proven to generate at least one pai
 
 \begin{frame}
   \frametitle{Choice of evolvent for the parallel algorithm}
-
+  \begin{table}
+  \begin{center}
+  \caption{Averaged number of computations of \(g_0\) and of \(\varphi\) when solving the
+  problems from GKLS 3d Simple class using the shifted evolvent}
+    \begin{tabular}{|l|{c}|{c}|{c}|}
+      \hline
+    $L$ & $calc(g_0)$ & $calc(\varphi)$ & $\frac{calc(g_0)}{calc(\varphi)}$ ratio \\
+    \hline
+    2 & 96247.9  & 6840.14 & 14.07\\
+    \hline
+    3 & 153131.0 & 7702.82 & 19.88\\
+    \hline
+    \end{tabular}
+    \label{tab:shifted_g0}
+  \end{center}
+  \end{table}
 \end{frame}
 
 \begin{frame}
@@ -256,12 +291,49 @@ solving (in Russian), 2009} is theoretically proven to generate at least one pai
 \end{frame}
 
 \begin{frame}
+  \frametitle{Results of applying the parallel algorithm}
+
+  \begin{table}
+    \centering
+    \caption{Speedup of parallel computations executed by the parallel algorithm}
+    \label{tab:speedup}
+    \begin{tabular}{cccccccc}
+      \cline{3-8}\noalign{\smallskip}
+      \multicolumn{2}{c}{  } & \textit{p} & \multicolumn{2}{c}{$N=4$} & &
+  \multicolumn{2}{c}{$N=5$}   \\
+      \noalign{\smallskip} \cline{4-5} \cline{7-8}  \noalign{\smallskip}
+      \multicolumn{2}{c}{  } & & \textit{Simple} & \textit{Hard} & & \textit{Simple} &
+  \textit{Hard}  \\
+      \noalign{\smallskip}\hline
+      I &
+      \parbox{0.25\textwidth}{
+      \begin{center}
+      \textbf{1 cluster node}
+      \end{center}		}
+      & \textit{1}   & 12167(10.58s) & 25635(22.26s) & & 20979(22.78s) & 187353(205.83s)  \\
+    &  & \textit{32} & 37.1(18.03) & 20.2(8.55)  & &  23.3(8.77) & 15.4(9.68) \\
+    \hline \noalign{\smallskip}
+  II  & \textbf{4 cluster nodes}  %\multirow{3}{*}{}
+  & \textit{1} &        0.5(0.33) & 2.3(0.86)  & & 14.3(6.61) & 11.0(6.06) \\
+  &   & \textit{32} & 190.1(9.59) & 28.1(1.08) & & 446.4(19.79) & 543.0(43.60) \\
+    \noalign{\smallskip}\hline	\noalign{\smallskip}
+  III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
+  & \textit{1}    & 15.0(6.05)  & 5.9(2.36)   & & 24.2(17.56)  & 32.9(24.87)  \\
+  & & \textit{32} & 357.9(2.36) & 228.9(2.64) & & 582.8(20.96) & 793.0(33.89) \\
+      \noalign{\smallskip}\hline
+    \end{tabular}
+  \end{table}
+
+\end{frame}
+
+\begin{frame}
   \frametitle{Conclusions}
     %Already done:
     \begin{itemize}
       \item the smooth evolvent and the non-univalent one demonstrate the best result in the problems of small dimensionality and can be applied successfully in solving the problems with the computational costly objective functions.
       \item the shifted evolvents introduce large overhead costs on the execution of the method due to the requirement to adding an auxiliary constraint. About 95\% of iterations are overhead to fight the auxiliary constraint.
       \item rotated evolvents perform almost the same as the shifted ones but without overhead.
+      \item parallel optimization method shows up to 33x speedup on hard \(5d\) problems when using a set of rotated evolvents.
     \end{itemize}
     %Future work:
     %\begin{itemize}
@@ -270,11 +342,10 @@ solving (in Russian), 2009} is theoretically proven to generate at least one pai
 \end{frame}
 
 \begin{frame}{{}}
-  \frametitle{ }
+  \frametitle{Q\&A}
   \begin{center}
-    \Large{Q\&A}
-
-\vspace{1cm}
+    \Large{Contacts:}
+\vspace{0.5cm}
 
     sovrasov.vlad@gmail.com
 
