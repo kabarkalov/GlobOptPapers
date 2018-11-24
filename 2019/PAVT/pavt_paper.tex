@@ -58,6 +58,8 @@ This work considers several stochastic and deterministic derivative-free global 
 \end{abstract}
 %
 \section{Introduction}
+
+\begin{Russian}
 Нелинейная глобальная оптимизация невыпуклых функций традиционно считается одной из самых трудных
 задач математического программирования. Отыскание глобального минимума функции от нескольких переменных
 зачастую оказывается сложнее, чем локальная оптимизация в тысячемерном пространстве. Для последней может оказаться достаточно
@@ -68,12 +70,23 @@ This work considers several stochastic and deterministic derivative-free global 
 В данной работе рассмотрены open-source реализации девяти различных методов глобальной оптимизации.
 Все алгоритмы были протестированы на наборе из 900 существенно многоэкстремальных функций, который был сгенерирован с
 помощью специализированных генераторов задач \cite{Gaviano2003, grishaginClass}. Помимо сравнения последовательных алгоритмов, на подмножестве из 200 тестовых задач произведено сравнение солвера MIDACO \cite{Schlueter2012} и программной системы Globalizer \cite{globalizerSystem} в условиях работы на суперкомпьютере Лобачевский.
+\end{Russian}
 
 \section{Related Work}
 
+\begin{Russian}
+Ранее в литературе рассмартивалось как сравнение между собой стохастических алгоритмов глобальной оптимизации \cite{Ali2005, JSSv060i06}, так и детерминированных \cite{posik2012, KVASOV2018245, Liberti2005}.
+В них большинство современных методов изучены довольно детально, но упор в основном делается на последовательные алгоритмы, а основными критериями эффективности метода оптимизации является его надёжность и скорость сходимости. В большинстве работ в качестве набора тестовых функций берётся набор известных тестовых задач (например, функция Растригина, Ackley function и др.). Размер такого набора обычно не превышает 100 различных функций, некоторые из которых могут быть одноэкстремальны (как функция Розенброка).
+
+В работе \cite{Beiranvand2017} софрмулированы некие общие принципы, которых, по мнению авторов, следует придерживаться при сравнении методов оптимизации.
+В частности, авторы говорят о преимуществах генераторов задач, позволяющих создать большие наборы задач, сводя случайные эфффекты при сравнении к минимуму. В то же время, использование одного генератора может оказаться недостаточно для исчерпывающего сравнения методов. Чтобы частично преодолеть эту проблему, авторы \cite{Beiranvand2017} советуют использовать несколько генераторов различной природы и создавать наборы задач различной сложности.
+
+Учитывая опыт предыдущих работ в области сравнения методов оптимизации, в данной работе будут использованы два генератора тестовых задач разной природы, с помощью которых сгенерировано 9 наборов по 100 задач разной сложности размерности от 2 до 5. Помимо сравнения последовательных методов, также в работе приводится сравнение эффективности двух параллельных алгоритмов.
+\end{Russian}
+
 \section{Statement of Multidimensional Global Optimization Problem}
 In this paper, the core class of optimization problems, which can be solved using
-Globalizer, is formulated. This class involves the multidimensional global
+global optimization methods, is formulated. This class involves the multidimensional global
 optimization problems without constraints, which can be defined in the following way:
 \begin{equation}
 \label{eq:task}
@@ -95,12 +108,15 @@ Usually, the objective function \(\varphi(y)\) is defined as a computational pro
 according to which the value \(\varphi(y)\) can be calculated for any vector \(y\in D\)
 (let us further call such a calculation \textit{a trial}). It is supposed that this procedure
 is time-consuming.
-\section{Dimension Reduction with Evolvents}
+
+\section{Review of Considered Optimization Methods}
+
+\subsection{Parallel Algorithm of Global Search}
+\subsubsection{Dimension Reduction with Evolvents}
 Within the framework of the information-statistical global optimization theory,
 the Peano space-filling curves (or evolvents) \(y(x)\) mapping the interval \([0,1]\)
 onto an \(N\)-dimensional hypercube \(D\) unambiguously are used for the dimensionality
-reduction \cite{sergeyevStronginLera2013}, \cite{strongin1978},
-\cite{stronginGergelBarkalovParGO}, \cite{strSergGO}.
+reduction \cite{sergeyevStronginLera2013, strongin1978, strSergGO}.
 \par
 As a result of the reduction, the initial multidimensional global optimization
 problem (\ref{eq:task}) is reduced to the following one-dimensional problem:
@@ -135,22 +151,10 @@ using the mapping \(y(x)\),
 \(y\in D\),
   \item The calculated value \(z=\varphi(y)\) is used further as the value of the reduced one-dimensional function \(\varphi(y(x))\) at the point \(x\).
 \end{itemize}
-\subsection{Rotated Evolvents}
-To overcome complexity of the $S$-evolvent and to preserve the information on the nearness of the points in
-the $N$-dimensional space, one more scheme of building of the multiple mappings was proposed.
-The building of a set of Peano curves not by the shift along the main diagonal of the hypercube
-but by rotation of the evolvents around the coordinate origin is a distinctive feature of the
-proposed scheme \cite{Gergel2009}.
-In Fig.~\ref{6_fig_9} two evolvents being the approximations to Peano curves for the case
-$N=2$ are presented as an illustration.
-Taking into account the initial mapping, one can conclude that current implementation of the
-method allows to build up to $N(N-1)+1$ evolvents for mapping the $N$-dimensional domain
-onto the corresponding one-dimensional intervals. Moreover, the additional constraint  $g_0(y)
-\leq 0$ with $g_0(y)$ from (\ref{6_g0}), which arises in shifted evolvents, is absent. This
-method for building a set of mappings can be ``scaled'' easily to obtain more evolvents (up to
-$2^N$) if necessary.
-\section{Sequential and Parallel Algorithm of Global Search}
-The optimization methods applied in Globalizer to solve the reduced problem
+
+\subsubsection{Algorithm of Global Search on Shared Memory}
+\label{sub:ags}
+Parallel optimization methods applied in Globalizer to solve the reduced problem
 (\ref{eq:oneDimTask}) are based on the MAGS method, which can be presented as follows ---
 see \cite{strongin1978}, \cite{strSergGO}.
 \par
@@ -166,25 +170,39 @@ $0=x_0<x_1<...<x_{k+1}=1$.
 \textit{Rule 2}. Compute the characteristics \(R(i)\) for each interval \((x_{i-1},x_i),1\leq i\leq
 k+1\).
 
-\textit{Rule 4}. Determine the interval with the maximum characteristic $R(t)=\max_{1\leq i
-\leq k+1}R(i)$.
+\textit{Rule 3}. Determine the \(p\) intervals with the maximum characteristics $R(t_j)=\max_{1\leq i
+\leq k+1}R(i),\: j=\overline{1,p}$.
 
-\textit{Rule 5}. Execute a new trial at the point \(x^{k+1}\) located within the interval with the
-maximum characteristic from the previous step
-  $x^{k+1}=d(x_t)$.
+\textit{Rule 4}. Execute new trials at points \(x^{k+j},\: j=\overline{1,p}\) located within intervals with
+maximum characteristics from the previous step
+  $x^{k+j}=d(x_{t_j}),\: j=\overline{1,p}$.
 
 The stopping condition, which terminated the trials, is defined by the inequality
-$\rho_t<\varepsilon$
-for the interval with the maximum characteristic from Step 4 and \(\varepsilon >0\) is the
-predefined
-accuracy of the optimization problem solution. If the stopping condition is not satisfied,
-the index \(k\) is incremented by 1, and the new global optimization iteration is executed.
+$\rho_{t_j}<\varepsilon,\: j=\overline{1,p}$
+for the intervals with maximum characteristics from Step 3 and \(\varepsilon >0\) is the
+predefined accuracy of the optimization problem solution. If the stopping condition is not satisfied,
+the index \(k\) is incremented by \(p\), and the new global optimization iteration is executed.
+
+This method is employed in Globalizer to organize parallel computations on shared memory: each of \(p\)
+trials can be carried out on one of \(p\) local computation units.
 
 The convergence conditions and exact formulas for descision rules $R(i)$ and $d(x)$ of the
 described algorithm are given, for example, in \cite{strSergGO}.
 
-\subsection{Parallel Algorithm Exploiting a Set of Evolvents}
-\label{sec:parallel_evolvents}
+\subsection{Parallel Algorithm on Distributed Memory Exploiting a Set of Evolvents}
+\subsubsection{Rotated Evolvents}
+One of the possible ways to overcome the negative effects of using a numerical
+approximation of evolvent (it destroys the information about the neighbor points in $\mathbb{R}^N$ space)
+consists in using the multiple mappings
+\begin{equation}
+  Y_L(x)=\left\{y^0(x),\ y^1(x),...,\ y^L(x)\right\}
+\end{equation}
+instead of single Peano curve $y(x)$ (see \cite{strSergGO}).
+The building of a set of Peano curves by rotation of the evolvents around the coordinate origin is a distinctive feature was proposed in \cite{Gergel2009}. Taking into account the initial mapping, one can conclude that current implementation of the
+method allows to build up to $N(N-1)+1$ evolvents for mapping the $N$-dimensional domain
+onto the corresponding one-dimensional intervals. This method for building a set of mappings can be ``scaled'' easily to obtain more evolvents (up to
+$2^N$) if necessary.
+
 Using the multiple mapping allows solving initial problem (\ref{eq:task}) by parallel solving the
 problems
 \[
@@ -215,27 +233,72 @@ index algorithm. For the organization of the interactions among the processors, 
 created on each processor, where the processors store the information on the executed iterations
 in the form of the tuples: the processor number \(s\), the trial point \(x{}^{k_s}\).
 \par
-The mentioned parallelization scheme is implemented in the Globalizer system with the use of MPI technology. Main
-features of implementation consist in the following. A separate MPI-process is created for each
-of \(S\) one-dimensional problems being solved, usually, one process per one processor
-employed. Each process can use $p$ threads to parallel execute $p$ trials, usually one thread per an accessible core.
+The mentioned parallelization scheme was proposed in \cite{Gergel2009} and implemented in the Globalizer system with the use of MPI technology. Main
+features of implementation consist in the following:
+\begin{itemize}
+  \item A separate MPI-process is created for each
+ of \(S\) one-dimensional problems being solved, usually, one process per one processor
+ employed.
+ \item Each process can use $p$ threads to parallel execute $p$ trials, usually one thread per an accessible core.
+\end{itemize}
 
-\section{Review of Other Methods}
+\subsection{MIDACO Parallel Solver}
+MIDACO (Mixed Integer Distributed Ant Colony Optimization) \cite{Schlueter2012} is a solver which implements the evolutionary algorithm
+the ant colony optimization metaheuristic for continuous search domains. ACO was originally
+proposed to solve the TSP, but later has been successfully adopted to solve mixed integer nonlinear programming problems \cite{SCHLUTER2009}.
+
+The MIDACO solver utilizes reverse communication architecture \cite{Schlueter2012}.
+Reverse communication means that the call of the objective function happens outside and independently of the MIDACO source code.
+Relying on this feature the following distributed parallelization scheme was implemented:
+\begin{enumerate}
+  \item MIDACO runs at the master node and generates \(n \times p\) new trial points at each iteration.
+  \item Each of \(n\) distributed computational nodes gets \(p\) points from the master and performs \(p\) parallel trials on local computing devices.
+  \item Each of \(n\) distributed computational nodes sends \(p\) values of the objective function to the master.
+\end{enumerate}
+
+In this scheme all distributed communications were implemented using the MPI library.
+Parallelism within a single node is powered by the OpenMP standard.
+
 \subsection{Sequential Methods}
 \begin{itemize}
-  \item Algorithm of global search (AGSl) (\url{https://github.com/sovrasov/ags_nlp_solver})
-  \item Multi Level Single Linkage (MLSL) (\url{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#mlsl-multi-level-single-linkage})
-  \item DIRECT (\url{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#direct-and-direct-l})
-  \item Locally-based DIRECT (DIRECT$l$) (\url{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#direct-and-direct-l})
-  \item Dual Simulated Annealing (\url{https://github.com/sgubianpm/sdaopt})
-  \item Differential Evolution (\url{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html#scipy.optimize.differential_evolution})
-  \item Controlled Random Search (\url{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#controlled-random-search-crs-with-local-mutation})
-  \item StoGO (\url{https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#stogo})
+  \item \textbf{Algorithm of Global Search}. Sequential version of the method described in Section \ref{sub:ags}.
+
+  \item \textbf{Locally-based Algorithm of Global Search (AGS\(l\))} \cite{indexMethod}. It's a modification of
+  the original AGS which make it more locally oriented by alternately using of two types of characteristics in the Rule 2 from the Section \ref{sub:ags}.
+
+  \item \textbf{Multi Level Single Linkage} \cite{Kan1987StochasticGO}. MLSL is an improved multistart algorithm.
+  It samples low-discrepancy starting points and does local optimizations from them. In contrast to the dummy multistart schemes
+  MLSL uses some clustering heuristics to avoid multiple local descents to already explored local minimas.
+
+  \item \textbf{DIRECT} \cite{Jones2009}. The algorithm is deterministic and recursively divides the search space and forms a tree of hyper-rectangles (boxes). DIRECT uses the objective function values and the Lipschitz condition (\ref{eq:lip}) to estimate promising boxes.
+
+  \item \textbf{Locally-based DIRECT (DIRECT$l$)} \cite{Gablonsky2001}. It's a variation of DIRECT which pays less attention to non-promising boxes and therefore
+  has less exploration power: it can converge faster on problems with few local minimas, but lost the global one in complicated cases.
+
+  \item \textbf{Dual Simulated Annealing} \cite{XIANG1997216}. This stochastic method is a combination of the Classical Simulated Annealing and the Fast Simulated Annealing coupled to a strategy for applying a local search on accepted locations. It converges much faster than both parent algorithms, CSA and FSA.
+
+  \item \textbf{Differential Evolution} \cite{Storn1997}. DE is an adaptation of the original genetic algorithm to
+  the continuous search domain.
+
+  \item \textbf{Controlled Random Search} \cite{Price1983}. The CRS starts with a set of random points and then defines
+  the next trial point in relation to a simplex chosen randomly from a stored configuration of points. CRS in not an
+  evolutional algorithm, although stores something like population and performs transformation resembling a mutation.
+
+  \item \textbf{StoGO} \cite{Madsen1998}. StoGO is dividing the search space into smaller hyper-rectangles via a branch-and-bound approach,
+  and searching them by a local-search algorithm, optionally including some randomness.
+
 \end{itemize}
-\subsection{MIDACO Parallel Solver}
+
+All the mentioned algorithms (except of AGS\(l\) are available in source codes as parts of wide-spread optimization pacages.
+AGS, DIRECT, DIRECT$l$, CRS, MLSL and StoGO are part of the NLOpt libray \cite{nlopt}. Differential Evolution and DSA can be found in
+the latest version of the SciPy \cite{scipy} package for Python.
+
 \section{Tools for Comparison of Global Optimization Algorithms}
+
 \section{Results of Comparison}
+
 \section{Conclusions}
+
 \section*{Acknowledgements}
 The study was supported by the Russian Science Foundation, project No 16-11-
 10150
