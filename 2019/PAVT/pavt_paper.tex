@@ -36,7 +36,7 @@
 %                                     also used for the TOC unless
 %                                     \toctitle is used
 %
-\author{Vladislav Sovrasov\inst{1}\letter \and Semen Bevzuk\inst{1}}
+\author{Vladislav Sovrasov\letter \and Semen Bevzuk}
 %
 \authorrunning{Vladislav Sovrasov et al.} % abbreviated author list (for running head)
 %
@@ -289,13 +289,200 @@ Parallelism within a single node is powered by the OpenMP standard.
 
 \end{itemize}
 
-All the mentioned algorithms (except of AGS\(l\) are available in source codes as parts of wide-spread optimization pacages.
+All the mentioned algorithms (except of AGS\(l\) which implemented in the Globalizer system)
+are available in source codes as parts of wide-spread optimization packages.
 AGS, DIRECT, DIRECT$l$, CRS, MLSL and StoGO are part of the NLOpt libray \cite{nlopt}. Differential Evolution and DSA can be found in
 the latest version of the SciPy \cite{scipy} package for Python.
 
 \section{Tools for Comparison of Global Optimization Algorithms}
+\begin{Russian}
 
-\section{Results of Comparison}
+Использование сгенерированных некоторыми случайными механизмами
+наборов тестовых задач с известными решениями является одним из общепринятых подходов
+к сравнению алгоритмов оптимизации \cite{Beiranvand2017}. В данной работе
+будем использовать два генератора тестовых задач, порождающих задачи различной природы \cite{grishaginClass, Gaviano2003}.
+
+Обозначим набор задач, полученных с помощью первого генератора из \cite{grishaginClass} как \(F_{GR}\). Механизм построения задач \(F_{GR}\),
+не предусматривает контроль за сложностью задач и количеством локальных оптимумов, однако известно, что порождаемые функции
+являются существенно многоэкстремальными. Кроме того, задачи, порождаемые \(F_{GR}\) двухмерные. В данной работе будем использовать
+100 случайно сгенерированных функций из класса \(F_{GR}\).
+
+Генератор GKLS \cite{Gaviano2003} позволяет получать задачи заданной размерности и с заданным количеством экстремумов.
+Кроме того GKLS позволяет регулировать сложность задач, уменьшая или увеличивая размер области притяжения гломального минимума.
+В работе \cite{SergeyevKvasov2006} указаны параметры генератора, позволяющие породить наборы по 100 задач двух уровней сложности
+(Simple и Hard) размерностей 2, 3, 4 и 5. Следуя примеру авторов генератора GKLS, будем использовать предложенные ими параметры и,
+таким образом, добавим в тестовый ещё 800 задач различной размерности и сложности.
+
+Будем считать, что тестовая задача решена, если метод оптимизации провёл очередное испытание \(y^k\) в
+\(\delta\)-окрестности глобального минимума \(y^*\), т.е. $\left\|y^k-
+y^*\right\|\leqslant \delta = 0.01\left\|b-a\right\|$, где \(a\) и \(b\) --- левая и правая границы гиперкуба из (\ref{eq:task}).
+Если указанное соотношение не выполнено до истечения лимита на количество испытаний, то задача считается не решённой.
+Максимальный лимит на количество испыаний установлен для каждого класса задач, в соответствии с размерностью и сложностью (см. таблицу \ref{tab:limits}).
+
+\begin{table}
+\begin{center}
+\caption{Trials limit for each test problems class}
+  \begin{tabular}{|l|{c}|}
+    \hline
+  Class & Limit\\
+  \hline
+  \(F_{GR}\) & 5000 \\
+  \hline
+  GKLS 2d Simple & 8000 \\
+  \hline
+  GKLS 2d Hard & 9000 \\
+  \hline
+  GKLS 3d Simple & 15000 \\
+  \hline
+  GKLS 3d Hard & 25000 \\
+  \hline
+  GKLS 4d Simple & 150000 \\
+  \hline
+  GKLS 4d Hard & 250000 \\
+  \hline
+  GKLS 5d Simple & 350000 \\
+  \hline
+  GKLS 5d Hard & 600000 \\
+  \hline
+  \end{tabular}
+  \label{tab:limits}
+\end{center}
+\end{table}
+
+В качестве характеристик метода оптимизации на каждом из классов будем рассматривать среднее число
+испытаний, затраченное для решения одной задачи, и количество решённых задач. Чем меньше число испытаний, тем быстрее метод сходится
+к решению, а значит и меньше обращается к потенциально трудомкой процедуре вычислений целевой функции.
+Количество решённых задач гоорит о надёжности метода с заданными параметрами на решаемом классе тестовых задач.
+\end{Russian}
+
+\section{Results of Numerical Experiments}
+\subsection{Results of Sequential Algorithms}
+seq
+\begin{table}
+\begin{center}
+\caption{Trials limit for each test problems class}
+  \begin{tabular}{|l|{c}|{c}|{c}|}
+    \hline
+  Class & AGS & CRS & DE\\
+  \hline
+  \(F_{GR}\) & \(r=3\) & popsize=150 & mutation=(1.1,1.9), popsize=60 \\
+  \hline
+  GKLS 2d Simple & \(r=4.6\) & popsize=200 & mutation=(1.1,1.9), popsize=60 \\
+  \hline
+  GKLS 2d Hard & \(r=6.5\) & popsize=400 & mutation=(1.1,1.9), popsize=60 \\
+  \hline
+  GKLS 3d Simple & \(r=3.7\) & popsize=1000 & mutation=(1.1,1.9), popsize=70 \\
+  \hline
+  GKLS 3d Hard & \(r=4.4\) & popsize=2000 & mutation=(1.1,1.9), popsize=80 \\
+  \hline
+  GKLS 4d Simple & \(r=4.7\) & popsize=8000 & mutation=(1.1,1.9), popsize=90 \\
+  \hline
+  GKLS 4d Hard & \(r=4.9\) & popsize=16000 & mutation=(1.1,1.9), popsize=100 \\
+  \hline
+  GKLS 5d Simple & \(r=4\) & popsize=25000 & mutation=(1.1,1.9), popsize=120 \\
+  \hline
+  GKLS 5d Hard & \(r=4\) & popsize=30000 & mutation=(1.1,1.9), popsize=140 \\
+  \hline
+  \end{tabular}
+\end{center}
+\end{table}
+
+\subsection{Results of Parallel Algorithms}
+
+\begin{table}
+  \centering
+  \caption{Averaged numbers of iterations executed by the parallel algorithm for solving the test
+optimization problems}
+  \label{tab:iterations}
+  \begin{tabular}{cccccccc}
+    \cline{3-8}\noalign{\smallskip}
+    \multicolumn{2}{c}{  } & \textit{p} & \multicolumn{2}{c}{$N=4$} & &
+\multicolumn{2}{c}{$N=5$}   \\
+    \noalign{\smallskip} \cline{4-5} \cline{7-8}  \noalign{\smallskip}
+    \multicolumn{2}{c}{  } & & \textit{Simple} & \textit{Hard} & & \textit{Simple} &
+\textit{Hard}  \\
+    \noalign{\smallskip}\hline
+    I &
+    \parbox{0.25\textwidth}{
+    \begin{center}
+    \textbf{1 cluster node}
+    \end{center}		}
+      & \textit{1} & 12167 & 25635 & & 20979 & 187353  \\
+    &  & \textit{32} & 328 & 1268  & &   898 & 12208 \\
+    \hline \noalign{\smallskip}
+II  & \textbf{4 cluster nodes}  %\multirow{3}{*}{}
+  & \textit{1} & 25312 & 11103 & & 1472 & 17009 \\
+&   & \textit{32} & 64 &   913 & & 47 & 345 \\
+    \noalign{\smallskip}\hline	\noalign{\smallskip}
+III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
+  & \textit{1}  & 810 & 4351 & & 868 & 5697  \\
+& & \textit{32} & 34  & 112  & & 35  & 868 \\
+    \noalign{\smallskip}\hline
+  \end{tabular}
+\end{table}
+
+\begin{table}
+  \centering
+  \caption{Speedup of parallel computations executed by the parallel algorithm}
+  \label{tab:speedup}
+  \begin{tabular}{cccccccc}
+    \cline{3-8}\noalign{\smallskip}
+    \multicolumn{2}{c}{  } & \textit{p} & \multicolumn{2}{c}{$N=4$} & &
+\multicolumn{2}{c}{$N=5$}   \\
+    \noalign{\smallskip} \cline{4-5} \cline{7-8}  \noalign{\smallskip}
+    \multicolumn{2}{c}{  } & & \textit{Simple} & \textit{Hard} & & \textit{Simple} &
+\textit{Hard}  \\
+    \noalign{\smallskip}\hline
+    I &
+    \parbox{0.25\textwidth}{
+    \begin{center}
+    \textbf{1 cluster node}
+    \end{center}		}
+    & \textit{1}   & 12167(10.58s) & 25635(22.26s) & & 20979(22.78s) & 187353(205.83s)  \\
+  &  & \textit{32} & 37.1(18.03) & 20.2(8.55)  & &  23.3(8.77) & 15.4(9.68) \\
+  \hline \noalign{\smallskip}
+II  & \textbf{4 cluster nodes}  %\multirow{3}{*}{}
+& \textit{1} &        0.5(0.33) & 2.3(0.86)  & & 14.3(6.61) & 11.0(6.06) \\
+&   & \textit{32} & 190.1(9.59) & 28.1(1.08) & & 446.4(19.79) & 543.0(43.60) \\
+  \noalign{\smallskip}\hline	\noalign{\smallskip}
+III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
+& \textit{1}    & 15.0(6.05)  & 5.9(2.36)   & & 24.2(17.56)  & 32.9(24.87)  \\
+& & \textit{32} & 357.9(2.36) & 228.9(2.64) & & 582.8(20.96) & 793.0(33.89) \\
+    \noalign{\smallskip}\hline
+  \end{tabular}
+\end{table}
+
+\begin{Russian}
+
+\begin{table}
+\begin{center}
+\caption{Trials limit for each test problems class}
+  \begin{tabular}{|l|{c}|}
+    \hline
+  Class & Limit\\
+  \hline
+  \(F_{GR}\) & 5000 \\
+  \hline
+  GKLS 2d Simple & 8000 \\
+  \hline
+  GKLS 2d Hard & 9000 \\
+  \hline
+  GKLS 3d Simple & 15000 \\
+  \hline
+  GKLS 3d Hard & 25000 \\
+  \hline
+  GKLS 4d Simple & 150000 \\
+  \hline
+  GKLS 4d Hard & 250000 \\
+  \hline
+  GKLS 5d Simple & 350000 \\
+  \hline
+  GKLS 5d Hard & 600000 \\
+  \hline
+  \end{tabular}
+\end{center}
+\end{table}
+\end{Russian}
 
 \section{Conclusions}
 
