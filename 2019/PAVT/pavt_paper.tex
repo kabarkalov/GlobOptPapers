@@ -190,6 +190,7 @@ The convergence conditions and exact formulas for descision rules $R(i)$ and $d(
 described algorithm are given, for example, in \cite{strSergGO}.
 
 \subsection{Parallel Algorithm on Distributed Memory Exploiting a Set of Evolvents}
+\label{sub:parallel_evolvents}
 \subsubsection{Rotated Evolvents}
 One of the possible ways to overcome the negative effects of using a numerical
 approximation of evolvent (it destroys the information about the neighbor points in $\mathbb{R}^N$ space)
@@ -321,7 +322,7 @@ y^*\right\|\leqslant \delta = 0.01\left\|b-a\right\|$, где \(a\) и \(b\) ---
 
 \begin{table}
 \begin{center}
-\caption{Trials limit for each test problems class}
+\caption{Trials limit for the each of test problems classes}
   \begin{tabular}{|l|{c}|}
     \hline
   Class & Limit\\
@@ -352,18 +353,33 @@ y^*\right\|\leqslant \delta = 0.01\left\|b-a\right\|$, где \(a\) и \(b\) ---
 В качестве характеристик метода оптимизации на каждом из классов будем рассматривать среднее число
 испытаний, затраченное для решения одной задачи, и количество решённых задач. Чем меньше число испытаний, тем быстрее метод сходится
 к решению, а значит и меньше обращается к потенциально трудомкой процедуре вычислений целевой функции.
-Количество решённых задач гоорит о надёжности метода с заданными параметрами на решаемом классе тестовых задач.
+Количество решённых задач говорит о надёжности метода с заданными параметрами на решаемом классе тестовых задач.
+Чтобы сделать величины, характеризующие надёжность и скорость сходимости, при подсчёте среднего количества испытаний учитывались тоолько решённые задачи.
 \end{Russian}
 
 \section{Results of Numerical Experiments}
 \subsection{Results of Sequential Algorithms}
-seq
+\begin{Russian}
+
+Результаты тех или иных алгоритмов на различных классах задач напрямую зависят от
+настроек алгоритмов. В большинстве случаев авторы программных реализаций ориентируются на
+задачи средней сложности и чтобы получить удовлетворительный резултьтат при решении
+существенно многоэкстремальных задач, требуется корректировка некоторых параметров.
+При проведении сравнения были заданы следующие параметры для методов:
+\begin{itemize}
+  \item в методе AGS\(l\) параметр чередования глобального и локального правил вычисления характеристик был задан равным 5:1;
+  \item в методах DIRECT и DIRECT\(l\) параметр \(\epsilon=10^{-4}\);
+  \item в методе SDA параметр \(visit=2.72\).
+\end{itemize}
+
+Остальные параметры варьировались в зависимости от класса задач (см. таблицу \ref{tab:params}).
+
 \begin{table}
 \begin{center}
-\caption{Trials limit for each test problems class}
+\caption{Class-specific parameters of optimization algorithms}
   \begin{tabular}{|l|{c}|{c}|{c}|}
     \hline
-  Class & AGS & CRS & DE\\
+    & AGS, AGS\(l\) & CRS & DE\\
   \hline
   \(F_{GR}\) & \(r=3\) & popsize=150 & mutation=(1.1,1.9), popsize=60 \\
   \hline
@@ -384,10 +400,101 @@ seq
   GKLS 5d Hard & \(r=4\) & popsize=30000 & mutation=(1.1,1.9), popsize=140 \\
   \hline
   \end{tabular}
+  \label{tab:params}
+\end{center}
+\end{table}
+
+В таблицах \ref{tab:trials}, \ref{tab:solved} приведены результаты запуска методов оптимизации на рассматриваемых классах задач.
+Методы DIRECT и AGS\(l\) показали наилучшую скорость сходимости на всех классах, причём AGS\(l\) уступает
+DIRECT на задачах из классов Simple и обходит его на задачах классов Hard. Как видно из таблицы \ref{tab:solved},
+самыми надёжными методами являются детерминированные: AGS, AGS\(l\), DIRECT и DIRECT\(l\). Из стохастических методов
+самую высокую надёжность демонстрируют MLSL и SDA.
+
+\begin{table}
+\begin{center}
+\caption{Averaged number of trials executed by sequential methods for solving the test
+optimization problems}
+  \begin{tabular}{|l|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|}
+    \hline
+    & AGS & AGS\(l\) & CRS & DIRECT & DIRECT\(l\) & MLSL & SDA & DE & StoGO \\
+  \hline
+  \(F_{GR}\)     & 193.1 &  \textbf{158.3} & 400.3 & 182.3 & 214.9 & 947.2 & 691.2 & 1257.3 & 1336.8 \\
+  \hline
+  GKLS 2d Simple &  254.9 & 217.6 & 510.6 & \textbf{189.0} & 255.2 & 556.8 & 356.3 & 952.2 & 1251.5 \\
+  \hline
+  GKLS 2d Hard   &  728.7 & \textbf{488.0} & 844.7 & 985.4 & 1126.7 & 1042.5 & 1637.9 & 1041.1 & 2532.2 \\
+  \hline
+  GKLS 3d Simple &  1372.1 & 1195.3 & 4145.8 & \textbf{973.6} & 1477.8 & 4609.2 & 2706.5 & 5956.94 & 3856.1 \\
+  \hline
+  GKLS 3d Hard   &  3636.1 & \textbf{1930.5} & 6787.0 & 2298.7 & 3553.3 & 5640.1 & 4708.4 & 6914.3 & 7843.2 \\
+  \hline
+  GKLS 4d Simple &  26654.1 & 11095.7 & 37436.8 & \textbf{7824.3} & 15994.1 & 41514.3 & 21417.9 & 19157.7 & 59895.4 \\
+  \hline
+  GKLS 4d Hard   &  54536.8 &  \textbf{23167.8} &  73779.3 &  23204.4 &  54489.9 &  80247.2 &  68815.5 &  27466.1 &  109328.1  \\
+  \hline
+  GKLS 5d Simple &  29810.0 & 11529.0 & 143575.0 & \textbf{7166.5} & 13970.5 & 52647.6 & 34255.3 & 73074.5 & 91580.4 \\
+  \hline
+  GKLS 5d Hard   &  113129.1 & 67652.7 & 165192.8 & \textbf{66327.4} & 164390.6 & 138766.2 & 116973.1 & 105496.9 & 155123.8 \\
+  \hline
+  \end{tabular}
+  \label{tab:trials}
+\end{center}
+\end{table}
+
+\begin{table}
+\begin{center}
+\caption{Number of test optimization problems solved by sequential methods}
+  \begin{tabular}{|l|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|}
+    \hline
+    & AGS & AGS\(l\) & CRS & DIRECT & DIRECT\(l\) & MLSL & SDA & DE & StoGO \\
+  \hline
+  \(F_{GR}\)     &  100 & 100 & 76  & 100 & 100 & 97  & 96  & 96  & 67\\
+  \hline
+  GKLS 2d Simple &  100 & 100 & 85  & 100 & 100 & 100 & 100 & 98  & 90\\
+  \hline
+  GKLS 2d Hard   &  100 & 100 & 74  & 100 & 100 & 100 & 93  & 85  & 77 \\
+  \hline
+  GKLS 3d Simple &  100 & 97  & 75  & 100 & 100 & 100 & 89  & 86  & 44 \\
+  \hline
+  GKLS 3d Hard   &  100  & 99   & 72   & 100  & 99   & 100  & 88   & 77   & 43 \\
+  \hline
+  GKLS 4d Simple &  100 & 100 & 46  & 100 & 100 & 94  & 78  & 59  & 16 \\
+  \hline
+  GKLS 4d Hard   &  100 & 100 & 47  & 99  & 97  & 94  & 72  & 32  & 10  \\
+  \hline
+  GKLS 5d Simple &  100 & 100 & 68  & 100 & 100 & 98  & 100 & 77  & 9  \\
+  \hline
+  GKLS 5d Hard   &  97  & 99  & 42  & 100 & 90  & 79  & 84  & 48  & 8 \\
+  \hline
+  \end{tabular}
+  \label{tab:solved}
 \end{center}
 \end{table}
 
 \subsection{Results of Parallel Algorithms}
+
+The computational experiments with parallel algorithms have been carried out on the Lobachevsky supercomputer at
+State University of Nizhni Novgorod. A computational node includes 2 Intel
+Sandy Bridge E5-2660 2.2 GHz processors, 64 GB RAM. Each CPU has 8 cores (i. e. total 16
+cores were available per a node). All computational nodes are working under CentOS Linux 7.2.
+All considered algorithms are implemented using C++ and compiled by GCC 4.8.5.
+
+Сравнение двух параллельных алгоритмов, реализованных в системах Globalizer и MIDACO
+было проведено на четырёхмерных задачах GKLS, т.к. задачи большей размерности не поддерживаются
+бесплатной версией MIDACO. Как и в случае с последовательными алгоритмами, для кадого класса задач
+были изменены параметры методов. Для MIDACO параметр \(focus = -1\). В случае с Globalizer параметр
+\(r\) был выбран следуя таблице \ref{tab:params}. С удвоением количества задействованных развёрток
+этот параметр уменьшался на 0.3, поскольку увеличение количества развёрток увеличивает и надёжность метода из секции \ref{sub:parallel_evolvents}.
+
+Если считать, что затраты на параллелизм пренебрежимо малы по сравнению с затратами на вычисление целевых функций в задачах оптимизации, то ускорение по времени от использования параллельного метода будет равно ускорению по итерациям. Однако, в действительности это предположение справедливо,
+тлолько если вычисление значения целевой функции достаточно трудоёмко. Во всех численных экспериментах время вычисления целевой функции занимает примерно $2\times 10^{-3}$с.
+
+In Table~\ref{tab:iterations}, an averaged number of iterations when solving 100 problems from
+each considered class is presented.
+The number of iterations is reduced considerably with increasing the number of nodes and the
+number of threads on each node. В скобках также указано количество решённых задач в каждом классе.
+Globalizer решает практически все задачи в обоих классах, в то время как MIDACO не решает многие задачи из класса GKLS 4d Hard.
+Стоит ещё отметить, что с ростом числа узлов надёжность MIDACO падает на обоих классах задач, в то время как надёжность Globalizer остаётся стабильной.
 
 \begin{table}
   \centering
@@ -396,30 +503,52 @@ optimization problems}
   \label{tab:iterations}
   \begin{tabular}{cccccccc}
     \cline{3-8}\noalign{\smallskip}
-    \multicolumn{2}{c}{  } & \textit{p} & \multicolumn{2}{c}{$N=4$} & &
-\multicolumn{2}{c}{$N=5$}   \\
+    \multicolumn{2}{c}{  } & \textit{p} & \multicolumn{2}{c}{Globalizer} & &
+\multicolumn{2}{c}{MIDACO}   \\
     \noalign{\smallskip} \cline{4-5} \cline{7-8}  \noalign{\smallskip}
     \multicolumn{2}{c}{  } & & \textit{Simple} & \textit{Hard} & & \textit{Simple} &
 \textit{Hard}  \\
     \noalign{\smallskip}\hline
-    I &
-    \parbox{0.25\textwidth}{
-    \begin{center}
-    \textbf{1 cluster node}
-    \end{center}		}
-      & \textit{1} & 12167 & 25635 & & 20979 & 187353  \\
-    &  & \textit{32} & 328 & 1268  & &   898 & 12208 \\
+    I & \textbf{1 cluster node}
+      & \textit{1} &   25270 (100)  & 55180 (99) & & 27645 (98) & 72068 (71)  \\
+    &  & \textit{16} & 1765 (100)  & 3714 (100) & &  1640 (97) & 4304 (70) \\
     \hline \noalign{\smallskip}
-II  & \textbf{4 cluster nodes}  %\multirow{3}{*}{}
-  & \textit{1} & 25312 & 11103 & & 1472 & 17009 \\
-&   & \textit{32} & 64 &   913 & & 47 & 345 \\
-    \noalign{\smallskip}\hline	\noalign{\smallskip}
-III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
-  & \textit{1}  & 810 & 4351 & & 868 & 5697  \\
-& & \textit{32} & 34  & 112  & & 35  & 868 \\
+II  & \textbf{2 cluster nodes}  %\multirow{3}{*}{}
+  & \textit{1} & 13056 (100) & 22938 (99) & & 10558 (89) & 27128 (73) \\
+&   & \textit{16} & 732 (100) & 1759 (100)  &  & 1130 (92) & 2254 (73) \\
+    \hline \noalign{\smallskip}
+III & \textbf{4 cluster nodes} %\multirow{3}{*}{}
+  & \textit{1}  & 5016 (100) & 12703 (100) & & 5777 (94) & 15980 (75) \\
+& & \textit{16} & 367 (100) & 776 (100) & & 529 (88) &  1264 (66) \\
+    \hline \noalign{\smallskip}
+VI & \textbf{8 cluster nodes} %\multirow{3}{*}{}
+  & \textit{1}  & 2103 (100) & 5063 (100) & & 2847 (97) & 9853 (83)\\
+& & \textit{16} & 145 (100)  & 310 (100)  & & 272 (83) & 774 (57)\\
+    \hline \noalign{\smallskip}
+V & \textbf{12 cluster nodes} %\multirow{3}{*}{}
+  & \textit{1}  & 1155 (100) & 2399 (100) & & 2233 (98) & 6022 (86) \\
+& & \textit{16} & 76 (100)  & 159 (100)  & & 168 (87) & 393 (53)\\
     \noalign{\smallskip}\hline
   \end{tabular}
 \end{table}
+
+Среднее ускорение по итерациям и среднее ускорение по времени (в скобках) приведены в таблице \ref{tab:speedup}.
+В первой строке таблицы приведено среднее количество итераций и среднее время решения задачи в
+последовательном режиме (в скобках). MIDACO для при параллельных вычислениях использует
+меньшее количество коммуникаций, поэтому показатели ускорения монотонно возрастают с ростом количества
+вычислительных узлов. В Globalizer каждый узел должен переслать результаты проведения итерации
+всем другим узлам и с увеличением количества узлов и количества рабочих потоков на каждом узле
+эффективность распараллеливания падает. Это можно видеть в таблице \ref{tab:speedup}, когда при переходе от 4х
+узлов к 8 ускорение по времени при использовании 16 потоков упало. В случае одного потока на узел
+ускорение обоих методов оптимизации примерно одинаковое. Однако стоит заметить, что Globalizer выполняет
+меньше испытаний и при \(p=1\) тратит гораздо меньше времени на решение всех задач.
+С ростом количества узлов и потоков MIDACO догоняет Globalizer по среднему времени решения задачи,
+однако надёжность при этом падает.
+
+Аномальное сверхлинейное ускорение по времени
+MIDACO на классе GKLS 2d Hard при использовании 8 и 12 узлов можно объяснить тем, что, согласно таблице
+\ref{tab:iterations}, MIDACO решил больше задач в параллельном режиме, чем в последовательном, а значит, на
+меньшем количестве задач работал до исчерпания лимита испытаний.
 
 \begin{table}
   \centering
@@ -427,65 +556,42 @@ III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
   \label{tab:speedup}
   \begin{tabular}{cccccccc}
     \cline{3-8}\noalign{\smallskip}
-    \multicolumn{2}{c}{  } & \textit{p} & \multicolumn{2}{c}{$N=4$} & &
-\multicolumn{2}{c}{$N=5$}   \\
+    \multicolumn{2}{c}{  } & \textit{p} & \multicolumn{2}{c}{Globalizer} & &
+\multicolumn{2}{c}{MIDACO}   \\
     \noalign{\smallskip} \cline{4-5} \cline{7-8}  \noalign{\smallskip}
     \multicolumn{2}{c}{  } & & \textit{Simple} & \textit{Hard} & & \textit{Simple} &
 \textit{Hard}  \\
     \noalign{\smallskip}\hline
-    I &
-    \parbox{0.25\textwidth}{
-    \begin{center}
-    \textbf{1 cluster node}
-    \end{center}		}
-    & \textit{1}   & 12167(10.58s) & 25635(22.26s) & & 20979(22.78s) & 187353(205.83s)  \\
-  &  & \textit{32} & 37.1(18.03) & 20.2(8.55)  & &  23.3(8.77) & 15.4(9.68) \\
+I  & \textbf{1 cluster node}  %\multirow{3}{*}{}
+    & \textit{1}   & 25270 (27.3s) & 55180 (61.8s) & & 27645 (32.2s) & 72068 (132.5s)  \\
+  &  & \textit{16} & 14.3(11.7) & 14.9(12.6)  & &  16.9(14.4) & 16.7(14.4) \\
   \hline \noalign{\smallskip}
-II  & \textbf{4 cluster nodes}  %\multirow{3}{*}{}
-& \textit{1} &        0.5(0.33) & 2.3(0.86)  & & 14.3(6.61) & 11.0(6.06) \\
-&   & \textit{32} & 190.1(9.59) & 28.1(1.08) & & 446.4(19.79) & 543.0(43.60) \\
+II  & \textbf{2 cluster nodes}  %\multirow{3}{*}{}
+  & \textit{1}      &   1.9(1.9) & 2.4(2.2)  & & 2.6(1.7) & 2.7(2.3) \\
+  &   & \textit{16} & 34.5(20.4) & 31.4(18.8) & & 24.5(18.8) & 32.0(29.1) \\
+    \noalign{\smallskip}\hline	\noalign{\smallskip}
+III  & \textbf{4 cluster nodes}  %\multirow{3}{*}{}
+& \textit{1}      & 5.0(4.6) & 4.3(4.1) & & 4.8(3.9) & 4.5(4.4) \\
+&   & \textit{16} & 68.8(23.7) & 71.2(25.8) & & 52.3(32.9) & 57.0(50.2) \\
   \noalign{\smallskip}\hline	\noalign{\smallskip}
-III & \textbf{8 cluster nodes} %\multirow{3}{*}{}
-& \textit{1}    & 15.0(6.05)  & 5.9(2.36)   & & 24.2(17.56)  & 32.9(24.87)  \\
-& & \textit{32} & 357.9(2.36) & 228.9(2.64) & & 582.8(20.96) & 793.0(33.89) \\
+VI & \textbf{8 cluster nodes} %\multirow{3}{*}{}
+& \textit{1}    & 12.0(8.7) & 10.9(8.3) & & 9.7(8.2)    & 7.3(9.0)    \\
+& & \textit{16} & 174.1(4.7) & 177.8(5.3) & & 101.6(51.6) & 93.1(84.1) \\
     \noalign{\smallskip}\hline
+    V & \textbf{12 cluster nodes} %\multirow{3}{*}{}
+    & \textit{1}    & 21.9(11.4)  & 23.0(12.8)  & & 12.4(11.1)  & 12.0(14.8)  \\
+    & & \textit{16} & 333.5(2.7) & 347.9(3.0) & & 164.5(82.0) & 183.2(129.7) \\
+        \noalign{\smallskip}\hline
   \end{tabular}
 \end{table}
-
-\begin{Russian}
-
-\begin{table}
-\begin{center}
-\caption{Trials limit for each test problems class}
-  \begin{tabular}{|l|{c}|}
-    \hline
-  Class & Limit\\
-  \hline
-  \(F_{GR}\) & 5000 \\
-  \hline
-  GKLS 2d Simple & 8000 \\
-  \hline
-  GKLS 2d Hard & 9000 \\
-  \hline
-  GKLS 3d Simple & 15000 \\
-  \hline
-  GKLS 3d Hard & 25000 \\
-  \hline
-  GKLS 4d Simple & 150000 \\
-  \hline
-  GKLS 4d Hard & 250000 \\
-  \hline
-  GKLS 5d Simple & 350000 \\
-  \hline
-  GKLS 5d Hard & 600000 \\
-  \hline
-  \end{tabular}
-\end{center}
-\end{table}
-\end{Russian}
 
 \section{Conclusions}
 
+В работе были рассмотрены несколько последовательных и параллельных алгоритмов глобальной оптимизации.
+
+
+
+\end{Russian}
 \section*{Acknowledgements}
 The study was supported by the Russian Science Foundation, project No 16-11-
 10150
