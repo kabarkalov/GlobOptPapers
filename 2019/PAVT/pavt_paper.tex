@@ -1,24 +1,23 @@
-%%%%%%%%%%%%%%%%%%%% author.tex %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% author.tex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % sample root file for your "contribution" to a proceedings volume
 %
 % Use this file as a template for your own input.
 %
-%%%%%%%%%%%%%%%% Springer %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% Springer
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \documentclass{svproc}
 %
-% RECOMMENDED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% RECOMMENDED
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
 %
 \usepackage{graphicx}
 \usepackage{marvosym}
 \usepackage{amssymb}
 \usepackage{cite}
-%%%%%ДОБАВИЛ ДЛЯ РУССКОГО ТЕКСТА
-\usepackage[utf8x]{inputenc}
-\usepackage[english,russian]{babel}
-\usepackage{cmap}
-%%%%%
 % to typeset URLs, URIs, and DOIs
 \usepackage{url}
 \usepackage{hyperref}
@@ -50,39 +49,71 @@
 \maketitle              % typeset the title of the contribution
 
 \begin{abstract}
-This work considers several stochastic and deterministic derivative-free global optimization algorithms. In the first part of the paper popular sequential open-source solvers are compared against the Globalizer solver, which is developed at the Lobachevsky State University. The Globalizer is designed to solve problems with black-box objectives satisfying the Lipschitz condition and shows competitive performance with other similar solvers. The comparison is done on several sets of challenging multi-extremal benchmark functions. The second part of this work is devoted to comparison between the Globalizer and MIDACO solvers on systems with shared and distributed memory. MIDACO is a state-of-the-art global solver included to the TOMLAB optimization environment for MATLAB. Results of the benchmark show advantages of the Globalizer on small-dimensional, but sufficiently multi-extremal benchmark functions.
+This work considers several stochastic and deterministic derivative-free global optimization
+algorithms. In the first part of the paper popular sequential open-source solvers are compared against
+the Globalizer solver, which is developed at the Lobachevskii State University. The Globalizer is
+designed to solve problems with black-box objectives satisfying the Lipschitz condition and shows
+competitive performance with other similar solvers. The comparison is done on several sets of
+challenging multi-extremal benchmark functions. The second part of this work is devoted to
+comparison between the Globalizer and MIDACO solvers on systems with shared and distributed
+memory. MIDACO is a state-of-the-art global solver included to the TOMLAB optimization
+environment for MATLAB. Results of the benchmark show advantages of the Globalizer on small-
+dimensional, but sufficiently multi-extremal benchmark functions.
 % We would like to encourage you to list your keywords within
 % the abstract section using the \keywords{...} command.
 \keywords{deterministic global optimization $\cdot$ stochastic global optimization
-  $\cdot$ parallel numerical methods $\cdot$ derivative-free algorithms $\cdot$ black-box optimization}
+  $\cdot$ parallel numerical methods $\cdot$ derivative-free algorithms $\cdot$ black-box
+optimization}
 \end{abstract}
 %
 \section{Introduction}
 
-\begin{Russian}
-Нелинейная глобальная оптимизация невыпуклых функций традиционно считается одной из самых трудных
-задач математического программирования. Отыскание глобального минимума функции от нескольких переменных
-зачастую оказывается сложнее, чем локальная оптимизация в тысячемерном пространстве. Для последней может оказаться достаточно
-применения простейшего метода градиентного спуска, в то время как чтобы \textit{гаранитрованно} отыскать глобальный оптимум методам
-оптимизации приходится накапливать информацию о поведении целевой функции во всей области поиска \cite{Jones2009,Paulavicius2011,Evtushenko2013,strSergGO}. В последнее время стали популярны
-различные стохастические алгоритмы глобально оптимизации, прежде всего эволюционные \cite{Storn1997, SCHLUTER2009, KennedyEberhart1995}. Они имеют довольно простую структуру, позволяют решать задачи большой размерности, однако обеспечивают глобальную сходимость только в вероятностном смысле.
+The nonlinear global optimization of the non-convex functions is considered to be one of the most
+difficult problems of mathematical programming traditionally. The finding of the global minimum of
+a function of several variables appears to be more difficult than the local optimization in the
+thousand-dimensional space often. For the latter, the application of the simplest gradient descent
+method may appear to be enough whereas in order to \textit{guarantee} the finding of the global
+optimum by the optimization methods, one has to accumulate the information on the behavior of the
+objective function within the whole search domain
+\cite{Jones2009,Paulavicius2011,Evtushenko2013,strSergGO}. To date, various stochastic global
+optimization algorithms have attracted much attention, first of all, the evolution ones
+\cite{Storn1997, SCHLUTER2009, KennedyEberhart1995}. These ones have rather simple structure
+and allow solving the problems of large dimensionality. However, the evolution algorithms ensure
+the global convergence in the probabilistic sense only.
 
-В данной работе рассмотрены open-source реализации девяти различных методов глобальной оптимизации.
-Все алгоритмы были протестированы на наборе из 900 существенно многоэкстремальных функций, который был сгенерирован с
-помощью специализированных генераторов задач \cite{Gaviano2003, grishaginClass}. Помимо сравнения последовательных алгоритмов, на подмножестве из 200 тестовых задач произведено сравнение солвера MIDACO \cite{Schlueter2012} и программной системы Globalizer \cite{globalizerSystem,Strongin2018} в условиях работы на суперкомпьютере Лобачевский.
-\end{Russian}
+In the present paper, the open source implementations of nine different global optimization methods
+were considered. All algorithms were tested using a set of 900 essentially multiextremal functions,
+which has been generated using special problem generators \cite{Gaviano2003, grishaginClass}.
+Besides the comparison of the sequential algorithms, a comparison of the MIDACO solver
+\cite{Schlueter2012} with the Globalizer software system \cite{globalizerSystem,Strongin2018} has been
+performed while running on Lobachevsky supercomputer using a subset of 200 test problems.
+
 
 \section{Related Work}
 
-\begin{Russian}
-Ранее в литературе рассмартивалось как сравнение между собой стохастических алгоритмов глобальной оптимизации \cite{Ali2005, JSSv060i06}, так и детерминированных \cite{posik2012, KVASOV2018245, Liberti2005}.
-В них большинство современных методов изучены довольно детально, но упор в основном делается на последовательные алгоритмы, а основными критериями эффективности метода оптимизации является его надёжность и скорость сходимости. В большинстве работ в качестве набора тестовых функций берётся набор известных тестовых задач (например, функция Растригина, Ackley function и др.). Размер такого набора обычно не превышает 100 различных функций, некоторые из которых могут быть одноэкстремальны (как функция Розенброка).
+Earlier, the comparison of the stochastic global optimization algorithms \cite{Ali2005, JSSv060i06}
+as well as of the deterministic ones \cite{posik2012, KVASOV2018245, Liberti2005} between each
+other has been considered in the literature. In these works, the majority of modern methods have
+been studied in details, but the emphasis was made mainly on the sequential algorithms while the
+reliability and the convergence speed were the main criteria of efficiency of the optimization
+methods. In the majority of works, the sets of well-known test problems (for example, the Rastrigin
+functions, Ackley function, etc.) were taken as the sets of test functions. The sizes of such sets don't
+exceed 100 different functions usually, some of which can be the single-extremal ones (such as the
+Rosenbrock functions).
 
-В работе \cite{Beiranvand2017} сформулированы некие общие принципы, которых, по мнению авторов, следует придерживаться при сравнении методов оптимизации.
-В частности, авторы говорят о преимуществах генераторов задач, позволяющих создать большие наборы задач, сводя случайные эффекты при сравнении к минимуму. В то же время, использование одного генератора может оказаться недостаточно для исчерпывающего сравнения методов. Чтобы частично преодолеть эту проблему, авторы \cite{Beiranvand2017} советуют использовать несколько генераторов различной природы и создавать наборы задач различной сложности.
+In Ref. \cite{Beiranvand2017}, some general principles were formulated, which, in the author's
+opinion, should be obeyed when comparing the optimization methods. In particular, the authors say
+about the advantages of the problem generators allowing generating the large sets of problems thus
+minimizing the random effects when comparing the methods. At the same time, the use of a single
+generator can appear to be not enough for a comprehensive comparison of the methods. In order to
+overcome this problem in part, the authors of Ref. \cite{Beiranvand2017} advise to use several
+generators of various nature and to create the sets of problems of various complexity.
 
-Учитывая опыт предыдущих работ в области сравнения методов оптимизации, в данной работе будут использованы два генератора тестовых задач разной природы, с помощью которых сгенерировано 9 наборов по 100 задач разной сложности размерности от 2 до 5. Помимо сравнения последовательных методов, также в работе приводится сравнение эффективности двух параллельных алгоритмов.
-\end{Russian}
+Taking into account the experience of the preceding works in the field of comparison of the
+optimization methods, two generators of the test problems of different nature will be used in the
+present work. Using these ones, 9 sets of 100 problems of various complexity with the
+dimensionality varying from 2 to 5 were generated. Besides the comparison of the sequential
+methods, a comparison of the efficiencies of two parallel algorithms is presented in the work as well.
 
 \section{Statement of Multidimensional Global Optimization Problem}
 In this paper, the core class of optimization problems, which can be solved using
@@ -149,7 +180,8 @@ following:
 using the mapping \(y(x)\),
   \item The value of the initial multidimensional function \(\varphi(y)\) is calculated at the point
 \(y\in D\),
-  \item The calculated value \(z=\varphi(y)\) is used further as the value of the reduced one-dimensional function \(\varphi(y(x))\) at the point \(x\).
+  \item The calculated value \(z=\varphi(y)\) is used further as the value of the reduced one-
+dimensional function \(\varphi(y(x))\) at the point \(x\).
 \end{itemize}
 
 \subsubsection{Algorithm of Global Search on Shared Memory}
@@ -173,7 +205,8 @@ k+1\).
 \textit{Rule 3}. Determine the \(p\) intervals with the maximum characteristics $R(t_j)=\max_{1\leq i
 \leq k+1}R(i),\: j=\overline{1,p}$.
 
-\textit{Rule 4}. Execute new trials at points \(x^{k+j},\: j=\overline{1,p}\) located within intervals with
+\textit{Rule 4}. Execute new trials at points \(x^{k+j},\: j=\overline{1,p}\) located within intervals
+with
 maximum characteristics from the previous step
   $x^{k+j}=d(x_{t_j}),\: j=\overline{1,p}$.
 
@@ -183,25 +216,30 @@ for the intervals with maximum characteristics from Step 3 and \(\varepsilon >0\
 predefined accuracy of the optimization problem solution. If the stopping condition is not satisfied,
 the index \(k\) is incremented by \(p\), and the new global optimization iteration is executed.
 
-This method is employed in Globalizer to organize parallel computations on shared memory: each of \(p\)
+This method is employed in Globalizer to organize parallel computations on shared memory: each of
+\(p\)
 trials can be carried out on one of \(p\) local computation units.
 
-The convergence conditions and exact formulas for descision rules $R(i)$ and $d(x)$ of the
+The convergence conditions and exact formulas for decision rules $R(i)$ and $d(x)$ of the
 described algorithm are given, for example, in \cite{strSergGO}.
 
 \subsection{Parallel Algorithm on Distributed Memory Exploiting a Set of Evolvents}
 \label{sub:parallel_evolvents}
 \subsubsection{Rotated Evolvents}
 One of the possible ways to overcome the negative effects of using a numerical
-approximation of evolvent (it destroys the information about the neighbor points in $\mathbb{R}^N$ space)
+approximation of evolvent (it destroys the information about the neighbor points in
+$\mathbb{R}^N$ space)
 consists in using the multiple mappings
 \begin{equation}
   Y_L(x)=\left\{y^0(x),\ y^1(x),...,\ y^L(x)\right\}
 \end{equation}
 instead of single Peano curve $y(x)$ (see \cite{strSergGO}).
-The building of a set of Peano curves by rotation of the evolvents around the coordinate origin is a distinctive feature was proposed in \cite{Gergel2009}. Taking into account the initial mapping, one can conclude that current implementation of the
+The building of a set of Peano curves by rotation of the evolvents around the coordinate origin is a
+distinctive feature was proposed in \cite{Gergel2009}. Taking into account the initial mapping, one
+can conclude that current implementation of the
 method allows to build up to $N(N-1)+1$ evolvents for mapping the $N$-dimensional domain
-onto the corresponding one-dimensional intervals. This method for building a set of mappings can be ``scaled'' easily to obtain more evolvents (up to
+onto the corresponding one-dimensional intervals. This method for building a set of mappings can be
+''scaled'' easily to obtain more evolvents (up to
 $2^N$) if necessary.
 
 Using the multiple mapping allows solving initial problem (\ref{eq:task}) by parallel solving the
@@ -213,7 +251,8 @@ on a set of intervals $[0,1]$ by the index method. Each one-dimensional problem 
 separate processor. The trial results at the point \(x^k\) obtained for the problem being solved by
 particular processor are interpreted as the results of the trials in the rest problems (in the
 corresponding points \(x^{k_1},\dots,x^{k_S})\). In this approach, a trial at the point \(x^k \in
-[0,1]\) executed in the framework of the \(s\)-th problem, consists in the following sequence of
+[0,1]\) executed in the framework of the \(s^{th}\) problem, consists in the following sequence
+of
 operations:
 \par
 1. Determine the image \(y^k=y^s (x^k)\) for the evolvent \(y^s (x)\).
@@ -221,7 +260,8 @@ operations:
 2. Inform the rest of processors about the start of the trial execution at the point \( y^k\) (the
 blocking of the point \(y^k\) ).
 \par
-3. Determine the preimages \(x{}^{k_s}  \in [0,1], 1\leqslant s\leqslant S\), of the point \(y^k\) and interpret the
+3. Determine the preimages \(x{}^{k_s}  \in [0,1], 1\leqslant s\leqslant S\), of the point \(y^k\) and
+interpret the
 trial executed at the point \(y^k \in D \) as the execution of the trials in the \(S\) points
 \(x{}^{k_1} ,\dots,x{}^{k_s} \)
 \par
@@ -235,27 +275,35 @@ created on each processor, where the processors store the information on the exe
 in the form of the tuples: the processor number \(s\), the trial point \(x{}^{k_s}\).
 The modifications of the method taking into account multiply criteria are given in \cite{GERGEL2017,Gergel2018}.
 \par
-The mentioned parallelization scheme was proposed in \cite{Gergel2009} and implemented in the Globalizer system with the use of MPI technology. Main
+The mentioned parallelization scheme was proposed in \cite{Gergel2009} and implemented in the
+Globalizer system with the use of MPI technology. Main
 features of implementation consist in the following:
 \begin{itemize}
   \item A separate MPI-process is created for each
  of \(S\) one-dimensional problems being solved, usually, one process per one processor
  employed.
- \item Each process can use $p$ threads to parallel execute $p$ trials, usually one thread per an accessible core.
+ \item Each process can use $p$ threads to parallel execute $p$ trials, usually one thread per an
+accessible core.
 \end{itemize}
 
 \subsection{MIDACO Parallel Solver}
-MIDACO (Mixed Integer Distributed Ant Colony Optimization) \cite{Schlueter2012} is a solver which implements the evolutionary algorithm
+MIDACO (Mixed Integer Distributed Ant Colony Optimization) \cite{Schlueter2012} is a solver
+which implements the evolutionary algorithm
 the ant colony optimization metaheuristic for continuous search domains. ACO was originally
-proposed to solve the TSP, but later has been successfully adopted to solve mixed integer nonlinear programming problems \cite{SCHLUTER2009}.
+proposed to solve the TSP, but later has been successfully adopted to solve mixed integer nonlinear
+programming problems \cite{SCHLUTER2009}.
 
 The MIDACO solver utilizes reverse communication architecture \cite{Schlueter2012}.
-Reverse communication means that the call of the objective function happens outside and independently of the MIDACO source code.
+Reverse communication means that the call of the objective function happens outside and
+independently of the MIDACO source code.
 Relying on this feature the following distributed parallelization scheme was implemented:
 \begin{enumerate}
-  \item MIDACO runs at the master node and generates \(n \times p\) new trial points at each iteration.
-  \item Each of \(n\) distributed computational nodes gets \(p\) points from the master and performs \(p\) parallel trials on local computing devices.
-  \item Each of \(n\) distributed computational nodes sends \(p\) values of the objective function to the master.
+  \item MIDACO runs at the master node and generates \(n \times p\) new trial points at each
+iteration.
+  \item Each of \(n\) distributed computational nodes gets \(p\) points from the master and performs
+\(p\) parallel trials on local computing devices.
+  \item Each of \(n\) distributed computational nodes sends \(p\) values of the objective function to
+the master.
 \end{enumerate}
 
 In this scheme all distributed communications were implemented using the MPI library.
@@ -263,67 +311,92 @@ Parallelism within a single node is powered by the OpenMP standard.
 
 \subsection{Sequential Methods}
 \begin{itemize}
-  \item \textbf{Algorithm of Global Search}. Sequential version of the method described in Section \ref{sub:ags}.
+  \item \textbf{Algorithm of Global Search}. Sequential version of the method described in Section
+\ref{sub:ags}.
 
-  \item \textbf{Locally-based Algorithm of Global Search (AGS\(l\))} \cite{indexMethod}. It's a modification of
-  the original AGS which make it more locally oriented by alternately using of two types of characteristics in the Rule 2 from the Section \ref{sub:ags}.
+  \item \textbf{Locally-based Algorithm of Global Search (AGS\(l\))} \cite{indexMethod}. It's a
+modification of
+  the original AGS which make it more locally oriented by alternately using of two types of
+characteristics in the Rule 2 from the Section \ref{sub:ags}.
 
-  \item \textbf{Multi Level Single Linkage} \cite{Kan1987StochasticGO}. MLSL is an improved multistart algorithm.
-  It samples low-discrepancy starting points and does local optimizations from them. In contrast to the dummy multistart schemes
-  MLSL uses some clustering heuristics to avoid multiple local descents to already explored local minimas.
+  \item \textbf{Multi Level Single Linkage} \cite{Kan1987StochasticGO}. MLSL is an improved
+multistart algorithm.
+  It samples low-discrepancy starting points and does local optimizations from them. In contrast to
+the dummy multistart schemes
+  MLSL uses some clustering heuristics to avoid multiple local descents to already explored local
+minima.
 
-  \item \textbf{DIRECT} \cite{Jones2009}. The algorithm is deterministic and recursively divides the search space and forms a tree of hyper-rectangles (boxes). DIRECT uses the objective function values and the Lipschitz condition (\ref{eq:lip}) to estimate promising boxes.
+  \item \textbf{DIRECT} \cite{Jones2009}. The algorithm is deterministic and recursively divides
+the search space and forms a tree of hyper-rectangles (boxes). DIRECT uses the objective function
+values and the Lipschitz condition (\ref{eq:lip}) to estimate promising boxes.
 
-  \item \textbf{Locally-based DIRECT (DIRECT$l$)} \cite{Gablonsky2001}. It's a variation of DIRECT which pays less attention to non-promising boxes and therefore
-  has less exploration power: it can converge faster on problems with few local minimas, but lost the global one in complicated cases.
+  \item \textbf{Locally-based DIRECT (DIRECT$l$)} \cite{Gablonsky2001}. It's a variation of
+DIRECT which pays less attention to non-promising boxes and therefore
+  has less exploration power: it can converge faster on problems with few local minima, but lost the
+global one in complicated cases.
 
-  \item \textbf{Dual Simulated Annealing} \cite{XIANG1997216}. This stochastic method is a combination of the Classical Simulated Annealing and the Fast Simulated Annealing coupled to a strategy for applying a local search on accepted locations. It converges much faster than both parent algorithms, CSA and FSA.
+  \item \textbf{Dual Simulated Annealing} \cite{XIANG1997216}. This stochastic method is a
+combination of the Classical Simulated Annealing and the Fast Simulated Annealing coupled to a
+strategy for applying a local search on accepted locations. It converges much faster than both parent
+algorithms, CSA and FSA.
 
-  \item \textbf{Differential Evolution} \cite{Storn1997}. DE is an adaptation of the original genetic algorithm to
+  \item \textbf{Differential Evolution} \cite{Storn1997}. DE is an adaptation of the original genetic
+algorithm to
   the continuous search domain.
 
-  \item \textbf{Controlled Random Search} \cite{Price1983}. The CRS starts with a set of random points and then defines
-  the next trial point in relation to a simplex chosen randomly from a stored configuration of points. CRS in not an
-  evolutional algorithm, although stores something like population and performs transformation resembling a mutation.
+  \item \textbf{Controlled Random Search} \cite{Price1983}. The CRS starts with a set of random
+points and then defines
+  the next trial point in relation to a simplex chosen randomly from a stored configuration of points.
+CRS in not an
+  evolutional algorithm, although stores something like population and performs transformation
+resembling a mutation.
 
-  \item \textbf{StoGO} \cite{Madsen1998}. StoGO is dividing the search space into smaller hyper-rectangles via a branch-and-bound approach,
+  \item \textbf{StoGO} \cite{Madsen1998}. StoGO is dividing the search space into smaller hyper-
+rectangles via a branch-and-bound approach,
   and searching them by a local-search algorithm, optionally including some randomness.
 
 \end{itemize}
 
 All the mentioned algorithms (except of AGS\(l\) which implemented in the Globalizer system)
 are available in source codes as parts of wide-spread optimization packages.
-AGS, DIRECT, DIRECT$l$, CRS, MLSL and StoGO are part of the NLOpt libray \cite{nlopt}. Differential Evolution and DSA can be found in
+AGS, DIRECT, DIRECT$l$, CRS, MLSL and StoGO are part of the NLOpt library \cite{nlopt}.
+Differential Evolution and DSA can be found in
 the latest version of the SciPy \cite{scipy} package for Python.
 
 \section{Tools for Comparison of Global Optimization Algorithms}
-\begin{Russian}
 
-Использование сгенерированных некоторыми случайными механизмами
-наборов тестовых задач с известными решениями является одним из общепринятых подходов
-к сравнению алгоритмов оптимизации \cite{Beiranvand2017}. В данной работе
-будем использовать два генератора тестовых задач, порождающих задачи различной природы \cite{grishaginClass, Gaviano2003}.
 
-Обозначим набор задач, полученных с помощью первого генератора из \cite{grishaginClass} как \(F_{GR}\). Механизм построения задач \(F_{GR}\),
-не предусматривает контроль за сложностью задач и количеством локальных оптимумов, однако известно, что порождаемые функции
-являются существенно многоэкстремальными. Кроме того, задачи, порождаемые \(F_{GR}\) двухмерные. В данной работе будем использовать
-100 случайно сгенерированных функций из класса \(F_{GR}\).
+The use of the sets of test problems with known solutions generated by some random mechanisms is
+one of commonly accepted approaches to comparing the optimization algorithms
+\cite{Beiranvand2017}. In the present work, we will use two generators of test problems generating
+the problems of different nature \cite{grishaginClass, Gaviano2003}.
 
-Генератор GKLS \cite{Gaviano2003} позволяет получать задачи заданной размерности и с заданным количеством экстремумов.
-Кроме того GKLS позволяет регулировать сложность задач, уменьшая или увеличивая размер области притяжения глобального минимума.
-В работе \cite{SergeyevKvasov2006} указаны параметры генератора, позволяющие породить наборы по 100 задач двух уровней сложности
-(Simple и Hard) размерностей 2, 3, 4 и 5. Следуя примеру авторов генератора GKLS, будем использовать предложенные ими параметры и,
-таким образом, добавим в тестовый ещё 800 задач различной размерности и сложности.
+Let us denote the problem set obtained with the use of the first generator from \cite{grishaginClass}
+as \(F_{GR}\). The mechanism of generation of the problems \(F_{GR}\) doesn't provide the
+control of the problem complexity and of the number of local optima. However, the generated
+functions are known to be the multiextremal ones essentially. Besides, the problems generated by
+\(F_{GR}\) are the two-dimensional ones. In the present work, we will use 100 functions from the
+class \(F_{GR}\) generated randomly.
 
-Будем считать, что тестовая задача решена, если метод оптимизации провёл очередное испытание \(y^k\) в
-\(\delta\)-окрестности глобального минимума \(y^*\), т.е. $\left\|y^k-
-y^*\right\|\leqslant \delta = 0.01\left\|b-a\right\|$, где \(a\) и \(b\) --- левая и правая границы гиперкуба из (\ref{eq:task}).
-Если указанное соотношение не выполнено до истечения лимита на количество испытаний, то задача считается нерешённой.
-Максимальный лимит на количество испытаний установлен для каждого класса задач, в соответствии с размерностью и сложностью (см. таблицу \ref{tab:limits}).
+The GKLS generator \cite{Gaviano2003} allows obtaining the problems of given dimensionality
+with given number of extrema. Besides, GKLS allows adjusting the complexity of the problems by
+decreasing or increasing the size of the global minimum attractor. In Ref.
+\cite{SergeyevKvasov2006}, the parameters of the generator allowing generating the sets of 100
+problems each of two levels of complexity (Simple and Hard) of the dimensionality equal to 2, 3, 4,
+and 5 are given. Following the authors of the GKLS generator, we will use the parameters proposed
+by them and, this way, add 800 more problems of various dimensionalities and complexity into the
+test problem set.
+
+Let us suppose a test problem to be solved if the optimization method executes the scheduled trial
+\(y^k\) in a \(\delta\)-nearness of the global minimum \(y^*\) i. e. $\left\|y^k-y^*\right\|\leqslant \delta
+= 0.01\left\|b-a\right\|$ where \(a\) and \(b\) are the left and the right boundaries of the hypercube
+from (\ref{eq:task}). If this relation is not fulfilled before the expiration of the limit of the number of
+trials, the problem was considered to be unsolved. The maximum limit of the number of trials was set
+for each problem class according to the dimensionality and complexity (see Table \ref{tab:limits}).
 
 \begin{table}
 \begin{center}
-\caption{Trials limit for the each of test problems classes}
+\caption{Trials limits for the test problem classes}
   \begin{tabular}{|l|{c}|}
     \hline
   Problems class & Trials limit\\
@@ -351,29 +424,32 @@ y^*\right\|\leqslant \delta = 0.01\left\|b-a\right\|$, где \(a\) и \(b\) ---
 \end{center}
 \end{table}
 
-В качестве характеристик метода оптимизации на каждом из классов будем рассматривать среднее число
-испытаний, затраченное для решения одной задачи, и количество решённых задач. Чем меньше число испытаний, тем быстрее метод сходится
-к решению, а значит и меньше обращается к потенциально трудоёмкой процедуре вычислений целевой функции.
-Количество решённых задач говорит о надёжности метода с заданными параметрами на решаемом классе тестовых задач.
-Чтобы сделать величины, характеризующие надёжность и скорость сходимости, независимыми при подсчёте среднего количества испытаний учитывались только решённые задачи.
-\end{Russian}
+Let us consider the averaged number of trials executed to solve a single problem and the number of
+solved problems as the characteristics of the optimization method on each class. The less the number
+of trials, the faster the method converges to a solution, hence the less times it turns to a potentially
+computation-costly procedure of computing the objective function. The number of solved problems
+evidences the reliability of the method at given parameters on the class of test problems being
+solved. In order to calculate the quantities featuring the reliability and the speed of convergence,
+when calculating the averaged number of trials the solved problems were taken into account only.
+
 
 \section{Results of Numerical Experiments}
 \subsection{Results of Sequential Algorithms}
-\begin{Russian}
 
-Результаты тех или иных алгоритмов на различных классах задач напрямую зависят от
-настроек алгоритмов. В большинстве случаев авторы программных реализаций ориентируются на
-задачи средней сложности и чтобы получить удовлетворительный результат при решении
-существенно многоэкстремальных задач, требуется корректировка некоторых параметров.
-При проведении сравнения были заданы следующие параметры для методов:
+
+The results of various algorithms on different problem classes depend on the adjustments of
+algorithms directly. In most cases, the authors of software implementations are oriented onto the
+problems of medium difficulty. In order to obtain a satisfactory result when solving the essentially
+multiextremal problems, a correction of some parameters is required. When conducting the
+comparison, the following parameters for the methods were employed:
 \begin{itemize}
-  \item в методе AGS\(l\) параметр чередования глобального и локального правил вычисления характеристик был задан равным 5:1;
-  \item в методах DIRECT и DIRECT\(l\) параметр \(\epsilon=10^{-4}\);
-  \item в методе SDA параметр \(visit=2.72\).
+  \item in the AGS\(l\) method, the parameter of alternation of the global rules of computing the
+characteristic and the local one was set to be equal to 5:1;
+  \item in the DIRECT and DIRECT\(l\) methods, the parameter \(\epsilon=10^{-4}\);
+  \item in the SDA method, the parameter \(visit=2.72\).
 \end{itemize}
 
-Остальные параметры варьировались в зависимости от класса задач (см. таблицу \ref{tab:params}).
+The rest parameters were varied subject to the problem class (see Table \ref{tab:params}).
 
 \begin{table}
 \begin{center}
@@ -400,16 +476,18 @@ y^*\right\|\leqslant \delta = 0.01\left\|b-a\right\|$, где \(a\) и \(b\) ---
   \hline
   GKLS 5d Hard & \(r=4\) & popsize=30000 & mutation=(1.1,1.9), popsize=140 \\
   \hline
-  \end{tabular}
+\end{tabular}
   \label{tab:params}
 \end{center}
 \end{table}
 
-В таблицах \ref{tab:trials}, \ref{tab:solved} приведены результаты запуска методов оптимизации на рассматриваемых классах задач.
-Методы DIRECT и AGS\(l\) показали наилучшую скорость сходимости на всех классах, причём AGS\(l\) уступает
-DIRECT на задачах из классов Simple и обходит его на задачах классов Hard. Как видно из таблицы \ref{tab:solved},
-самыми надёжными методами являются детерминированные: AGS, AGS\(l\), DIRECT и DIRECT\(l\). Из стохастических методов
-самую высокую надёжность демонстрируют MLSL и SDA.
+The results of running the optimization methods on the considered problem classes are presented in
+Tables \ref{tab:trials}, \ref{tab:solved}. The DIRECT and AGS\(l\) methods have demonstrated the
+best convergence speed on all classes, at that AGS\(l\) inferior to DIRECT on the problems from the
+Simple classes and has an advantage on the problems of the Hard classes. As one can see from Table
+\ref{tab:solved}, the deterministic methods (AGS, AGS\(l\), DIRECT, and DIRECT\(l\)) were the
+most reliable. Among the stochastic methods, MLSL and SDA have demonstrated the highest
+reliability.
 
 \begin{table}
 \begin{center}
@@ -420,23 +498,32 @@ optimization problems}
     \hline
     & AGS & AGS\(l\) & CRS & DIRECT & DIRECT\(l\) & MLSL & SDA & DE & StoGO \\
   \hline
-  \(F_{GR}\)     & 193.1 &  \textbf{158.3} & 400.3 & 182.3 & 214.9 & 947.2 & 691.2 & 1257.3 & 1336.8 \\
+  \(F_{GR}\)     & 193.1 &  \textbf{158.3} & 400.3 & 182.3 & 214.9 & 947.2 & 691.2 & 1257.3 &
+1336.8 \\
   \hline
-  GKLS 2d Simple &  254.9 & 217.6 & 510.6 & \textbf{189.0} & 255.2 & 556.8 & 356.3 & 952.2 & 1251.5 \\
+  GKLS 2d Simple &  254.9 & 217.6 & 510.6 & \textbf{189.0} & 255.2 & 556.8 & 356.3 & 952.2
+& 1251.5 \\
   \hline
-  GKLS 2d Hard   &  728.7 & \textbf{488.0} & 844.7 & 985.4 & 1126.7 & 1042.5 & 1637.9 & 1041.1 & 2532.2 \\
+  GKLS 2d Hard   &  728.7 & \textbf{488.0} & 844.7 & 985.4 & 1126.7 & 1042.5 & 1637.9 &
+1041.1 & 2532.2 \\
   \hline
-  GKLS 3d Simple &  1372.1 & 1195.3 & 4145.8 & \textbf{973.6} & 1477.8 & 4609.2 & 2706.5 & 5956.94 & 3856.1 \\
+  GKLS 3d Simple &  1372.1 & 1195.3 & 4145.8 & \textbf{973.6} & 1477.8 & 4609.2 & 2706.5 &
+5956.94 & 3856.1 \\
   \hline
-  GKLS 3d Hard   &  3636.1 & \textbf{1930.5} & 6787.0 & 2298.7 & 3553.3 & 5640.1 & 4708.4 & 6914.3 & 7843.2 \\
+  GKLS 3d Hard   &  3636.1 & \textbf{1930.5} & 6787.0 & 2298.7 & 3553.3 & 5640.1 & 4708.4 &
+6914.3 & 7843.2 \\
   \hline
-  GKLS 4d Simple &  26654.1 & 11095.7 & 37436.8 & \textbf{7824.3} & 15994.1 & 41514.3 & 21417.9 & 19157.7 & 59895.4 \\
+  GKLS 4d Simple &  26654.1 & 11095.7 & 37436.8 & \textbf{7824.3} & 15994.1 & 41514.3 &
+21417.9 & 19157.7 & 59895.4 \\
   \hline
-  GKLS 4d Hard   &  54536.8 &  \textbf{23167.8} &  73779.3 &  23204.4 &  54489.9 &  80247.2 &  68815.5 &  27466.1 &  109328.1  \\
+  GKLS 4d Hard   &  54536.8 &  \textbf{23167.8} &  73779.3 &  23204.4 &  54489.9 &  80247.2
+&  68815.5 &  27466.1 &  109328.1  \\
   \hline
-  GKLS 5d Simple &  29810.0 & 11529.0 & 143575.0 & \textbf{7166.5} & 13970.5 & 52647.6 & 34255.3 & 73074.5 & 91580.4 \\
+  GKLS 5d Simple &  29810.0 & 11529.0 & 143575.0 & \textbf{7166.5} & 13970.5 & 52647.6 &
+34255.3 & 73074.5 & 91580.4 \\
   \hline
-  GKLS 5d Hard   &  113129.1 & 67652.7 & 165192.8 & \textbf{66327.4} & 164390.6 & 138766.2 & 116973.1 & 105496.9 & 155123.8 \\
+  GKLS 5d Hard   &  113129.1 & 67652.7 & 165192.8 & \textbf{66327.4} & 164390.6 & 138766.2
+& 116973.1 & 105496.9 & 155123.8 \\
   \hline
 \end{tabular}}
   \label{tab:trials}
@@ -475,29 +562,38 @@ optimization problems}
 
 \subsection{Results of Parallel Algorithms}
 
-The computational experiments with parallel algorithms have been carried out on the Lobachevsky supercomputer at
+The computational experiments with parallel algorithms have been carried out on the Lobachevskii
+supercomputer at
 State University of Nizhni Novgorod. A computational node includes 2 Intel
 Sandy Bridge E5-2660 2.2 GHz processors, 64 GB RAM. Each CPU has 8 cores (i. e. total 16
 cores were available per a node). All computational nodes are working under CentOS Linux 7.2.
 All considered algorithms are implemented using C++ and compiled by GCC 4.8.5.
 
-Сравнение двух параллельных алгоритмов, реализованных в системах Globalizer и MIDACO
-было проведено на четырёхмерных задачах GKLS, т.к. задачи большей размерности не поддерживаются
-бесплатной версией MIDACO. Как и в случае с последовательными алгоритмами, для кадого класса задач
-были изменены параметры методов. Для MIDACO параметр \(focus = -1\). В случае с Globalizer параметр
-\(r\) был выбран следуя таблице \ref{tab:params}. С удвоением количества задействованных развёрток
-этот параметр уменьшался на 0.3, поскольку увеличение количества развёрток увеличивает и надёжность метода из секции \ref{sub:parallel_evolvents}
-(подробнее см. \cite{SOVRASOV2018}).
+The comparison of two parallel algorithms implemented in the Globalizer and MIDACO systems
+was conducted on four-dimensional GKLS problems since the problems of larger dimensionality are
+not supported by the free version of MIDACO. As in the case of the sequential algorithms, the
+parameters of methods were determined for each problem class. For MIDACO, the parameter
+\(focus = -1\). In the case of Globalizer, the parameter \(r\) was selected following Table
+\ref{tab:params}. This parameter decreased by 0.3 with doubling the number of employed evolvents
+since the increasing of the number of evolvents enhances the reliability of the method from Section
+\ref{sub:parallel_evolvents} as well (see \cite{SOVRASOV2018} for details).
 
-Если считать, что затраты на параллелизм пренебрежимо малы по сравнению с затратами на вычисление целевых функций в задачах оптимизации, то ускорение по времени от использования параллельного метода будет равно ускорению по итерациям. Однако, в действительности это предположение справедливо,
-тлолько если вычисление значения целевой функции достаточно трудоёмко. Во всех численных экспериментах время вычисления целевой функции занимает примерно $2\times 10^{-3}$с.
+If one considers the costs of parallelism to be negligible as compared to the costs of computing the
+objective functions in the optimization problems, the speedup in time due to the use of the parallel
+method would be equal to the speedup with respect to the number of iterations. However, actually
+this assumption is true if the computing of the objective function is well computation costly only. In
+all numerical experiments, the time of computing the objective function was approximately $2.5\times
+10^{-3}$ s.
 
 In Table~\ref{tab:iterations}, an averaged number of iterations when solving 100 problems from
 each considered class is presented.
 The number of iterations is reduced considerably with increasing the number of nodes and the
-number of threads on each node. В скобках также указано количество решённых задач в каждом классе.
-Globalizer решает практически все задачи в обоих классах, в то время как MIDACO не решает многие задачи из класса GKLS 4d Hard.
-Стоит ещё отметить, что с ростом числа узлов надёжность MIDACO падает на обоих классах задач, в то время как надёжность Globalizer остаётся стабильной.
+number of threads on each node. Also, the number of solved problems in each class is given  in
+brackets.
+Globalizer solves almost all problems in both classes whereas MIDACO hasn't solved a considerable
+number of problems from the GKLS 4d Hard class. Also, it is worth noting that the reliability of
+MIDACO decreased with increasing number of nodes on both problem classes whereas the
+reliability of Globalizer remains stable.
 
 \begin{table}
   \centering
@@ -535,23 +631,25 @@ V & \textbf{12 cluster nodes} %\multirow{3}{*}{}
   \end{tabular}
 \end{table}
 
-Среднее ускорение по итерациям и среднее ускорение по времени (в скобках) приведены в таблице \ref{tab:speedup}.
-В первой строке таблицы приведено среднее количество итераций и среднее время решения задачи в
-последовательном режиме (в скобках). MIDACO для при параллельных вычислениях использует
-меньшее количество коммуникаций, поэтому показатели ускорения монотонно возрастают с ростом количества
-вычислительных узлов. В Globalizer каждый узел должен переслать результаты проведения итерации
-всем другим узлам и с увеличением количества узлов и количества рабочих потоков на каждом узле
-эффективность распараллеливания падает. Это можно видеть в таблице \ref{tab:speedup}, когда при переходе от 4х
-узлов к 8 ускорение по времени при использовании 16 потоков упало. В случае одного потока на узел
-ускорение обоих методов оптимизации примерно одинаковое. Однако стоит заметить, что Globalizer выполняет
-меньше испытаний и при \(p=1\) тратит гораздо меньше времени на решение всех задач.
-С ростом количества узлов и потоков MIDACO догоняет Globalizer по среднему времени решения задачи,
-однако надёжность при этом падает.
+The averaged speedup in the number of iterations and the one in time (in brackets) are presented in
+Table \ref{tab:speedup}. In the first row of Table \ref{tab:speedup}, the averaged number of
+iterations and the averaged time of solving the problems in the sequential mode (in brackets) are
+presented. MIDACO uses a smaller number of communications in the parallel computations.
+Therefore, the indicators of speedup increased monotonously with increasing number of
+computational nodes employed. In Globalizer, each node should transfer the results of the executed
+iterations to all other nodes. Therefore, the efficiency of parallelization decreased with increasing
+number of nodes and the number of active threads on each node. This is evident from Table
+\ref{tab:speedup}: the speedup in time decreased at the transition from 4 nodes to 8 ones when
+using 16 threads. In the case of using 1 thread per a node, the speedup of both optimization methods
+were approximately the same. However, it should be noted that Globalizer executed less number of
+trials, and spends much less time for solving all problems when \(p=1\). With increasing number of
+nodes and threads, MIDACO approaches Globalizer in the averaged time of problem solving,
+however, its reliability decreases at the same time.
 
-Аномальное сверхлинейное ускорение по времени
-MIDACO на классе GKLS 2d Hard при использовании 8 и 12 узлов можно объяснить тем, что, согласно таблице
-\ref{tab:iterations}, MIDACO решил больше задач в параллельном режиме, чем в последовательном, а значит, на
-меньшем количестве задач работал до исчерпания лимита испытаний.
+An anomalous superlinear speedup of MIDACO in time on the GKLS 2d Hard class when
+employing 8 and 12 nodes can be explained by the fact that, according to Table \ref{tab:iterations},
+MIDACO has solved a greater number of problems in the parallel mode than in the sequential one,
+hence, has worked until the limit of trials is expired on a less number of problems.
 
 \begin{table}
   \centering
@@ -590,22 +688,26 @@ VI & \textbf{8 cluster nodes} %\multirow{3}{*}{}
 
 \section{Conclusions}
 
-В статье были рассмотрены несколько последовательных и параллельных алгоритмов глобальной оптимизации.
-Было проведено сравнение эффективности их работы на множестве тестовых задач, по результатам которого можно сделать
-следующие выводы:
+In the present paper, several sequential and parallel global optimization algorithms were considered.
+A comparison of efficiencies of these ones has been done on a set of test problems. The results allow
+making the following conclusions:
 \begin{itemize}
-  \item методы AGS\(l\), реализованный в системе Globalizer показал скорость сходимости и надёжность на уровне \(DIRECT\) и
-  превосходит многие другие алгоритмы, реализации которых есть в открытом доступе;
-  \item стохастические методы оптимизации проигрывают детерминированным по скорости сходимости и надёжности. Особенно
-  сильно это проявляется на более сложных многоэкстремальных задачах;
-  \item параллельная версия системы Globalizer демонстрирует хорошие показатели ускорения по времени при работе на нескольких узлах,
-  на каждом из которых вычисляется одно значение целевой за итерацию. При решении задач с быстро вычислимой целевой функцией и
-  использовании многопоточности на узлах показатели ускорения системы Globalizer деградируют с увеличением количества узлов;
-  \item система MIDACO больше всего подходит для несложных глобальных задач, целевые функции в которых могут быть быстро вычислимы.
-  В таком случае MIDACO достаточно надёжна и обеспечивает линейное ускорение с ростом количества узлов и параллельно выполняемых потоков на них.
+  \item AGS\(l\) method implemented in the Globalizer system has demonstrated the convergence
+speed and reliability at the level of \(DIRECT\) and exceeds many other algorithms, the open-access
+implementations of which are available;
+  \item the stochastic optimization methods inferior to the deterministic ones in the convergence
+speed and in reliability. It is manifested especially strongly on more complex multiextremal
+problems;
+  \item the parallel version of the Globalizer system demonstrates good indicators of speedup in time
+when running on several nodes, on each of which a single objective function value per iterations is
+computed. When solving the problems with fast computable objective functions and using multiple
+threads on the nodes, the indicators of speedup for the Globalizer system degrade with increasing
+number of nodes;
+  \item the MIDACO system is the most suitable for simple global optimization problems with the
+fast-computable objective functions. In this case, MIDACO is reliable enough and provides a linear
+speedup with increasing number of nodes and threads executed on these ones in parallel.
 \end{itemize}
 
-\end{Russian}
 
 \section*{Acknowledgements}
 The study was supported by the Russian Science Foundation, project No 16-11-
