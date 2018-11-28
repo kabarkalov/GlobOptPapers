@@ -18,6 +18,7 @@
 \usepackage{marvosym}
 \usepackage{amssymb}
 \usepackage{cite}
+\usepackage{subfig}
 % to typeset URLs, URIs, and DOIs
 \usepackage{url}
 \usepackage{hyperref}
@@ -51,7 +52,7 @@
 \begin{abstract}
 This work considers several stochastic and deterministic derivative-free global optimization
 algorithms. In the first part of the paper popular sequential open-source solvers are compared against
-the Globalizer solver, which is developed at the Lobachevskii State University. The Globalizer is
+the Globalizer solver, which is developed at the Lobachevsky State University. The Globalizer is
 designed to solve problems with black-box objectives satisfying the Lipschitz condition and shows
 competitive performance with other similar solvers. The comparison is done on several sets of
 challenging multi-extremal benchmark functions. The second part of this work is devoted to
@@ -429,8 +430,8 @@ solved problems as the characteristics of the optimization method on each class.
 of trials, the faster the method converges to a solution, hence the less times it turns to a potentially
 computation-costly procedure of computing the objective function. The number of solved problems
 evidences the reliability of the method at given parameters on the class of test problems being
-solved. In order to calculate the quantities featuring the reliability and the speed of convergence,
-when calculating the averaged number of trials the solved problems were taken into account only.
+solved. In order to make independent the quantities featuring the reliability and the speed of convergence,
+averaged number of trials always was calculated taking into account solved problems only.
 
 
 \section{Results of Numerical Experiments}
@@ -562,12 +563,12 @@ optimization problems}
 
 \subsection{Results of Parallel Algorithms}
 
-The computational experiments with parallel algorithms have been carried out on the Lobachevskii
+Computational experiments with parallel algorithms have been carried out on the Lobachevsky
 supercomputer at
 State University of Nizhni Novgorod. A computational node includes 2 Intel
 Sandy Bridge E5-2660 2.2 GHz processors, 64 GB RAM. Each CPU has 8 cores (i. e. total 16
-cores were available per a node). All computational nodes are working under CentOS Linux 7.2.
-All considered algorithms are implemented using C++ and compiled by GCC 4.8.5.
+cores were available per a node). All the computational nodes are working under CentOS Linux 7.2.
+All the considered algorithms are implemented using C++ and compiled by GCC 4.8.5.
 
 The comparison of two parallel algorithms implemented in the Globalizer and MIDACO systems
 was conducted on four-dimensional GKLS problems since the problems of larger dimensionality are
@@ -597,7 +598,7 @@ reliability of Globalizer remains stable.
 
 \begin{table}
   \centering
-  \caption{Averaged numbers of iterations executed by the parallel algorithm for solving the test
+  \caption{Averaged numbers of iterations executed by the parallel algorithms for solving the test
 optimization problems}
   \label{tab:iterations}
   \begin{tabular}{cccccccc}
@@ -639,11 +640,11 @@ Therefore, the indicators of speedup increased monotonously with increasing numb
 computational nodes employed. In Globalizer, each node should transfer the results of the executed
 iterations to all other nodes. Therefore, the efficiency of parallelization decreased with increasing
 number of nodes and the number of active threads on each node. This is evident from Table
-\ref{tab:speedup}: the speedup in time decreased at the transition from 4 nodes to 8 ones when
+\ref{tab:speedup} and Picture \ref{fig:speedup_p16}: the speedup in time decreased at the transition from 4 nodes to 8 ones when
 using 16 threads. In the case of using 1 thread per a node, the speedup of both optimization methods
-were approximately the same. However, it should be noted that Globalizer executed less number of
+were approximately the same (see Picture \ref{fig:speedup_p16}). However, it should be noted that Globalizer executed less number of
 trials, and spends much less time for solving all problems when \(p=1\). With increasing number of
-nodes and threads, MIDACO approaches Globalizer in the averaged time of problem solving,
+nodes and threads, MIDACO approaches Globalizer in the averaged time of problem solving (see Pictures \ref{fig:time_p1}, \ref{fig:time_p16}),
 however, its reliability decreases at the same time.
 
 An anomalous superlinear speedup of MIDACO in time on the GKLS 2d Hard class when
@@ -651,9 +652,23 @@ employing 8 and 12 nodes can be explained by the fact that, according to Table \
 MIDACO has solved a greater number of problems in the parallel mode than in the sequential one,
 hence, has worked until the limit of trials is expired on a less number of problems.
 
+\begin{figure}[ht]
+  \centering
+  \subfloat[$p=1$]{{\includegraphics[width=.5\textwidth]{images/speedup_midaco_globalizer_p_1.pdf}}\label{fig:speedup_p1}}
+  \subfloat[$p=16$]{{\includegraphics[width=.5\textwidth]{images/speedup_midaco_globalizer_p_16.pdf}}\label{fig:speedup_p16}}
+  \caption{Speedup demonstrated by the parallel algorithms when solving problems from the GKLS 4d Hard class}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \subfloat[$p=1$]{{\includegraphics[width=.5\textwidth]{images/time_midaco_globalizer_p_1.pdf}}\label{fig:time_p1}}
+  \subfloat[$p=16$]{{\includegraphics[width=.5\textwidth]{images/time_midaco_globalizer_p_16.pdf}}\label{fig:time_p16}}
+  \caption{Averaged execution time of the parallel algorithms when solving problems from the GKLS 4d Hard class}
+\end{figure}
+
 \begin{table}
   \centering
-  \caption{Speedup of parallel computations executed by the parallel algorithm}
+  \caption{Speedup of parallel computations executed by the parallel algorithms}
   \label{tab:speedup}
   \begin{tabular}{cccccccc}
     \cline{3-8}\noalign{\smallskip}
