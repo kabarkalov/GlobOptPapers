@@ -1,0 +1,192 @@
+\documentclass{aip-cp}
+
+\usepackage[numbers]{natbib}
+\usepackage{rotating}
+\usepackage{graphicx}
+
+\usepackage{multirow}
+
+\begin{document}
+
+\title{Accelerating Multicriterial Optimization by the Intensive Exploitation of Accumulated Search Data}
+\author[aff1]{Victor Gergel}
+\eaddress{gergel@unn.ru}
+\author[aff1]{Evgeny Kozinov}
+\eaddress{evgeny.kozinov@itmm.unn.ru}
+
+\affil[aff1]{Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia}
+
+\maketitle
+
+
+%\textbf{Keywords.}Multicriterial decision making; global optimization problems; high performance computing; computing efficiency.
+
+%-----------------------------------------------------------------
+\begin{abstract}
+The work proposed an efficient method for solving computationally difficult multicriterial optimization problems, which are widely used to model complex optimal decision making problems. Under the suggested approach, it is assumed that partial criteria can be multi-extremal and computationally intense, and finding a solution to multicriterial problems can require the sequential computation of several efficient (Pareto-optimal) alternatives. This multiple repetition of alternative searches leads to a substantial increase in computational costs, and the problem can be overcome by means of full usage of all search information obtained during the computations. The article provides a description of the developed approach, the efficiency of which has been substantiated by the results of computational experiments. 
+\end{abstract}
+
+\section{EXPANDED STATEMENT OF MULTICRITERIAL OPTIMIZATION PROBLEMS}
+Multicriterial optimization (MCO) problems are used, as a rule, to model the decision making problems – see, for example, [1-5]. The opportunity to define several partial criteria complies with the decision-making practice in many areas of application. At the same time, the problem definition may need to be updated during the computations, so as to expand or reduce the number of criteria. \par
+
+Taking into account the above, the following expanded statement of MCO problems is suggested to ensure a more adequate description of decision making problems. \par
+
+1.	Before proceeding with the selection problem, it is necessary to define the object of optimization as the following set of components:
+\begin{eqnarray} \label{eq1}
+O = \langle y, D, w(y) \rangle,
+\end{eqnarray}
+where:
+\begin{itemize}
+  \item $y$ is the parameters vector:
+	\begin{eqnarray*}
+		y=(y_1,y_2,\dots,y_N)
+	\end{eqnarray*}
+		(N is the dimension of the problem);
+	\item $D$ is the hyper-interval of possible values of the vector $y$, determined by the predefined vectors $a$ and $b$:	
+	\begin{eqnarray*}
+	   D=\{y \in R^N:a_i \leq y_i \leq b_i,1 \leq i \leq N\};
+	\end{eqnarray*}
+	\item $w(y)$ is the vector function of characteristics determining the object efficiently:
+	\begin{eqnarray*}
+		w(y)=(w_1 (y),w_2 (y),\dots,w_M (y))
+	\end{eqnarray*}
+\end{itemize}
+(the characteristics can include, for example, weight, speed, cost, etc.). \par
+
+It is expected that the characteristics $w_j (y)$, $1 \leq j \leq M$, can be multiextremal and require intensive computations. Without reducing the generality, the characteristics are also supposed to be non-negative, and their decreasing will result in improved object efficiency. It is also required that the model of the optimization object remains constant during the computations and does not change. \par
+
+2. The requirements for the optimal alternative of the optimization object can be determined using the following set of elements:
+
+\begin{eqnarray} \label{eq2}
+  Z=\langle F,G,q \rangle,
+\end{eqnarray}
+where:
+\begin{itemize}
+  \item $F=<i_1,i_2,\ldots,i_s>$ is a set of indices determining the vector \textit{criteria} of efficiency
+\begin{eqnarray*}
+  f(y)=(w_{i_1}(y),w_{i_2}(y),\ldots,w_{i_s}(y)),
+\end{eqnarray*}
+as a subset of functions from the vector function of characteristics $w(y)$;
+  \item $G=<j_1,j_2,\ldots,j_m>$ is a set of indices determining the vector function of \textit{constraints}  
+\begin{eqnarray*}
+  g(y)=(w_{j_1}(y)-q_1,w_{j_2}(y)-q_2,\ldots,w_{j_m}(y)-q_m),
+\end{eqnarray*}
+and $q=(q_1,q_2,\ldots,q_m )$ is the tolerance vector. The constraints $g(y)$ set the \textit{feasible search domain} 
+\begin{eqnarray*}
+  Q= \langle y \in D: g(y) \leq 0 \rangle .
+\end{eqnarray*}
+\end{itemize}
+
+The efficiency criteria and constraints defined in this way, allow the {\it multicriterial optimization problem} to be defined
+\begin{eqnarray*}
+f(y) \rightarrow \min, y \in Q.
+\end{eqnarray*}
+
+This proposed scheme gives a chance to change the statement during computations. Unlike the object model (1), the MCO problem (2)  can be changed – some constraints may be modified, tolerance values may be tightened or, on the contrary, relaxed, etc. The possibility for such variations allows to set requirements for the desired decision more adequately. As a result, the decision making in the proposed approach is declared as a multi-step procedure, where the MCO problem is reviewed at each stage and subsequently solved. 
+
+\section{METHODS FOR SOLVING MCO PROBLEMS}
+
+1. In the MCO problem (2), partial criteria are usually controversial and there are no point $y \in D$ that would provide the best (smallest) values for all criteria simultaneously. In these cases, the solution of the MCO problem considers such point $y^* \in D$, for which partial criteria cannot be improved without decreasing the efficiency for any other criteria. These unimprovable variants are called {\it efficient} or {\it Pareto optimal}. Solving an MCO problem usually requires finding one or more (in extreme cases, the entire set) of the efficient points. \par 
+
+One of the widely used approaches to finding efficient alternatives is the convolution of the partial criteria $f_i(y)$, $1 \leq i \leq s$, to a single scalar function $\Phi(\lambda, y)$, which allows to reduce the problem (2) to a scalar nonlinear programming problem (see [2-4], for example):
+\begin{eqnarray}
+\min \Phi(\lambda, y), y \in Q
+\end{eqnarray}
+where $\lambda = (\lambda_1,\lambda_2,\dots,\lambda_s)$ is the vector of coefficients used in constructing the scalar criterion. \par
+
+A definite advantage to this approach is the possibility of solving scalar problems (3) using numerous efficient nonlinear programming algorithms [5-13]. \par
+
+To obtain scalar criteria $\Phi(\lambda, y)$, in many cases it is possible to use a minimax convolution of the partial criteria [2-4]:
+\begin{eqnarray}
+\Phi(\lambda, y) = \max_{1 \leq i \leq s} \lambda_i  f_i(y),
+\end{eqnarray}
+\begin{eqnarray*}
+\lambda_i \geq 0, 1 \leq i \leq s, \sum\limits_{i=1}^s \lambda_i = 1 
+\end{eqnarray*}
+
+A main property of minimax convolution is the necessity and sufficiency of this approach in solving the MCO problem: optimizing $F(\lambda, y)$ produces an efficient option\footnote{To be more precise, minimization of $\Phi(\lambda, y)$ can lead to  weak efficient points (the set of weak efficient points includes the Pareto domain). } for the MCO problem, and vice versa, any efficient point for the MCO problem can be obtained as a result of minimization of $F(\lambda, y)$, given the respective values of the convolution coefficients $\lambda_i, 1 \leq i \leq s$. \par
+2. It should be noted that solving optimization problems (3) and (4) can require massive computations. These computations can be reduced greatly if the points for calculating criteria and constraints are only densely spaced around the globally optimal alternatives sought. This nonuniform coverage can only be supported when performing adaptive computations, when the selection of new iteration points uses the entire search data (previous iteration points and the values of the function being minimized at these points) obtained during the computations. This condition substantially complicates the computational procedures for global optimization methods, as it implies a complex computational analysis of multidimensional search data. \par
+
+To reduce the complexity of multidimensional optimization methods, various dimensionality reduction schemes are used. For example, Peano {\it curves} or {\it mappings} $y(x)$ are widely used (see, for example, [6-7]), which allow to map uniquely the one-dimensional interval interval [0,1] onto a N-dimensional search domain. As a result of this reduction, the multidimensional global optimization problem (4) is reduced to the following univariate problem:
+\begin{eqnarray}
+\phi(\lambda, x) = \Phi(\lambda, y(x)), x \in [0, 1].
+\end{eqnarray}
+
+Using Peano mappings to reduce dimensionality became the grounds for developing a large number of efficient multiextremal optimization methods – see, for example, [6-12]. \par
+3. Reducing dimensionality does not allow sufficient decreasing the computations in solving MCO problems. The biggest problem is that finding optimal decisions may require repeated solution of general multiextremal problems (3)-(5) when the MCO problem (2) is changed or new values for criteria convolution coefficients are selected. This problem can be overcome only by using the whole search data accumulated during the computations. \par
+	
+A numerical solution to the optimal decision making problems usually consists of repeated computations of the values of characteristics $w(y)$ at points $y^i,0 \leq i \leq k$ within the search domain $D$.The results of the respective computations can be represented as a matrix ({\it search data matrix}, SDM):
+\begin{eqnarray*}
+\Omega_k = \{ (y^i,w^i=w(y^i ))^T :0 \leq i \leq k \}.
+\end{eqnarray*}
+
+The size of the search data can become rather large when solving complex multidimensional problems, but any reduction in the volume of data stored, as a rule, results in excessive iterations of the global search [6-7]. \par
+
+As a result of reducing the decision making problem to an MCO problem (2), scalarizing vector criteria (3) or (4), and reducing dimensionality (5), a SDM is transformed into a {\it search state matrix} (SSM) 
+\begin{eqnarray*}
+\omega_k=\{ (x_i,z_i = \phi(\lambda, x^i), f^i, g^i, w^i)^T:0 \leq i \leq k\}.
+\end{eqnarray*}
+which meets the statement of the optimization problem currently being solved. \par
+
+Providing search information as an SSM is important for substantially reducing the computational intensity of solutions to the decision making problems. Optimization methods can use SSM for the adaptive performance of another round of search iterations (using the results of previous computations). And most importantly, the presence of SSM allows to recalculate the results of previous computations to the values of another next optimization problem (5) without any intense computations of the vector function characteristics $w(y)$ from (1). Thereby, all search data can be fully reused in continuing the computations. And as the main result, reusing the search data will require increasingly fewer computations for each subsequent optimization problem, until there are only a few iterations will be needed to find next efficient variants.
+
+\section{RESULTS OF COMPUTATIONAL EXPERIMENTS}
+To evaluate the efficiency of the proposed approach, a number of computational experiments for bicriterial univariate MCO problems without constraints has been executed, i.e., $N=1$, $M=2$, $s=2$, $m=0$. Multiextremal functions [14] were used as criteria for the problem defined by expression:
+\begin{eqnarray*}
+\psi(x) = A_0 + \sum\limits_{i=1}^{14} (A_i sin (2 i \pi x) + B_i cos (2 i \pi x)) , 0 \leq x \leq 1,
+\end{eqnarray*}
+were used as the problem criteria and $A_0$, $A_i$, $B_i$, $1 \leq i \leq 14$, are pseudo-random values uniformly distributedin the range of [-1,1]. \par
+
+To optimize the convolution of the criteria (5) we used a global search algorithm developed in the framework of information-statistical theory of the global optimization [6-8], with a reliability parameter $r=2$ and search accuracy $\varepsilon=0.001$. In each experiments performed, we solved a problem (5) with several different convolution coefficients $\lambda_i$, $1 \leq i \leq s$ (from 1 to 25), with and without using the search data. The experiment results are presented in Table ~\ref{tab:tab1}.
+
+%\begin{table}[ht]
+%\centering
+%\caption{Results of experiments with and without using the search data.}
+%\label{tab:tab1}
+%\begin{tabular}{llccccccc}
+%\hline
+%\multicolumn{2}{l}{Number of problems to be solved}          & 1            & 5            & 10           & 15           & 20           & 25           & 30           \\ \hline
+%             Computations without  &Total number of iterations              & 40           & 234          & 566          & 746          & 1018         & 1304         & 1621         \\
+%             using search data  &      Average per job        & 40           & 46.8         & 56.6         & 49.7         & 50.9         & 52.2         & 54.0         \\ \hline
+%            Computations using    &       Total number of iterations       & 40           & 69           & 93           & 104          & 142          & 151          & 177          \\
+%            search data   &      Average per job        & 40           & 13.8         & 9.3          & 6.9          & 7.1          & 6.0          & 5.9          \\ \hline
+%\multicolumn{2}{l}{\textbf{Decreasing of executed iteration (times)}} & \textbf{1.0} & \textbf{3.4} & \textbf{6.1} & \textbf{7.2} & \textbf{7.2} & \textbf{8.6} & \textbf{9.2} \\ \hline
+%\end{tabular}
+%\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Results of experiments with and without using the search data.}
+\label{tab:tab1}
+\begin{tabular}{ccccccc}
+\hline
+  \tch{1}{c}{b}{Number of}  & \multicolumn{2}{c}{\textbf{Without using search data}}& & \multicolumn{2}{c}{\textbf{Using search data}} & \tch{1}{c}{b} {Decreasing of}  \\ \cline{2-3} \cline{5-6}  \noalign{\smallskip}
+  \tch{1}{c}{b}{ problems \\to be solved}  & \tch{1}{c}{b}{Total number\\ of iterations} & \tch{1}{c}{b}{Average \\per job} & & \tch{1}{c}{b}{Total number\\ of iterations} & \tch{1}{c}{b}{Average \\per job}  & \tch{1}{c}{b} { executed \\iterations (times) }  \\ \hline
+1  & 40        & 40      & & 40       & 40        & 1   \\
+5  & 234       & 46,8    & & 69       & 13,8      & 3,4 \\
+10 & 566       & 56,6    & & 93       & 9,3       & 6,1 \\
+15 & 746       & 49,7    & & 104      & 6,9       & 7,2 \\
+20 & 1018      & 50,9    & & 142      & 7,1       & 7,2 \\
+25 & 1304      & 52,2    & & 151      & 6         & 8,6 \\ \hline
+%30 & 1621      & 54      & & 177      & 5,9       & 9,2 \\ \hline
+\end{tabular}
+\end{table}
+
+
+As the experiments presented above show, the use of search data allows the computational intensity to be reduced by up to 8 times when computing multicriterial optimization problems.
+
+\section{ACKNOWLEDGEMENTS}
+
+This research was supported by the Russian Science Foundation, project No 16-11-10150 ''Novel efficient methods and software tools for the time consuming decision making problems with using supercomputers of superior performance.''
+
+\section{CONCLUSION}
+
+This work proposed an approach to increasing the efficiency of handling computationally intensive multicriterial optimization problems by reusing search data obtained in the computations. The results of computational experiments confirm the viability of the developed approach. \par
+
+Further development of this approach is needed to provide theoretical estimates for the reduction in computational intensity, and to expand substantiallythe range of computational experiments conducted for multidimensional multicriterial optimization problems with constraints.
+
+\nocite{*}
+\bibliographystyle{aipnum-cp}%
+\bibliography{NUMTA2016_kozinov_transl}%
+
+\end{document}

@@ -1,0 +1,333 @@
+\documentclass[runningheads]{llncs}
+
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{amsmath}
+\usepackage{bbding}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{GPU-based Parallel Computations in Multicriterial Optimization 
+%\thanks{This research was supported by the Russian Science Foundation, project No 16-11-10150 ''Novel efficient methods and software tools for time-consuming decision-making problems using supercomputers of superior performance.''}
+}
+
+\author{ Victor Gergel \orcidID{0000-0002-4013-2329}(\Envelope) \and
+Evgeny Kozinov \orcidID{0000-0001-6776-0096}}
+
+\authorrunning{V. Gergel et al.}
+
+\institute{Lobachevsky State University of Nizhni Novgorod \\
+Nizhni Novgorod, Russia \\
+\email{gergel@unn.ru}, \email{evgeny.kozinov@itmm.unn.ru}}
+
+
+\maketitle
+
+\begin{abstract}
+In the present paper, an efficient approach for solving the time-consuming multicriterial optimization problems, in which the optimality criteria could be the multiextremal ones and computing the criteria values could require a large amount of computations is proposed. The proposed approach is based on the reduction of the multicriterial problems to the scalar optimization ones with the use of the minimax convolution of the partial criteria, on the dimensionality reduction with the use of the Peano space-filling curves, and on the application of the efficient information-statistical global optimization methods. An additional application of the block multistep scheme provides the opportunity of the large-scale parallel computations with the use of the graphics processing units (GPUs) with thousands of computational cores. The results of the numerical experiments have demonstrated such an approach to allow improving the computational efficiency of solving the multicriterial optimization problems considerably -- hundreds and thousands.
+\end{abstract}
+
+\keywords{Decision making \and Multicriterial optimization \and Global optimization \and High performance computations \and Dimensionality reduction \and Criteria convolution \and Global search algorithm \and Computational costs}
+
+\section{Introduction} \label{sec:01}
+
+The multicriterial optimization (MCO) problems are classified as the most general statements of the decision-making problems -- the statement of MCO problems covers many classes of optimization problems, including unconstrained optimization, nonlinear programming, global optimization, etc. The opportunity to set several criteria is very useful in the formulating of the complex decision-making problems and is used in the applications widely. Such practical importance has caused a high activity of research in the field of the MCO problems. As a result of the performed investigations, a large number of the efficient methods of solving the MCO problems have been proposed and a great number of the applied problems have been solved -- see, for example, the monographs \cite{c2,c3,c4,c5} and the reviews of the scientific and practical results in the field \cite{c7,c9}. 
+
+The present paper is devoted to the solving of the MCO problems, which are used for formulating the decision-making problems in the design of complex technical objects and systems. In such applications, the partial criteria could take a complex multiextremal form, and computing the values of the criteria could require a large amount of computations. In such conditions, finding even a single efficient decision requires a significant amount of computations whereas finding several decisions (or the complete set of these ones) becomes a problem of high computation costs.  
+
+Among the directions used for solving the MCO problems widely, the scalarization approach utilizing some methods of the partial criteria convolution to a single scalar criterion is applied -- see, for example, \cite{c3,c5,c10}. Among such approaches, there are the methods of finding the decisions, which are the closest to the ideal one or to the compromised ones, or to the prototypes existing actually, etc. Among such algorithms, there exists the method of successive concessions, in which some tolerances to possible values of criteria are introduced. The scalarization of a vector criterion allows reducing the solving of a MCO problem to solving a series of the multiextremal optimization problems and, therefore, utilizing all existing highly efficient global search algorithms for the multicriterial optimization. 
+
+One of the promising approaches to solving the time-consuming global optimization problems consists in utilizing the graphics processing units (GPUs). At present, a GPU is a high-performance flexible programmable massive parallel processor, which can provide solving many complex computational problems \cite{c18}. However, the use of the GPU computational potential in the field of global optimization is quite limited. As a rule, GPUs are used for the parallelization of the algorithms, which are based on the random search concept in any way (see \cite{c19,c20,c21}). A review of this direction is given in \cite{c22}. 
+
+Further structure of the paper is as follows. In Section \ref{sec:02}, the multicriterial optimization problem statement is given and the basics of the developed approach are considered, namely the reduction of the multicriterial problems to the scalar optimization ones using the minimax convolution of the partial criteria and the dimensionality reduction using the Peano space-filling curves. In Section \ref{sec:03}, the parallel global search algorithm for solving the reduced scalar optimization problems is described and the block multistep scheme of the dimensionality reduction, which provides the opportunity to use the GPUs with thousands of computational cores is presented. Section \ref{sec:04} includes the results of numerical experiments confirming the proposed approach to be a promising one. In Conclusion, the obtained results are discussed and main possible directions of further investigations are outlined.
+
+\section{Problem Statement}\label{sec:02}
+
+The multicriterial  optimization (MCO) can be defined as follows:
+\begin{equation}
+\label{eq:01}
+f(y) = (f_1(y), f_2(y),\dots, f_s(y)) \to min,  y \in D,	
+\end{equation}
+where $y = (y_1, y_2,\dots, y_N)$ is the vector of the varied parameters, $N$ is the dimensionality of the multicriterial optimization problem being solved, $f(y)$ is the vector efficiency criterion, and $D$ is the search domain representing an $N$-dimensional hyperparallelepiped 
+\begin{equation}
+D  = { y \in R^N: a_i \leq y_i \leq b_i, 1 \leq i \leq N }
+\end{equation}
+at given boundary vectors $a$ and $b$. 
+
+Without loss of generality, the values of partial criteria in the problem (\ref{eq:01}) are supposed to be non-negative, and the decreasing of these ones corresponds to increasing efficiency of the decisions $y \in D$.
+
+In the present work the problem (\ref{eq:01}) will be considered in application to the most complex decision-making problems, in which the partial criteria $f_i(y)$, $1 \leq i \leq s$ could be multiextremal, and obtaining the criteria values at the points of the search domain $y \in D$ could require a considerable amount of computations. Let us suppose also the partial criteria $f_i(y)$ to satisfy the Lipschitz condition
+\begin{eqnarray} \label{eq:02}
+|f_i(y') - f_i(y'')| \leq L_i \|y' - y''\|, y', y'' \in D, 1 \leq i \leq s. 
+\end{eqnarray} 
+where $L_i$ is the Lipschitz constant for the functions $f_i(y)$, $1 \leq i \leq s$ and $\| * \|$ denotes the Euclidean norm in $R^N$.
+
+The general approach to solving the MCO problem applied in the present work consists in the reduction of solving the MCO problems to the solving of a series of one-dimensional optimization problems: 
+\begin{eqnarray} \label{eq:03}
+\min{⁡ \phi(x)=F(\lambda, y(x)),x \in [0,1]},
+\end{eqnarray} 
+where 
+\begin{eqnarray}
+F(\lambda, y(x)) = \max{((\lambda_i f_i (y(x)), 1 \leq i \leq s)}
+\end{eqnarray} 
+is the minimax convolution of the partial criteria of the MCO problem with the use of the vector of the convolution coefficients 
+\begin{eqnarray}
+\lambda=(\lambda_1,\lambda_2,\dots,\lambda_s) \in \Lambda \subset R^s : 
+\sum_{i=1}^s{\lambda_i=1}, \lambda_i \geq 0, 1 \leq i \leq s	
+\end{eqnarray}
+and $y(x)$ is a continuous and unambiguous mapping of the interval $[0,1]$ onto the $N$-dimensional search domain $D$ -- see, for example, \cite{c11,c12,c13}.
+
+\section{GPU-based Parallel Computations for Solving the Multicriterial Optimization Problems}\label{sec:03}
+
+The convolution of the partial criteria applied within the framework of the developed approach and the dimensionality reduction allow reducing the solving of the MCO problem (\ref{eq:01}) to solving a series of the reduced multiextremal problems (\ref{eq:03}). And, therefore, the problem of the development of the methods for solving the MCO problems is resolved by the opportunity of a wide use of the global search algorithms. The state of the art in the field of global optimization is presented comprehensively enough, for example, in \cite{c11,c27,c28}.
+
+In the present work, the global search algorithm developed within the framework of the information-statistical theory of the multiextremal optimization is proposed to use for solving the reduced problems (\ref{eq:03}). This theory served as a basis for the development of a large number of algorithms, which have been substantiated mathematically, have demonstrated high efficiency, and allowed solving many complex optimization problems in various fields of application \cite{c11,c12,c29,c30,c32,c33}.
+
+The approach proposed for the organization of the parallel computations when solving the time-consuming multiextremal optimization problems is based on the simultaneous computing of the partial criteria values in the MCO problem (\ref{eq:01}) at several different points of the search domain $D$. Such an approach provides the parallelization of the most time-consuming part of the global search and is a general one -- it can be applied for many global search methods in various global optimization problems.
+
+\subsection{Parallel Algorithm of Global Search for Finding the Efficient Decisions in the Multicriterial Optimization Problems}
+
+Within the framework of this approach, the multidimensional generalized parallel algorithm of global search (PAGS) for finding the efficient decisions of the multicriterial optimization problems constitutes the basis for the developed optimization methods. The general computational scheme of the algorithm can be described as follows \cite{c11,c12,c13}.
+
+Let $p$ is the number of employed parallel computers (processors or cores) of a computational system with shared memory. The initial two iterations of the algorithm are performed at the boundaries of the interval $x^0=0$, $x^1=1$. Besides these boundary points, the algorithm should perform additional iterations at the points $x^i$, $1<i \leq p$, which can be defined \textit{a priori} or computed by any auxiliary computational procedure. Then, let $k$, $k>p$ global search iterations have been completed, at each of which the computing of the value of the minimized function $\phi(x)$ from (\ref{eq:03}) (hereafter called \textit{a trial}) has been performed. The choice of the points for trials performed within the next iteration in parallel is determined by the following rules.
+
+\textit{Rule 1.} Renumber the trials points of the completed search iterations by the lower indices in the order of increasing coordinate values
+\begin{eqnarray} \label{eq:05}
+	0=x_0<x_1<\dots<x_i<\dots<x_k=1.
+\end{eqnarray}
+
+\textit{Rule 2.} Compute current estimate of the H\"{o}lder constant of the reduced function $\phi(x)$:
+\begin{eqnarray} \label{eq:06}
+	m = 
+ \begin{cases}
+   r M, & M > 0 \\
+   1,   & M = 0
+ \end{cases} ,
+ M = \max_{1 \leq i \leq k} {\frac{|z_i - z_{i-1}|} {\varrho_i} }
+\end{eqnarray}
+where $z_i=\phi(x_i )$, $\varrho_i=\sqrt[N]{x_i-x_{i-1}}$, $1 \leq i \leq k$. The constant $r$, $r>1$ is the \textit{reliability parameter} of the algorithm.
+
+\textit{Rule 3.} Compute \textit{the characteristic} $R(i)$ for each interval $(x_{i-1}  ,x_i)$, $1 \leq i \leq k$ according to the expression 
+\begin{eqnarray} \label{eq:07}
+R(i) = \varrho_i + \frac{(z_i - z_{i-1})^2}{m^2 \varrho_i} - 2 \frac{(z_i + z_{i-1})}{m}, 1 \leq i \leq k,
+\end{eqnarray}
+
+\textit{Rule 4.} Arrange the characteristics of the intervals $(x_{i-1},x_i)$, $1 \leq i \leq k$ obtained according to (\ref{eq:07}) in the decreasing order 
+\begin{eqnarray} \label{eq:08}
+R(t_1) \geq R(t_2) \geq \dots \geq R(t_{k-1}) \geq R(t_k)
+\end{eqnarray}
+and select $p$ intervals with the indices $t_j$, $1 \leq j \leq p$ having the maximum values of the characteristics.
+
+\textit{Rule 5.} Perform new trials at the points $x^{k+j}$, $1 \leq j \leq p$ placed in the intervals with the maximum characteristics from (\ref{eq:08}) according to the expressions 
+
+\begin{eqnarray} \label{eq:09}
+	x^{k+j} = \frac{x_{t_j} + x_{t_j-1}}{2}
+	- sign(z_{t_j} - z_{t_j-1}) \frac{[\frac{|z_{t_j} - z_{t_j-1}|}{m}]^N}{2r} , 1\leq j \leq p.
+\end{eqnarray}
+
+\textit{Stopping condition} for the algorithm, according to which the execution of the algorithm is terminated, consists in checking the lengths of the intervals, in which the scheduled trials are performed, with respect to the required \textit{accuracy} of the problem solution i.e.
+\begin{eqnarray} \label{eq:10}
+\varrho_t \leq \varepsilon, 1 \leq t_j \leq p.
+\end{eqnarray}
+
+Various modifications of this algorithm and the corresponding theory of convergence are presented in \cite{c11,c12}.
+
+\subsection{Multilevel Decomposition of the Parallel Computations}
+
+Further development of the methods of the parallel computations in the multicriterial global optimization problems and, therefore, the expansion of the possible quantity of the employed processors/cores can be ensured by the use of one more dimensionality reduction method in the decomposition scheme of the MCO problems (\ref{eq:01}) -- the multistep scheme of decomposition of the optimization problems \cite{c11,c12,c33,c34}. According to this scheme, the solution of a multidimensional optimization problem can be obtained by solving a series of «nested» one-dimensional problems:
+
+\begin{eqnarray} \label{eq:11}
+\min{\{\phi(y): y \in D\}} = 
+\min_{a_1 \leq y_1 \leq b_1}{ \min_{a_2 \leq y_2 \leq b_2}{ \dots \min_{a_N \leq y_N \leq b_N}{ \phi(y) } } }.
+\end{eqnarray}
+
+The original multistep reduction scheme (\ref{eq:11}) can be generalized for the use in combination with the dimensionality reduction scheme based on the Peano curves \cite{c36}. According to the generalized block multistep scheme, the vector of variables $y \in D$ of the global optimization problem (\ref{eq:01}) is considered as a set of the block variables 
+\begin{eqnarray} 
+y = (y_1, y_2, \dots, y_N) = (u_1, u_2, \dots, u_M),
+\end{eqnarray}
+where the $i^{th}$ block variable $u_i$ is a vector with the dimensionality $N_i$ of the elements of the vector $y$ taken sequentially i.e. 
+\begin{eqnarray}
+\begin{aligned}
+u_{i}=(y_{n_i+1},y_{n_i+2},\dots,y_{n_i+N_{i}}), \\
+n_0=N_0=0, n_i=n_{i-1}+N_{i-1} ,1 \leq i \leq M
+\end{aligned}
+\end{eqnarray}
+and $N_1 + N_2 + \dots + N_M = N$.
+
+Using the new variables, main equation of the multistep reduction scheme (\ref{eq:11}) can be rewritten in the form
+\begin{eqnarray} \label{eq:12}
+\min{\{\phi(y): y \in D\}} = 
+\min_{u_1 \in D_1}{ \min_{u_2 \in D_2}{ \dots \min_{u_M \in D_M}{ \phi(y) } } }.
+\end{eqnarray}
+where the subdomains $D_i$, $1 \leq i \leq M$ are the projections of the initial search domain $D$ onto the subspace corresponding the variables $u_i$, $1 \leq i \leq M$. As a result, in the generalized block multistep reduction scheme, the nested subproblems
+\begin{eqnarray} \label{eq:13}
+\phi_i(u_1 \dots u_i) = 
+\min_{u_{i + 1} \in D_{i + 1}}{\phi_{i+1}(u_1 \dots u_i, u_{i+1})},1 \leq i \leq M-1
+\end{eqnarray}
+are the multidimensional ones, and  the dimensionality reduction method based on the Peano curves can be applied to solve these ones.
+
+To provide the parallel computations in the block multistep reduction scheme, at each decomposition level one can generate several optimization problems simultaneously for the parallel solving of these ones \cite{c34,c36} (see Figure \ref{fig:01}). The resulting set of problems to be solved in parallel can be controlled by means of the predefined parallelization vector
+\begin{eqnarray} \label{eq:14}
+\pi = (\pi_1, \pi_2, \dots, \pi_M),
+\end{eqnarray}
+where $\pi_i$, $1 \leq i < M$ is the number of subproblems being solved in parallel at the $(i+1)^{th}$ level of decomposition arising as a result of performing the parallel iterations at the $i^{th}$ level. For the $M^{th}$ level, the quantity $\pi_M$ means the number of parallel trials in the course of minimization of the function 
+\begin{eqnarray}
+\phi_M(u_1, \dots, u_M) = \phi(y_1, \dots, y_N)
+\end{eqnarray}
+with respect to the variable $u_M$ at fixed values $u_1, \dots, u_{M-1}$, i.e. the number of values of the objective function $\phi(y)$ computed in parallel. Then, the total number of the employed processors/cores will be 
+\begin{eqnarray} \label{eq:15}
+\prod{} = 1 + \sum_{i=1}^{M-1}\prod_{j=1}^i{\pi_j}
+\end{eqnarray}
+The resulting multilevel scheme of parallel computations allows ensuring the efficient employment of all processors/nodes available in the high-performance systems with a large number of the computational nodes (including the ones with the distributed memory). The generation of a large number of optimization problems solved in parallel initiates a promising direction on a wide employment of GPUs with a large number of computational cores. This direction has been tested in solving the time-consuming global optimization problems \cite{c38,c39,c40}. In the present work, the possibility of utilizing the GPUs for solving the multicriterial optimization problems has been evaluated.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=0.5\textwidth]{fig1.png}}
+\caption{General scheme of generating the parallel problems using the block multistep dimensionality reduction scheme}
+\label{fig:01}
+\end{figure}
+
+The PAGS algorithm combined with the block multistep scheme of dimensionality reduction will be called hereafter Generalized Parallel Algorithm of Global Search (GPAGS).
+
+\section{Results of Numerical Experiments}\label{sec:04}
+
+The numerical experiments have been carried out on the «Lobachevsky» supercomputer at State University of Nizhni Novgorod (operating system -- CentOS 6.4, management system -- SLURM). Each supercomputer node included 2 Intel Sandy Bridge E5-2660 2.2 GHz, 64 Gb RAM processors. The central processor units were the 8-core one (i. e. total 16 CPU cores per a node were available). At each node, three NVIDIA Kepler K20Х GPUs were installed. To provide parallel computations MPI and CUDA technologies are applied.
+
+The evaluation of the efficiency of the developed approach for solving the MCO problems without using the computational accelerators has already been performed earlier \cite{c14,c15,c16,c17}. Let us consider, for example, the results of experiments from \cite{c16}. For comparison, a bicriterial test problem proposed in \cite{c41} was used:
+
+\begin{eqnarray} \label{eq:16}
+f_1 (y)=(y_1-1) y_2^2+1, f_2 (y)=y_2, 0 \leq y_1,y_2 \leq 1.
+\end{eqnarray}
+
+As a solution of this MCO problem, the construction of a numerical approximation of the Pareto domain (PDA) was considered. For evaluating the quality of approximation, the completeness and the uniformity of the coverage of the Pareto domain were compared with the use of the following two indicators \cite{c16,c41}:
+
+\begin{itemize}
+\item The \textit{hypervolume index} (HV) defined as the volume of the subdomain of the values of the vector criterion $f(y)$ dominated by the points of the Pareto domain approximation. This indicator characterizes the completeness of the Pareto domain approximation (a higher value corresponds to more complete coverage of the Pareto domain).
+\item The \textit{distribution uniformity} index (DU) of the points from the Pareto domain approximation. This indicator characterizes the uniformity of coverage of the Pareto domain (a lower value corresponds to more uniform coverage of the Pareto domain).
+\end{itemize}
+
+Within the described experiment, five multicriterial optimization algorithms were compared: the Monte-Carlo (MC) method, the genetic algorithm SEMO from the PISA library \cite{c7,c42}, the Non-uniform coverage (NUC) method \cite{c7}, the bi-objective Lipschitz optimization (BLO) method proposed in \cite{c42}, and the serial variant of the GPAGS algorithm proposed in the present paper.
+
+Total for the GPAGS algorithm 50 subproblems were solved at various values of the convolution coefficients $\lambda$ distributed in $\Lambda$  uniformly. The results of experiments from \cite{c16} are presented in Table \ref{tab:01}.
+
+\begin{table}[htbp]
+\centering
+\caption{Results of numerical experiments from \cite{c16} for the test problem (\ref{eq:16})}
+\label{tab:01}
+\begin{tabular}{ccccc}
+\hline
+\textbf{Method} & \textbf{Iterations} & \textbf{PDA points} & \textbf{HV} & \textbf{DU} \\ \hline
+MC              & 500                 & 67                  & 0.300       & 1.277       \\
+SEMO            & 500                 & 104                 & 0.312       & 1.116       \\
+NUC             & 515                 & 29                  & 0.306       & 0.210       \\
+BLO             & 498                 & 68                  & 0.308       & 0.175       \\
+GPAGS           & 370                 & 100                 & 0.316       & 0.101       \\ \hline
+\end{tabular}
+\end{table}
+
+The results of performed experiments have demonstrated the GPAGS algorithm to have a considerable advantage as compared to considered multicriterial optimization methods even in solving relatively simple MCO problems.
+
+In the present paper, the numerical experiments were conducted in order to evaluate the efficiency of the developed approach in solving the MCO problems with the use of the GPUs. In the conducted series of experiments, the solving of the bicriterial six-dimensional MCO problems (i.e. $N = 6$, $s = 2$) has been performed. As the test problem criteria, the multiextremal functions obtained with the use of the GKLS generator \cite{c43} were used. 
+
+In the course of experiments, 50 multicriterial problems of this class have been solved. In each problem, the search of the Pareto-optimal decisions was performed for 10 convolution coefficients $\lambda$ from (\ref{eq:03}) distributed in $\Lambda$ uniformly (i.e. 500 global optimization subproblems have been solved). In solving the problems, two levels of the block dimensionality reduction scheme were used. At the first level of the reduction scheme, the optimization with respect to the first two variables was performed (i.e. $u_1 = (y_1, y_2)$, $N_1=2$). The optimization with respect to the rest variables was performed at the second decomposition level (i.e. $u_2 = (y_3, y_4, y_5, y_6)$, $N_2=4$). Trials at the second decomposition level are executed on GPU. Computations are implemented in accordance with the master/slave scheme which is not required any data communication between GPUs. Trial points are sent by CPU just before every iteration and are stored in the GPU global memory.
+
+As the parameters the accuracy of the method $\varepsilon=0.025$ and the reliability of the method $r=6.5$ for the first level of the block reduction scheme and $r=4.5$ for the second level of decomposition were used. The results of the numerical experiments are presented in Table \ref{tab:02}.
+
+\begin{table}[htbp]
+\centering
+\caption{Comparison of the times of solving of the six-dimensional bicriterial MCO problems}
+\label{tab:02}
+\begin{tabular}{ccccccc}
+\hline
+\textbf{Nodes} & \textbf{P} & \textbf{Th} & \textbf{P*Th} & \textbf{Core type} & \textbf{Time, s} & \textbf{Speedup} \\ \hline
+1              & 1          & 16          & 16            & CPU                   & 7 186.4          & 1.0              \\
+16             & 16         & 16          & 256           & CPU                   & 957.3            & 7.5              \\
+16             & 32         & 4 032       & 129 024       & GPU                   & 529.9            & 13.6             \\
+16             & 64         & 2 016       & 129 024       & GPU                   & 291.8            & 24.6             \\
+16             & 128        & 1 008       & 129 024       & GPU                   & 272.4            & 26.4             \\
+32             & 128        & 2 016       & 258 048       & GPU                   & 214.9            & 33.4             \\
+32             & 256        & 1 008       & 258 048       & GPU                   & 253.2            & 28.4             \\ \hline
+\end{tabular}
+\end{table}
+
+In Table \ref{tab:02}, the column ''Nodes'' shows the number of the supercomputer nodes employed, the column $P$ shows the number of the parallel subproblems generated at the first level of the block reduction scheme (the parameter $\pi_1$ from (\ref{eq:14})), the column $Th$ shows the number of generated points of trials performed in parallel at the second decomposition level (the parameter $\pi_2$ from (\ref{eq:14})).
+
+The results of experiments presented in the first row show the averaged time of solving of the MCO problems with the use a single computational node of the supercomputer ($\pi_1=1$, $\pi_2=16$). In the second row of the table, the averaged time of solving of the MCO problems with the use of sixteen computational nodes of the supercomputer ($\pi_1=16$, $\pi_2=16$) is given. As follows from the presented results, the resulting speedup of the computations was 7.5 times. In the rows 3-7, the averaged times of solving the MCO problems with the use of 16 and 32 supercomputer nodes are given. At each node, 3 GPUs were employed. The number of parallel subproblems generated at the first level of the block reduction scheme (the parameter $\pi_1$ from (\ref{eq:14})) ranged from 32 to 256 whereas the number of generated points of trials performed in parallel at the second decomposition level (the parameter $\pi_2$ from (\ref{eq:14})) ranged from 1008 to 4032. Total number of employed GPU cores was 129024 with using 16 nodes, and 258048 with using 32 nodes. The maximal speedup of computations achieved was 33.4 times.
+
+It is worth noting that the speedup of computations in the time depends on the time of computing the values of the criteria of the MCO problem being solved. This time is relatively small in the test optimization problems, but it can be essential when solving the applied problems in various scientific and technical applications. As a result, along with the evaluation of the achieved speedup of computations in the time, it is reasonable to evaluate the speedup of computations with respect to the reduction of the number of iterations performed in the course of computations. The results of experiments performed to evaluate such speedup are presented in Table \ref{tab:03}.
+
+\begin{table}[htbp]
+\centering
+\caption{Comparison of the number of iterations when solving the six-dimensional bicriterial MCO problems}
+\label{tab:03}
+\begin{tabular}{ccccccc}
+\hline
+\textbf{Nodes} & \textbf{P} & \textbf{Th} & \textbf{P*Th} & \textbf{Core type} & \textbf{Iterations} & \textbf{Speedup} \\ \hline
+1              & 1          & 16          & 16            & CPU                                                           & 12 279 179.8        & 1.0              \\
+16             & 16         & 16          & 256           & CPU                                                           & 808 858.8           & 15.2             \\
+16             & 32         & 4 032       & 129 024       & GPU                                                           & 3 086.5             & 3 978.4          \\
+16             & 64         & 2 016       & 129 024       & GPU                                                           & 2 426.9             & 5 059.6          \\
+16             & 128        & 1 008       & 129 024       & GPU                                                           & 2 910.2             & 4 219.4          \\
+32             & 128        & 2 016       & 258 048       & GPU                                                           & 1 581.5             & 7 764.4          \\
+32             & 256        & 1 008       & 258 048       & GPU                                                           & 2307.5              & 5 321.4          \\ \hline
+\end{tabular}
+\end{table}
+
+The results of experiments presented above demonstrate the speedup of computations with respect to the reduction of the number of performed global search iterations to be considerable. Thus, when employing 16 computer nodes, the speedup can be more than 5000 times whereas when employing 32 computer nodes -- more than 7700 times.
+
+\section{Conclusion}
+In the present paper, an efficient approach for solving the complex multicriterial optimization problems, in which the criteria of optimality can be the multiextremal ones, and the computing of the criteria values can require a large amount of computations has been proposed. The proposed approach is based on the reduction of the multicriterial problems to the scalar optimization ones by means of the minimax convolution of the partial criteria, the dimensionality reduction with the use of Peano space-filling curves, and the application of the efficient information-statistical methods of global optimization. 
+
+The opportunity of the large-scale parallel computations is provided by application of the block multistep dimensionality reduction scheme and by the use of the GPUs with many thousands computational cores. The results of numerical experiments have shown the developed approach to allow reducing the computational costs of solving the multicriterial optimization problems considerably -- by hundreds and thousands times.
+
+The results of the performed experiments have demonstrated the developed approach to be a promising one and to require further investigations. First of all, it is necessary to continue carrying out the numerical experiments on solving the multicriterial optimization problems at larger number of the partial criteria of efficiency and for larger dimensionality of the optimization problems being solved. 
+
+          
+\section*{Acknowledgements}
+This research was supported by the Russian Science Foundation, project No 16-11-10150 ''Novel efficient methods and software tools for time-consuming decision-making problems using supercomputers of superior performance''.
+
+
+\begin{thebibliography}{8}
+
+\bibitem{c2} Marler, R.T., Arora, J.S.: Multi-Objective Optimization: Concepts and Methods for Engineering,  VDM Verlag  (2009)
+\bibitem{c3} Ehrgott, M.: Multicriteria Optimization,  Springer, 2005. (2nd ed., 2010)
+\bibitem{c4} Collette, Y., Siarry, P.: Multiobjective Optimization: Principles and Case Studies (Decision Engineering),  Springer (2011)
+\bibitem{c5} Pardalos, P.M., {\v Z}ilinskas, A., {\v Z}ilinskas, J.: Non-Convex Multi-Objective Optimization,  Springer (2017)
+\bibitem{c7} Hillermeier, C., Jahn, J.: Multiobjective optimization: survey of methods and industrial applications,  Surv. Math. Ind. \textbf{11}, pp. 1--42 (2005)
+\bibitem{c9} Cho, J.-H., Wang, Ya., Chen, I.-R., Chan, K.S., Swami, A.: A Survey on Modeling and Optimizing Multi-Objective Systems,  IEEE Communications Surveys {\&} Tutorials \textbf{19}(3), pp. 1867--1901 (2017) 
+\bibitem{c10}	Eichfelder, G.: Scalarizations for adaptively solving multi-objective optimization problems,  Comput. Optim. Appl. \textbf{44}, pp. 249--273 (2009) 
+\bibitem{c11}	Strongin, R., Sergeyev, Ya.: Global optimization with non-convex constraints. Sequential and parallel algorithms,  Kluwer Academic Publishers, Dordrecht, 2000 (2nd ed. 2013, 3rd ed. 2014).
+\bibitem{c12}	Strongin, R., Gergel, V., Grishagin, V., Barkalov, K.: Parallel computations for global optimization problems,  Moscow State University Press (2013) (in Russian)
+\bibitem{c13}	Sergeyev, Y.D., Strongin, R.G., Lera, D.: Introduction to global optimization exploiting space-filling curves,  Springer (2013)
+\bibitem{c14}	Gergel V.P., Kozinov, E.A.: Accelerating Parallel Multicriterial Optimization Methods Based on Intensive Using of Search Information,  Procedia Computer Science, \textbf{108}, pp. 1463-1472 (2017)
+\bibitem{c15}	Gergel, V., Kozinov, E.: Parallel computing for time-consuming multicriterial optimization problems,  Lecture Notes in Computer Science, \textbf{10421}, pp. 446--458 (2017).  DOI: 10.1007/978-3-319-62932-2\_43
+\bibitem{c16}	Gergel, V., Kozinov, E.: Efficient methods of multicriterial optimization based on the intensive use of search information,  Springer Proceedings in Mathematics and Statistics, \textbf{197}, pp. 27--45 (2017). DOI: 10.1007/978-3-319-56829-4\_3
+\bibitem{c17}	Gergel, V., Kozinov, E.: An approach for parallel solving the multicriterial optimization problems with non-convex constraints,  Communications in Computer and Information Science, \textbf{793}, pp. 121-135 (2017). DOI: 10.1007/978-3-319-71255-0\_10
+\bibitem{c18}	Cai, Y., See, S.: GPU Computing and Applications,  Springer (2015) 
+\bibitem{c19}	Ferreiro, A.M., Garcia, J.A., Lopez-Salas, J.G., Vazquez, C.: An efficient implementation of parallel simulated annealing algorithm in GPUs,  J. Glob. Optim., \textbf{57}(3), pp. 863--890 (2013)
+\bibitem{c20}	Zhu, W.: Massively parallel differential evolution--pattern search optimization with graphics hardware acceleration: an investigation on bound constrained optimization problems,  J. Glob. Optim. \textbf{50}(3), pp. 417--437 (2011)
+\bibitem{c21}	Garcia-Martinez, J.M., Garzon, E.M., Ortigosa, P.M.: A GPU implementation of a hybrid evolutionary algorithm: GPuEGO,  J. Supercomput (2014). DOI:10.1007/s11227-014-1136-7
+\bibitem{c22}	Langdon, W.B.: Graphics processing units and genetic programming: an overview,  Soft. Comput. \textbf{15}(8), pp. 1657--1669 (2011)
+\bibitem{c27}	Locatelli, M., Schoen, F.: Global Optimization: Theory, Algorithms, and Applications,  SIAM (2013)
+\bibitem{c28}	Floudas, C.A., Pardalos, M.P.: Recent Advances in Global Optimization,  Princeton University Press (2016)
+\bibitem{c29}	Gergel, V.P., Strongin, R.G.: Parallel Computing for Globally Optimal Decision Making,  Lecture Notes in Computer Science, \textbf{2763}, pp. 76--88 (2003)
+\bibitem{c30}	Gergel, V.P., Kuzmin, M.I., Solovyov, N.A., Grishagin, V.A.: Recognition of surface defects of cold-rolling sheets based on method of localities,  International Review of Automatic Control \textbf{8}(1), pp. 51--55 (2015)
+\bibitem{c32}	Modorskii, V.Y., Gaynutdinova, D.F., Gergel, V.P., Barkalov, K.A.: Optimization in design of scientific products for purposes of cavitation problems,  AIP Conference Proceedings, \textbf{1738}, pp. 400013 (2016). DOI: 10.1063/1.4952201
+\bibitem{c33} Grishagin, V., Israfilov, R., Sergeyev, Y.: Convergence conditions and numerical comparison of global optimization methods based on dimensionality reduction schemes,  Applied Mathematics and Computation, \textbf{318}, pp. 270--280 (2018). DOI: 10.1016/j.amc.2017.06.036
+\bibitem{c34}	Sergeyev, Y., Grishagin, V.: Parallel asynchronous global search and the nested optimization scheme,  J. Comput. Anal. Appl., \textbf{3}(2), pp. 123--145 (2001)
+\bibitem{c36}	Barkalov, K.A., Gergel, V.P.: Multilevel scheme of dimensionality reduction for parallel global search algorithms,  Proceedings of the 1st International Conference on Engineering and Applied Sciences Optimization, pp. 2111--2124 (2014)
+\bibitem{c38} Gergel, V., Lebedev, I.: Heterogeneous Parallel Computations for Solving Global Optimization Problems,  Procedia Computer Science, \textbf{66}, pp. 53--62 (2015)
+\bibitem{c39}	Gergel, V.P., Sidorov, S.V.: A Two-Level Parallel Global Search Algorithm for Solving Computationally Intensive Multi-extremal Optimization Problems,  Lecture Notes in Computer Science, \textbf{9251}, pp. 505--515 (2015)
+\bibitem{c40}	Gergel, V.: An Unified Approach to Use of Coprocessors of Various Types for Solving Global Optimization Problems,  2nd International Conference on Mathematics and Computers in Sciences and in Industry, MCSI, \textbf{7423935}, pp. 13--18 (2016)
+\bibitem{c41}	Evtushenko, Yu.G., Posypkin, M.A.: A deterministic algorithm for global multi-objective optimization,  Optimization Methods \& Software, \textbf{29}(5), pp. 1005--1019 (2014)
+\bibitem{c42}	{\v Z}ilinskas, A., {\v Z}ilinskas, J.: Adaptation of a one-step worst-case optimal univariate algorithm of bi-objective Lipschitz optimization to multidimensional problems,  Commun Nonlinear Sci Numer Simulat, \textbf{21}, pp. 89--98 (2015)
+\bibitem{c43}	Gaviano, M., Kvasov, D.E., Lera, D., Sergeyev, Ya.D.: Software for generation of classes of test functions with known local and global minima for global optimization,  ACM Transactions on Mathematical Software \textbf{29}(4), pp. 469--480 (2003)
+
+\end{thebibliography}
+
+\end{document}
