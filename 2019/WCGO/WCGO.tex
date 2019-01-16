@@ -1,0 +1,153 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2017/10/04
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage{graphicx}
+
+% If you use the hyperref package, please uncomment the following line
+% to display URLs in blue roman font according to Springer's eBook style:
+% \renewcommand\UrlFont{\color{blue}\rmfamily}
+
+\begin{document}
+%
+\title{ Generalized scheme for dimensionality reduction based on nested 
+optimization and Peano curve for global optimization problems
+\thanks{This study was supported by the Russian Science Foundation, project 
+No.\,16-11-10150.}}
+%
+%\titlerunning{Abbreviated paper title}
+% If the paper title is too long for the running head, you can set 
+% an abbreviated paper title here
+%
+\author{Konstantin Barkalov \orcidID{0000-0001-5273-2471} \and
+Ilia Lebedev\orcidID{0000-0002-8736-0652}}
+%
+\authorrunning{K. Barkalov, I. Lebedev}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{Lobachevsky State University of Nizhny Novgorod, Nizhny Novgorod, 
+Russia \email{konstantin.barkalov@itmm.unn.ru}}
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+The abstract should briefly summarize the contents of the paper in
+150--250 words.
+
+\keywords{Dimensionality reduction \and Global optimization \and 
+Multiextremal functions.}
+\end{abstract}
+%
+%
+%
+\section{Introduction}
+
+\section{The core global search algorithm}
+
+According to the algorithm, the first two trials are executed at the ends of 
+the interval  $[a,b]$, i.e., $x^0=a,\;x^1=b$. The function values $z^0=\varphi
+(x^0),\;z^1=\varphi(x^1)$  are computed and the number $k$ is set to 1. In 
+order to select the point of a new trial $x^{k+1}, k\geq 1,$  it is necessary 
+to perform the following steps.
+
+\textbf{Step 1.} Renumber by subscripts (beginning from zero) the points $x^i,
+\:0\leq i\leq k$, of the previous trials in increasing order, i.e.,
+\begin{displaymath}
+a=x_0<x_1<\ldots <x_{k}=b.
+\end{displaymath} 
+Juxtapose to the points $x_i,\:1\leq i\leq k$,  the function values $z_i=
+\varphi(x_i),\:0\leq i\leq k$.
+
+\textbf{Step 2.} Compute the maximum absolute value of the first divided 
+differences 
+\begin{displaymath}
+\mu=\max_{1\leq i\leq k}\frac{\left|z_i-z_{i-1}\right|}{\Delta_i}
+\end{displaymath}
+where $\Delta_i = x_i-x_{i-1}$. If the above formula yields a zero value, 
+assume that $\mu = 1$.
+
+
+\textbf{Step 3.} For each interval $(x_{i-1},x_i),1\leq i\leq k$,  calculate 
+the characteristic
+\begin{displaymath}
+R(i)=r\mu(x_i-x_{i-1})+\frac{(z_i-z_{i-1})^2}{r\mu(x_i-x_{i-1})}-2(z_i+z_{i-1}
+),
+\end{displaymath} 
+where $r>1$ is a predefined parameter of the method. 
+
+\textbf{Step 4.} Find the interval $(x_{t-1},x_t)$ with the maximum 
+characteristic
+\begin{equation}\label{MaxR}
+R(t)=\max_{1\leq i\leq {k}}R(i).
+\end{equation}  
+
+\textbf{Step 5.} Execute the new trial at the point 
+\begin{displaymath}
+x^{k+1}=\frac{1}{2}(x_{t-1}+x_t) - \frac{z_t-z_{t-1}}{2r\mu}.
+\end{displaymath}
+
+The algorithm terminates if the condition $\Delta_t<\epsilon$ is satisfied; 
+here $t$ is from (\ref{MaxR}) and $\epsilon>0$ is the preset accuracy. For 
+estimation of the global solution, values
+\[
+z_k^\ast=\min_{0\leq i \leq k}\varphi(x^i), \ x_k^\ast=\arg \min_{0\leq i \leq
+ k}\varphi(x^i).
+\]
+are selected.
+
+\section{Dimensionality reduction}
+\subsection{Dimensionality reduction using Peano-type space-filling curves}
+
+
+\subsection{Nested optimization schemes}
+
+The nested optimization scheme of dimensionality reduction is based on the 
+well-known relation (see, e.g., [])
+\begin{equation}\label{nested}
+\min_{y \in D}\varphi(y) = \min_{a_1\leq y_1 \leq b_1}\min_{a_2\leq y_2 \leq 
+b_2}...\min_{a_N\leq y_N \leq b_N}\varphi(y),
+\end{equation}
+which allows replacing the solving of multidimensional problem (\ref{multi_
+problem}) by solving a family of one-dimensional subproblems related to each 
+other recursively.
+
+In order to describe the scheme let us introduce a set of reduced functions 
+as follows:
+\begin{equation}\label{nested_N}
+\varphi^N(y_1,...,y_N) = \varphi(y_1,...,y_N),
+\end{equation}
+\begin{equation}\label{nested_i}
+\varphi^i(y_1,...,y_i) = \min_{a_{i+1}\leq y_{i+1}\leq b_{i+1}} \varphi^{i+1}(
+y_1,...,y_i,y_{i+1}), 1\leq i\leq N-1.
+\end{equation}
+
+Then, according to relation (\ref{nested}), solving of multidimensional 
+problem (\ref{multi_problem}) is reduced to solving a one-dimensional problem 
+\begin{equation}\label{nested_1}
+%\varphi^1(y_1^\ast) = 
+\min_{a_1\leq y_1\leq b_1}\varphi^1(y_1).
+\end{equation}
+But in order to evaluate the function $\varphi^1$ at a fixed point $y_1$ it 
+is necessary to solve the one-dimensional problem of the second level
+\begin{equation}
+\varphi^1(y_1) = \min_{a_2\leq y_2\leq b_2}\varphi^2(y_1,y_2),
+\end{equation}
+and so on up to the univariate minimization of the function $\varphi^N(y_1
+,...,y_N)$ with fixed coordinates $y_1,...,y_{N-1}$ at the $N$-th level of 
+recursion.
+
+
+%
+% ---- Bibliography ----
+%
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted in the correct style.
+%
+ \bibliographystyle{splncs04}
+ \bibliography{bibliography}
+
+
+\end{document}
