@@ -42,11 +42,15 @@ Russia \email{konstantin.barkalov@itmm.unn.ru}}
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-The abstract should briefly summarize the contents of the paper in
-150--250 words.
 
-\keywords{Dimensionality reduction \and Global optimization \and 
-Multiextremal functions.}
+В статье рассматриваются задачи многомерной многоэкстремальной оптимизации и численные методы их решения. Об оптимизируемой функции делается лишь общее предположение, что она удовлетворяет условию Липшица с неизвестной априори константой. Задачи такого типа часто встречаются в приложениях. 
+Рассмотрено два подхода к редукции размерности в задачах многомерной оптимизации. Первый из них использует Peano-type space-filling curves, отображающие одномерный отрезок на многомерную область. Второй основан на nested optimization scheme, that reduces the mul- tidimensional problem to a family of one-dimensional subproblems.
+Предложена обобщенная схема, комбинирующая эти два подхода. В новой схеме решение многомерной задачи сводится к решению семейства задач меньшей размерности, в которых, в свою очередь, используются space-filling curves. Реализован адаптивный алгоритм, в котором все возникающие подзадачи решаются одновременно. 
+Проведены численные эксперименты на нескольких сотнях тестовых задач, подтверждающие эффективность предложенной обобщенной схемы.
+
+\keywords{Global optimization \and Multiextremal functions \and 
+Dimensionality reduction \and Peano curve \and Nested optimization \and 
+Numerical methods.}
 \end{abstract}
 %
 %
@@ -64,8 +68,7 @@ The objective function is assumed to satisfy the Lipschitz condition
 with the constant $L$ unknown a priori.
 
 \Russian
-
-Известным способом решения многоэкстремальных задач являются мультистартовые схемы (см., например, [8–10]). В этих схемах в области поиска размещается некоторая сетка, точки которой использутся как стартовые поиска экстремума локальным методом, а затем выбирается наименьший из найденных экстремумов. Отдельной проблемой в рамках данного подхода является выбор стартовых точек, осуществляемый, как правило, на основе метода Монте-Карло \cite{Zhigljavsky2008}. Этот подход вполне применим для задач с небольшим числом локальных минимумов, имеющих широкие области притяжения, но для задач с существенной многоэкстремальностью его эффективность резко падает. 
+Известным способом решения многоэкстремальных задач являются мультистартовые схемы. В этих схемах в области поиска размещается некоторая сетка, точки которой использутся как стартовые поиска экстремума локальным методом, а затем выбирается наименьший из найденных экстремумов. Отдельной проблемой в рамках данного подхода является выбор стартовых точек, осуществляемый, как правило, на основе метода Монте-Карло \cite{Zhigljavsky2008}. Этот подход вполне применим для задач с небольшим числом локальных минимумов, имеющих широкие области притяжения, но для задач с существенной многоэкстремальностью его эффективность резко падает. 
 
 В настоящее время для решения задач глобальной оптимизации широко используются генетические алгоритмы (см., например, \cite{Yang2013}), которые так или иначе основаны на идеях случайного поиска. В силу простоты реализации и использования они получили большую популярность, однако по качеству работы (численной оценкой которого может служить число корректно решенных задач из некоторого тестового набора) они существенно уступают детерминированным алгоритмам \cite{Kvasov2018,Sergeyev2018}.
 
@@ -99,7 +102,7 @@ to perform the following steps.
 \textbf{Step 1.} Renumber by subscripts (beginning from zero) the points $x^i,
 \:0\leq i\leq k$, of the previous trials in increasing order, i.e.,
 \[
-a=x_0<x_1<\ldots <x_{k}=b.
+0=x_0<x_1<\ldots <x_{k}=1.
 \] 
 Juxtapose to the points $x_i, 0\leq i\leq k$,  the function values $z_i=
 \varphi(x_i), 0\leq i\leq k$.
@@ -193,7 +196,7 @@ x^{k+1} = \frac{x_t+x_{t-1}}{2} - \mathrm{sign}(z_t-z_{t-1})\frac{1}{2r}
 \subsection{Nested optimization scheme}
 
 The nested optimization scheme of dimensionality reduction is based on the 
-well-known relation (see, e.g., [])
+well-known relation (see, e.g., \cite{Carr1964})
 \begin{equation}\label{nested}
 \min_{y \in D}\varphi(y) = \min_{a_1\leq y_1 \leq b_1}\min_{a_2\leq y_2 \leq 
 b_2}...\min_{a_N\leq y_N \leq b_N}\varphi(y),
@@ -279,19 +282,42 @@ principal difference from the initial nested scheme.
 
 \section{Results of numerical experiments}
 
-One of the well-known approaches to investigating and comparing multiextremal 
-optimization algorithms is based on the application of these methods for 
-solving a set of test problems generated randomly.
+One of the well-known approaches to investigating and comparing multiextremal optimization algorithms is based on the application of these methods for solving a set of test problems generated randomly.
 
-The numerical comparison of the algorithms has been carried out using the Grishagin test problems [] and the GKLS test problem generator \cite{Gaviano2003}.
+The numerical comparison of the algorithms has been carried out using the Grishagin test problems $F_{gr}$ (описание данных функций см., например, в \cite{Grishagin1994}, test function 4) and the GKLS generator \cite{Gaviano2003}.
+
+В работах \cite{Barkalov2015,Grishagin2018} было показано, что global search algorithm как с использованием разверток, так и в сочетании с адаптивной схемой редукции размерности превосходит многие известные алгоритмы, включая методы DIRECT и DIRECT\textit{l}. Поэтому в данном исследовании мы ограничимся сравнением вариантов GSA с различными схемами редукции размерности.
+
+Для сравнения эффективности работы алгоритмов используются два критерия: the average number of trials and operational characteristic.
+Операционной характеристикой алгоритма называется функция $P(k)$, определяемая как доля задач, для решения которых потребовалось не более чем $k$ испытаний.
+The global minimizer $y^\ast$ was considered to be found, if the algorithm generated a trial point $y^k$ in the vicinity of the global minimum, i.e. $\left|y^k-y^\ast\right| < \delta \left\|b-a\right\|$, where $\delta = 0.01$, $a$ and $b$ are the boundaries of the search domain $D$.
+
+Первая серия экспериментов была проведена на двумерных задачах классов $F_{gr}$, GKLS \textit{Simple}, GKLS \textit{Hard} (100 функций каждого класса). В таблице 1  представлено среднее число испытаний, выполненных GSA с использованием evolvents ($K_e$), nested optimization scheme ($K_n$ ), adaptive nested optimization scheme ($K_a$).
+
+\begin{table}
+\centering
+\caption{Average number of iterations for 2D problems.}\label{tab1}
+\begin{tabular}{lccc}
+\hline\noalign{\smallskip}
+ &  $F_{gr}$  &  GKLS \textit{Simple} &  GKLS \textit{Hard} \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+ $K_e$ & 180  & 252 & 674 \\
+ $K_n$ & 341  & 697 & 1252 \\
+ $K_a$ & 215  & 279 & 815 \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
 
 
-
-
+Результаты экспериментов показывают, что GSA с использованием adaptive nested optimization scheme не сильно уступает по быстродействию GSA с развертками, и оба они значительно превосходят GSA в сочетании с nested optimization scheme. 
 
 
 \section{Conclusion}
 
+В данной работе предложена обобщенная адаптивная схема редукции размерности для задач глобальной оптимизации, комбинирующая использование кривых Пеано и схему вложенной оптимизации. Для решения редуцированных подзадач меньшей размерности используется алгоритм глобального поиска. Приведена вычислительная схема алгоритма, рассмотрены алгоритмические моменты работы адаптивной схемы редукции размерности.
+Проведены вычислительные эксперименты на серии тестовых задач с целью сравнения эффективности различных схем редукции размерности. 
+Результаты экспериментов показывают, что . 
+Перспективы ...
 
 
 %
