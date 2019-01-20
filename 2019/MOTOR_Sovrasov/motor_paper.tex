@@ -1,0 +1,487 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2017/10/04
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{subfig}
+\usepackage{cite}
+
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+% If you use the hyperref package, please uncomment the following line
+% to display URLs in blue roman font according to Springer's eBook style:
+% \renewcommand\UrlFont{\color{blue}\rmfamily}
+
+\begin{document}
+%
+\title{Comparison of several derivative-free global optimization algorithms\thanks{The study was supported by the Russian Science Foundation, project No 16-11-10150.}}
+%
+%\titlerunning{Abbreviated paper title}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{Vladislav Sovrasov}
+%
+\authorrunning{V. Sovrasov}
+%
+\institute{Lobachevsky State University of Nizhni Novgorod, Russia \\
+  \email{sovrasov.vlad@gmail.com}
+}%
+\maketitle              % typeset the header of the contribution
+%
+
+\begin{abstract}
+This work considers several stochastic and deterministic deri-vative-free global optimization
+algorithms. In the first part of the paper popular sequential open-source solvers are compared against
+Globalizer solver, which is developed at the Lobachevsky State University. The Globalizer is
+designed to solve problems with black-box objectives satisfying the Lipschitz condition and shows
+competitive performance with other similar solvers. The comparison is done on several sets of
+challenging multi-extremal benchmark functions. The second part of this work is devoted to
+comparison between the Globalizer and MIDACO solvers on systems with shared and distributed
+memory. MIDACO is a state-of-the-art global solver included to the TOMLAB optimization
+environment for MATLAB. Results of the benchmark show advantages of the Globalizer on small-dimensional, but sufficiently multi-extremal benchmark functions.
+% We would like to encourage you to list your keywords within
+% the abstract section using the \keywords{...} command.
+\keywords{deterministic global optimization $\cdot$ stochastic global optimization
+  $\cdot$ parallel numerical methods $\cdot$ derivative-free algorithms $\cdot$ black-box
+optimization}
+\end{abstract}
+%
+\section{Introduction}
+
+Nonlinear global optimization of non-convex functions is considered to be one of the most
+difficult problems of mathematical programming. The finding of the global minimum of
+a function of several variables often appears to be more difficult than local optimization in a
+thousand-dimensional space. In local optimization applying of the simplest gradient descent
+method may appear to be enough, whereas in order to \textit{guarantee} finding the global
+optimum, an optimization method has to accumulate information about behavior of the
+objective function within the whole search domain
+\cite{Jones2009,Paulavicius2011,Evtushenko2013,strSergGO}. Nowadays, various stochastic global
+optimization algorithms have attracted much attention, first of all, the evolution ones
+\cite{Storn1997, SCHLUTER2009, KennedyEberhart1995}. They have rather simple structure
+and allow solving the problems of large dimensionality. However, the evolution algorithms ensure
+the global convergence in the probabilistic sense only.
+
+In the present paper, the open-source implementations of nine different global optimization methods
+were considered. All the algorithms were tested using a set of 900 essentially multiextremal functions,
+which has been generated using generators of test problems \cite{Gaviano2003, grishaginClass}.
+Besides the comparison of the sequential algorithms, a comparison of the MIDACO solver
+\cite{Schlueter2012} with the Globalizer software system \cite{globalizerSystem,Strongin2018} on a subset of 200 test problems has been
+performed in the Lobachevsky supercomputer environment.
+
+
+\section{Related Work}
+
+Earlier, the comparison of the stochastic global optimization algorithms \cite{Ali2005, JSSv060i06}
+as well as of the deterministic ones \cite{posik2012, KVASOV2018245, Liberti2005} between each
+other has been considered in the literature. In these works, most of modern methods have
+been studied in details, but the emphasis was made mainly on the sequential algorithms while the
+reliability and the convergence speed were the main criteria of efficiency of the optimization
+methods. In the majority of works, the sets of well-known test problems (for example, the Rastrigin
+function, Ackley function, etc.) were taken as the sets of test functions. The sizes of such sets don't
+exceed 100 different functions usually, some of which can be the single-extremal ones (such as the
+Rosenbrock function).
+
+In Ref. \cite{Beiranvand2017}, some general principles were formulated, which, in the author's
+opinion, should be obeyed when comparing the optimization methods. In particular, the authors say
+about the advantages of the problem generators allowing generating the large sets of problems thus
+minimizing the random effects when comparing the methods. At the same time, the use of a single
+generator can appear to be not enough for a comprehensive comparison of the methods. In order to
+overcome this problem in part, the authors of Ref. \cite{Beiranvand2017} advise to use several
+generators of various nature and to create the sets of problems of various complexity.
+
+Taking into account the experience of the preceding works in the field of comparison of the
+optimization methods, two generators of the test problems of different nature will be used in the
+present work. Using these ones, 9 sets of 100 problems of various complexity with the
+dimensionality varying from 2 to 5 were generated. Besides the comparison of the sequential
+methods, a comparison of the efficiencies of two parallel algorithms is presented in the work as well.
+
+\section{Statement of Multidimensional Global Optimization Problem}
+In this paper, the core class of optimization problems, which can be solved using
+global optimization methods, is formulated. This class involves the multidimensional global
+optimization problems without constraints, which can be defined in the following way:
+\begin{equation}
+\label{eq:task}
+\begin{array}{cr}\\
+  \varphi(y^*)=\min\{\varphi(y):y\in D\}, \\
+  D=\{y\in \mathbb{R}^N:a_i\leq y_i\leq{b_i}, 1\leq{i}\leq{N}\}
+\end{array}
+\end{equation}
+with the given boundary vectors  $a$ and  $b$. It is supposed, that the objective function
+\(\varphi(y)\) satisfies the Lipschitz condition
+\begin{equation}
+\label{eq:lip}
+|\varphi(y_1)-\varphi(y_2)|\leq L\Vert y_1-y_2\Vert,y_1,y_2\in D,
+\end{equation}
+where \(L>0\) is the Lipschitz constant, and \(||\cdot||\) denotes the norm in \(\mathbb{R}^N\)
+space.
+\par
+Usually, the objective function \(\varphi(y)\) is defined as a computational procedure,
+according to which the value \(\varphi(y)\) can be calculated for any vector \(y\in D\)
+(let us further call such a calculation \textit{a trial}). It is supposed that this procedure
+is time-consuming.
+
+\section{Review of Considered Optimization Methods}
+
+\subsection{Parallel Algorithm of Global Search}
+\subsubsection{Dimension Reduction with Space-Filling Curves}
+Within the framework of the information-statistical global optimization theory,
+the Peano space-filling curves (or \textit{evolvents}) \(y(x)\) mapping the interval \([0,1]\)
+onto an \(N\)-dimensional hypercube \(D\) unambiguously are used for the dimensionality
+reduction \cite{sergeyevStronginLera2013, strongin1978, strSergGO}.
+\par
+As a result of the reduction, the initial multidimensional global optimization
+problem (\ref{eq:task}) is reduced to the following one-dimensional problem:
+\begin{equation}
+\label{eq:oneDimTask}
+\varphi(y(x^*))=\min\{\varphi(y(x)):x\in [0,1]\}.
+\end{equation}
+\par
+It is important to note that this dimensionality reduction scheme transforms the % minimized
+Lipschitzian function from (\ref{eq:task}) to the corresponding one-dimensional
+function \(\varphi(y(x))\), which satisfies the uniform H{\"o}lder condition, i. e.
+\begin{equation}
+\label{eq:holder}
+|\varphi(y(x_1))-\varphi(y(x_2))|\leq H{|x_1-x_2|}^{\frac{1}{N}}, x_1,x_2\in[0,1],
+\end{equation}
+where the constant $H$ is defined by the relation \(H=2L\sqrt{N+3}\), \(L\) is the Lipschitz
+constant from (\ref{eq:lip}), and \(N\) is the dimensionality of the optimization problem
+(\ref{eq:task}).
+\par
+The algorithms for the numerical construction of the Peano curve approximations are
+given in \cite{strSergGO}.
+
+\par
+The computational scheme obtained as a result of the dimensionality reduction consists of the
+following:
+\begin{itemize}
+  \item The optimization algorithm performs the minimization of the reduced one-dimensional
+  function \(\varphi(y(x))\) from (\ref{eq:oneDimTask}),
+  \item After determining the next trial point \(x\), a multidimensional image \(y\) is calculated by
+using the mapping \(y(x)\),
+  \item The value of the initial multidimensional function \(\varphi(y)\) is calculated at the point
+\(y\in D\),
+  \item The calculated value \(z=\varphi(y)\) is used further as the value of the reduced one-
+dimensional function \(\varphi(y(x))\) at the point \(x\).
+\end{itemize}
+
+\subsubsection{Algorithm of Global Search on Shared Memory}
+\label{sub:ags}
+Parallel optimization methods applied in Globalizer to solve the reduced problem
+(\ref{eq:oneDimTask}) are based on the MAGS method, which can be presented as follows ---
+see \cite{strongin1978}, \cite{strSergGO}.
+\par
+The initial iteration of the algorithm is performed at an arbitrary point \mbox{\(x^1\in(0,1)\)}.
+Then, let us suppose that \(k\), \(k\ge 1\), optimization iterations have been completed already.
+The selection of the trial point \(x^{k+1}\) for the next iteration is performed according to the
+following rules.
+
+\textit{Rule 1}. Renumber the points of the preceding trials by the lower indices in order of
+increasing value of coordinates
+$0=x_0<x_1<...<x_{k+1}=1$.
+
+\textit{Rule 2}. Compute the characteristics \(R(i)\) for each interval \((x_{i-1},x_i),1\leq i\leq
+k+1\).
+
+\textit{Rule 3}. Determine the \(p\) intervals with the maximum characteristics $R(t_j)=\max_{1\leq i
+\leq k+1}R(i),\: j=\overline{1,p}$.
+
+\textit{Rule 4}. Execute new trials at points \(x^{k+j},\: j=\overline{1,p}\) located within intervals
+with
+maximum characteristics from the previous step
+  $x^{k+j}=d(x_{t_j}),\: j=\overline{1,p}$.
+
+The stopping condition, which terminated the trials, is defined by the inequality
+$\rho_{t_j}<\varepsilon,\: j=\overline{1,p}$
+for the intervals with maximum characteristics from Step 3 and \(\varepsilon >0\) is the
+predefined accuracy of the optimization problem solution. If the stopping condition is not satisfied,
+the index \(k\) is incremented by \(p\), and the new global optimization iteration is executed.
+
+This method is employed in Globalizer to organize parallel computations on shared memory: each of
+\(p\)
+trials can be carried out on one of \(p\) local computation units.
+
+The convergence conditions and exact formulas for decision rules $R(i)$ and $d(x)$ of the
+described algorithm are given, for example, in \cite{strSergGO}.
+
+\subsection{Sequential Methods}
+\begin{itemize}
+  \item \textbf{Algorithm of Global Search}. Sequential version of the method described in Section
+\ref{sub:ags}.
+
+  \item \textbf{Locally-biased Algorithm of Global Search (AGS\(l\))} \cite{indexMethod}. It's a
+modification of
+  the original AGS which make it more locally oriented by alternately using of two types of
+characteristics in the Rule 2 from the Section \ref{sub:ags}.
+
+  \item \textbf{Multi Level Single Linkage} \cite{Kan1987StochasticGO}. MLSL is an improved
+multistart algorithm.
+  It samples low-discrepancy starting points and does local optimizations from them. In contrast to
+the dummy multistart schemes
+  MLSL uses some clustering heuristics to avoid multiple local descents to already explored local
+minima.
+
+  \item \textbf{DIRECT} \cite{Jones2009}. The algorithm is deterministic and recursively divides
+the search space and forms a tree of hyper-rectangles (boxes). DIRECT uses the objective function
+values and the Lipschitz condition (\ref{eq:lip}) to estimate promising boxes.
+
+  \item \textbf{Locally-biased DIRECT (DIRECT$l$)} \cite{Gablonsky2001}. It's a variation of
+DIRECT which pays less attention to non-promising boxes and therefore
+  has less exploration power: it can converge faster on problems with few local minima, but lost the
+global one in complicated cases.
+
+  \item \textbf{Dual Simulated Annealing} \cite{XIANG1997216}. This stochastic method is a
+combination of the Classical Simulated Annealing and the Fast Simulated Annealing coupled to a
+strategy for applying a local search on accepted locations. It converges much faster than both parent
+algorithms, CSA and FSA.
+
+  \item \textbf{Differential Evolution} \cite{Storn1997}. DE is an adaptation of the original genetic
+algorithm to
+  the continuous search domain.
+
+  \item \textbf{Controlled Random Search} \cite{Price1983}. The CRS starts with a set of random
+points and then defines
+  the next trial point in relation to a simplex chosen randomly from a stored configuration of points.
+CRS in not an
+  evolutional algorithm, although stores something like population and performs transformation
+resembling a mutation.
+
+  \item \textbf{StoGO} \cite{Madsen1998}. StoGO is dividing the search space into smaller hyper-
+rectangles via a branch-and-bound approach,
+  and searching them by a local-search algorithm, optionally including some randomness.
+
+\end{itemize}
+
+All the mentioned algorithms are available in source codes as parts of wide-spread optimization packages (except of AGS and AGS\(l\), which are implemented in the Globalizer system).
+DIRECT, DIRECT$l$, CRS, MLSL and StoGO are part of the NLOpt library \cite{nlopt}.
+Differential Evolution and DSA can be found in
+the latest version of the SciPy \cite{scipy} package for Python.
+
+\section{Tools for Comparison of Global Optimization Algorithms}
+
+
+The use of the sets of test problems with known solutions generated by some random mechanisms is
+one of commonly accepted approaches to comparing the optimization algorithms
+\cite{Beiranvand2017}. In the present work, we will use two generators of test problems generating
+the problems of different nature \cite{grishaginClass, Gaviano2003}.
+
+Let us denote the problem set obtained with the use of the first generator from \cite{grishaginClass}
+as \(F_{GR}\). The mechanism of generation of the problems \(F_{GR}\) doesn't provide the
+control of the problem complexity and of the number of local optima. However, the generated
+functions are known to be the multiextremal ones essentially. Besides, the problems generated by
+\(F_{GR}\) are the two-dimensional ones. In the present work, we will use 100 functions from the
+class \(F_{GR}\) generated randomly.
+
+The GKLS generator \cite{Gaviano2003} allows obtaining the problems of given dimensionality
+with given number of extrema. Moreover, GKLS allows adjusting the complexity of the problems by
+decreasing or increasing the size of the global minimum attractor. In
+\cite{SergeyevKvasov2006} the parameters of the generator allowing generating the sets of 100
+problems each of two levels of complexity (Simple and Hard) of the dimensionality equal to 2, 3, 4,
+and 5 are given. Following the authors of the GKLS generator, we will use the parameters proposed
+by them and, this way, add 800 more problems of various dimensionalities and complexity into the
+test problem set.
+
+Let us suppose a test problem to be solved if the optimization method executes the scheduled trial
+\(y^k\) in a \(\delta\)-vicinity of the global minimum \(y^*\), i.e. $\left\|y^k-y^*\right\|\leq \delta
+= 0.01\left\|b-a\right\|$, where \(a\) and \(b\) are the left and the right boundaries of the hypercube
+from (\ref{eq:task}). If this relation is not fulfilled before the expiration of the limit of the number of
+trials, the problem was considered to be unsolved. The limit of the number of trials was set
+for each problem class according to the dimensionality and complexity (see Table \ref{tab:limits}).
+
+\begin{table}
+\begin{center}
+\caption{Trials limits for the test problem classes}
+  \begin{tabular}{|l|{c}|}
+    \hline
+  Problems class & Trials limit\\
+  \hline
+  \(F_{GR}\) & 5000 \\
+  \hline
+  GKLS 2d Simple & 8000 \\
+  \hline
+  GKLS 2d Hard & 9000 \\
+  \hline
+  GKLS 3d Simple & 15000 \\
+  \hline
+  GKLS 3d Hard & 25000 \\
+  \hline
+  GKLS 4d Simple & 150000 \\
+  \hline
+  GKLS 4d Hard & 250000 \\
+  \hline
+  GKLS 5d Simple & 350000 \\
+  \hline
+  GKLS 5d Hard & 600000 \\
+  \hline
+  \end{tabular}
+  \label{tab:limits}
+\end{center}
+\end{table}
+
+Let us consider the averaged number of trials executed to solve a single problem and the number of
+solved problems as the characteristics of the optimization method on each class. The less the number
+of trials, the faster the method converges to a solution, hence the less times it turns to a potentially
+computation-costly procedure of computing the objective function. The number of solved problems
+evidences the reliability of the method at given parameters on the class of test problems being
+solved. In order to make independent the quantities featuring the reliability and the speed of convergence,
+averaged number of trials always was calculated taking into account solved problems only.
+
+
+\section{Results of Numerical Experiments}
+
+The results of various algorithms on different problem classes depend on the adjustments of
+algorithms directly. In most cases, the authors of software implementations are oriented onto the
+problems of medium difficulty. In order to obtain a satisfactory result when solving the essentially
+multiextremal problems, a correction of some parameters is required. When conducting the
+comparison, the following parameters for the methods were employed:
+\begin{itemize}
+  \item in the AGS\(l\) method, the parameter of alternation the
+global and local iterations was set to be equal to 5:1;
+  \item in the DIRECT and DIRECT\(l\) methods, the parameter \(\epsilon=10^{-4}\);
+  \item in the SDA method, the parameter \(visit=2.72\).
+\end{itemize}
+
+The rest parameters were varied subject to the problem class (see Table \ref{tab:params}).
+
+\begin{table}
+\begin{center}
+\caption{Class-specific parameters of the optimization algorithms}
+  \begin{tabular}{|l|{c}|{c}|{c}|}
+    \hline
+    & AGS, AGS\(l\) & CRS & DE\\
+  \hline
+  \(F_{GR}\) & \(r=3\) & popsize=150 & mutation=(1.1,1.9), popsize=60 \\
+  \hline
+  GKLS 2d Simple & \(r=4.6\) & popsize=200 & mutation=(1.1,1.9), popsize=60 \\
+  \hline
+  GKLS 2d Hard & \(r=6.5\) & popsize=400 & mutation=(1.1,1.9), popsize=60 \\
+  \hline
+  GKLS 3d Simple & \(r=3.7\) & popsize=1000 & mutation=(1.1,1.9), popsize=70 \\
+  \hline
+  GKLS 3d Hard & \(r=4.4\) & popsize=2000 & mutation=(1.1,1.9), popsize=80 \\
+  \hline
+  GKLS 4d Simple & \(r=4.7\) & popsize=8000 & mutation=(1.1,1.9), popsize=90 \\
+  \hline
+  GKLS 4d Hard & \(r=4.9\) & popsize=16000 & mutation=(1.1,1.9), popsize=100 \\
+  \hline
+  GKLS 5d Simple & \(r=4\) & popsize=25000 & mutation=(1.1,1.9), popsize=120 \\
+  \hline
+  GKLS 5d Hard & \(r=4\) & popsize=30000 & mutation=(1.1,1.9), popsize=140 \\
+  \hline
+\end{tabular}
+  \label{tab:params}
+\end{center}
+\end{table}
+
+The results of running the optimization methods on the considered problem classes are presented in
+Tables \ref{tab:trials}, \ref{tab:solved}. The DIRECT and AGS\(l\) methods have demonstrated the
+best convergence speed on all classes, at that AGS\(l\) inferior to DIRECT on the problems from the
+Simple classes and has an advantage on the problems of the Hard classes. As one can see from Table
+\ref{tab:solved}, the deterministic methods (AGS, AGS\(l\), DIRECT, and DIRECT\(l\)) were the
+most reliable. Among the stochastic methods, MLSL and SDA have demonstrated the highest
+reliability.
+
+\begin{table}
+\begin{center}
+\caption{Averaged number of trials executed by sequential methods for solving the test
+optimization problems}
+\resizebox{\textwidth}{!}{%
+  \begin{tabular}{|l|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|}
+    \hline
+    & AGS & AGS\(l\) & CRS & DIRECT & DIRECT\(l\) & MLSL & SDA & DE & StoGO \\
+  \hline
+  \(F_{GR}\)     & 193.1 &  \textbf{158.3} & 400.3 & 182.3 & 214.9 & 947.2 & 691.2 & 1257.3 &
+1336.8 \\
+  \hline
+  GKLS 2d Simple &  254.9 & 217.6 & 510.6 & \textbf{189.0} & 255.2 & 556.8 & 356.3 & 952.2
+& 1251.5 \\
+  \hline
+  GKLS 2d Hard   &  728.7 & \textbf{488.0} & 844.7 & 985.4 & 1126.7 & 1042.5 & 1637.9 &
+1041.1 & 2532.2 \\
+  \hline
+  GKLS 3d Simple &  1372.1 & 1195.3 & 4145.8 & \textbf{973.6} & 1477.8 & 4609.2 & 2706.5 &
+5956.94 & 3856.1 \\
+  \hline
+  GKLS 3d Hard   &  3636.1 & \textbf{1930.5} & 6787.0 & 2298.7 & 3553.3 & 5640.1 & 4708.4 &
+6914.3 & 7843.2 \\
+  \hline
+  GKLS 4d Simple &  26654.1 & 11095.7 & 37436.8 & \textbf{7824.3} & 15994.1 & 41514.3 &
+21417.9 & 19157.7 & 59895.4 \\
+  \hline
+  GKLS 4d Hard   &  54536.8 &  \textbf{23167.8} &  73779.3 &  23204.4 &  54489.9 &  80247.2
+&  68815.5 &  27466.1 &  109328.1  \\
+  \hline
+  GKLS 5d Simple &  29810.0 & 11529.0 & 143575.0 & \textbf{7166.5} & 13970.5 & 52647.6 &
+34255.3 & 73074.5 & 91580.4 \\
+  \hline
+  GKLS 5d Hard   &  113129.1 & 67652.7 & 165192.8 & \textbf{66327.4} & 164390.6 & 138766.2
+& 116973.1 & 105496.9 & 155123.8 \\
+  \hline
+\end{tabular}}
+  \label{tab:trials}
+\end{center}
+\end{table}
+
+\begin{table}
+\begin{center}
+\caption{Number of test optimization problems solved by sequential methods}
+  \begin{tabular}{|l|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|}
+    \hline
+    & AGS & AGS\(l\) & CRS & DIRECT & DIRECT\(l\) & MLSL & SDA & DE & StoGO \\
+  \hline
+  \(F_{GR}\)     &  100 & 100 & 76  & 100 & 100 & 97  & 96  & 96  & 67\\
+  \hline
+  GKLS 2d Simple &  100 & 100 & 85  & 100 & 100 & 100 & 100 & 98  & 90\\
+  \hline
+  GKLS 2d Hard   &  100 & 100 & 74  & 100 & 100 & 100 & 93  & 85  & 77 \\
+  \hline
+  GKLS 3d Simple &  100 & 97  & 75  & 100 & 100 & 100 & 89  & 86  & 44 \\
+  \hline
+  GKLS 3d Hard   &  100  & 99   & 72   & 100  & 99   & 100  & 88   & 77   & 43 \\
+  \hline
+  GKLS 4d Simple &  100 & 100 & 46  & 100 & 100 & 94  & 78  & 59  & 16 \\
+  \hline
+  GKLS 4d Hard   &  100 & 100 & 47  & 99  & 97  & 94  & 72  & 32  & 10  \\
+  \hline
+  GKLS 5d Simple &  100 & 100 & 68  & 100 & 100 & 98  & 100 & 77  & 9  \\
+  \hline
+  GKLS 5d Hard   &  97  & 99  & 42  & 100 & 90  & 79  & 84  & 48  & 8 \\
+  \hline
+  \end{tabular}
+  \label{tab:solved}
+\end{center}
+\end{table}
+
+\section{Conclusions}
+
+In the present paper, several sequential and parallel global optimization algorithms were considered.
+A comparison of efficiencies of these ones has been done on a set of test problems. The results allow
+making the following conclusions:
+\begin{itemize}
+  \item AGS\(l\) method implemented in the Globalizer system has demonstrated the convergence
+speed and reliability at the level of DIRECT and exceeds many other algorithms, the open-source
+implementations of which are available;
+  \item the stochastic optimization methods inferior to the deterministic ones in the convergence
+speed and in reliability. It is manifested especially strongly on more complex multiextremal
+problems;
+  \item the parallel version of the Globalizer system demonstrates good speedup
+when running on several nodes, on each of which a single objective function value per iterations is
+computed. When solving the problems with fast computable objective functions and using multiple
+threads on the nodes, the speedup for the Globalizer system degrade with increasing
+number of nodes;
+  \item the MIDACO system is the most suitable for simple global optimization problems with the
+fast-computable objective functions. In this case, MIDACO is reliable enough and provides a linear
+speedup with increasing number of nodes and threads executed on these ones in parallel.
+\end{itemize}
+
+% ---- Bibliography ----
+%
+\bibliographystyle{splncs04}
+\bibliography{bibliography}{}
+%
+
+\end{document}
