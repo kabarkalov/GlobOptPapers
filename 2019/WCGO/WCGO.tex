@@ -19,8 +19,8 @@
 
 \begin{document}
 %
-\title{Generalized dimensionality reduction scheme 
-for global optimization problems
+\title{Generalized dimensionality reduction scheme for global optimization 
+algorithms
 \thanks{This study was supported by the Russian Science Foundation, project 
 No.\,16-11-10150.}}
 %
@@ -29,7 +29,7 @@ No.\,16-11-10150.}}
 % an abbreviated paper title here
 %
 \author{Konstantin Barkalov %\orcidID{0000-0001-5273-2471}  
-\and Ilia Lebedev %\orcidID{0000-0002-8736-0652}
+\and Ilya Lebedev %\orcidID{0000-0002-8736-0652}
 }
 %
 \authorrunning{K. Barkalov, I. Lebedev}
@@ -42,8 +42,8 @@ Russia \email{konstantin.barkalov@itmm.unn.ru}}
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-
-В статье рассматриваются задачи многомерной многоэкстремальной оптимизации и численные методы их решения. Об оптимизируемой функции делается лишь общее предположение, что она удовлетворяет условию Липшица с неизвестной априори константой. Задачи такого типа часто встречаются в приложениях. 
+\Russian
+В статье рассматриваются задачи многомерной многоэкстремальной оптимизации и численные методы их решения. Об оптимизируемой функции делается лишь общее предположение, что она удовлетворяет Lipschitz condition с неизвестной априори константой. Задачи такого типа часто встречаются в приложениях. 
 Рассмотрено два подхода к редукции размерности в задачах многомерной оптимизации. Первый из них использует Peano-type space-filling curves, отображающие одномерный отрезок на многомерную область. Второй основан на nested optimization scheme, that reduces the mul- tidimensional problem to a family of one-dimensional subproblems.
 Предложена обобщенная схема, комбинирующая эти два подхода. В новой схеме решение многомерной задачи сводится к решению семейства задач меньшей размерности, в которых, в свою очередь, используются space-filling curves. Реализован адаптивный алгоритм, в котором все возникающие подзадачи решаются одновременно. 
 Проведены численные эксперименты на нескольких сотнях тестовых задач, подтверждающие эффективность предложенной обобщенной схемы.
@@ -56,14 +56,16 @@ Numerical methods.}
 %
 %
 \section{Introduction}
-This paper considers ''black-box'' global optimization problems of the following form:
+This paper considers ``black-box'' global optimization problems of the 
+following form:
 \begin{eqnarray}\label{main_problem}
 & \varphi(y^\ast)=\min{\left\{\varphi(y):y\in D\right\}},\\
 & D=\left\{y\in R^N: a_i\leq y_i \leq b_i, 1\leq i \leq N\right\}. \nonumber
 \end{eqnarray}
 The objective function is assumed to satisfy the Lipschitz condition 
 \[
-\left|\varphi(y')-\varphi(y'')\right|\leq L\left\|y'-y''\right\|,\; y',y'' \in D,\; 0<L<\infty,
+\left|\varphi(y')-\varphi(y'')\right|\leq L\left\|y'-y''\right\|,\; y',y'' \in
+ D,\; 0<L<\infty,
 \]
 with the constant $L$ unknown a priori.
 
@@ -218,8 +220,7 @@ y_1,...,y_i,y_{i+1}), 1\leq i\leq N-1.
 Then, according to relation (\ref{nested}), solving of multidimensional 
 problem (\ref{main_problem}) is reduced to solving a one-dimensional problem 
 \begin{equation}\label{nested_1}
-%\varphi^1(y_1^\ast) = 
-\min_{a_1\leq y_1\leq b_1}\varphi^1(y_1).
+\varphi^* = \min_{a_1\leq y_1\leq b_1}\varphi^1(y_1).
 \end{equation}
 But in order to evaluate the function $\varphi^1$ at a fixed point $y_1$ it 
 is necessary to solve the one-dimensional problem of the second level
@@ -269,31 +270,30 @@ method based on Peano curves can be applied for solving these ones. It is a
 principal difference from the initial nested scheme. 
 
 \subsection{Block adaptive optimization scheme}
-
 \Russian
 Решение возникающего множества подзадач вида (\ref{nested_i}) (для nested optimization scheme) или вида (\ref{block_nested_i}) (для block nested optimization scheme) может быть организовано различными способами. 
 Очевидный способ (детально проработанный в \cite{Grishagin2001,Grishagin2015} для nested optimization scheme и в \cite{Barkalov2014,Barkalov2016} для block nested optimization scheme) основан на решении поздадач в соответствии с рекурсивным порядком их порождения. Однако здесь возникает потеря значительной части информации о objective function при решении многомерной задачи. Иным  подходом является адаптивная схема, в которой все подзадачи решаются одновременно, что позволяет более полно учитывать информацию о многомерной задаче и за счет этого ускорять процесс ее решения.
 
-Для случая одномерных поздадач данный подход был реализован и теоретически обоснован в \cite{Grishagin2016,Grishagin2016_1,Grishagin2018}. Настоящая работа предлагает обобщение адаптивной схемы для случая многомерных подзадач.
-Дадим краткое описание ее основных элементов.
+Для случая одномерных поздадач данный подход был теоретически обоснован и апробирован в \cite{Grishagin2016,Grishagin2016_1,Grishagin2018}. Настоящая работа предлагает обобщение адаптивной схемы для случая многомерных подзадач. Дадим краткое описание ее основных элементов.
 
 Пусть вложенные подзадачи вида (\ref{block_nested_i}) решаются с помощью многомерного алгоритма глобального поиска, описанного в Section \ref{SectionPeano}. Тогда каждой подзадаче (\ref{block_nested_i}) можно присвоить некоторое числовое
-значение, называемое характеристикой этой задачи. К качестве такой характеристики можно взять значение from (\ref{MaxR}), т.е. максимальную характеристику интервалов, сформированных в данной задаче. В соответствии с правилом вычисления характеристик (ссылка), чем выше значение характеристики, тем более перспективной является подзадача для продолжения поиска в ней глобального минимума исходной задачи (ссылка)  . Поэтому на каждой итерации выбирается подзадача с максимальной характеристикой для проведения в ней очередного испытания. Это испытание либо вычисляет значение целевой функции $\varphi(y)$ (если выбранная подзадача принадлежала уровню $j=M$), либо порождает новые подзадачи согласно (\ref{block_nested_i}) при $j\leq M-1$. В последнем случае новые порожденные задачи добавляются к текущему множеству задач, вычисляются их характеристики и процесс повторяется. Завершение процесса оптимизации происходит, когда в корневой задаче выполняется условие остановки алгоритма, решающего эту задачу.
+значение, называемое характеристикой этой задачи. К качестве такой характеристики можно взять значение $R(t)$ from (\ref{MaxR}), т.е. максимальную характеристику интервалов, сформированных в данной задаче. В соответствии с правилом вычисления характеристик (\ref{R}), чем выше значение характеристики, тем более перспективной является подзадача для продолжения поиска в ней глобального минимума исходной задачи (\ref{main_problem}). Поэтому на каждой итерации выбирается подзадача с максимальной характеристикой для проведения в ней очередного испытания. Это испытание либо вычисляет значение целевой функции $\varphi(y)$ (если выбранная подзадача принадлежала уровню $j=M$), либо порождает новые подзадачи согласно (\ref{block_nested_i}) при $j\leq M-1$. В последнем случае новые порожденные задачи добавляются к текущему множеству задач, вычисляются их характеристики и процесс повторяется. Завершение процесса оптимизации происходит, когда в корневой задаче выполняется условие остановки алгоритма, решающего эту задачу.
 
 \section{Results of numerical experiments}
 
-One of the well-known approaches to investigating and comparing multiextremal optimization algorithms is based on the application of these methods for solving a set of test problems generated randomly.
+One of the well-known approaches to investigating and comparing multiextremal 
+optimization algorithms is based on the application of these methods for 
+solving a set of test problems generated randomly.
+\Russian
+The comparison of the algorithms has been carried out using the Grishagin test problems $F_{gr}$ (описание данных функций см., например, в \cite{Grishagin1994}, test function 4) and the GKLS generator \cite{Gaviano2003}.
 
-The numerical comparison of the algorithms has been carried out using the Grishagin test problems $F_{gr}$ (описание данных функций см., например, в \cite{Grishagin1994}, test function 4) and the GKLS generator \cite{Gaviano2003}.
-
-В работах \cite{Barkalov2015,Grishagin2018} было показано, что global search algorithm как с использованием разверток, так и в сочетании с адаптивной схемой редукции размерности превосходит многие известные алгоритмы, включая методы DIRECT и DIRECT\textit{l}. Поэтому в данном исследовании мы ограничимся сравнением вариантов GSA с различными схемами редукции размерности.
+В работах \cite{Barkalov2015,Grishagin2018} было показано, что global search algorithm как с использованием разверток, так и в сочетании с адаптивной схемой редукции размерности превосходит многие известные алгоритмы глобальной оптимизации, включая методы DIRECT и DIRECT\textit{l}. Поэтому в данном исследовании мы ограничимся сравнением вариантов GSA с различными схемами редукции размерности.
 
 Для сравнения эффективности работы алгоритмов используются два критерия: the average number of trials and operating characteristic.
 Операционной характеристикой алгоритма называется функция $P(k)$, определяемая как доля задач из рассматриваемой серии, для решения которых потребовалось не более чем $k$ испытаний.
 The global minimizer $y^\ast$ was considered to be found, if the algorithm generated a trial point $y^k$ in the vicinity of the global minimum, i.e. $\left|y^k-y^\ast\right| < \delta \left\|b-a\right\|$, where $\delta = 0.01$, $a$ and $b$ are the boundaries of the search domain $D$.
 
-Первая серия экспериментов была проведена на двумерных задачах классов $F_{gr}$, GKLS \textit{Simple}, GKLS \textit{Hard} (100 функций каждого класса). В Table~\ref{tab1}  представлено среднее число испытаний, выполненных GSA с использованием evolvents ($K_e$), nested optimization scheme ($K_n$ ), adaptive nested optimization scheme ($K_a$). На Fig.~\ref{fig1}, Fig.~\ref{fig2}(a,b) приведены operating characteristics алгоритмов, полученные на классах $F_{gr}$, GKLS \textit{Simple}, GKLS \textit{Hard} соответственно. Непрерывная линия соответсвует алгоритму с использованием evolvents, короткий пунктир -- adaptive nested optimization scheme, длинный пунктир -- nested optimization scheme. Результаты экспериментов показывают, что GSA с использованием adaptive nested optimization scheme показывает одинаковое быстродействие  по сравнению с GSA с развертками, и оба они значительно превосходят алгоритм, использующий nested optimization scheme. 
-Поэтому в дальнейших экспериментах данная схема использоваться не будет.
+Первая серия экспериментов была проведена на двумерных задачах классов $F_{gr}$, GKLS \textit{Simple}, GKLS \textit{Hard} (100 функций каждого класса). В Table~\ref{tab1}  представлено среднее число испытаний, выполненных GSA с использованием evolvents ($K_e$), nested optimization scheme ($K_n$), adaptive nested optimization scheme ($K_a$). На Fig.~\ref{fig1}, Fig.~\ref{fig2}(a,b) приведены operating characteristics алгоритмов, полученные на классах $F_{gr}$, GKLS \textit{Simple}, GKLS \textit{Hard} соответственно. Непрерывная линия соответсвует алгоритму с использованием evolvents, короткий пунктир -- adaptive nested optimization scheme, длинный пунктир -- nested optimization scheme. Результаты экспериментов показывают, что GSA с использованием adaptive nested optimization scheme показывает примерно одинаковое быстродействие  по сравнению с GSA с развертками, и оба они значительно превосходят алгоритм, использующий nested optimization scheme. Поэтому в дальнейших экспериментахмы ограничимся сравнением различных вариантов адаптивной схемы редукции размерности.
 
 \begin{table}
 \centering
@@ -323,13 +323,14 @@ The global minimizer $y^\ast$ was considered to be found, if the algorithm gener
 \begin{minipage}{0.5\linewidth}
 \center{\includegraphics[width=1.0\linewidth]{2DHard.pdf} \\ (b)}
 \end{minipage}
-\caption{Operating characteristics using 2d GKLS \textit{Simple} (a) and GKLS \textit{Hard} (b) classes}
+\caption{Operating characteristics using 2d GKLS \textit{Simple} (a) and \textit{Hard} (b) classes}
 \label{fig2}
 \end{figure}
 
-Вторая серия экспериментов была проведена на четырехмерных задачах классов GKLS \textit{Simple}, GKLS \textit{Hard} (100 функций каждого класса). В Table~\ref{tab2}  представлено среднее число испытаний, выполненных GSA с использованием evolvents ($K_e$), adaptive nested optimization scheme ($K_a$ ), block adaptive nested optimization scheme ($K_ba$). 
-На Fig.~\ref{fig3}(a,b) приведены operational characteristics алгоритмов, полученные на классах GKLS \textit{Simple}, GKLS \textit{Hard} соответственно. Непрерывная линия соответсвует алгоритму с использованием evolvents, короткий пунктир -- adaptive nested optimization scheme, длинный пунктир -- block adaptive nested optimization scheme. 
-Результаты экспериментов показывают,
+Вторая серия экспериментов была проведена на четырехмерных задачах классов GKLS \textit{Simple} and GKLS \textit{Hard} (100 функций каждого класса). В Table~\ref{tab2}  представлено среднее число испытаний, выполненных GSA с использованием adaptive nested optimization scheme ($K_a$), block adaptive nested optimization scheme ($K_ba$) с формированием двух уровней подзадач одинаковой размерности $N_1=N_2=2$. Отметим, что при использовании исходного варианта адаптивной схемы при решении задачи размерности $N=4$ формируется четыре уровня одномерных подзадач, что усложняет их обработку.
+
+На Fig.~\ref{fig3}(a,b) приведены operating characteristics алгоритмов, полученные на классах GKLS \textit{Simple} and GKLS \textit{Hard} соответственно. Пунктирная линия соответсвует алгоритму с использованием adaptive nested optimization scheme, непрерывная --  block adaptive nested optimization scheme. 
+Результаты экспериментов показывают, что использование block adaptive nested optimization scheme дает ощутимый выигрыш по числу trials (до 35\%) по сравнению с исходной adaptive nested optimization scheme.
 
 \begin{table}
 \centering
@@ -338,32 +339,30 @@ The global minimizer $y^\ast$ was considered to be found, if the algorithm gener
 \hline\noalign{\smallskip}
  &    GKLS \textit{Simple} &  GKLS \textit{Hard} \\
 \noalign{\smallskip}\hline\noalign{\smallskip}
- $K_e$  &        &       \\
  $K_a$  &  21747 & 35633 \\
- $K_ba$ &  15942 & 33206 \\
+ $K_{ba}$ &  15942 & 33206 \\
 \noalign{\smallskip}\hline
 \end{tabular}
 \end{table}
 
 \begin{figure}
 \begin{minipage}{0.5\linewidth}
-\center{\includegraphics[width=1.0\linewidth]{2DSimple.pdf} \\ (a)}
+\center{\includegraphics[width=1.0\linewidth]{4DSimple.pdf} \\ (a)}
 \end{minipage}
 \begin{minipage}{0.5\linewidth}
-\center{\includegraphics[width=1.0\linewidth]{2DHard.pdf} \\ (b)}
+\center{\includegraphics[width=1.0\linewidth]{4DHard.pdf} \\ (b)}
 \end{minipage}
-\caption{Operating characteristics using 4d GKLS \textit{Simple} (a) and GKLS \textit{Hard} (b) classes}
+\caption{Operating characteristics using 4d GKLS \textit{Simple} (a) and \textit{Hard} (b) classes}
 \label{fig3}
 \end{figure}
 
 
-
 \section{Conclusion}
-
-В данной работе предложена обобщенная адаптивная схема редукции размерности для задач глобальной оптимизации, комбинирующая использование кривых Пеано и схему вложенной оптимизации. Для решения редуцированных подзадач меньшей размерности используется алгоритм глобального поиска. Приведена вычислительная схема алгоритма, рассмотрены алгоритмические моменты работы адаптивной схемы редукции размерности.
+\Russian
+В данной работе предложена обобщенная адаптивная схема редукции размерности для задач глобальной оптимизации, комбинирующая использование кривых Пеано и схему вложенной (рекурсивной) оптимизации. Для решения редуцированных подзадач меньшей размерности используется алгоритм глобального поиска. Приведена вычислительная схема алгоритма, рассмотрены основные вопросы, связанные с использованием адаптивной схемы редукции размерности.
 Проведены вычислительные эксперименты на серии тестовых задач с целью сравнения эффективности различных схем редукции размерности. 
-Результаты экспериментов показывают, что . 
-Перспективы ...
+Результаты экспериментов показывают, что использование block adaptive nested optimization scheme может значительно сократить число испытаний, необходимое для решения задачи с заданной точностью. 
+Дальнейшие работы в развитии методов решения задач глобальной оптимизации, основанных на данном способе редукции размерности, могут быть связаны с использованием локальных оценок константы Липшица в различных подзадачах; схемы локального оценивания подробно рассмотрены, например, в \cite{Grishagin2015,Sergeyev2016}.
 
 
 %
