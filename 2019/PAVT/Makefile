@@ -14,6 +14,5 @@ texsecond: refs
 
 clean:
 	rm -r build/
-	rm -r images/*.pdf
 
 all: texsecond
