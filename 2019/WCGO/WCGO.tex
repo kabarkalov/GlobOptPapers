@@ -7,9 +7,9 @@
 \usepackage{graphicx}
 
 %%%%ДОБАВИЛ ДЛЯ РУССКОГО ТЕКСТА
-\usepackage[utf8x]{inputenc}
-\usepackage[english,russian]{babel}
-\usepackage{cmap}
+%\usepackage[utf8x]{inputenc}
+%\usepackage[english,russian]{babel}
+%\usepackage{cmap}
 %%%%
 
 
@@ -42,11 +42,24 @@ Russia \email{konstantin.barkalov@itmm.unn.ru}}
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-\Russian
-В статье рассматриваются задачи многомерной многоэкстремальной оптимизации и численные методы их решения. Об оптимизируемой функции делается лишь общее предположение, что она удовлетворяет Lipschitz condition с неизвестной априори константой. Задачи такого типа часто встречаются в приложениях. 
-Рассмотрено два подхода к редукции размерности в задачах многомерной оптимизации. Первый из них использует Peano-type space-filling curves, отображающие одномерный отрезок на многомерную область. Второй основан на nested optimization scheme, that reduces the mul- tidimensional problem to a family of one-dimensional subproblems.
-Предложена обобщенная схема, комбинирующая эти два подхода. В новой схеме решение многомерной задачи сводится к решению семейства задач меньшей размерности, в которых, в свою очередь, используются space-filling curves. Реализован адаптивный алгоритм, в котором все возникающие подзадачи решаются одновременно. 
-Проведены численные эксперименты на нескольких сотнях тестовых задач, подтверждающие эффективность предложенной обобщенной схемы.
+
+In the present paper, the multidimensional multiextremal optimization 
+problems and the numerical methods for solving these ones are considered. A 
+general assumption only is made on the objective function that this one 
+satisfies the Lipschitz condition with the Lipschitz constant not known 
+a priori. The problems of this type are frequent in the applications. 
+Two approaches to the dimensionality reduction for the multidimensional 
+optimization problems were considered. The first one uses the Peano-type 
+space-filling curves mapping a one-dimensional interval onto a multidimensional 
+domain. The second one is based on the nested optimization scheme, which 
+reduces a multi-dimensional problem to a family of the one-dimensional 
+subproblems. A generalized scheme combining these two approaches has been 
+proposed. In this novel scheme, solving a multidimensional problem is 
+reduced to solving a family of problems of lower dimensionality, in 
+which the space-filling curves are used. An adaptive algorithm, in which all 
+arising subproblems are solved simultaneously has been implemented. The 
+numerical experiments on several hundred test problems have been carried out 
+confirming the efficiency of the proposed generalized scheme.
 
 \keywords{Global optimization \and Multiextremal functions \and 
 Dimensionality reduction \and Peano curve \and Nested optimization \and 
@@ -69,14 +82,37 @@ The objective function is assumed to satisfy the Lipschitz condition
 \]
 with the constant $L$ unknown a priori.
 
-\Russian
-Известным способом решения многоэкстремальных задач являются мультистартовые схемы. В этих схемах в области поиска размещается некоторая сетка, точки которой использутся как стартовые поиска экстремума локальным методом, а затем выбирается наименьший из найденных экстремумов. Отдельной проблемой в рамках данного подхода является выбор стартовых точек, осуществляемый, как правило, на основе метода Монте-Карло \cite{Zhigljavsky2008}. Этот подход вполне применим для задач с небольшим числом локальных минимумов, имеющих широкие области притяжения, но для задач с существенной многоэкстремальностью его эффективность резко падает. 
+The multistart scheme is a well known method for solving the multiextremal problems.
+In such schemes, a grid is seeded in the search domain, the points of which are used as the starting ones for the search of 
+the extrema by some local method, and then the lowest of the found extrema is chosen. 
+The choice of the starting points performed, as a rule, on the basis of the Monte Carlo method is a special problem within 
+this approach \cite{Zhigljavsky2008}. 
+The approach is well applicable for the problems with a small number of local minima having a vide field of application, 
+but for the problems with essential multiextremality its efficiency falls drastically. 
 
-В настоящее время для решения задач глобальной оптимизации широко используются генетические алгоритмы (см., например, \cite{Yang2013}), которые так или иначе основаны на идеях случайного поиска. В силу простоты реализации и использования они получили большую популярность, однако по качеству работы (численной оценкой которого может служить число корректно решенных задач из некоторого тестового набора) они существенно уступают детерминированным алгоритмам \cite{Kvasov2018,Sergeyev2018}.
+At present, the genetic algorithms one way or another based on the random search concept are used widely for solving the 
+global optimization problems (see, for example, \cite{Yang2013}). 
+Because of simplicity of implementation and usage these ones have gained a large popularity. 
+However the quality of work (the number of problems from some set solved correctly can serve as a quantitative measure 
+of which) is essentially less as compared to the deterministic algorithms \cite{Kvasov2018,Sergeyev2018}.
 
-Если говорить о детерминированных методах глобальной оптимизации, то многие методы данного класса основаны на различных способах разбиения области поиска на систему подобластей и последующего выбора наиболее перспективной подобласти для размещения очередного испытания (вычисления целевой функции). Результаты в данном направлении представлены в работах \cite{Zilinskas2010,Paulavicius2016,Evtushenko2013,Jones2009,Sergeyev2015}.
+If one speaks about the deterministic global optimization methods, many ones of this class are based on various methods 
+of division of the search domain into a system of subdomains followed by the selection of the most promising subdomain 
+for placing the next trial (computing the objective function). The results in this direction are presented in 
+\cite{Evtushenko2013,Jones2009,Paulavicius2016,Zilinskas2010,Sergeyev2015}.
 
-Наконец, для разработки методов многомерной оптимизации широко применяется подход, связанный с редукцией многомерной задачи к эквивалентной одномерной или системе одномерных подзадач и последующим решением одномерных задач эффективными методами оптимизации функций одной переменной. Используются две такие схемы: редукция на основе кривых, заполняющих пространство (кривых Пеано, или разверток) \cite{Strongin2000,Sergeyev2013}, и схема рекурсивной вложенной оптимизации \cite{Strongin2000,Grishagin2001}. В статье \cite{Grishagin2016} предложена адаптивная схема редукции, обобщающая классическую схему рекурсивной оптимизации. Адаптивная схема существенно повышает эффективность оптимизации по сравнению с базовым прототипом \cite{Grishagin2016_1}. В данной работе предлагается обобщение адаптивной схемы редукции размерности, комбинирующее использование вложенной оптимизации и кривых Пеано. При таком подходе вложенные подзадачи в адаптивной схеме могут быть как одномерными, так и многомерными. В последнем случае для редукции размерности вложенных подзадач используются развертки.
+Finally, the approach related to the reduction of the multidimensional problems to the equivalent one-dimensional ones (or 
+to a system of the one-dimensional subproblems) with subsequent solving the one-dimensional problems by the efficient 
+univariate optimization algorithms is widely used for the development of the multidimensional 
+optimization methods. Two such schemes are used: the reduction based on the Peano-type space-filling curves (evolvents) 
+\cite{Sergeyev2013,Strongin2000}, and the nested optimization scheme \cite{Grishagin2001,Strongin2000}. 
+
+An adaptive reduction scheme generalizing the classical nested optimization one has been proposed in 
+\cite{Grishagin2016}. The adaptive scheme essentially enhances the optimization efficiency as compared to the base 
+prototype \cite{Grishagin2016_1}. In the present work, a generalization of the adaptive dimensionality reduction scheme 
+combining the use of the nested optimization and the Peano curves has been proposed. In this approach the nested 
+subproblems in the adaptive scheme can be the one-dimensional as well as the multidimensional ones. In the latter case, 
+the evolvents are used for the reduction of the dimensionality of the nested subproblems.
 
 
 \section{The global search algorithm}
@@ -96,7 +132,7 @@ GSA involves constructing a sequence of points $x^i$, where the values of the
 objective function $z^i=\varphi(x^i)$ are calculated. Let us call the 
 function value calculation process the \textit{trial}. 
 According to the algorithm, the first two trials are executed at the ends of 
-the interval  $[a,b]$, i.e., $x^0=a,\;x^1=b$. The function values $z^0=\varphi
+the interval  $[0,1]$, i.e. $x^0=0,\;x^1=1$. The function values $z^0=\varphi
 (x^0),\;z^1=\varphi(x^1)$  are computed and the number $k$ is set to 1. In 
 order to select the point of a new trial $x^{k+1}, k\geq 1,$  it is necessary 
 to perform the following steps.
@@ -157,8 +193,8 @@ y(x):0\leq x \leq 1 \right\}
 unambiguously mapping the interval of real axis $[0,1]$ onto a 
 $N$-dimensional cube is the first of the dimension reduction methods considered.
 Problems of numerical construction of Peano-type space-filling curves and the 
-corresponding theory are considered in detail in \cite{Strongin2000}, 
-\cite{Sergeyev2013}. Here we will note that a numerically 
+corresponding theory are considered in detail in 
+\cite{Sergeyev2013,Strongin2000}. Here we will note that a numerically 
 constructed curve (\textit{evolvent}) is $2^{-m}$ accurate approximation of 
 the theoretical Peano curve, where $m$ is an evolvent construction parameter.
 
@@ -169,7 +205,7 @@ problem~(\ref{main_problem}) to a univariate problem
 \right\}}.
 \end{equation}
 An important property of such mapping is preservation of boundedness of 
-function relative differences (see \cite{Strongin2000,Sergeyev2013}). If the 
+function relative differences (see \cite{Sergeyev2013,Strongin2000}). If the 
 function $\varphi(y)$ in the domain $D$ satisfies the Lipschitz condition, 
 then the function $\varphi(y(x))$ on the interval $[0,1]$ will satisfy a 
 uniform H{\"o}lder condition
@@ -240,7 +276,7 @@ Let us consider vector $y$ as a vector of block variables
 y=(y_1,y_2,...,y_N)=(u_1,u_2,...,u_M),
 \end{equation}
 where the $i$-th block variable $u_i$ is a vector of vector $y$ components, 
-taken serially i.e. $u_1=(y_1,y_2,...,y_{N_1})$, $u_2=(y_{N_1+1},y_{N_1+2}
+taken serially, i.e., $u_1=(y_1,y_2,...,y_{N_1})$, $u_2=(y_{N_1+1},y_{N_1+2}
 ,...,y_{N_1+N_2})$,..., $u_M=(y_{N-N_M+1},y_{N-N_M+2},...,y_{N})$, where $N_1+
 N_2+...+N_M=N$.
 
@@ -254,7 +290,7 @@ where the subdomains $D_i, 1 \leq i \leq M$, are projections of initial
 search domain $D$ onto the subspaces corresponding to the variables $u_i, 1 
 \leq i \leq M$.
 
-The formulae defining the method of solving of problem (\ref{main_problem}) 
+The formulae defining the method for solving the problem (\ref{main_problem}) 
 based on relation (\ref{block_nested}), in general, are the same to the ones 
 of nested scheme (\ref{nested_N})--(\ref{nested_1}). It is only necessary to 
 substitute the original variables $y_i, 1\leq i \leq N$,  by the block 
@@ -263,44 +299,75 @@ variables $u_i, 1\leq i \leq M$.
 At that, the nested subproblems 
 \begin{equation}\label{block_nested_i}
 \varphi^i(u_1,...,u_i) = \min_{u^{i+1}\in D_{i+1}} \varphi_{i+1}(u_1,...,u_i,u
-_{i+1}), 1\leq i\leq M-1.
+_{i+1}), 1\leq i\leq M-1,
 \end{equation}
 in the block scheme are the multidimensional ones. The dimension reduction 
 method based on Peano curves can be applied for solving these ones. It is a 
 principal difference from the initial nested scheme. 
 
 \subsection{Block adaptive optimization scheme}
-\Russian
-Решение возникающего множества подзадач вида (\ref{nested_i}) (для nested optimization scheme) или вида (\ref{block_nested_i}) (для block nested optimization scheme) может быть организовано различными способами. 
-Очевидный способ (детально проработанный в \cite{Grishagin2001,Grishagin2015} для nested optimization scheme и в \cite{Barkalov2014,Barkalov2016} для block nested optimization scheme) основан на решении поздадач в соответствии с рекурсивным порядком их порождения. Однако здесь возникает потеря значительной части информации о objective function при решении многомерной задачи. Иным  подходом является адаптивная схема, в которой все подзадачи решаются одновременно, что позволяет более полно учитывать информацию о многомерной задаче и за счет этого ускорять процесс ее решения.
 
-Для случая одномерных поздадач данный подход был теоретически обоснован и апробирован в \cite{Grishagin2016,Grishagin2016_1,Grishagin2018}. Настоящая работа предлагает обобщение адаптивной схемы для случая многомерных подзадач. Дадим краткое описание ее основных элементов.
+The solving of the arising set of subproblems (\ref{nested_i}) (for the nested optimization scheme) or 
+(\ref{block_nested_i}) (for the block nested optimization scheme) can be organized in various ways. 
+A straightforward way (developed in details for the nested optimization scheme \cite{Grishagin2015,Grishagin2001} 
+and for the block nested optimization scheme \cite{Barkalov2016,Barkalov2014}) is based on solving the 
+subproblems according to the generation order. However, here a loss of a considerable part of the information 
+on the objective function takes place when solving the multidimensional problem. Another approach is the adaptive 
+scheme, in which all subproblems are solved simultaneously, that allows more complete accounting for the information on 
+the multidimensional and accelerating the process of its solving.
 
-Пусть вложенные подзадачи вида (\ref{block_nested_i}) решаются с помощью многомерного алгоритма глобального поиска, описанного в Section \ref{SectionPeano}. Тогда каждой подзадаче (\ref{block_nested_i}) можно присвоить некоторое числовое
-значение, называемое характеристикой этой задачи. К качестве такой характеристики можно взять значение $R(t)$ from (\ref{MaxR}), т.е. максимальную характеристику интервалов, сформированных в данной задаче. В соответствии с правилом вычисления характеристик (\ref{R}), чем выше значение характеристики, тем более перспективной является подзадача для продолжения поиска в ней глобального минимума исходной задачи (\ref{main_problem}). Поэтому на каждой итерации выбирается подзадача с максимальной характеристикой для проведения в ней очередного испытания. Это испытание либо вычисляет значение целевой функции $\varphi(y)$ (если выбранная подзадача принадлежала уровню $j=M$), либо порождает новые подзадачи согласно (\ref{block_nested_i}) при $j\leq M-1$. В последнем случае новые порожденные задачи добавляются к текущему множеству задач, вычисляются их характеристики и процесс повторяется. Завершение процесса оптимизации происходит, когда в корневой задаче выполняется условие остановки алгоритма, решающего эту задачу.
+For the case of the one-dimensional subproblems the adaptive scheme was theoretically substantiated and tested in 
+\cite{Grishagin2016,Grishagin2016_1,Grishagin2018}. The present work proposes a generalization of the adaptive 
+scheme for the case of the multidimensional subproblems. Let us give a brief description of its basic elements.
+
+Let us assume the nested subproblems (\ref{block_nested_i}) to be solved with the use of a multidimensional 
+global search algorithm described in Section \ref{SectionPeano}. Then, each subproblem (\ref{block_nested_i}) can be 
+associated with a numerical value called the characteristic of this problem. The value $R(t)$ from (\ref{MaxR}) (i.e., the 
+maximum characteristic of the intervals formed within the subproblem) can be taken as such characteristic. According to the 
+rule of computing the characteristics (\ref{R}), the higher the value of the characteristic, the more promising the 
+subproblem for continuing the search of the global minimum of the initial problem (\ref{main_problem}). Therefore, the 
+subproblem with the highest characteristic is selected for executing the next trial at each iteration. This trial either 
+computes the objective function value $\varphi(y)$ (if the selected subproblem belongs to the level $j=M$) or generates 
+new subproblems according to (\ref{block_nested_i}) when $j\leq M-1$. In the latter case, new generated problems are 
+added to current problem set, their characteristics are computed, and the process is repeated. The  optimization process is 
+finished when the  stop condition is fulfilled for the algorithm solving the root problem.
 
 \section{Results of numerical experiments}
 
 One of the well-known approaches to investigating and comparing multiextremal 
 optimization algorithms is based on the application of these methods for 
 solving a set of test problems generated randomly.
-\Russian
-The comparison of the algorithms has been carried out using the Grishagin test problems $F_{gr}$ (описание данных функций см., например, в \cite{Grishagin1994}, test function 4) and the GKLS generator \cite{Gaviano2003}.
+The comparison of the algorithms has been carried out using the Grishagin test problems $F_{gr}$ (see, for example, \cite{Grishagin1994}, test function 4) and the GKLS generator \cite{Gaviano2003}.
 
-В работах \cite{Barkalov2015,Grishagin2018} было показано, что global search algorithm как с использованием разверток, так и в сочетании с адаптивной схемой редукции размерности превосходит многие известные алгоритмы глобальной оптимизации, включая методы DIRECT и DIRECT\textit{l}. Поэтому в данном исследовании мы ограничимся сравнением вариантов GSA с различными схемами редукции размерности.
+In \cite{Barkalov2015,Grishagin2018} the global search algorithm (GSA) with the use of the evolvents as well as in combination 
+with the adaptive dimensionality reduction scheme was shown to overcome many well known optimization 
+algorithms including DIRECT \cite{Jones1993} and DIRECT\textit{l} \cite{Gablonsky2001}. Therefore, in the present study we will limit ourselves to the comparison of the  variants of GSA with different dimensionality reduction schemes. 
 
-Для сравнения эффективности работы алгоритмов используются два критерия: the average number of trials and operating characteristic.
-Операционной характеристикой алгоритма называется функция $P(k)$, определяемая как доля задач из рассматриваемой серии, для решения которых потребовалось не более чем $k$ испытаний.
-The global minimizer $y^\ast$ was considered to be found, if the algorithm generated a trial point $y^k$ in the vicinity of the global minimum, i.e. $\left|y^k-y^\ast\right| < \delta \left\|b-a\right\|$, where $\delta = 0.01$, $a$ and $b$ are the boundaries of the search domain $D$.
+In order to compare the efficiencies of the algorithms, the two criteria were used: the average number of trials and the 
+operating characteristic.
+The operating  characteristic of an algorithm is the function $P(k)$ defined as the fraction of the problems from the 
+considered series, for solving of which not more than $k$ trials have been required.
+The problem was considered to be solved, if the algorithm generated a trial point $y^k$ in the vicinity of 
+the global minimizer $y^\ast$, i.e. $\left|y^k-y^\ast\right| < \delta \left\|b-a\right\|$, where $\delta = 0.01$, $a$ and $b$ are the 
+boundaries of the search domain $D$.
 
-Первая серия экспериментов была проведена на двумерных задачах классов $F_{gr}$, GKLS \textit{Simple}, GKLS \textit{Hard} (100 функций каждого класса). В Table~\ref{tab1}  представлено среднее число испытаний, выполненных GSA с использованием evolvents ($K_e$), nested optimization scheme ($K_n$), adaptive nested optimization scheme ($K_a$). На Fig.~\ref{fig1}, Fig.~\ref{fig2}(a,b) приведены operating characteristics алгоритмов, полученные на классах $F_{gr}$, GKLS \textit{Simple}, GKLS \textit{Hard} соответственно. Непрерывная линия соответсвует алгоритму с использованием evolvents, короткий пунктир -- adaptive nested optimization scheme, длинный пунктир -- nested optimization scheme. Результаты экспериментов показывают, что GSA с использованием adaptive nested optimization scheme показывает примерно одинаковое быстродействие  по сравнению с GSA с развертками, и оба они значительно превосходят алгоритм, использующий nested optimization scheme. Поэтому в дальнейших экспериментахмы ограничимся сравнением различных вариантов адаптивной схемы редукции размерности.
+The first series of experiments has been carried out on the two-dimensional problems from the classes $F_{gr}$, GKLS 
+\textit{Simple}, and GKLS \textit{Hard} (100 functions from each class). Table~\ref{tab1} presents the averaged 
+numbers of trials executed by GSA with the use of evolvents ($K_e$), nested optimization scheme ($K_n$), and adaptive 
+nested optimization scheme ($K_a$). Fig.~\ref{fig1} and Fig.~\ref{fig2}(a,b) present the operating characteristics of the 
+algorithms obtained on the problem classes $F_{gr}$, GKLS \textit{Simple}, and GKLS \textit{Hard} respectively. The solid 
+line corresponds to the algorithm using the evolvents, short dashed line -- to the adaptive nested optimization scheme, and 
+the long dashed line -- to the nested optimization scheme. The results of experiments demonstrate that GSA with the use of 
+the adaptive nested optimization scheme shows almost the same speed as compared to GSA with the evolvents, and 
+both algorithms considerably exceed the algorithm using the nested optimization scheme. Therefore further experiments 
+were limited to the comparison of different variants of the adaptive  dimensionality reduction scheme. 
 
 \begin{table}
 \centering
-\caption{Average number of iterations for 2D problems.}\label{tab1}
+\caption{Average number of trials for 2D problems.}\label{tab1}
 \begin{tabular}{lccc}
 \hline\noalign{\smallskip}
- &  $F_{gr}$  &  GKLS \textit{Simple} &  GKLS \textit{Hard} \\
+ &  $\;\;\;F_{gr}\;\;\;$  &  GKLS \textit{Simple} &  GKLS \textit{Hard} \\
 \noalign{\smallskip}\hline\noalign{\smallskip}
  $K_e$ & 180  & 252 & 674 \\
  $K_n$ & 341  & 697 & 1252 \\
@@ -327,20 +394,28 @@ The global minimizer $y^\ast$ was considered to be found, if the algorithm gener
 \label{fig2}
 \end{figure}
 
-Вторая серия экспериментов была проведена на четырехмерных задачах классов GKLS \textit{Simple} and GKLS \textit{Hard} (100 функций каждого класса). В Table~\ref{tab2}  представлено среднее число испытаний, выполненных GSA с использованием adaptive nested optimization scheme ($K_a$), block adaptive nested optimization scheme ($K_ba$) с формированием двух уровней подзадач одинаковой размерности $N_1=N_2=2$. Отметим, что при использовании исходного варианта адаптивной схемы при решении задачи размерности $N=4$ формируется четыре уровня одномерных подзадач, что усложняет их обработку.
+The second series of experiments has been carried out on the four-dimensional problems from the classes GKLS 
+\textit{Simple} and GKLS \textit{Hard} (100 functions of each class). Table~\ref{tab2}  presents the averaged numbers 
+of trials executed by GSA with the use of the adaptive nested optimization scheme ($K_a$) and block adaptive nested 
+optimization scheme ($K_{ba}$) with two levels of subproblems of equal dimensionality $N_1=N_2=2$. 
+Note that when solving the problem of the dimensionality $N=4$ using the initial variant of the adaptive scheme, four 
+levels of one-dimensional subproblems are formed that complicates the processing of these ones.
 
-На Fig.~\ref{fig3}(a,b) приведены operating characteristics алгоритмов, полученные на классах GKLS \textit{Simple} and GKLS \textit{Hard} соответственно. Пунктирная линия соответсвует алгоритму с использованием adaptive nested optimization scheme, непрерывная --  block adaptive nested optimization scheme. 
-Результаты экспериментов показывают, что использование block adaptive nested optimization scheme дает ощутимый выигрыш по числу trials (до 35\%) по сравнению с исходной adaptive nested optimization scheme.
+Fig.~\ref{fig3}(a,b) presents the operating characteristics of the algorithms obtained on the classes GKLS \textit{Simple} 
+and GKLS \textit{Hard} respectively. The dashed line corresponds to GSA using the adaptive nested optimization 
+scheme, the solid line -- the block adaptive nested optimization scheme. 
+The results of experiments demonstrate the use of the block adaptive nested optimization scheme provides a considerable 
+gain in the number of trials (up to 35\%) as compared to the initial adaptive nested optimization scheme.
 
 \begin{table}
 \centering
-\caption{Average number of iterations for 4D problems.}\label{tab2}
+\caption{Average number of trials for 4D problems.}\label{tab2}
 \begin{tabular}{lcc}
 \hline\noalign{\smallskip}
  &    GKLS \textit{Simple} &  GKLS \textit{Hard} \\
 \noalign{\smallskip}\hline\noalign{\smallskip}
  $K_a$  &  21747 & 35633 \\
- $K_{ba}$ &  15942 & 33206 \\
+ $K_{ba}$ &  13894 & 31620 \\
 \noalign{\smallskip}\hline
 \end{tabular}
 \end{table}
@@ -358,11 +433,18 @@ The global minimizer $y^\ast$ was considered to be found, if the algorithm gener
 
 
 \section{Conclusion}
-\Russian
-В данной работе предложена обобщенная адаптивная схема редукции размерности для задач глобальной оптимизации, комбинирующая использование кривых Пеано и схему вложенной (рекурсивной) оптимизации. Для решения редуцированных подзадач меньшей размерности используется алгоритм глобального поиска. Приведена вычислительная схема алгоритма, рассмотрены основные вопросы, связанные с использованием адаптивной схемы редукции размерности.
-Проведены вычислительные эксперименты на серии тестовых задач с целью сравнения эффективности различных схем редукции размерности. 
-Результаты экспериментов показывают, что использование block adaptive nested optimization scheme может значительно сократить число испытаний, необходимое для решения задачи с заданной точностью. 
-Дальнейшие работы в развитии методов решения задач глобальной оптимизации, основанных на данном способе редукции размерности, могут быть связаны с использованием локальных оценок константы Липшица в различных подзадачах; схемы локального оценивания подробно рассмотрены, например, в \cite{Grishagin2015,Sergeyev2016}.
+
+In the present work, the generalized adaptive dimensionality reduction scheme for the global optimization problems 
+combining the use of Peano space-filling curves and the nested (recursive) optimization scheme has been proposed.
+For solving the reduced subproblems of less dimensionality, the global search algorithm was applied. 
+The computational scheme of the algorithm was given, main issues related to the use of the adaptive dimensionality 
+reduction scheme were considered.
+The numerical experiments have been carried out using the series of test problems in order to compare the efficiencies of 
+different dimensionality reduction schemes.  
+The result of experiments demonstrated that the use of the block adaptive nested optimization scheme can essentially reduce the 
+number of trials required to solve the problem with given accuracy. 
+Further works on the development of the global optimization methods based on this method of the 
+dimensionality reduction may be related to the use of the local estimates of the Lipschitz constant (considered, for example, in \cite{Grishagin2015,Sergeyev2016}) in different subproblems.
 
 
 %
