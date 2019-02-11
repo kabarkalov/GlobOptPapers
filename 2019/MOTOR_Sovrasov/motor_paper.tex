@@ -6,8 +6,18 @@
 %
 \usepackage{graphicx}
 \usepackage{amssymb}
+\usepackage{amsmath}
 \usepackage{subfig}
 \usepackage{cite}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\sign}{sign}
+
+%%%%%ДОБАВИЛ ДЛЯ РУССКОГО ТЕКСТА
+\usepackage[utf8x]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{cmap}
 
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
@@ -18,7 +28,7 @@
 
 \begin{document}
 %
-\title{Comparison of several derivative-free global optimization algorithms\thanks{The study was supported by the Russian Science Foundation, project No 16-11-10150.}}
+\title{Comparison of several stochastic and deterministic derivative-free global optimization algorithms\thanks{The study was supported by the Russian Science Foundation, project No 16-11-10150.}}
 %
 %\titlerunning{Abbreviated paper title}
 % If the paper title is too long for the running head, you can set
@@ -35,15 +45,14 @@
 %
 
 \begin{abstract}
-This work considers several stochastic and deterministic deri-vative-free global optimization
-algorithms. In the first part of the paper popular sequential open-source solvers are compared against
-Globalizer solver, which is developed at the Lobachevsky State University. The Globalizer is
-designed to solve problems with black-box objectives satisfying the Lipschitz condition and shows
+In this paper popular sequential open-source solvers are compared against
+Globalizer solver, which is developed at the Lobachevsky State University.
+The Globalizer is designed to solve problems with black-box objectives satisfying the Lipschitz condition and shows
 competitive performance with other similar solvers. The comparison is done on several sets of
-challenging multi-extremal benchmark functions. The second part of this work is devoted to
-comparison between the Globalizer and MIDACO solvers on systems with shared and distributed
-memory. MIDACO is a state-of-the-art global solver included to the TOMLAB optimization
-environment for MATLAB. Results of the benchmark show advantages of the Globalizer on small-dimensional, but sufficiently multi-extremal benchmark functions.
+challenging multi-extremal benchmark functions. Also this work considers a method of
+heuristic hyperparameters control for Globalizer allowing to reduce amount of
+initial tuning before optimization. The proposed scheme allows rapidly increase convergence speed
+of Globalizer by switching between ``local'' and ``global'' search phases in runtime.
 % We would like to encourage you to list your keywords within
 % the abstract section using the \keywords{...} command.
 \keywords{deterministic global optimization $\cdot$ stochastic global optimization
@@ -53,26 +62,17 @@ optimization}
 %
 \section{Introduction}
 
-Nonlinear global optimization of non-convex functions is considered to be one of the most
-difficult problems of mathematical programming. The finding of the global minimum of
-a function of several variables often appears to be more difficult than local optimization in a
-thousand-dimensional space. In local optimization applying of the simplest gradient descent
-method may appear to be enough, whereas in order to \textit{guarantee} finding the global
-optimum, an optimization method has to accumulate information about behavior of the
-objective function within the whole search domain
-\cite{Jones2009,Paulavicius2011,Evtushenko2013,strSergGO}. Nowadays, various stochastic global
-optimization algorithms have attracted much attention, first of all, the evolution ones
-\cite{Storn1997, SCHLUTER2009, KennedyEberhart1995}. They have rather simple structure
-and allow solving the problems of large dimensionality. However, the evolution algorithms ensure
-the global convergence in the probabilistic sense only.
+Задача отысканя глобального минимума нелинейных невыпуклых функций традиционно считается одной из самых трудных
+задач математического программирования. Зачастую она оказывается сложнее, чем локальная оптимизация в существенно многомерном пространстве.
+Для последней может оказаться достаточно применения простейшего метода градиентного спуска или pattern search algorithms \cite{torczon1997},
+в то время как чтобы \textit{гаранитрованно} отыскать глобальный оптимум методам
+оптимизации приходится накапливать информацию о поведении целевой функции во всей области поиска \cite{Jones2009,Paulavicius2011,Evtushenko2013,strSergGO}. В последнее время стали популярны
+различные стохастические алгоритмы глобально оптимизации, прежде всего эволюционные \cite{Storn1997, SCHLUTER2009, KennedyEberhart1995}. Они имеют довольно простую структуру, позволяют решать задачи большой размерности, однако обеспечивают глобальную сходимость только в вероятностном смысле.
 
-In the present paper, the open-source implementations of nine different global optimization methods
-were considered. All the algorithms were tested using a set of 900 essentially multiextremal functions,
-which has been generated using generators of test problems \cite{Gaviano2003, grishaginClass}.
-Besides the comparison of the sequential algorithms, a comparison of the MIDACO solver
-\cite{Schlueter2012} with the Globalizer software system \cite{globalizerSystem,Strongin2018} on a subset of 200 test problems has been
-performed in the Lobachevsky supercomputer environment.
-
+В данной работе рассмотрены open-source реализации восьми различных методов глобальной оптимизации, представленные
+в библиотеке NLOpt\cite{nlopt} и пакете SciPY\cite{scipy}.
+Все алгоритмы были протестированы на наборе из 900 существенно многоэкстремальных функций, который был сгенерирован с
+помощью специализированных генераторов задач \cite{Gaviano2003, grishaginClass}.
 
 \section{Related Work}
 
@@ -97,8 +97,7 @@ generators of various nature and to create the sets of problems of various compl
 Taking into account the experience of the preceding works in the field of comparison of the
 optimization methods, two generators of the test problems of different nature will be used in the
 present work. Using these ones, 9 sets of 100 problems of various complexity with the
-dimensionality varying from 2 to 5 were generated. Besides the comparison of the sequential
-methods, a comparison of the efficiencies of two parallel algorithms is presented in the work as well.
+dimensionality varying from 2 to 5 were generated.
 
 \section{Statement of Multidimensional Global Optimization Problem}
 In this paper, the core class of optimization problems, which can be solved using
@@ -127,7 +126,8 @@ is time-consuming.
 
 \section{Review of Considered Optimization Methods}
 
-\subsection{Parallel Algorithm of Global Search}
+\subsection{Algorithm of Global Search}
+\label{sub:ags}
 \subsubsection{Dimension Reduction with Space-Filling Curves}
 Within the framework of the information-statistical global optimization theory,
 the Peano space-filling curves (or \textit{evolvents}) \(y(x)\) mapping the interval \([0,1]\)
@@ -169,55 +169,100 @@ using the mapping \(y(x)\),
 dimensional function \(\varphi(y(x))\) at the point \(x\).
 \end{itemize}
 
-\subsubsection{Algorithm of Global Search on Shared Memory}
-\label{sub:ags}
-Parallel optimization methods applied in Globalizer to solve the reduced problem
-(\ref{eq:oneDimTask}) are based on the MAGS method, which can be presented as follows ---
+Optimization method applied in Globalizer to solve the reduced problem
+(\ref{eq:oneDimTask}) is based on the AGS method, which can be presented as follows ---
 see \cite{strongin1978}, \cite{strSergGO}.
+\par
+The algorithm considered for solving the stated problem implies generating
+a sequence of points \(x_k\), in which the values of the minimized function \(z_k = f(x_k)\)
+are computed. Let us call the process of computating the function value
+(including calculating an image \(y^k=y(x^k)\)) a trial, and the pair \((x^k,z^k)\) ---
+the result of the trial. A set of the pairs \(\{(x^k,z^k)\}, 1\leqslant k\leqslant n\)
+makes up the search information accumulated by the method after executing \(n\) steps.
 \par
 The initial iteration of the algorithm is performed at an arbitrary point \mbox{\(x^1\in(0,1)\)}.
 Then, let us suppose that \(k\), \(k\ge 1\), optimization iterations have been completed already.
 The selection of the trial point \(x^{k+1}\) for the next iteration is performed according to the
 following rules.
 
-\textit{Rule 1}. Renumber the points of the preceding trials by the lower indices in order of
-increasing value of coordinates
-$0=x_0<x_1<...<x_{k+1}=1$.
+\textit{Step 1.} Renumber the points in the set \(X_k=\{x^1,\dotsc,x^k\}\cup\{0\}\cup\{1\}\),
+which includes the boundary points of the interval \([0,1]\) as well as the points of
+preceding trials, by the lower indices in order of increasing coordinate values  i.e.
+\begin{displaymath}
+0=x_0<x_1<\dotsc<x_{k+1}=1
+\end{displaymath}
+\par
+\textit{Step 2.} Assuming \(z_i=f(x_i),1\leqslant i\leqslant k\), compute the values
+\begin{equation}
+\label{eq:step2}
+\mu=\max_{1\leqslant i\leqslant k}\dfrac{|z_i-z_{i-1}|}{\Delta_i},
+\begin{matrix}
+    M =
+    \left\{
+    \begin{matrix}
+    r\mu,\mu>0 \\
+    1,\mu=0
+    \end{matrix} \right.
+    \end{matrix}
+\end{equation}
+where \(r>1\) is a predefined parameter for the method, and \(\Delta_i=(x_i-x_{i-1})^\frac{1}{N}\).
+\par
+\textit{Step 3.} For each interval \((x_{i-1},x_i),1\leqslant i\leqslant k+1\), compute the
+characteristics according to the formulae
+\begin{equation}
+\label{step3_1}
+R(1)=2\Delta_1-4\dfrac{z_1}{M},R(k+1)=2\Delta_{k+1}-4\dfrac{z_k}{M},
+\end{equation}
+\begin{equation}
+\label{eq:step3_2}
+R(i)=\Delta_i+\dfrac{(z_i-z_{i-1})^2}{M^2\Delta_i}-2\dfrac{z_i+z_{i-1}}{M},1<i<k+1.
+\end{equation}
+\par
+\textit{Step 4.} Determine the interval with the maximum characteristic \((x_{t-1}, x_t),\:t=\argmax_{1\leqslant i \leqslant k+1}R(i)\)
 
-\textit{Rule 2}. Compute the characteristics \(R(i)\) for each interval \((x_{i-1},x_i),1\leq i\leq
-k+1\).
-
-\textit{Rule 3}. Determine the \(p\) intervals with the maximum characteristics $R(t_j)=\max_{1\leq i
-\leq k+1}R(i),\: j=\overline{1,p}$.
-
-\textit{Rule 4}. Execute new trials at points \(x^{k+j},\: j=\overline{1,p}\) located within intervals
-with
-maximum characteristics from the previous step
-  $x^{k+j}=d(x_{t_j}),\: j=\overline{1,p}$.
+\textit{Step 5.} Execute a new trial at point \(x_{k+1}\) computed according to the formula
+\begin{displaymath}
+x_{k+1}=\dfrac{x_{t}+x_{t-1}}{2},t=1,t=k+1,
+\end{displaymath}
+\begin{displaymath}
+\label{step5}
+x_{k+1}=\dfrac{x_{t}+x_{t-1}}{2}-\sign(z_{t}-z_{t-1})\dfrac{1}{2r}\left[\dfrac{|z_{t}-z_{t-1}|}{\mu}\right]^N,1<t<k+1.
+\end{displaymath}
 
 The stopping condition, which terminated the trials, is defined by the inequality
-$\rho_{t_j}<\varepsilon,\: j=\overline{1,p}$
-for the intervals with maximum characteristics from Step 3 and \(\varepsilon >0\) is the
+\(\Delta_{t}\leqslant \varepsilon\)
+for the interval with the maximum characteristics from Step 4 and \(\varepsilon >0\) is the
 predefined accuracy of the optimization problem solution. If the stopping condition is not satisfied,
-the index \(k\) is incremented by \(p\), and the new global optimization iteration is executed.
+the index \(k\) is incremented by \(1\), and the new global optimization iteration is executed.
 
-This method is employed in Globalizer to organize parallel computations on shared memory: each of
-\(p\)
-trials can be carried out on one of \(p\) local computation units.
+The convergence conditions of the described algorithm are given, for example, in \cite{strSergGO}.
 
-The convergence conditions and exact formulas for decision rules $R(i)$ and $d(x)$ of the
-described algorithm are given, for example, in \cite{strSergGO}.
+\subsubsection{Hyperparameters tuning}
+Параметр $r$ из (\ref{eq:step2}) непосредственно влияет на глобальную сходимость AGS (see \cite{strSergGO}, Chapter 8):
+при достаточно большом значении $r$ метод гарантированно сходится ко всем глобальным минимумам целевой функции.
+В то же время, согласно (\ref{eq:step3_2}), при бесконечно большом значении $r$ AGS превращается в полный перебор
+по равномерной сетке.
 
-\subsection{Sequential Methods}
+В идеальном случае для обеспечения наибольшей скорости сходимости оценка константы Липшица из (\ref{eq:step2})
+не должна быть слишком завышенной, но на практике реальное значение $L$ из (\ref{eq:lip}) неизвестно и приходится
+либо брать заведомо большое значение $r$, либо проводить несколько запусков AGS с разными параметрами. Чтобы в некотрой
+степени решить обозначенную проблему выбора $r$ будем использовать следующую схему:
 \begin{itemize}
-  \item \textbf{Algorithm of Global Search}. Sequential version of the method described in Section
-\ref{sub:ags}.
+  \item совершить $q$ итераций AGS при $r=r_{max}$;
+  \item совершить $q$ итераций AGS при $r=r_{min}$;
+  \item повторять предыдущие шаги до схоимости или исчерпания лимита итараций.
+\end{itemize}
 
-  \item \textbf{Locally-biased Algorithm of Global Search (AGS\(l\))} \cite{indexMethod}. It's a
-modification of
-  the original AGS which make it more locally oriented by alternately using of two types of
-characteristics in the Rule 2 from the Section \ref{sub:ags}.
+В указанном алгоритме $r_{min} < r_{max}$, $q > 1$. Вместо одного параметра $r$ теперь
+необходимо выбирать 3, однако, согласно численным экспериментам, сделать это проще, чем найти оптимальное значение $r$.
+Интуитивно практическую эффективность предложенной схемы можно объяснить тем, что теперь работа метода происходит в
+двух режимах: глобальный поиск при $r=r_{max}$ и локальный при $r=r_{min}$. Если во время фазы глобального посика
+метод приблизился к глобальному минимуму, то во время следующей фазы оценка глобального минимума будет быстро уточнена.
+Если двух фаз не хватило, то процесс продолжается. Таким образом выбирается более оптимальный trade-off between
+exploration and exploitation. Далее будем обозначать метод, использующий описанную схему как AGS-AR.
 
+\subsection{Other Optimization Methods}
+\begin{itemize}
   \item \textbf{Multi Level Single Linkage} \cite{Kan1987StochasticGO}. MLSL is an improved
 multistart algorithm.
   It samples low-discrepancy starting points and does local optimizations from them. In contrast to
@@ -256,13 +301,12 @@ rectangles via a branch-and-bound approach,
 
 \end{itemize}
 
-All the mentioned algorithms are available in source codes as parts of wide-spread optimization packages (except of AGS and AGS\(l\), which are implemented in the Globalizer system).
+All the mentioned algorithms are available in source codes as parts of wide-spread optimization packages.
 DIRECT, DIRECT$l$, CRS, MLSL and StoGO are part of the NLOpt library \cite{nlopt}.
 Differential Evolution and DSA can be found in
 the latest version of the SciPy \cite{scipy} package for Python.
 
 \section{Tools for Comparison of Global Optimization Algorithms}
-
 
 The use of the sets of test problems with known solutions generated by some random mechanisms is
 one of commonly accepted approaches to comparing the optimization algorithms
@@ -330,7 +374,6 @@ evidences the reliability of the method at given parameters on the class of test
 solved. In order to make independent the quantities featuring the reliability and the speed of convergence,
 averaged number of trials always was calculated taking into account solved problems only.
 
-
 \section{Results of Numerical Experiments}
 
 The results of various algorithms on different problem classes depend on the adjustments of
@@ -339,13 +382,15 @@ problems of medium difficulty. In order to obtain a satisfactory result when sol
 multiextremal problems, a correction of some parameters is required. When conducting the
 comparison, the following parameters for the methods were employed:
 \begin{itemize}
-  \item in the AGS\(l\) method, the parameter of alternation the
-global and local iterations was set to be equal to 5:1;
+  \item in the AGS-AR method, the parameter of alternation the
+  global and local stages $q$ was set to be equal to $100\cdot N^2$, also $r_{min}=3,\:r_{max}=2\cdot r_{min}$;
   \item in the DIRECT and DIRECT\(l\) methods, the parameter \(\epsilon=10^{-4}\);
   \item in the SDA method, the parameter \(visit=2.72\).
 \end{itemize}
 
 The rest parameters were varied subject to the problem class (see Table \ref{tab:params}).
+For the AGS the value ot the $r$ parameter, such that the method solves all problems and performs the minimum amount of trials,
+was estimated by brute force on the uniform grid with step $0.1$.
 
 \begin{table}
 \begin{center}
@@ -378,21 +423,21 @@ The rest parameters were varied subject to the problem class (see Table \ref{tab
 \end{table}
 
 The results of running the optimization methods on the considered problem classes are presented in
-Tables \ref{tab:trials}, \ref{tab:solved}. The DIRECT and AGS\(l\) methods have demonstrated the
-best convergence speed on all classes, at that AGS\(l\) inferior to DIRECT on the problems from the
+Tables \ref{tab:trials}, \ref{tab:solved}. The DIRECT, AGS and AGS-AR methods have demonstrated the
+best convergence speed on all classes, at that AGS-AR inferior to DIRECT on the 2d problems from the
 Simple classes and has an advantage on the problems of the Hard classes. As one can see from Table
-\ref{tab:solved}, the deterministic methods (AGS, AGS\(l\), DIRECT, and DIRECT\(l\)) were the
+\ref{tab:solved}, the deterministic methods (AGS, AGS-AR, DIRECT, and DIRECT\(l\)) were the
 most reliable. Among the stochastic methods, MLSL and SDA have demonstrated the highest
 reliability.
 
 \begin{table}
 \begin{center}
-\caption{Averaged number of trials executed by sequential methods for solving the test
+\caption{Averaged number of trials executed by optimization methods for solving the test
 optimization problems}
 \resizebox{\textwidth}{!}{%
   \begin{tabular}{|l|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|}
     \hline
-    & AGS & AGS\(l\) & CRS & DIRECT & DIRECT\(l\) & MLSL & SDA & DE & StoGO \\
+    & AGS & AGS-AR & CRS & DIRECT & DIRECT\(l\) & MLSL & SDA & DE & StoGO \\
   \hline
   \(F_{GR}\)     & 193.1 &  \textbf{158.3} & 400.3 & 182.3 & 214.9 & 947.2 & 691.2 & 1257.3 &
 1336.8 \\
@@ -428,10 +473,10 @@ optimization problems}
 
 \begin{table}
 \begin{center}
-\caption{Number of test optimization problems solved by sequential methods}
+\caption{Number of test optimization problems solved by methods}
   \begin{tabular}{|l|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|{c}|}
     \hline
-    & AGS & AGS\(l\) & CRS & DIRECT & DIRECT\(l\) & MLSL & SDA & DE & StoGO \\
+    & AGS & AGS-AR & CRS & DIRECT & DIRECT\(l\) & MLSL & SDA & DE & StoGO \\
   \hline
   \(F_{GR}\)     &  100 & 100 & 76  & 100 & 100 & 97  & 96  & 96  & 67\\
   \hline
@@ -462,20 +507,14 @@ In the present paper, several sequential and parallel global optimization algori
 A comparison of efficiencies of these ones has been done on a set of test problems. The results allow
 making the following conclusions:
 \begin{itemize}
-  \item AGS\(l\) method implemented in the Globalizer system has demonstrated the convergence
+  \item the proposed modification of the stock AGS substantially outperforms it on the most complicated problems
+  from the generated test set and allows to pay less attention to initial hyperparameter tuning.
+  \item AGS-AR method  has demonstrated the convergence
 speed and reliability at the level of DIRECT and exceeds many other algorithms, the open-source
 implementations of which are available;
   \item the stochastic optimization methods inferior to the deterministic ones in the convergence
 speed and in reliability. It is manifested especially strongly on more complex multiextremal
 problems;
-  \item the parallel version of the Globalizer system demonstrates good speedup
-when running on several nodes, on each of which a single objective function value per iterations is
-computed. When solving the problems with fast computable objective functions and using multiple
-threads on the nodes, the speedup for the Globalizer system degrade with increasing
-number of nodes;
-  \item the MIDACO system is the most suitable for simple global optimization problems with the
-fast-computable objective functions. In this case, MIDACO is reliable enough and provides a linear
-speedup with increasing number of nodes and threads executed on these ones in parallel.
 \end{itemize}
 
 % ---- Bibliography ----
