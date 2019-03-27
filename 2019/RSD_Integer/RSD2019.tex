@@ -73,33 +73,144 @@ known analogs are presented.
 
 \section{Global optimization algorithm and dimension reduction}
 
-Let us consider a multiextremal optimization problem in the form
+A constrained global optimization problem can be formulated as follows
+%Let us consider the $N$-dimensional global optimization problem
 \begin{gather}\label{problem}
-\varphi(y^\ast)=\min{\left\{\varphi(y):y\in D, \; g_j(y)\leq 0, \; 1 \leq j \leq m\right\}},\\
-D=\left\{y\in R^N: a_i\leq y_i \leq b_i, 1\leq i \leq N\right\}.\nonumber
+\varphi(y^\ast)=\min{\left\{\varphi(y):y\in D, \; g_i(y)\leq 0, \; 1 \leq i \leq m\right\}},\\
+D=\left\{y\in R^N: a_j\leq y_j \leq b_j, 1\leq j \leq N \right\}.\label{D}
 \end{gather}
-Suppose, that the objective function $\varphi(y)$ (henceforth denoted by $g_{m+1}(y)$) and
-the left-hand sides $g_j(y), \; 1\leq j \leq m$, of the constraints satisfy the Lipschitz condition
-\[ \left|g_j(y')-g_j(y'')\right| \leq L_j \left\|y'-y'' \right\|, \; y',y''\in D, \; 1\leq j \leq m+1, \]
-with constants $L_j, \; 1 \leq j \leq m+1$, respectively,  
-and may be multiextremal.
-
-Using a continuous single-valued mapping $y(x)$  (Peano-type space-filling curve, or \textit{evolvent}) of the interval $[0,1]$ onto $D$, a multidimensional problem (\ref{problem}) can be reduced to a one-dimensional problem
-\begin{equation}\label{problem1}
-\varphi(y(x^\ast))= \min \left\{g_{m+1}(y(x)): x \in [0,1], \; g_i(y(x))\leq 0, \; 1 \leq i \leq m\right\}.
+The objective function $\varphi(y)$ (hereafter denoted by $g_{m+1}(y)$) and the left-hand 
+sides $g_i(y), \; 1\leq i \leq m,$ of the constraints satisfy the Lipschitz condition 
+\[
+\left|g_i(y_1)-g_i(y_2)\right|\leq L_i\left\|y_1-y_2\right\|, \;1\leq i\leq m+1, \; y_1,y_2 \in D,\;
+\]
+with a priori unknown constants $L_i, \; 1 \leq i \leq m+1,$ and may be multiextremal. It is 
+assumed that the functions $g_i(y)$ are defined and computable only at the points $y \in D$ 
+satisfying the conditions
+\begin{equation}\label{g_k}
+g_k(y) \leq 0, \; 1 \leq k < i.
 \end{equation}
-The reduction of dimensionality matches the multidimensional problem with a Lipschitzian objective function and constraints with a one-dimensional problem where the respective functions satisfy the uniform H\"older condition (see \cite{Strongin2000}).
 
-An efficient global search algorithm (GSA) for solving the constrained optimization problem 
-(\ref{problem1}) has been developed at University of Nizhni Novgorod. 
+By employing the continuous single-valued Peano curve $y(x)$ mapping the unit interval 
+$[0,1]$ on the $x$-axis onto the $N$-dimensional domain (\ref{D}), it is possible to find the 
+minimum in (\ref{problem}) by solving the one-dimensional problem
+\[
+\varphi(y(x^\ast))=\min \left\{\varphi(y(x)): x \in [0,1], \; g_i(y(x))\leq 0, \; 1 \leq i \leq m\right\}.
+\]
+Algorithms for numerical construction of Peano curve approximation (\textit{evolvent}) are 
+considered in \cite{Strongin2013}. Due to (\ref{g_k}) the functions $g_i(y(x))$ are defined 
+and computable in the subranges 
+\[
+Q_1=[0,1], \; Q_{i+1}=\left\{x \in Q_i : g_i(y(x)) \leq 0 \right\}, \; 1 \leq i \leq m.
+\]
 
-%Описание индексного алгоритма
+These conditions allows us to introduce a classification of the points $x \in [0,1]$ according to 
+the number $\nu (x)$ of the constraints computed at this point. The \textit{index} $\nu(x)$ can 
+also be defined by the conditions
+\begin{equation}\label{nu}
+g_i(y(x)) \leq 0, \; 1 \leq i < \nu, \; g_\nu(y(x))>0,
+\end{equation}
+where the last inequality is inessential if $\nu=m+1$.
 
-A detailed description 
-of the algorithm and the corresponding convergence theory are presented in 
-\cite{Strongin2000}.
+In the dimensionality reduction scheme considered here, a multidimensional problem with 
+Lipschitzian functions is juxtaposed with a one-dimensional problem, where the corresponding 
+functions satisfy uniform H{\"o}lder condition (see \cite{Strongin2013}), i.e.,
+\[
+\left|g_i(y(x_1))-g_i (y(x_2))\right| \leq H_i \left|x_1-x_2 \right|^{1/N}, \; x_1,x_2\in [0,1], \; 
+1\leq i \leq m+1.
+\]
+Here, $N$ is the dimensionality of the initial multidimensional problem and the coefficients 
+$H_i$ are related to the Lipschitz constant $L_i$ of the initial problem as $H_i \leq 2L_i 
+\sqrt{N+3}$.
 
-\section{Global search algorithm for mixed-integer problems}
+Thus, \textit{a trial} at a point $x^k \in [0,1]$ executed at the $k$-th iteration of the algorithm 
+will consist of the following sequence of operations:
+\begin{itemize}
+	\item Determine the \textit{image} $y^k=y(x^k)$ in accordance with the mapping 
+$y(x)$;
+	\item Compute the values $g_1(y^k),..., g_\nu(y^k),$ where $\nu = \nu(x^k)$ is from 
+(\ref{nu}). 
+\end{itemize}
+The dyad $ \{ \nu=\nu(x^k), \; z^k=g_\nu(y(x^k)) \} $ will be referred to as the \textit{trial 
+outcome}.
+
+An efficient parallel index algorithm (PIA) for solving the constrained optimization problem 
+(\ref{problem}) has been developed at University of Nizhni Novgorod. 
+
+Suppose we have $p \geq 1$  computational elements (e.g., accelerator cores), which can be used to run $p$ trials simultaneously. In the first iteration of the method, $p$ trials are run in parallel at various random points $x^i\in(0,1)$, $1\leq i \leq p$. 
+Suppose $n \geq 1$  iterations of the method have been completed, and as a result of which, trials were carried out in $k=k(n)$ points $x^i, 1\leq i \leq k$. Then the points $x^{k+1},...,x^{k+p}$  of the search trials in the next $(n+1)$-th iteration will be determined according to the rules below.
+
+\begin{enumerate}
+\item 
+Renumber the points $x^1,...,x^k$ from previous iterations with lower indices, lowest to highest coordinate values, i.e.
+\begin{equation}\label{Eq:17}
+0=x_0<x_1<...<x_i<...<x_k<x_{k+1}=1,
+\end{equation}
+and match them with the values $z_i=g_\nu(y(x_i))$, $\nu=\nu(x_i)$, $1 \leq i \leq k$, from (\ref{Eq:16}) , calculated at these points; points $x_0=0$ и $x_{k+1}=1$ are introduced additionally; the values $z_0$ и $z_{k+1}$ are indeterminate.
+\item
+Classify the numbers $i,1\leq i \leq k$, of the trial points from (\ref{Eq:17}) by the number of problem constraints fulfilled at these points, by building the sets
+\begin{equation}\label{Eq:18}
+I_\nu = \left\{i: 1 \leq i \leq k,\ \nu = \nu(x_i)\right\},\ 1 \leq \nu \leq m+1,
+\end{equation}
+containing the numbers of all points $x_i,1\leq i \leq k$, with the same values of $\nu$. The end points $x_0=0$ and $x_{k+1}=1$ are interpreted as those with zero indices, and they are matched to an additional set $I_0={0,k+1}$. 
+
+Identify the maximum current value of the index
+\begin{equation}\label{Eq:19}
+M=\max \left\{\nu = \nu(x_i), \ 1\leq i \leq k\right\}.
+\end{equation}
+\item
+For all values of $\nu, \ 1\leq \nu \leq m+1$, calculate the values  
+\begin{equation}\label{Eq:20}
+\mu_\nu = \max \left\{ \frac{\left|z_i-z_j\right|}{\left(x_i-x_j\right)^{1/N}} : i,j \in I_\nu, j<i\right\}.
+\end{equation}
+If the set $I_\nu$ contains less than two elements or $\mu_\nu$ from (\ref{Eq:20}) equals zero, then assume $\mu_\nu=1$.
+\item
+For all non-empty sets $I_\nu$, $1 \leq \nu \leq m+1$, determine the values
+\begin{equation}\label{Eq:21}
+  z^\ast_\nu =  
+   \begin{cases}
+    -\epsilon_\nu,  \nu < M, \\
+    \min{\left\{g_\nu(x_i):i\in I_\nu\right\}}, \nu = M,
+   \end{cases}
+\end{equation}
+where $M$ is the maximum current value of the index, and the vector
+\begin{equation}\label{Eq:22}
+\epsilon _R=\left(\epsilon_1,...,\epsilon_m\right),
+\end{equation}
+with positive coordinates is called the \textit{reserve vector} and is used as a parameter in the algorithm.
+\item
+For each interval $(x_{i-1},x_i)$,$1 \leq i \leq k+1$, calculate the \textit{characteristic} $R(i)$: 
+\[
+R(i)=\Delta_i+ \frac{(z_i-z_{i-1})^2}{(r_\nu\mu_\nu)^2\Delta_i}-2\frac{z_i+z_{i-1}-2z^\ast_\nu}{r_\nu\mu_\nu},\;\; \nu=\nu(x_{i-1})=\nu(x_i),
+\]
+\[
+R(i)= 2\Delta_i-4\frac{z_i-z^\ast_\nu}{r_\nu\mu_\nu},\;\; \nu(x_{i-1})<\nu(x_i)=\nu,
+\]
+\[
+R(i)= 2\Delta_i-4\frac{z_{i-1}-z^\ast_\nu}{r_\nu\mu_\nu},\;\; \nu = \nu(x_{i-1})>\nu(x_i).
+\]
+where $\Delta_i=(x_i-x_{i-1})^{1/N}$, and the values $r_\nu>1, 1\leq\nu\leq m+1$, are used as parameters in the algorithm.
+\item
+Reorder the characteristics $R(i)$, $1\leq i \leq k+1$, from highest to lowest 	
+\begin{equation}\label{Eq:23}
+R(t_1)\geq R(t_2)\geq ... \geq R(t_{k})\geq R(t_{k+1})
+\end{equation}
+and choose $p$ largest characteristics with interval numbers $t_j, 1\leq j \leq p$.
+\item
+Carry out $p$ new trials in parallel at the points $x^{k+j}, 1 \leq j \leq p$, calculated by the formulae
+\begin{eqnarray*}
+& x^{k+j}=\frac{x_{t_j}+x_{t_j-1}}{2}, \; \nu(x_{t_j-1})\neq \nu(x_{t_j}), \\
+& x^{k+j}=\frac{x_{t_j}+x_{t_j-1}}{2}- \frac{\mathrm{sign}(z_{t_j}-z_{t_j-1})}{2r_\nu}\left[\frac{\left|z_{t_j}-z_{t_j-1}\right|}{\mu_\nu}\right]^N, \; \nu(x_{t_j-1})=\nu(x_{t_j})=\nu. \\
+\end{eqnarray*} 
+
+%Добавить результаты испытаний в информационную базу алгоритма, и перейти к правилу 1.
+\end{enumerate}
+
+The algorithm stops if the condition $\Delta_{t_j}\leq \epsilon$ becomes true for at least one number $t_j, 1\leq j \leq p$; here  $\epsilon>0$ has an order of magnitude of the desired coordinate accuracy.
+
+A detailed description of the algorithm convergence theory is presented in \cite{Strongin2000}.
+
+\section{Parallel algorithm for mixed-integer problems}
 
 Рассмотрим теперь случай, когда аргумент функций задачи содержит две компоненты: вектор $y$, принадлежащий гиперинтервалу $D$, и вектор $u$, имеющий конечный (и при этом не очень большой) набор возможных значений, т.е. 
 \begin{gather}\label{problem_i}
@@ -130,10 +241,13 @@ Y(x)=y(x-E(x)), \; x\in[0,S],
 g_j(x) = g_j(Y(x),u_{E(x)+1}), x\in[0,S],
 \]
 имеющие, вообще говоря, разрывы первого рода в целочисленных точках $x_i = i, 1\leq i \leq S-1$.
+%значения функций и индексов в данных точках - не определены!
 Используя введенные обозначения можно переформулировать исходную задачу как
-\[
+\begin{equation}\label{problem_is1}
 \min \left\{g_{m+1}(x): x \in [0,S], \; g_j(x) \leq 0, \; 1 \leq j \leq m\right\}.
-\]
+\end{equation}
+
+
 
 
 As an illustration, Fig. \ref{fig:1} presents the plots of the functions corresponding to a 
@@ -146,7 +260,7 @@ problem with one continuous parameter and one binary parameter.
     \label{fig:1}
 \end{figure}
 
-Applying the global search algorithm to solving the problem (\ref{problem_is1}), we will find 
+Applying the parallel index algorithm to solving the problem (\ref{problem_is1}), we will find 
 the solution of the problem (\ref{problem_i}). In this case the major part of trials will conducted in 
 the subproblem, the solving of which corresponds to the solving of the initial 
 problem (\ref{problem_i}). In the rest subproblems, a only minor part of trials will be performed 
@@ -156,21 +270,21 @@ All the above is confirmed by Fig. \ref{fig:1}, where the
 points of trials executed in the course of solving this problem are denoted by the dashes.
 
 
-Thus, we have constructed the \textit{Mixed-Integer Global Search Algorithm} (MIGSA) based on the  
+Thus, we have constructed the \textit{Mixed-Integer Parallel Index Algorithm} (MIPIA) based on the  
 reduction of the mixed-integer non-convex optimization problem to the non-convex optimization problem. 
 %It is possible to prove that the convergence conditions for this algorithm will follow from the convergence conditions of its prototype (GSA).
 
 \section{Results of experiments}
 
-Let us compare the proposed MIGSA method with a genetic algorithm for solving the mixed-integer optimization problems implemented in Matlab Global Optimization Toolbox \cite{Matlab}. In Table 
+Let us compare proposed MIPIA with a genetic algorithm for solving the mixed-integer global optimization problems implemented in Matlab Global Optimization Toolbox \cite{Matlab}. In Table 
 \ref{tab:1}, the numbers of trials required for solving the known test mixed-integer 
 problems by these methods are presented. For both methods, the same accuracy of search $10^{-2}$ were used. All numerical experiments were conducted on a 
 computer with Intel Core i5-7300 2.5 GHz processor and 8 Gb RAM under MS Windows 10. The 
-results of experiments have demonstrated the advantage to the MIGSA method in the number 
+results of experiments have demonstrated the advantage of MIPIA in the number 
 of iterations as well as in the execution time.
 
 \begin{table}
-	\caption{Comparison of MIGSA and GA}
+	\caption{Comparison of MIPIA and GA}
 	\label{tab:1}
 	\center
 	\begin{tabular}{cccccc}
