@@ -80,14 +80,14 @@
 \begin{frame}
   \frametitle{Methods}
   \begin{itemize}
-    \item[$\square$] \textbf{Deteriminstic}
+    \item[$\square$] \textbf{Deteriminstic}:
     \begin{itemize}
       \item Have complicated internal structure in multidimensional case;
       \item Usually store and use the whole history of trials accumulated during search;
       \item Require non-trivial parallelization schemes;
-      \item Under some assumptions convergence to the global solution is guaranteed;
+      \item Under some assumptions convergence to the global solution is guaranteed.
     \end{itemize}
-    \item[$\square$] \textbf{Stochastic}
+    \item[$\square$] \textbf{Stochastic}:
     \begin{itemize}
       \item Have relative simple internal structure;
       \item Require constant amount of memory to store internal state of some random process or individuals of population;
@@ -102,19 +102,19 @@
   \frametitle{Methods}
   In this work considered the following solvers available in open-source:
   \begin{itemize}
-    \item[$\square$] \textbf{Deteriminstic}
+    \item[$\square$] \textbf{Deteriminstic}:
     \begin{itemize}
       \item DIRECT, DIRECT$l$;
-      \item AGS, AGS$l$;
+      \item AGS, AGS$l$.
     \end{itemize}
-    \item[$\square$] \textbf{Stochastic}
+    \item[$\square$] \textbf{Stochastic}:
     \begin{itemize}
       \item Multi Level Single Linkage;
       \item StoGO;
       \item Differential Evolution;
       \item Controlled Random Search;
       \item Dual Simulated Annealing;
-      \item Ant colony optimization;
+      \item Ant Colony Optimization.
     \end{itemize}
   \end{itemize}
 \end{frame}
@@ -227,7 +227,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Basic optimization method}
+  \frametitle{Univariate Algorithm of Global Search}
   Optimization method generates search sequence \(\{x_k\}\) and consists of the following steps:
   \begin{enumerate}
     \setlength{\itemindent}{.1in}
@@ -261,14 +261,29 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Parallel Globalizer solver}
+  \frametitle{Globalizer parallel solver}
   \begin{figure}[ht]
     \includegraphics[width=0.95\textwidth]{evolvents_parallel.pdf}
   \end{figure}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Parallel MIDACO solver}
+  \frametitle{MIDACO parallel solver}
+  The MIDACO solver utilizes reverse communication architecture.
+  Reverse communication means that the call of the objective function happens outside and
+  independently of the MIDACO source code.
+  Relying on this feature the following distributed parallelization scheme was implemented:
+  \begin{enumerate}
+    \item MIDACO runs at the master node and generates \(n \times p\) new trial points at each
+  iteration.
+    \item Each of \(n\) distributed computational nodes gets \(p\) points from the master and performs
+  \(p\) parallel trials on local computing devices.
+    \item Each of \(n\) distributed computational nodes sends \(p\) values of the objective function to
+  the master.
+  \end{enumerate}
+
+  In this scheme all distributed communications were implemented using the MPI library.
+  Parallelism within a single node is powered by the OpenMP standard.
 \end{frame}
 
 \begin{frame}
@@ -282,7 +297,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Results of applying the parallel algorithm}
+  \frametitle{Results of the parallel algorithms}
   \begin{table}
     \centering
     \caption{Averaged numbers of iterations executed by the parallel algorithms for solving the test
@@ -321,7 +336,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Results of applying the parallel algorithm}
+  \frametitle{Results of the parallel algorithms}
   \begin{table}
     \centering
     \caption{Speedup of parallel computations executed by the parallel algorithms}
@@ -359,7 +374,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Results of applying the parallel algorithm}
+  \frametitle{Results of the parallel algorithms}
   \begin{figure}[ht]
     \centering
     \subfloat[$p=1$]{{\includegraphics[width=.5\textwidth]{speedup_midaco_globalizer_p_1.pdf}}\label{fig:speedup_p1}}
@@ -369,7 +384,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Results of applying the parallel algorithm}
+  \frametitle{Results of the parallel algorithms}
   \begin{figure}[ht]
     \centering
     \subfloat[$p=1$]{{\includegraphics[width=.5\textwidth]{time_midaco_globalizer_p_1.pdf}}\label{fig:time_p1}}
@@ -378,15 +393,24 @@
   \end{figure}
 \end{frame}
 
-%\begin{frame}
-%  \frametitle{Results of applying the parallel algorithm}
-%\end{frame}
-
 \begin{frame}
   \frametitle{Conclusions}
     %Already done:
     \begin{itemize}
-      \item 1
+      \item AGS\(l\) method implemented in the Globalizer system has demonstrated the convergence
+    speed and reliability at the level of DIRECT and exceeds many other algorithms, the open-source
+    implementations of which are available;
+    \item the stochastic optimization methods inferior to the deterministic ones in the convergence
+  speed and in reliability. It is manifested especially strongly on more complex multiextremal
+  problems;
+    \item the parallel version of the Globalizer system demonstrates good speedup
+  when running on several nodes, on each of which a single objective function value per iterations is
+  computed. When solving the problems with fast computable objective functions and using multiple
+  threads on the nodes, the speedup for the Globalizer system degrade with increasing
+  number of nodes;
+    \item the MIDACO system is the most suitable for simple global optimization problems with the
+  fast-computable objective functions. In this case, MIDACO is reliable enough and provides a linear
+  speedup with increasing number of nodes and threads executed on these ones in parallel.
     \end{itemize}
     %Future work:
     %\begin{itemize}
