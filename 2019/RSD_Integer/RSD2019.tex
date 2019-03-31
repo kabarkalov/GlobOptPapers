@@ -285,6 +285,21 @@ Thus, we have constructed the \textit{Mixed-Integer Parallel Index Algorithm} (M
 reduction of the mixed-integer non-convex optimization problem to the non-convex optimization problem. 
 %It is possible to prove that the convergence conditions for this algorithm will follow from the convergence conditions of its prototype (GSA).
 
+Наиболее эффективно на GPU можно реализовать операцию вычисления сразу многих значений целевой функции. Для этого требуется реализовать на GPU процедуру вычисления значений функции. Пересылки данных от CPU к GPU будут минимальные: требуется лишь передать на GPU координаты точек испытаний, и получить обратно значения функций в этих точках. Функции, определяющие обработку результатов испытаний в соответствии с алгоритмом и требующие работы с большим объемом накопленной поисковой информацией, могут быть эффективно реализованы на CPU.
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=1.0\textwidth] {fig2.jpg}
+    \caption{Схема информационных обменов в GPU-алгоритме}
+    \label{fig:2}
+\end{figure}
+
+Общая схема организации вычислений с использованием GPU приведена на Fig.  \ref{fig:2}. В соответствии с данной схемой на CPU выполняются шаг 1 – 6 параллельного алгоритма глобального поиска. Координаты \textit{p} точек испытаний, вычисленные на шаге 7 алгоритма, накапливаются в промежуточном буфере, а затем передаются на графический процессор. На GPU происходит вычисление значений функции в этих точках, после чего результаты испытаний (снова через промежуточный буфер) передаются на CPU.
+
+
+
+
 \section{Results of experiments}
 
 Let us compare proposed MIPIA with a genetic algorithm for solving the mixed-integer global optimization problems implemented in Matlab Global Optimization Toolbox \cite{Matlab}. In Table 
@@ -344,9 +359,56 @@ This generator of multiextremal functions is often used for the investigations o
 \end{enumerate}
 
 
-In the problems generated in our experiments, there were 5 integer  and 3 continuous parameters.
-The accuracy of the search was equal to $10^{-2}$. 
+In the problems generated in our experiments, there were 5 integer  and 6 continuous parameters. Дискретные параметры имеют по 4 значения, таким образом имеем \textit{S} = 1024 возможных значения. The accuracy of the search was equal to $10^{-2}$.  С помощью GKLS-генератора создавалось 100 шестимерных задач. 
+Computational experiments were carried out on Lobachevsky supercomputer. The node of 
+supercomputer included two Intel Sandy Bridge E5-2660 2.2 GHz CPUs and 64 Gb RAM. The 
+CPU had 8 cores, i.e. each node had a total of 16 cores and two NVIDIA Kepler K20Х GPUs.
 
+
+
+В Table \ref{tab:2} приведены результаты экспериментов на CPU с использованием OpenMP. Использовалось 1, 8 и 16 потоков. 16 потоков соответствуют полной загрузке CPU на узле кластера. Приведено среднее число итераций требуемое для решения задачи, среднее время решения и ускорение по времени по отношению к последовательному запуску. За одну итерации проводилось столько же испытаний сколько использовалось потоков.
+
+\begin{table}
+	\caption{Результаты экспериментов на CPU}
+	\label{tab:2}
+	\center
+	\begin{tabular}{cccccc}
+		\hline\noalign{\smallskip}
+        
+		Число потоков & \textit{p} = 1 & \textit{p} = 8 & \textit{p} = 16 \\
+	\noalign{\smallskip} \hline \noalign{\smallskip}
+
+		Среднее число итераций  & 3 221 023,4 & 512 314,2 & 209 237,0 \\
+		Среднее время решения & 5 520,3 & 1 253,5 & 717,3 \\
+		Ускорение по отношению к одному потоку & 1,0 & 4,4 & 7,7 \\
+		\noalign{\smallskip}\hline
+	\end{tabular}
+\end{table}
+
+
+Наблюдается почти линейное ускорение по итерациям и значительное ускорение по времени решения задачи.
+
+В Table \ref{tab:3} приведены результаты экспериментов на GPU с использованием CUDA. Использовалось 256, 512 и 1024 нитей. Приведено среднее число итераций требуемое для решения задачи, среднее время решения и ускорение по времени по отношению к полной загрузке CPU на узле кластера. За одну итерации проводилось столько же испытаний сколько использовалось нитей.
+
+\begin{table}
+	\caption{Результаты экспериментов на GPU}
+	\label{tab:3}
+	\center
+	\begin{tabular}{cccccc}
+		\hline\noalign{\smallskip}
+        
+		Число нитей & \textit{p} = 256 & \textit{p} = 512 & \textit{p} = 1024 \\
+	\noalign{\smallskip} \hline \noalign{\smallskip}
+
+		Среднее число итераций  & 1 522,3 & 919,8 & 412,6 \\
+		среднее время решения & 33,6 & 31,2 & 30,2 \\
+		Ускорение по отношению к полной загрузке ЦПУ & 21,4 & 23,0 & 23,7 \\
+
+		\noalign{\smallskip}\hline
+	\end{tabular}
+\end{table}
+
+Наблюдается значительное ускорение. Ускорение по отношению к последовательному запуску составило 182.
 
 %All problems of the series have been solved successfully and for solving the problems based on the \textit{Simple} class 11988 trials in average were required whereas for solving the problems based on the \textit{Hard} class 24750 trials were required.
 
