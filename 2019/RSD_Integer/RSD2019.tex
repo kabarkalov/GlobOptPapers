@@ -27,7 +27,7 @@
 project No.\,16-11-10150.}}
 \author{Konstantin Barkalov \and Ilya Lebedev %\Letter 
 \\
-\email{konstantin.barkalov@itmm.unn.ru}}
+\email{ \{konstantin.barkalov,ilya.lebedev\}@itmm.unn.ru}}
 
 \institute{
 Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia
@@ -36,12 +36,15 @@ Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia
 \maketitle
 
 \begin{abstract}
+
 In the present paper, the mixed-integer global optimization problems are considered. A novel 
-deterministic algorithm for solving the problems of this class based on the information-statistical 
-approach to solving the continuous global optimization problems has been proposed. The 
-comparison of this algorithm with known analogs demonstrating the efficiency of the 
-developed approach has been conducted. The stable operation of the algorithm was confirmed 
-also by solving a series of several hundred mixed-integer global optimization problems. 
+parallel algorithm for solving the problems of this class based on the information-statistical 
+approach to solving the continuous global optimization problems has been proposed. 
+The comparison of this algorithm with known analogs demonstrating the efficiency of the 
+developed approach has been conducted. 
+%Russian
+Предложенный алгоритм допускает эффективное использование graphics accelerators. 
+Проведены вычислительные эксперименты при решении серии из 100 multiextremal mixed-integer problems, которые подтверждают хорошее ускорение алгоритма с использованием GPU. 
 
 \keywords global optimization, non-convex constraints, mixed-integer problems.
 
@@ -53,25 +56,39 @@ In the present paper, the global optimization problems and the method of solving
 considered. The global optimization problems are the computation-costly ones since the global 
 optimum is an integral characteristic of the problem being solved and requires the investigation 
 of the whole search domain. 
-%As a result, the search of the global optimum is reduced to the construction of a coverage (in general, a nonuniform one) of the space of parameters. 
+As a result, the search of the global optimum is reduced to the construction of a coverage (in general, a nonuniform one) of the space of parameters. 
 The problems, in which some parameters can take the integer values only (mixed-integer global 
 optimization problems) are of special interest because for these ones it is more difficult to build 
 the estimates of the optimum as compared to the continuous problems.
 
+The situation when some parameters are featured by the discreteness or integerness is frequent in applied problems. As a rule, the integer parameters take a small number of values and may denote, for example, the trademarks of the materials used, the variant of typical layouts of components, etc.
+
 A lot of publication have been devoted to the methods of solving the mixed-integer problems 
 (see, for example, the reviews~\cite{Burer,Boukouvala}). The well known deterministic 
 methods of solving the problems of this class are based, as a rule, on the Branch-and-Bound 
-approach or on the Branch-and-Reduce one. Also, a number of the metaheuristic and genetic 
-algorithms are known, which are based one way or another on the random search concept.
-%  based ones, anyway, based on the ideas of random search.
+approach \cite{Belotti} or on the Branch-and-Reduce one \cite{Vigerske}. Also, a number of the metaheuristic and genetic 
+algorithms are known, which are based one way or another on the random search concept \cite{Deep,Schluter}.
 
-In the present study, we proposed a novel deterministic method for solving the mixed-integer 
+In the present study, we proposed a novel parallel method for solving the mixed-integer 
 problems based on the information-statistical approach to solving the global optimization 
-problems \cite{Strongin2000,Strongin2013}. The paper text reflecting the results of preliminary 
-studies is composed as follows. First, an approach to solving the problems with continuous 
-parameters has been considered, then its generalization for the mixed-integer problems was 
-proposed. In the final section, the results of comparison of the proposed method with the 
-known analogs are presented.
+problems \cite{Strongin2000,Strongin2013}. 
+%Russian
+В рамках данного подхода 
+\begin{itemize}
+	\item 
+	решение многомерных задач сводится  к решению эквивалентных им одномерных, cоответствующая редукция основана на использовании space-filling curves;
+	\item 
+	при решении constrained optimization problems каждое ограничение учитывается и обрабатывается отдельно, штрафные функции не используются;
+	\item 
+	распараллеливание процесса поиска осуществляется за счет одновременного вычисления на каждой итерации нескольких значений целевой функции в разных точках search domain.	
+\end{itemize}
+
+Текст статьи, отражающей результаты проведенного исследования, построен следующим образом. 
+В разделе 2 дано краткое описание описание схемы редукции размерности с использованием space-filling curves, а также описана индексная схема учета ограничений. Здесь же приведена формулировка параллельного индексного алгоритма для решения задач непрерывной глобальной оптимизации.
+В разделе 3 предложен подход к обобщению параллельного индексного алгоритма с целью решения mixed-integer problems. Приведен способ, позволяющий свести решение mixed-integer problem к решению набора задач непрерывной оптимизации, которое может выполняться параллельно. 
+Раздел 4 содержит результаты численных экспериментов. Здесь производится сравнение последовательной версии алгоритма с известными аналогами, а также показана эффективность параллельных CPU- и GPU-версий алгоритма при решении серии multiextremal mixed-integer problem.  
+Section 5 concludes the paper.
+
 
 \section{Global optimization algorithm and dimension reduction}
 
@@ -102,9 +119,19 @@ minimum in (\ref{problem}) by solving the one-dimensional problem
 Algorithms for numerical construction of Hilbert curve approximation (\textit{evolvent}) are 
 considered in \cite{Strongin2013}. These evolvents are fractals generated by an iterative
 process, that fill in the hypercube $D$ with accuracy $2^{-m}$, where integer $m>0$ is the evolvent construction parameter. 
-%Пример разверток - рисунки: 2D или 3D?
-%Examples of the evolvent with different m in two dimensions are given in Fig. 1.
-%In Fig. 1 approximations of levels 1, 2, 3, and 4 of the Hilbert curve are given in the domain [􀀀1; 1] \in R3.
+
+Problems of numerical construction of Peano-type space filling curves and the corresponding theory are considered in detail in \cite{Strongin2000,Strongin2013}. Examples of the evolvent with different $m$ in two dimensions are given in Fig.~\ref{evolvents}.
+
+\begin{figure}
+\begin{minipage}{0.49\linewidth}
+\center{\includegraphics[width=1.0\linewidth]{fig1b.JPG} \\ (a)}
+\end{minipage}
+\begin{minipage}{0.49\linewidth}
+\center{\includegraphics[width=1.0\linewidth]{fig1c.JPG} \\ (b)}
+\end{minipage}
+\caption{Evolvents in two dimensions with (a) $m=4$ and (b) $m=5$}
+\label{evolvents}
+\end{figure}
 
 
 Due to (\ref{g_k}) the functions $g_i(y(x))$ are defined 
@@ -146,7 +173,7 @@ The dyad
 \end{equation}
 will be referred to as the \textit{trial outcome}.
 
-An efficient parallel index algorithm (PIA) for solving the constrained global optimization problem (\ref{problem}) has been developed at University of Nizhni Novgorod. 
+An efficient parallel index algorithm (PIA) for solving the constrained global optimization problem (\ref{problem}) has been developed at University of Nizhni Novgorod. The scheme of the algorithm is as follows.
 
 Suppose we have $p \geq 1$  computational elements (e.g., accelerator cores), which can be used to run $p$ trials simultaneously. In the first iteration of the method, $p$ trials are run in parallel at various random points $x^i\in(0,1)$, $1\leq i \leq p$. 
 Suppose $n \geq 1$  iterations of the method have been completed, and as a result of which, trials were carried out in $k=k(n)$ points $x^i, 1\leq i \leq k$. Then the points $x^{k+1},...,x^{k+p}$  of the search trials in the next $(n+1)$-th iteration will be determined according to the rules below.
@@ -214,15 +241,13 @@ Carry out $p$ new trials in parallel at the points $x^{k+j}, 1 \leq j \leq p$, c
 & x^{k+j}=\frac{x_{t_j}+x_{t_j-1}}{2}- \frac{\mathrm{sign}(z_{t_j}-z_{t_j-1})}{2r_\nu}\left[\frac{\left|z_{t_j}-z_{t_j-1}\right|}{\mu_\nu}\right]^N, \; \nu(x_{t_j-1})=\nu(x_{t_j})=\nu. \\
 \end{eqnarray*} 
 
-%Добавить результаты испытаний в информационную базу алгоритма, и перейти к правилу 1.
 \end{enumerate}
 
 The algorithm stops if the condition $\Delta_{t_j}\leq \epsilon$ becomes true for at least one number $t_j, 1\leq j \leq p$; here  $\epsilon>0$ has an order of magnitude of the desired coordinate accuracy.
-
 A detailed description of the algorithm convergence theory is presented in \cite{Strongin2000}.
 
 \section{Parallel algorithm for mixed-integer problems}
-
+%Russian
 Рассмотрим теперь случай, когда аргумент функций задачи содержит две компоненты: вектор $y$, принадлежащий гиперинтервалу $D$, и вектор $u$, имеющий конечный (и при этом не очень большой) набор возможных значений, т.е. 
 \begin{gather}\label{problem_i}
 \min{\left\{ g_{m+1}(y,u):y\in D, \; g_i(y,u)\leq 0, \; 1 \leq i \leq m\right\}},\\
@@ -252,14 +277,12 @@ Y(x)=y(x-E(x)), \; x\in[0,S],
 g_i(x) = g_i(Y(x),u_{E(x)+1}), x\in[0,S],
 \]
 имеющие, вообще говоря, разрывы первого рода в целочисленных точках $x_k = i, 1\leq i \leq S-1$.
-%значения функций и индексов в данных точках - не определены!
+Значение  $z_k = g_\nu(y(x_k))$ из (\ref{trial_result}) в этих точках будем считать неопределенным, а значения индекса -- равным 0, т.е. $\nu(x_k) = 0$ .
+
 Используя введенные обозначения можно переформулировать исходную задачу как
 \begin{equation}\label{problem_is1}
 \min \left\{g_{m+1}(x): x \in [0,S], \; g_i(x) \leq 0, \; 1 \leq i \leq m\right\}.
 \end{equation}
-
-
-
 
 As an illustration, Fig. \ref{fig:1} presents the plots of the functions corresponding to a 
 problem with one continuous parameter and one binary parameter.
@@ -283,28 +306,17 @@ points of trials executed in the course of solving this problem are denoted by t
 
 Thus, we have constructed the \textit{Mixed-Integer Parallel Index Algorithm} (MIPIA) based on the  
 reduction of the mixed-integer non-convex optimization problem to the non-convex optimization problem. 
-%It is possible to prove that the convergence conditions for this algorithm will follow from the convergence conditions of its prototype (GSA).
-
-Наиболее эффективно на GPU можно реализовать операцию вычисления сразу многих значений целевой функции. Для этого требуется реализовать на GPU процедуру вычисления значений функции. Пересылки данных от CPU к GPU будут минимальные: требуется лишь передать на GPU координаты точек испытаний, и получить обратно значения функций в этих точках. Функции, определяющие обработку результатов испытаний в соответствии с алгоритмом и требующие работы с большим объемом накопленной поисковой информацией, могут быть эффективно реализованы на CPU.
-
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=1.0\textwidth] {fig2.jpg}
-    \caption{Схема информационных обменов в GPU-алгоритме}
-    \label{fig:2}
-\end{figure}
-
-Общая схема организации вычислений с использованием GPU приведена на Fig.  \ref{fig:2}. В соответствии с данной схемой на CPU выполняются шаг 1 – 6 параллельного алгоритма глобального поиска. Координаты \textit{p} точек испытаний, вычисленные на шаге 7 алгоритма, накапливаются в промежуточном буфере, а затем передаются на графический процессор. На GPU происходит вычисление значений функции в этих точках, после чего результаты испытаний (снова через промежуточный буфер) передаются на CPU.
-
-
+%Russian
+Предложенная схема основана на параллельном индексном методе для решения задач непрерывной оптимизации и не является ориентированной на конкретное вычислительное устройство. Одной из ключевых операций здесь является параллельное проведение нескольких испытаний в различных точках области поиска (см. шаг 7 алгоритма), которе может быть реализовано как на CPU (с использованием OpenMP и/или MPI), так и на GPU (с использованием CUDA). Вопросы использования GPU для этих целей были детально рассмотрены в \cite{Barkalov2016,Gergel2016}, указанный подход к использованию GPU был применен и при реализации алгоритма MIPIA.
 
 
 \section{Results of experiments}
+%Russian
+Первая серия экспериментов была проведена с использованием последовательной версии предложенного алгоритма с целью его сравнения с известными методами аналогичного назначения.
 
 Let us compare proposed MIPIA with a genetic algorithm for solving the mixed-integer global optimization problems implemented in Matlab Global Optimization Toolbox \cite{Matlab}. In Table 
 \ref{tab:1}, the numbers of trials required for solving the known test mixed-integer 
-problems by these methods are presented. For both methods, the same accuracy of search $10^{-2}$ were used. All numerical experiments were conducted on a 
+problems by these methods are presented. For both methods, the same accuracy of search $10^{-2}$ were used. These numerical experiments were conducted on a 
 computer with Intel Core i5-7300 2.5 GHz processor and 8 Gb RAM under MS Windows 10. The 
 results of experiments have demonstrated the advantage of MIPIA in the number 
 of iterations as well as in the execution time.
@@ -320,7 +332,7 @@ of iterations as well as in the execution time.
 		 & $k$ & $t$ & & $k$ & $t$  \\
 		\noalign{\smallskip} \hline \noalign{\smallskip}
 		 Problem 2 \cite{Floudas}&	481 &	0.0601 & &	417 &	0.04 \\
-%		 Problem 3 \cite{Floudas}& 	1821 &	0.1130 & & 3324 &	0.107 \\
+		 Problem 3 \cite{Floudas}& 	1821 &	0.1130 & & 3324 &	0.107 \\
 		 Problem 6 \cite{Floudas}&	641 &	0.0510 & &	118 &	0.001 \\
 		 Problem 1 \cite{Deep}   &	481 &	0.1378 & &	66 &	0.0007 \\
 		 Problem 2 \cite{Deep}   &	481 &	0.0473 & &	57 &	0.0006 \\
@@ -329,12 +341,24 @@ of iterations as well as in the execution time.
 	\end{tabular}
 \end{table}
 
-%In order to demonstrate the reliability of the MIGSA method, we have solved two series of 100 multiextremal mixed-integer problems each constructed on the basis of modified problems of \textit{Simple} and \textit{Hard} classes generated by GKLS generator. 
+Последующие серии экспериментов были выполнены для оценки ускорения параллельной версии предложенного алгоритма MIPIA с использованием как CPU, так и GPU. В данных экспериментах решалась серия из 100 тестовых mixed-integer problems, сгенерированных случайных образом.  
 
 Известным генератором тестовых задач непрерывной многоэкстремальной оптимизации является GKLS-генератор \cite{Gaviano}. Он позволяет генерировать functions of arbitrary dimensionality with known properties (the number of local minima, the size of their domains of attraction, the global minimizer, etc.).  
 This generator of multiextremal functions is often used for the investigations of the global optimization algorithms~ 
-\cite{Paulavicius2014,SergeyevKvasov2015,Lebedev2015,Gergel2015}.
-%Линии уровня какой-нибудь задачи GKLS? C точками испытаний?
+\cite{Paulavicius2014,SergeyevKvasov2015,Lebedev2015,Gergel2015}. 
+In Fig.~\ref{example} (a) and (b), the contour plots of two-dimensional GKLS functions are presented. Figures also shows the points of the trials performed by the method until the required accuracy $\epsilon=10^{-2}$ was achieved.
+
+\begin{figure}
+\begin{minipage}{0.5\linewidth}
+\center{\includegraphics[width=1.0\linewidth]{GKLS-4.png} \\ (a)}
+\end{minipage}
+\hfill
+\begin{minipage}{0.5\linewidth}
+\center{\includegraphics[width=1.0\linewidth]{GKLS-6.png} \\ (b)}
+\end{minipage}
+\caption{Solving a two-dimensional problem using the index algorithm}
+\label{example}
+\end{figure}
 
 В проведенных экспериментах GKLS-генератор использовался как основа для построения mixed-integer problems. Правила, позволяющие генерировать тестовые задачи подобного вида, заключаются в следующем.
 
@@ -342,9 +366,14 @@ This generator of multiextremal functions is often used for the investigations o
 	\item С помощью генератора GKLS порождается непрерывная многоэкстремальная функция $\varphi(y), \; y\in D, \; D = \left\{ a_j\leq y_j\leq b_j, 1\leq j \leq N \right\}$. Глобальный минимум данной функции достигается в известной точке $y'=(y'_1,...,y'_N)$ и равен $\varphi'=\varphi(y')=-1$.
 	\item Генерируется concave mixed-integer function 
 	\[
-			\mu(y,u) = -2 \left[ \sum_{j=1}^N \left( \frac{y_j - y'_j}{b_j-a_j} \right)^2 + \sum_{j=1}^M \left( \frac{u_j - b_j}{b_j-a_j} \right)^2 \right].
+			\mu(y,u) = -2 \left[ \sum_{j=1}^N \left( \frac{y_j - y'_j}{b_j-a_j} \right)^2 + \sum_{j=1}^M \left( \frac{u_j - b_j}{b_j-a_j} \right)^2 \right],
 	\]
-	где $y\in D = \left\{ a_j\leq y_j\leq b_j, 1\leq j \leq N \right\} \subset R^N$, a $u\in U = = \left\{ a_j\leq u_j\leq b_j, 1\leq j \leq M \right\} \subset Z^N$; т.е. данная функция имеет $N$ непрерывных и $M$ дискретных параметров и достигает минимального значения в точке $(y',b)$.
+	где 
+	\begin{gather}
+	y\in D = \left\{ a_j\leq y_j\leq b_j, 1\leq j \leq N \right\} \subset R^N,\nonumber \\
+	u\in U = \left\{ u_j \in  \left\{a_j, ..., b_j \right\}, 1\leq j \leq M \right\};\nonumber
+	\end{gather}
+	т.е. данная функция имеет $N$ непрерывных и $M$ дискретных параметров и достигает минимального значения в точке $(y',b)$.
 	\item Вычисляется коэффициент 
 	\[
 	C = 4 - \min_{y,u} \left\{ \mu(y,u) \right\}, \; y\in D, u \in U.
@@ -359,36 +388,40 @@ This generator of multiextremal functions is often used for the investigations o
 \end{enumerate}
 
 
-In the problems generated in our experiments, there were 5 integer  and 6 continuous parameters. Дискретные параметры имеют по 4 значения, таким образом имеем \textit{S} = 1024 возможных значения. С помощью GKLS-генератора создано 100 шестимерных задач, которые были преобразованы в смешанные 11-ти мерные задачи. The accuracy of the search was equal to $10^{-2}$.   
+In the problems generated in our experiments, there were 5 discrete and 6 continuous parameters 
+	\begin{gather}
+	y\in D = \left\{ -1 \leq y_j\leq 1, 1\leq j \leq 6 \right\} \subset R^6,\nonumber \\
+	u\in U = \left\{ u_j \in  \left\{-1, -1/3, 0, 1/3, 1 \right\}, 1\leq j \leq 5 \right\}.\nonumber
+	\end{gather}
+
+Было сгенерировано 100 11-и мерных mixed-integer problems данного типа. The accuracy of the search was equal to $10^{-2}$.   
 Computational experiments were carried out on Lobachevsky supercomputer. The node of 
 supercomputer included two Intel Sandy Bridge E5-2660 2.2 GHz CPUs and 64 Gb RAM. The 
 CPU had 8 cores, i.e. each node had a total of 16 cores and two NVIDIA Kepler K20Х GPUs.
 
 
-
-В Table \ref{tab:2} приведены результаты экспериментов на CPU с использованием OpenMP. Использовалось 1, 8 и 16 потоков. Приведено среднее число итераций требуемое для решения задачи, среднее время решения (в секундах) и ускорение по времени по отношению к последовательному запуску. За одну итерацию проводилось столько же испытаний сколько использовалось потоков.
+В Table \ref{tab:2} приведены результаты экспериментов на CPU с использованием OpenMP в зависимости от числа задействованных threads $p$. Использовалось 1, 8 и 16 потоков. Приведено среднее число итераций $K_{av}$, требуемое для решения задачи, среднее время решения $T_{av}$ (в секундах), time speedup $S$ and iteration speedup $s$ (по отношению к последовательному запуску, т.е. $p=1$). В соответствии со схемой распараллеливания число испытаний на одной итерации параллельного алгоритма равнялось числу задействованных threads.
 
 \begin{table}
 	\caption{Результаты экспериментов на CPU}
 	\label{tab:2}
 	\center
 	\begin{tabular}{cccccc}
-		\hline\noalign{\smallskip}
-        
-		Число потоков & \textit{p} = 1 & \textit{p} = 8 & \textit{p} = 16 \\
+		\hline\noalign{\smallskip}        
+		$p$ & $T_{av}$ & $K_{av}$ & $S$ & $s$ \\
 	\noalign{\smallskip} \hline \noalign{\smallskip}
-
-		Среднее число итераций  & 3 221 023,4 & 512 314,2 & 209 237,0 \\
-		Среднее время решения & 5 520,3 & 1 253,5 & 717,3 \\
-		Ускорение по отношению к одному потоку & 1,0 & 4,4 & 7,7 \\
+	1 \;&	5520 \;  & 3221023 \;  & ...\; & ...  \\
+	8 \;&	1253 \; & 512314 \;  & 4.4\; & 6.3  \\
+	16\;&  717 \; &  209237 \; & 7.7\; & 15.4 \\
 		\noalign{\smallskip}\hline
 	\end{tabular}
 \end{table}
 
 
-Как видно из Table \ref{tab:2} , наблюдается почти линейное ускорение по итерациям и значительное ускорение по времени решения задачи. В среднем при последовательном решение задачи требовалось 1,5 часа.
 
-В Table \ref{tab:3} приведены результаты экспериментов на GPU с использованием CUDA. Использовалось 256, 512 и 1024 нитей. Приведено среднее число итераций требуемое для решения задачи, среднее время решения (в секундах) и ускорение по времени по отношению к полной загрузке CPU на узле кластера. За одну итерации проводилось столько же испытаний сколько использовалось нитей.
+Как видно из Table \ref{tab:2} , наблюдается почти линейное ускорение по итерациям и значительное ускорение по времени решения задачи, при этом последовательному алгоритму в среднем требовалось примерно 1.5 часа для решения задачи.
+
+В Table \ref{tab:3} приведены результаты экспериментов на GPU с использованием CUDA в зависимости от числа задействованных GPU-threads. Приведено среднее число итераций $K_{av}$, требуемое для решения задачи, среднее время решения $T_{av}$ (в секундах), time speedup $S$ and iteration speedup $s$ (по отношению к полной загрузке CPU на узле кластера). 
 
 \begin{table}
 	\caption{Результаты экспериментов на GPU}
@@ -396,27 +429,28 @@ CPU had 8 cores, i.e. each node had a total of 16 cores and two NVIDIA Kepler K2
 	\center
 	\begin{tabular}{cccccc}
 		\hline\noalign{\smallskip}
-        
-		Число нитей & \textit{p} = 256 & \textit{p} = 512 & \textit{p} = 1024 \\
+			$p$ & $T_{av}$ & $K_{av}$ & $S$ & $s$ \\
 	\noalign{\smallskip} \hline \noalign{\smallskip}
-
-		Среднее число итераций  & 1 522,3 & 919,8 & 412,6 \\
-		среднее время решения & 33,6 & 31,2 & 30,2 \\
-		Ускорение по отношению к полной загрузке ЦПУ & 21,4 & 23,0 & 23,7 \\
-
+	256 \;&	33.6 \; & 1522\;  & 21.3 \; & 137  \\
+	512 \;&	31.2 \; & 919 \;  & 23.0 \; & 228  \\
+	1024\;& 30.2 \; & 412 \; & 23.7  \; & 508  \\
+	2048\;& 38.5 \; & 244 \; & 18.6  \; & 858  \\
 		\noalign{\smallskip}\hline
 	\end{tabular}
 \end{table}
 
-Наблюдается значительное ускорение как по числу итераций, так и по времени. В среднем решение задачи (при 1024 нитях) потребовало 30 секунд. Таким образом, ускорение по отношению к последовательному запуску составило 182.
+Результаты эксперимнетов показывают почти одинаковое time speedup и линейное iteration speedup при использовании $p=256, 512, 1024$ threads. Однако при использовании $p=2048$ threads время работы алгоритма замедляется, но число итераций продолжает падать. Данный эффект объясняется тем, что для параллельного проведения $p$ испытаний используется GPU, а для обработки результатов испытаний (которая подразумевает работу со всей накопленной на предыдущих итерациях поисковой информацией) используется CPU. И при использовании $p=2048$ GPU threads время, которое тратится на передачу и обработку результатов 2048 испытаний, становится сопоставимым со временем проведения испытания, что и приводит к замедлению алгоритма в целом.
 
-%All problems of the series have been solved successfully and for solving the problems based on the \textit{Simple} class 11988 trials in average were required whereas for solving the problems based on the \textit{Hard} class 24750 trials were required.
 
 \section{Conclusion}
+%Russian
+В данной статье представлены результаты, полученные в Lobachevsky State University of Nizhni Novgorod при разработке и  исследовании параллельных алгоритмов глобальной оптимизации для решения многоэкстремальных задач, в которых часть параметров является непрерывными, а часть - дискретными.
+Для задач указанного класса был предложен эффективный параллельный алгоритм их решения алгоритм. 
+В последовательном варианте данный алгоритм не уступает алгоритму аналогичного назначения, реализованному в Matlab Global Optimization Toolbox.
+В параллельном варианте предложенный алгоритм допускает эффективную реализацию как на CPU, так и на GPU. 
+Проведены вычислительные эксперименты на серии из 100 multiextremal mixed-integer problems, убедительно демонстрирующие хорошее ускорение алгоритма с использованием GPU.
+Так, параллельный алгоритм с использованием GPU показал time speedup $S = 182$ по отношению к последовательному алгоритму и $S = 23.7$ по отношению к алгоритму, полностью задействующему два CPU на узле кластера.
 
-Заключение 
-
-%\textbf{Acknowledgments}. This study was supported by the Russian Science Foundation, project No 16-11-10150.
 
 \begin{thebibliography}{10}
 
@@ -425,6 +459,19 @@ Burer, S., Letchford, A.N.: Non-convex mixed-integer nonlinear programming: A su
 
 \bibitem{Boukouvala}
 Boukouvala, F., Misener, R., Floudas, C.A.: Global optimization advances in Mixed-Integer Nonlinear Programming, MINLP, and Constrained Derivative-Free Optimization, CDFO. European J. Oper. Res. \textbf{252}, 701--727 (2016) 
+
+\bibitem{Deep}
+Deep, K., Singh, K. P., Kansal, M.L., Mohan, C.: A real coded genetic algorithm for solving integer and mixed integer optimization problems. Appl. Math. Comput. \textbf{212}(2), 505--518 (2009)
+
+\bibitem{Schluter}
+Schl\"uter, M., Egea, J.A., Banga, J.R.: Extended ant colony optimization for non-convex mixed integer nonlinear programming. Computers and Operations Research \textbf{36}(7), 2217--2229 (2009)
+
+\bibitem{Belotti}
+Belotti, P., Lee, J., Liberti, L., Margot, F., W\"achter, A.: Branching and bounds tightening techniques for non-convex MINLP. Optim. Method. Softw. \textbf{24}(4-5), 597--634 (2009)
+
+\bibitem{Vigerske}
+Vigerske, S., Gleixner, A.: SCIP: global optimization of mixed-integer nonlinear programs in a branch-and-cut framework. 
+Optim. Method. Softw. \textbf{33}(3), 563--593 (2018)
 
 \bibitem{Strongin2000}
 Strongin, R.G., Sergeyev, Y.D.: Global optimization with non-convex constraints. Sequential and parallel algorithms. Kluwer Academic Publishers, Dordrecht (2000) %; DOI: 10.1007/978-1-4615-4677-1
@@ -438,8 +485,6 @@ Floudas, C.A., Pardalos, P.M.:  Handbook of test problems in local and global op
 \bibitem{Matlab}
 https://www.mathworks.com/help/gads/mixed-integer-optimization.html
 
-\bibitem{Deep}
-Deep, K., Singh, K. P., Kansal, M.L., Mohan, C.: A real coded genetic algorithm for solving integer and mixed integer optimization problems. Appl. Math. Comput. \textbf{212}(2), 505--518 (2009)
 
 \bibitem{Gaviano} Gaviano, M., Kvasov, D.E, Lera, D., and Sergeyev, Ya.D.: Software for generation of classes of test functions with known local and global minima for global optimization. ACM Transactions on Mathematical Software \textbf{29}(4), 469--480 (2003)
 
@@ -454,6 +499,13 @@ Lebedev, I., Gergel, V.: Heterogeneous parallel computations for solving global 
 
 \bibitem{Gergel2015}
 Gergel, V., Sidorov, S.: A two-level parallel global search algorithm for solution of computationally intensive multiextremal optimization problems. Lecture Notes in Computer Science  \textbf{9251}, 505--515 (2015)
+
+\bibitem{Barkalov2016} 
+Barkalov, K., Gergel, V.: Parallel global optimization on GPU. Journal of Global Optimization 66(1), 2--20 (2016) 
+
+\bibitem{Gergel2016}
+Barkalov, K., Gergel, V., Lebedev, I.: Solving Global Optimization Problems on GPU Cluster. In: Simos T.E. (Ed.) ICNAAM 2015, AIP Conference Proceedings, vol. 1738, art. no. 400006 (2016)
+
 
 
 \end{thebibliography}
