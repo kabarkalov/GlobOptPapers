@@ -37,16 +37,14 @@ Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia
 
 \begin{abstract}
 
-In the present paper, the mixed-integer global optimization problems are considered. A novel 
-parallel algorithm for solving the problems of this class based on the information-statistical 
-approach to solving the continuous global optimization problems has been proposed. 
-The comparison of this algorithm with known analogs demonstrating the efficiency of the 
-developed approach has been conducted. 
+The paper considers the mixed-integer global optimization problems. A novel 
+parallel algorithm for solving the problems of this class based on the index 
+algorithm to solving the continuous global optimization problems has been proposed. 
+The comparison of this algorithm with known analogs demonstrates the efficiency of the 
+developed approach. 
 %Russian
 The proposed algorithm allows an efficient parallelization including the employment of the 
-graphics accelerators. 
-The results of performed numerical experiments (solving a series of 100 multiextremal mixed-
-integer problems) confirm a good speed-up of the algorithm with the use of GPU. 
+graphics accelerators. The results of performed numerical experiments (solving a series of 100 multiextremal mixed-integer problems) confirm a good speedup of the algorithm with the use of GPU. 
 
 \keywords global optimization, non-convex constraints, mixed-integer problems.
 
@@ -54,15 +52,15 @@ integer problems) confirm a good speed-up of the algorithm with the use of GPU.
 
 \section{Introduction}\label{sec:intro}
 
-In the present paper, the global optimization problems and the method of solving these ones are 
-considered. The global optimization problems are the computation-costly ones since the global 
+In this paper the global optimization problems and the method of solving these ones are 
+considered. The global optimization problems are the time-consuming ones since the global 
 optimum is an integral characteristic of the problem being solved and requires the investigation 
 of the whole search domain. 
 As a result, the search of the global optimum is reduced to the construction of a coverage (in 
 general, a nonuniform one) of the space of parameters. 
-The problems, in which some parameters can take the integer values only (mixed-integer global 
-optimization problems) are of special interest because for these ones it is more difficult to build 
-the estimates of the optimum as compared to the continuous problems.
+The problems, in which some parameters can take the discrete or integer values only (mixed-integer global 
+optimization problems) are of special interest because for these problems it is more difficult to build 
+the estimates of the optimum as compared to the continuous ones.
 
 The situation when some parameters are featured by the discreteness or integerness is frequent 
 in applied problems. As a rule, the integer parameters take a small number of values and may 
@@ -72,21 +70,19 @@ components, etc.
 A lot of publication have been devoted to the methods of solving the mixed-integer problems 
 (see, for example, the reviews~\cite{Burer,Boukouvala}). The well known deterministic 
 methods of solving the problems of this class are based, as a rule, on the Branch-and-Bound 
-approach \cite{Belotti} or on the Branch-and-Reduce one \cite{Vigerske}. Also, a number of 
+\cite{Belotti} or on the Branch-and-Reduce approach \cite{Vigerske}. Also, a number of 
 the metaheuristic and genetic 
 algorithms are known, which are based one way or another on the random search concept 
 \cite{Deep,Schluter}.
 
 In the present study, we proposed a novel parallel method for solving the mixed-integer 
-problems based on the information-statistical approach to solving the global optimization 
+problems based on the index approach to solving the constrained global optimization 
 problems \cite{Strongin2000,Strongin2013}. 
 %Russian
 Within the framework of this approach: 
 \begin{itemize}
 	\item 
-	the solving of the multidimensional problems is reduced to solving the equivalent one-
-dimensional problems; the corresponding reduction is based on the use of the space-filling 
-curves;
+	the solving of the multidimensional problems is reduced to solving the equivalent one-dimensional problems; the corresponding reduction is based on the use of the space-filling curves;
 	\item 
 	when solving the constrained optimization problems, each constraint is taken into 
 account and processed separately, the penalty functions are not used;
@@ -102,7 +98,7 @@ curves is given. Also, the index scheme of accounting for the constraints is des
 formulation of the parallel index algorithm for solving the continuous global optimization 
 problems is given as well.
 In Section 3, the approach to the generalization of the parallel index algorithm with the purpose 
-of solving the mixed-integer problems is presented. A method allowing reducing the solving of 
+of solving the mixed-integer problems is presented. A method that allows to reduce solving of 
 mixed-integer problem to solving a set of the continuous optimization problems, which can be 
 performed in parallel, is given. 
 Section 4 contains the results of numerical experiments. The comparison of the sequential 
@@ -139,14 +135,10 @@ minimum in (\ref{problem}) by solving the one-dimensional problem
 \[
 \varphi(y(x^\ast))=\min \left\{\varphi(y(x)): x \in [0,1], \; g_i(y(x))\leq 0, \; 1 \leq i \leq m\right\}.
 \]
-Algorithms for numerical construction of Hilbert curve approximation (\textit{evolvent}) are 
-considered in \cite{Strongin2013}. These evolvents are fractals generated by an iterative
+Algorithms for numerical construction of Peano-Hilbert curve approximation (\textit{evolvent}) are 
+considered in \cite{Strongin2000,Strongin2013}. These evolvents are fractals generated by an iterative
 process, that fill in the hypercube $D$ with accuracy $2^{-m}$, where integer $m>0$ is the 
-evolvent construction parameter. 
-
-Problems of numerical construction of Peano-type space filling curves and the corresponding 
-theory are considered in detail in \cite{Strongin2000,Strongin2013}. Examples of the evolvent 
-with different $m$ in two dimensions are given in Fig.~\ref{evolvents}.
+evolvent construction parameter. Examples of the evolvent with different $m$ in two dimensions are given in Fig.~\ref{evolvents}.
 
 \begin{figure}
 \begin{minipage}{0.49\linewidth}
@@ -203,7 +195,7 @@ An efficient parallel index algorithm (PIA) for solving the constrained global o
 problem (\ref{problem}) has been developed at University of Nizhni Novgorod. The scheme of 
 the algorithm is as follows.
 
-Suppose we have $p \geq 1$  computational elements (e.g., accelerator cores), which can be 
+Suppose we have $p \geq 1$  computational elements (e.g., processor cores), which can be 
 used to run $p$ trials simultaneously. In the first iteration of the method, $p$ trials are run in 
 parallel at various random points $x^i\in(0,1)$, $1\leq i \leq p$. 
 Suppose $n \geq 1$  iterations of the method have been completed, and as a result of which, 
@@ -220,7 +212,7 @@ coordinate values, i.e.
 \end{equation}
 and match them with the values $z_i=g_\nu(y(x_i))$, $\nu=\nu(x_i)$, $1 \leq i \leq k$, from 
 (\ref{trial_result}), calculated at these points; points $x_0=0$ and $x_{k+1}=1$ are introduced 
-additionally; the values $z_0$ and $z_{k+1}$ are indeterminate.
+additionally, the values $z_0$ and $z_{k+1}$ are indeterminate.
 \item
 Classify the numbers $i,1\leq i \leq k$, of the trial points from (\ref{Eq:17}) by the number of 
 problem constraints fulfilled at these points, by building the sets
@@ -229,7 +221,7 @@ I_\nu = \left\{i: 1 \leq i \leq k,\ \nu = \nu(x_i)\right\},\ 1 \leq \nu \leq m+1
 \end{equation}
 containing the numbers of all points $x_i,1\leq i \leq k$, with the same values of $\nu$. The end 
 points $x_0=0$ and $x_{k+1}=1$ are interpreted as those with zero indices, and they are 
-matched to an additional set $I_0={0,k+1}$. 
+matched to an additional set $I_0= \left\{ 0,k+1 \right\}$. 
 
 Identify the maximum current value of the index
 \begin{equation}\label{Eq:19}
@@ -252,11 +244,7 @@ For all non-empty sets $I_\nu$, $1 \leq \nu \leq m+1$, determine the values
     \min{\left\{g_\nu(x_i):i\in I_\nu\right\}}, \nu = M,
    \end{cases}
 \end{equation}
-where $M$ is the maximum current value of the index, and the vector
-\begin{equation}\label{Eq:22}
-\epsilon _R=\left(\epsilon_1,...,\epsilon_m\right),
-\end{equation}
-with positive coordinates is called the \textit{reserve vector} and is used as a parameter in the 
+where $M$ is the maximum current value of the index, and the vector $\epsilon _R=\left(\epsilon_1,...,\epsilon_m\right)$ with positive coordinates is called the \textit{reserve vector} and is used as a parameter in the 
 algorithm.
 \item
 For each interval $(x_{i-1},x_i)$,$1 \leq i \leq k+1$, calculate the \textit{characteristic} $R(i)$: 
@@ -293,6 +281,12 @@ formulae
 The algorithm stops if the condition $\Delta_{t_j}\leq \epsilon$ becomes true for at least one 
 number $t_j, 1\leq j \leq p$; here  $\epsilon>0$ has an order of magnitude of the desired 
 coordinate accuracy.
+
+This method of organizing parallel computing has the following justification.
+The characteristics of intervals $R(i)$ used in the index algorithm can be considered as
+probability measures of the global minimum point location in these intervals. Inequalities
+(\ref{Eq:23}) arrange intervals according to their characteristics, and trials are carried out in parallel in
+the first $p$ intervals with the largest probabilities.
 A detailed description of the algorithm convergence theory is presented in \cite{Strongin2000}.
 
 \section{Parallel algorithm for mixed-integer problems}
@@ -312,8 +306,8 @@ Let us number by the integer values $s, 1\leq s \leq S,$ all possible values of 
 juxtapose each considered value $s$ with the vector $u_s$. 
 Then, the considered problem can be written in the form 
 \begin{gather}\label{problem_is}
- \min_{s\in\{1,...,S\}}\left(\min{\left\{ g_{m+1}(y,u_s):y\in D, \; g_i(y,u_s)\leq 0, \; 1 \leq i \leq 
-m\right\}}\right),\\
+ \min_{s\in\{1,...,S\}} \left\{ \min_{}{\left\{ g_{m+1}(y,u_s):y\in D, \; g_i(y,u_s)\leq 0, \; 1 \leq i \leq 
+m\right\}}\right\},\\
 D=\left\{ a_j\leq y_j \leq b_j, \; 1 \leq j\leq N \right\}.\nonumber 
 \end{gather}
 
@@ -348,7 +342,7 @@ As an illustration, Fig. \ref{fig:1} presents the plots of the functions corresp
 problem 
 \[
 %\min{\left\{ x^2 - 10\cos(2\pi x) + u^2 - 10\cos(2\pi u) : x\in [-2.22, 1.8], u \in {0,1} \right\}}
-\min{\left\{ u^2 (\sin(x) +\sin(10x/3) : x\in [2.7, 7.5], u \in {1,2} \right\}}
+\min{\left\{ u^2 (\sin(x) +\sin(10x/3) : x\in [2.7, 7.5], u \in \{1,2\} \right\}}
 \]
 with one continuous parameter $x$ and one binary parameter $u$.
 %Еще один график?   
@@ -406,7 +400,7 @@ of iterations as well as in the execution time.
 	\begin{tabular}{cccccc}
 		\hline\noalign{\smallskip}
 	\multirow{2}{*}{Test problem}	 & \multicolumn{2}{c}{ GA } & & 
-\multicolumn{2}{c}{MIGSA} \\
+\multicolumn{2}{c}{MIPIA} \\
 		\noalign{\smallskip} \cline{2-3} \cline{5-6} \noalign{\smallskip}
 		 & $k$ & $t$ & & $k$ & $t$  \\
 		\noalign{\smallskip} \hline \noalign{\smallskip}
@@ -457,10 +451,10 @@ the following.
 	\item A continuous multiextremal function $\varphi(y), y\in D = \left\{ a_j\leq 
 y_j\leq b_j, 1\leq j \leq N \right\}$ is generated with the use of the GKLS generator. The global 
 minimum of this function is achieved at the known point $y'=(y'_1,...,y'_N)$ and equals 
-$\varphi'=\varphi(y')=-1$.
+$\varphi(y')=-1$.
 	\item A concave mixed-integer function 
 	\[
-			\mu(y,u) = -2 \left[ \sum_{j=1}^N \left( \frac{y_j - y'_j}{b_j-a_j} 
+			h(y,u) = -2 \left[ \sum_{j=1}^N \left( \frac{y_j - y'_j}{b_j-a_j} 
 \right)^2 + \sum_{j=1}^M \left( \frac{u_j - b_j}{b_j-a_j} \right)^2 \right],
 	\]
 	is generated where 
@@ -472,7 +466,7 @@ $\varphi'=\varphi(y')=-1$.
 minimum value at the point $(y',b)$.
 	\item The coefficient 
 	\[
-	C = 4 - \min_{y,u} \left\{ \mu(y,u) \right\}, \; y\in D, u \in U.
+	h_{min} = 4 - \min_{y,u} \left\{ h(y,u) \right\}, \; y\in D, u \in U.
 	\]
 	is computed. 
 It is obvious, that the minimum of a concave function $\mu(y,u)$ is located at one of the corner 
@@ -480,7 +474,7 @@ points of the search domain. Therefore, if the problem dimensionality is of the 
 be found by the brute force method.
 	\item A multiextremal mixed-integer function 
 	\[
-	f(y,u) = \left(\varphi(y) + \sum_{j=1}^M{u_j}\right)\left(C + \mu(y,u)\right).
+	f(y,u) = \left(\varphi(y) + \sum_{j=1}^M{u_j}\right)\left(h_{min} + h(y,u)\right).
 	\]
 	is formed.
 By construction, $f(y,u)$ would take its minimum value at the point $(y',b)$.
@@ -497,7 +491,7 @@ parameters
 
 A hundred 11-dimensional mixed-integer problems of this type were generated in total. 
 For the purpose of simulation of the computational complexity inherent to
-applied problems of optimization, calculation of the objective function in all performed
+applied optimization problems, calculation of the objective function in all performed
 experiments was made more complex by additional calculations without changing the type
 of function and arrangement of its minima (series summation from 80 thousand elements).
 The accuracy of the search was equal to $10^{-2}$.%Параметры метода!!!   
@@ -564,7 +558,7 @@ the algorithm as a whole.
 
 \section{Conclusion}
 %Russian
-In the present paper, the results obtained in Lobachevskii State University of Nizhni Novgorod 
+In the paper the results obtained in Lobachevsky State University of Nizhni Novgorod 
 when developing and investigating the parallel global optimization algorithms for solving the 
 multiextremal problems, in which some parameters are continuous and the others are the discrete 
 ones are presented. 
