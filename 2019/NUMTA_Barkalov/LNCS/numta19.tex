@@ -5,7 +5,7 @@
 \documentclass[runningheads]{llncs}
 %
 \usepackage{graphicx}
-%\usepackage{hyperref}
+\usepackage{hyperref}
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
 %
@@ -13,10 +13,15 @@
 % to display URLs in blue roman font according to Springer's eBook style:
 % \renewcommand\UrlFont{\color{blue}\rmfamily}
 
+\usepackage[utf8x]{inputenc}
+\usepackage[english,russian]{babel}
+
+
 \begin{document}
 %
 \title{Acceleration of Global Search through Dual Lipschitz Constant Estimates
-\thanks{This research was supported by the the Russian Science Foundation, project No.\,16-11-10150.}}
+\thanks{This research was supported by the the Russian Science Foundation,
+project No.\,16-11-10150.}}
 %
 %\titlerunning{Abbreviated paper title}
 % If the paper title is too long for the running head, you can set
@@ -39,25 +44,105 @@ Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-The abstract should briefly summarize the contents of the paper in
-150--250 words.
+The paper considers global optimization problems with a black-box objective 
+function satisfying the Lipschitz condition. Efficient algorithms for this 
+class of problems require reliable estimates of the Lipschitz constant to be 
+introduced. The various approaches have been proposed to take into account both
+global and local properties of the objective function. In particular, algorithms
+using local estimates of the Lipschitz constant have shown their potential.
+The new approach presented in this paper is based on simultaneous use of two
+estimates: one is substantially larger then the other. 
+The larger estimate ensures global convergence and the smaller one reduces 
+the total number of trials needed to find the global optimizer.
+Results of numerical experiments on the random sample of multidimensional 
+functions demonstrate the efficiency of the suggested approach.  
 
-\keywords{First keyword  \and Second keyword \and Another keyword.}
+\keywords{Global optimization \and Multiextremal problems 
+\and Lipschitz constant estimates}
 \end{abstract}
 %
 %
 %
 \section{Introduction}
 
-The paper considers global optimization problems with a black-box objective function satisfying the Lipschitz condition. 
-Efficient algorithms for this class of problems require reliable estimates of the Lipschitz constant to be introduced. 
-In fundamental work \cite{Strongin2000} various approaches have been proposed to take into account both global and local properties of the objective function. 
-%В частности, показали свою перспективность  алгоритмы с использованием локальных оценок константы Липшица 
-In particular, algorithms using local estimates of the Lipschitz constant have shown their potential \cite{Sergeyev2010,Sergeyev2016}.
+% Введение должно быть полностью новым
+% Константа Липшица - основное в методах глобальной оптимизации
+% Постановку задачи - дать во введении? Можно, ради экономии места
+% А в журнальной статье постановку задачи вынести в отельный раздел
 
-The new approach presented in this paper is based on simultaneous use of two estimates: one is substantially larger then the other. 
-The larger estimate ensures global convergence and the smaller one reduces the total number of trials needed to find the global optimizer.
-Results of numerical experiments on the random sample of multidimensional functions demonstrate the efficiency of the suggested approach.  
+\section{Global search algorithm}
+
+
+
+According to the global search algorithm, the first two trials are executed at 
+the points $y^0=y(0), y^1=y(1)$. The choice of the point $y^{k+1},k\geq 1,$  
+for the next $(k+1)$-th trial is defined by the following rules.
+
+\begin{enumerate}
+	\item 
+	Renumber the preimages of all the points $y^i=y(x^i)$
+	from the trials already performed  	
+%\begin{equation}\label{y_i} 
+%y^0=y(x^0), y^1=y(x^1),...,y^k=y(x^k)
+%\end{equation}
+by subscripts in the increasing order of their coordinates, i.e.
+\begin{equation}\label{x_i}
+0=x_0<x_1<\dots <x_k=1,
+\end{equation}
+and associate these with the values $z_i=\varphi(y(x_i)), 0\leq i \leq k,$ 
+computed at these points.
+\item
+Compute the maximum absolute value of the first divided differences
+\begin{equation}\label{mu}
+\mu = \max_{1 \leq i \leq k}\frac{\left|z_i-z_{i-1}\right|}{\Delta_i},
+\end{equation}
+where $\Delta_i=\left(x_i-x_{i-1}\right)^{1/N}$. If $\mu = 0$, set $\mu = 1$.
+\item
+For each interval $(x_{i-1}, x_i), \; 1\leq i \leq k,$  calculate the value
+\begin{equation}\label{R}
+R(i)=\Delta_i+\frac{(z_i-z_{i-1})^2}{r^2\mu^2\Delta_i}-2\frac{z_i+z_{i-1}-z^*}{r\mu}
+\end{equation}
+called the \textit{characteristic} of the interval; the real number $r>1$ being 
+the input parameter of the algorithm.
+\item 
+Select the interval $(x_{t-1},x_t)$ corresponding to the maximum characteristic
+\begin{equation}\label{MaxR}
+R(t)= \max_{1 \leq i \leq k}R(i).
+\end{equation}
+\item
+Carry out the next trial at the point $x^{k+1}\in(x_{t-1},x_t)$ calculated using
+the following formula
+\begin{equation}\label{xk1}
+x^{k+1} = \frac{x_t+x_{t-1}}{2} - \mathrm{sign}(z_t-z_{t-1})\frac{1}{2r}
+\left[\frac{\left|z_t-z_{t-1}\right|}{\mu}\right]^N.
+\end{equation}
+\end{enumerate}
+
+The algorithm terminates if the condition $\Delta_t < \epsilon$ is satisfied
+where $t$ is from (\ref{MaxR}), and $\epsilon>0$ is the predefined accuracy. 
+
+The theory of convergence of this algorithm is provided in \cite{Strongin2000}.
+%The modifications taking into account .... are given in [....].
+
+\section{Алгоритм с двойной оценкой Lipschitz constant}
+
+Комментарий об использовании $\mu$ как оценки константы Липшица
+
+Ключевое условие из теорема о сходимости - $r\mu > 2^{3-1/N}L\sqrt{N+3} $ 
+
+Возьмем большое значение параметра $r$ - алгоритм гарантированно сойдется к глобальному минимум, но сделает много итераций, т.к. значение константы Липшица будет переоценено.
+
+Возьмем малое значение $r$ - алгоритм будет сходиться быстро, но может потерять свойство сходимости к глобальному экстремуму, т.к. значение константы Липшица будет недооценено. 
+
+Характеристики $R(i)$ зависят от параметра $r$, и они будут несравнимы при разных значениях $r$.
+
+Сравнимость характеристик можно получить, если ввести нормировочные коэффициент (формула).
+
+
+
+
+
+\section{Numerical Experiments}
 
 \section{Conclusion}
 
