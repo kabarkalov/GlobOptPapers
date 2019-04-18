@@ -69,8 +69,8 @@ functions demonstrate the efficiency of the suggested approach.
 
 The paper considers global optimization problems of the form 
 \begin{gather}
- \varphi(y^\ast)=\min{\left\{\varphi(y):y\in D\right\}},\\
- D=\left\{y\in R^N: a_i\leq y_i \leq b_i, 1\leq i \leq N\right\},
+ \varphi(y^\ast)=\min{\left\{\varphi(y):y\in D\right\}}, \label{problem}\\
+ D=\left\{y\in R^N: a_i\leq y_i \leq b_i, 1\leq i \leq N\right\} \label{D},
 \end{gather}
 where the objective function is a black-box function and assumed to satisfy the Lipschitz condition
 \[
@@ -82,7 +82,7 @@ with the constant $L$ unknown a priori.
 
 %Здесь же - про редукцию размерности!
 % Или в конце введения? 
-% Или вообще в следующем разделе?
+% Или вообще в следующем разделе? - Да, в следующем разделе
 
 При этом наиболее важной проблемой, так или иначе решаемой в данных алгоритмах, является адаптивная оценка неизвестной константы Липшица на основе полученной поисковой информации. 
 
@@ -102,21 +102,34 @@ with the constant $L$ unknown a priori.
 В данной работе предлагается алгоритм, который испольует две глобальных оценки константы Липшица, одна из которых значительно больше другой. 
 The larger estimate ensures global convergence and the smaller one reduces the total number of trials needed to find the global optimizer.
 
-% геометрическая интерпретация
+% геометрическая интерпретация ?
 
 Выбор того, какая из двух оценок будет использоваться в правилах алгоритма, осуществляется адаптивно, в зависимости от поведения функции и фазы поиска.
 
-Строгое обоснование предложенного подхода выходит за рамки данной первоначальной публикации и будет сделано в последующих работах. 
-Здесь же приведены результаты вычислительных экспериментов, наглядно демонстрирующие эффективность предложенного алгоритма.
-При проведении вычислительных экспериментов было решено несколько сотен тестовых многоэкстремальных задач разной размерности.
+Строгое обоснование предложенного подхода выходит за рамки данной первоначальной публикации и будет сделано в последующих работах. Здесь же приведены результаты вычислительных экспериментов, наглядно демонстрирующие эффективность предложенного алгоритма. При проведении вычислительных экспериментов было решено несколько сотен тестовых многоэкстремальных задач разной размерности.
  
 % Константа Липшица - основное в методах глобальной оптимизации
 
 
-\section{Global search algorithm}
+\section{Global search algorithm and dimensionality reduction}
 
+Типичным способом конструирования алгоритмов глобальной оптимизации является адаптация эффективных алгоритмов для решения одномерных задач к решению многомерных задач, see, for example, the diagonal partitions method in [18] or
+the simplicial partitions method in [19].
 
+В данной статье используется подход, основанный на идеях редукции размерности с помощью Peano-Hilbert curves, which continuously and unambiguously maps the unit interval $[0,1]$ onto the $n$-dimensional cube $D$ from (\ref{D}). By using this kind of mapping it is possible to reduce the multidimensional problem (\ref{problem}) to a univariate problem
+\[
+\varphi(y^\ast)=\varphi(y(x^\ast))=\min{\left\{\varphi(y(x)): x\in[0,1]\right\}},
+\]
+where the function $\varphi(y(x))$ will satisfy a uniform H{\"o}lder condition
+\[
+\left|\varphi(y(x_1))-\varphi(y(x_2))\right|\leq H\left|x_1-x_2\right|^{1/N},
+\]
+with the H{\"o}lder constant $H$ linked to the Lipschitz constant $L$ by the relation
+$ H=2 L \sqrt{N+3}$.
 
+Let us call the process of computing a function value (including the construction of the image $y=y(x)$) a \textit{trial}, and the pair $(x, z = \varphi(y))$ the outcome of the trial.
+
+%связка - формулируем правила алгоритма глобального поиска
 
 According to the global search algorithm, the first two trials are executed at 
 the points $y^0=y(0), y^1=y(1)$. The choice of the point $y^{k+1},k\geq 1,$  
@@ -142,11 +155,16 @@ Compute the maximum absolute value of the first divided differences
 \end{equation}
 where $\Delta_i=\left(x_i-x_{i-1}\right)^{1/N}$. If $\mu = 0$, set $\mu = 1$.
 \item
-For each interval $(x_{i-1}, x_i), \; 1\leq i \leq k,$  calculate the value
+For each interval $(x_{i-1}, x_i), \; 1\leq i \leq k,$  calculate the value 
+$R(i)$ called the \textit{characteristic} of the interval
 \begin{equation}\label{R}
-R(i)=\Delta_i+\frac{(z_i-z_{i-1})^2}{r^2\mu^2\Delta_i}-2\frac{z_i+z_{i-1}-z^*}{r\mu}
+R(i)=\Delta_i+\frac{(z_i-z_{i-1})^2}{r^2\mu^2\Delta_i}-2\frac{z_i+z_{i-1}-z^*}{r\mu},
 \end{equation}
-called the \textit{characteristic} of the interval; the real number $r>1$ being 
+where 
+\begin{equation}\label{z}
+z^*= \min_{0\leq i\leq k}z_i
+\end{equation} 
+and the real number $r>1$ is 
 the input parameter of the algorithm.
 \item 
 Select the interval $(x_{t-1},x_t)$ corresponding to the maximum characteristic
@@ -183,14 +201,9 @@ r\mu > 2^{3-1/N}L\sqrt{N+3}.
 
 Перспективным является подход, при котором в правилах алгоритма будут использованы две оценки константы Липшица, одна из которых будет значительно выше другой, что соответствует использованию в алгоритме двух парметров $r_{max}$ и $r_{min}$, где $r_{max} > r_{min}$.
 
+Правила алгоритма с двойной оценкой константы Липшица будут полностью повторять правила алгоритма глобального поиска, за исключением правила 3 алгоритма.
 
-Характеристики $R(i)$ зависят от параметра $r$, и они будут несравнимы при разных значениях $r$.
-
-Сравнимость характеристик можно получить, если ввести нормировочные коэффициент (формула).
-
-Таким образом, правила алгоритма с двойной оценкой константы Липшица будут полностью повторять правила алгоритма глобального поиска, за исключением правила 3 алгоритма.
-
-Новое правило вычисленя характеристики $R(i)$ интервала $(x_{i-1}, x_i)$ будет состоять из следующих действий:
+Новое правило вычисления характеристики $R(i)$ интервала $(x_{i-1}, x_i)$ будет состоять из следующих действий:
 \begin{itemize}
 \item
 Вычислить значение $R_{max}(i)$, соответствующее большей оценке константы Липшица
@@ -204,15 +217,74 @@ R_{min}(i)=\Delta_i+\frac{(z_i-z_{i-1})^2}{r_{min}^2\mu^2\Delta_i}-2\frac{z_i+z_
 \]
 \item
 Определить характеристику интервала $R(i)$ как
-\[
+\begin{equation}\label{pho}
 R(i) = \max\{\rho R_{min}(i),R_{max}(i)\}, где \rho = \left(\frac{1-1/r_{max}}{1-1/r_{min}}\right)^2.
-\]
+\end{equation}
 \end{itemize}
 
+Указанный способ вычисления характеристики имеет следующее обоснование. 
+Пусть текущее минимальное значение $z^*$ из (\ref{z}) достигается на в левой точке $i$-го интервала, т.е. $z^* = z_{i-1}$. Тогда, в соответствии с правилом (\ref{R}), будут верно неравенство
+\[
+R(i) \geq \Delta_i \left( 1 - \frac{1}{r} \right)^2.
+\]
+Следовательно, две нижние оценки для двух характеристик текущего лучшего интервала $R_{min}(i)$ и $R_{max}(i)$, вычисленных с разными параметрами $r_{min}$ и $r_{max}$, будут иметь разные значения.
+Однако если первую из них домножить на коэффициент $\rho$ из (\ref{pho}), то нижние оценки характеристик лучшего интервала будут совпадать, что сделает сравнимыми и характеристики, вычисленные для остальных интервалов.
 
 \section{Numerical Experiments}
 
+The numerical comparison of the algorithms has been carried out using the GKLS 
+test problem generator \cite{Gaviano2003}. 
+This generator of multiextremal functions is often used for the investigations of the global 
+optimization algorithms ~\cite{Paulavicius2014,Sergeyev2015,%Lebedev2015,Gergel2015,
+Barkalov2018}.
+%This generator allows multiextremal optimization problems to be generated with known properties (the number of localminima, the size of their domains of attraction, the global minimizer, etc.). 
+Six GKLS classes of differentiable test functions of the dimensions $N = 3,4,5$
+have been used. For each dimension, both \textit{Hard} and \textit{Simple}
+classes have been considered. The difficulty of a class was increased either by
+decreasing the radius of the attraction region of the global minimizer, or by
+decreasing the distance from the global minimizer $y^\ast$ to the domain
+boundaries. The global minimizer $y^\ast$ was considered to be found, if the
+algorithm generated a trial point $y^k$ in the vicinity of the global minimum,
+i.e. $\left|y^k-y^\ast\right| <\delta\left\|b-a\right\|$, where $\delta = 0.01$,
+$a$ and $b$ are the boundaries of the search domain $D$. 
 
+%УКАЗАТЬ ПРАВИЛЬНЫЕ ПАРАМЕТРЫ
+When using the Global Search Algorithm, the parameter $r$ was set to $5$, 
+the evolvent construction parameter was fixed as $m = 10$. 
+The maximum allowable number of iterations per problem was $K_{max} = 10^6$.
+
+Каждая серия задач была решена с помощью исходного алгоритма глобального поиска (GSA) и спомощью метода с двойной оценкой константы Липшица (GSA-DL).  Для GSA использовалось минимальное (с шагом 0.1) значение параметра $r = 5.6$, при котором успешно решились все задачи.
+Для GSA-DL использовались значения $r_{max} = 5.6$ и $r_{min} = 2.0$. 
+
+%Структуру таблицы можно взять из статьи со Стронгиным
+
+%\begin{table}
+	%\caption{Average number of iterations for the \textit{Simple} class}
+	%\label{tab:1}
+	%\center
+	%\begin{tabular}{cccccccccccc}
+		%\hline\noalign{\smallskip}
+		%$p$ & \multicolumn{2}{c}{ $N=2$ } & & \multicolumn{2}{c}{$N=3$} & & \multicolumn{2}{c}{$N=4$} & & \multicolumn{2}{c}{$N=5$}  \\
+		%\noalign{\smallskip} \cline{2-3} \cline{5-6} \cline{8-9} \cline{11-12}  \noalign{\smallskip}
+		 %& $S1$ & $S2$ & & $S1$ & $S2$ & & $S1$ & $S2$ & & $S1$ & $S2$  \\
+		%\noalign{\smallskip} \hline \noalign{\smallskip}
+%1	&	408	&	408	&	&	2502	&	2502	&	&	28254	&	28254	&	&	87261	&	87261	\\
+%2	&	408	&	415	&	&	2502	&	2496	&	&	28254	&	27206	&	&	87261	&	85994	\\
+%4	&	408	&	405	&	&	2502	&	2430	&	&	28254	&	30121	&	&	87261	&	78064	\\
+%8	&	408	&	402	&	&	2502	&	2505	&	&	28254	&	28980	&	&	87261	&	84337	\\
+%16	&	408	&	415	&	&	2502	&	2501	&	&	28254	&	28206	&	&	87261	&	82564	\\
+%24	&	408	&	400	&	&	2502	&	2416	&	&	28254	&	27868	&	&	87261	&	86252	\\
+		%\noalign{\smallskip}\hline
+	%\end{tabular}
+%\end{table}
+
+Превосходство алгоритма GSA-DL над его прототипом наглядно подтверждается также и операционными характеристиками алгоритмов.  
+
+
+Результат решения всех задач серии представляется функцией $p(k)$, характеризующей долю задач, решенных за $k$ итераций. Такую функцию будем называть операционной характеристикой алгоритма.
+
+Операционные характеристики для обоих методов, полученные на сериях пятимерных задач GKLS Simple и GKLS Hard представлены соответственно на рис.3 и 4. При этом нижние (непрерывные) кривые на обеих фигурах характеризуют GSA, а верхние (разрывные) линии — GSA-DL.
+Указанное расположение кривых показывает, что алгоритм с двумя оценками константы Липшица обеспечивает в среднем более быстрое решение задач данного класса, чем алгоритм с использованием одной глобальной оценки константы Липшица.
 
 \section{Conclusion}
 
