@@ -25,7 +25,7 @@
 \thanks{This research was supported by the the Russian Science Foundation,
 project No.\,16-11-10150.}}
 %
-%\titlerunning{Abbreviated paper title}
+\titlerunning{Acceleration of Global Search}
 % If the paper title is too long for the running head, you can set
 % an abbreviated paper title here
 %
@@ -78,40 +78,32 @@ where the objective function is a black-box function and assumed to satisfy the 
 \]
 with the constant $L$ unknown a priori.
 
-Предположение липшицевости целевой функции является типичным для многих подходов к разработке алгоритмов глобальной оптимизации (ссылки). 
-
-%Здесь же - про редукцию размерности!
-% Или в конце введения? 
-% Или вообще в следующем разделе? - Да, в следующем разделе
-
-При этом наиболее важной проблемой, так или иначе решаемой в данных алгоритмах, является адаптивная оценка неизвестной константы Липшица на основе полученной поисковой информации. 
+Предположение липшицевости целевой функции является типичным для многих подходов к разработке алгоритмов глобальной оптимизации \cite{Pinter1996,Strongin2000,Zilinskas2010,Evtushenko2013}. При этом наиболее важной проблемой, так или иначе решаемой в данных алгоритмах, является адаптивная оценка неизвестной константы Липшица на основе полученной поисковой информации. 
 
 Значение константы Липшица существенно влияет на скорость сходимости алгоритмов липшицевой глобальной оптимизации, поэтому столь важным является вопрос ее корректной оценки. Заниженная оценка инстинного значения константы Липшица может привести к потере сходимости алгоритма к глобальному решению. В то же время слишком большое значение оценки константы $L$ для целевой функции, %предполагает сложную структуру функции с резкими перепадами ее значений. Поэтому завышенная оценка константы L, 
 не соответствующее ее истинному поведению, влечет за собой медленную сходимость алгоритма к точке глобального минимума. 
 
 Известны несколько типичных способов адаптивного оценивания константы Липшица:
 \begin{itemize}
-	\item оценивание глобальной константы Липшица во всей области поиска $D$ \cite{Horst1996,Pinter1996,Strongin2000}.
-	\item оценивание локальных оценок констант Липшица $L_i$ в различных подобластях $D_i$ области поиска $D$ \cite{Kvasov2003,Sergeyev2010,Sergeyev2016}.
+	\item глобальная оценка константы Липшица $L$ во всей области поиска $D$ \cite{Horst1996,Pinter1996,Strongin2000}.
+	\item локальные оценки константы Липшица $L_i$ в различных подобластях $D_i$ области поиска $D$ \cite{Kvasov2003,Sergeyev2010,Sergeyev2016}.
 	\item выбор оценок константы $L$ из некоторого множества возможных значений \cite{Jones1993,Gablonsky2001,Jones2009,Sergeyev2006}.
 \end{itemize}
 
-%Каждый из указанных подходов обладает своими достоинствами и недостатками. Например, использование только глобальной константы Липшица во всей области поиска может замедлить сходимость алгоритма к точке глобального минимума. А использование локальных оценок, ускоряющих сходимость, требует адекватной настройки параметров алгоритма для сохранения глобальной сходимости. 
+Каждый из указанных подходов обладает своими достоинствами и недостатками. Например, использование только глобальной оценки во всей области поиска может замедлить сходимость алгоритма к точке глобального минимума. А использование локальных оценок, ускоряющих сходимость, требует адекватной настройки параметров алгоритма для сохранения глобальной сходимости. 
 
 В данной работе рассмотрен алгоритм, котором предлагается использовать две глобальных оценки константы Липшица, одна из которых значительно больше другой. 
 The larger estimate ensures global convergence and the smaller one reduces the total number of trials needed to find the global optimizer.
-% геометрическая интерпретация ?
 Выбор того, какая из двух оценок будет использоваться в правилах алгоритма, осуществляется адаптивно, в зависимости от поведения функции и фазы поиска.
 
-Строгое обоснование предложенного подхода выходит за рамки данной первоначальной публикации и будет сделано в последующих работах. Здесь же приведем результаты вычислительных экспериментов, наглядно демонстрирующие эффективность предложенного алгоритма. При проведении вычислительных экспериментов было решено несколько сотен тестовых многоэкстремальных задач разной размерности.
+Строгое обоснование предложенного подхода выходит за рамки данной первоначальной публикации и будет сделано в последующих работах. Здесь же приведем результаты вычислительных экспериментов, наглядно демонстрирующие эффективность нового алгоритма. При проведении вычислительных экспериментов было решено несколько сотен тестовых многоэкстремальных задач разной размерности.
 
 
 \section{Global search algorithm and dimensionality reduction}
 
-Типичным способом конструирования алгоритмов глобальной оптимизации является адаптация эффективных алгоритмов для решения одномерных задач к решению многомерных задач, see, for example, the diagonal partitions method in [18] or
-the simplicial partitions method in [19].
+Типичным способом конструирования алгоритмов глобальной оптимизации является адаптация эффективных алгоритмов для решения одномерных задач к решению многомерных задач, see, for example, the diagonal partitions method in \cite{Sergeyev2006} or the simplicial partitions method in \cite{Zilinskas2008}.
 
-В данной статье используется подход, основанный на идеях редукции размерности с помощью Peano-Hilbert curves, which continuously and unambiguously maps the unit interval $[0,1]$ onto the $n$-dimensional cube $D$ from (\ref{D}). By using this kind of mapping it is possible to reduce the multidimensional problem (\ref{problem}) to a univariate problem
+В данной статье используется подход, основанный на идеях редукции размерности с помощью Peano-Hilbert curves \cite{Strongin2000,Sergeyev2013}, which continuously and unambiguously maps the unit interval $[0,1]$ onto the $n$-dimensional cube $D$ from (\ref{D}). By using this kind of mapping it is possible to reduce the multidimensional problem (\ref{problem}) to a univariate problem
 \[
 \varphi(y^\ast)=\varphi(y(x^\ast))=\min{\left\{\varphi(y(x)): x\in[0,1]\right\}},
 \]
@@ -122,11 +114,10 @@ where the function $\varphi(y(x))$ will satisfy a uniform H{\"o}lder condition
 with the H{\"o}lder constant $H$ linked to the Lipschitz constant $L$ by the relation
 $ H=2 L \sqrt{N+3}$.
 
-Let us call the process of computing a function value (including the construction of the image $y=y(x)$) a \textit{trial}, and the pair $(x, z = \varphi(y))$ the outcome of the trial.
+Let us call the process of computing a function value (including the construction of the image $y=y(x)$) a \textit{trial}, and the pair $\{x, z = \varphi(y(x))\}$ the outcome of the trial.
 
-%связка - формулируем правила алгоритма глобального поиска
-
-According to the global search algorithm, the first two trials are executed at 
+The global search algorithm (according to \cite{Strongin2000}) can be formulated as follows.
+The first two trials are executed at 
 the points $y^0=y(0), y^1=y(1)$. The choice of the point $y^{k+1},k\geq 1,$  
 for the next $(k+1)$-th trial is defined by the following rules.
 
@@ -195,7 +186,7 @@ r\mu > 2^{3-1/N}L\sqrt{N+3}.
 
 Перспективным является подход, при котором в правилах алгоритма будут использованы две оценки константы Липшица, одна из которых будет значительно выше другой, что соответствует использованию в алгоритме двух парметров $r_{glob}$ и $r_{loc}$, где $r_{glob} > r_{loc}$.
 
-Правила алгоритма с двойной оценкой константы Липшица будут полностью повторять правила алгоритма глобального поиска, за исключением правила 3 алгоритма.
+Правила алгоритма с двойной оценкой константы Липшица будут полностью повторять алгоритм глобального поиска, за исключением правила 3 (вычисление характеристики).
 
 Новое правило вычисления характеристики $R(i)$ интервала $(x_{i-1}, x_i)$ будет состоять из следующих действий:
 \begin{itemize}
@@ -212,12 +203,14 @@ R_{loc}(i)=\Delta_i+\frac{(z_i-z_{i-1})^2}{r_{loc}^2\mu^2\Delta_i}-2\frac{z_i+z_
 \item
 Определить характеристику интервала $R(i)$ как
 \begin{equation}\label{pho}
-R(i) = \max\{\rho R_{loc}(i),R_{glob}(i)\}, где \rho = \left(\frac{1-1/r_{glob}}{1-1/r_{loc}}\right)^2.
+R(i) = \max\{\rho R_{loc}(i),R_{glob}(i)\}, где \rho = \left(\frac{1-1/r_{glob}}{1-1/r_{loc}}\right)^2,
 \end{equation}
-\end{itemize}
+и зафиксировать значение $r = r_{loc}$, если  $\rho R_{loc}(i) > R_{glob}(i)$, иначе зафиксировать $r=r_{glob}$.
+Данное значение $r$ будет использовано в правиле 5 алгоритма при вычислении точки нового испытания.   
+\end{itemize}.
 
 Указанный способ вычисления характеристики имеет следующее обоснование. 
-Пусть текущее минимальное значение $z^*$ из (\ref{z}) достигается на в левой точке $i$-го интервала, т.е. $z^* = z_{i-1}$. Тогда, в соответствии с правилом (\ref{R}), будут верно неравенство
+Пусть текущее минимальное значение $z^*$ из (\ref{z}) достигается в левой точке $i$-го интервала, т.е. $z^* = z_{i-1}$. Тогда, в соответствии с правилом (\ref{R}), будут верно неравенство
 \[
 R(i) \geq \Delta_i \left( 1 - \frac{1}{r} \right)^2.
 \]
@@ -247,37 +240,35 @@ When using the Global Search Algorithm, the parameter $r$ was set to $5$,
 the evolvent construction parameter was fixed as $m = 10$. 
 The maximum allowable number of iterations per problem was $K_{max} = 10^6$.
 
-Каждая серия задач была решена с помощью исходного алгоритма глобального поиска (GSA) и спомощью метода с двойной оценкой константы Липшица (GSA-DL). Для GSA использовалось минимальное (с шагом 0.1) значение параметра $r = 5.6$, при котором успешно решились все задачи.
-Для GSA-DL использовались значения $r_{glob} = 5.6$ и $r_{loc} = 2.0$. 
-
+Каждая серия задач была решена с помощью исходного алгоритма глобального поиска (GSA) и спомощью метода с двойной оценкой константы Липшица (GSA-DL). Среднее число итераций, выполненное алгоритмами, отражено в табл. \ref{tab:1}.
+При этом при решении задач класса Simple в GSA использовалось единственное значение параметра $r=4.8$, при решении задач класса Hard -- $r=5.6$.
+Указанное значение является минимальным (с точностью 0.1) значением, при котором успешно решились все задачи.
+При решении данных классов задач с использованием GSA-DL указанное ранее значение параметра $r$ выбиралось для верхней оценки константы Липшица, т.е. задавалось значение $r_{glob} = r$, которое дополнялось значениями $r_{loc}=1.8$ и $r_{loc}=2.4$. 
 %Структуру таблицы можно взять из статьи 
 
-%\begin{table}
-	%\caption{Average number of iterations for the \textit{Simple} class}
-	%\label{tab:1}
-	%\center
-	%\begin{tabular}{cccccccccccc}
-		%\hline\noalign{\smallskip}
-		%$p$ & \multicolumn{2}{c}{ $N=2$ } & & \multicolumn{2}{c}{$N=3$} & & \multicolumn{2}{c}{$N=4$} & & \multicolumn{2}{c}{$N=5$}  \\
-		%\noalign{\smallskip} \cline{2-3} \cline{5-6} \cline{8-9} \cline{11-12}  \noalign{\smallskip}
-		 %& $S1$ & $S2$ & & $S1$ & $S2$ & & $S1$ & $S2$ & & $S1$ & $S2$  \\
-		%\noalign{\smallskip} \hline \noalign{\smallskip}
-%1	&	408	&	408	&	&	2502	&	2502	&	&	28254	&	28254	&	&	87261	&	87261	\\
-%2	&	408	&	415	&	&	2502	&	2496	&	&	28254	&	27206	&	&	87261	&	85994	\\
-%4	&	408	&	405	&	&	2502	&	2430	&	&	28254	&	30121	&	&	87261	&	78064	\\
-%8	&	408	&	402	&	&	2502	&	2505	&	&	28254	&	28980	&	&	87261	&	84337	\\
-%16	&	408	&	415	&	&	2502	&	2501	&	&	28254	&	28206	&	&	87261	&	82564	\\
-%24	&	408	&	400	&	&	2502	&	2416	&	&	28254	&	27868	&	&	87261	&	86252	\\
-		%\noalign{\smallskip}\hline
-	%\end{tabular}
-%\end{table}
+\begin{table}
+	\caption{Average number of iterations}
+	\label{tab:1}
+	\center
+	\begin{tabular}{ccccccccc}
+		\hline\noalign{\smallskip}
+		$r$ & \multicolumn{2}{c}{$N=3$} & & \multicolumn{2}{c}{$N=4$} & & \multicolumn{2}{c}{$N=5$}  \\
+		\noalign{\smallskip} \cline{2-3} \cline{5-6} \cline{8-9} \noalign{\smallskip}
+		 & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard}  \\
+		\noalign{\smallskip} \hline \noalign{\smallskip}
+									AGS	&	2502	&	2502	&	&	28254	&	28254	&	&	87261	&	87261	\\
+AGS-DL, $r_{loc}=2.4$	&	2502	&	2496	&	&	28254	&	27206	&	&	87261	&	85994	\\
+AGS-DL, $r_{loc}=1.8$	&	2502	&	2430	&	&	28254	&	30121	&	&	87261	&	78064	\\
+		\noalign{\smallskip}\hline
+	\end{tabular}
+\end{table}
 
 Превосходство алгоритма GSA-DL над его прототипом наглядно подтверждается также и операционными характеристиками алгоритмов.  
 
 
 Результат решения всех задач серии будем представлять функцией $p(k)$, характеризующей долю задач, решенных за $k$ итераций. Такую функцию будем называть \textit{operational characteristic} of the algorithm..
 
-Операционные характеристики для методов GSA и GSA-DL, полученные при решении серий задач GKLS Simple и GKLS Hard размерности $N=4$ представлены соответственно на рис. \ref{oper}.
+Операционные характеристики для методов GSA и GSA-DL, полученные при решении серий задач \textit{Simple} and \textit{Hard} размерностей $N=4$ и $N=5$ представлены соответственно на рис. \ref{oper4} и \ref{oper5}.
 
 \begin{figure}
 \begin{minipage}{0.5\linewidth}
@@ -287,16 +278,26 @@ The maximum allowable number of iterations per problem was $K_{max} = 10^6$.
 \begin{minipage}{0.5\linewidth}
 \center{\includegraphics[width=1.0\linewidth]{Operating_characteristic_gklsh_4.png} \\ (b)}
 \end{minipage}
-\caption{Operational characteristics on GKLS Simple (a) and Hard (b) classes.}
-\label{oper}
+\caption{Operational characteristics for GKLS Simple (a) and Hard (b) classes, $N=4$.}
+\label{oper4}
 \end{figure}
 
+\begin{figure}
+\begin{minipage}{0.5\linewidth}
+\center{\includegraphics[width=1.0\linewidth]{Operating_characteristic_gklss_4.png} \\ (a)}
+\end{minipage}
+\hfill
+\begin{minipage}{0.5\linewidth}
+\center{\includegraphics[width=1.0\linewidth]{Operating_characteristic_gklsh_4.png} \\ (b)}
+\end{minipage}
+\caption{Operational characteristics for GKLS Simple (a) and Hard (b) classes, $N=5$.}
+\label{oper5}
+\end{figure}
 
 
 Нижние кривые на обеих фигурах характеризуют GSA, а верхние линии — GSA-DL. Указанное расположение кривых показывает, что алгоритм с двумя оценками константы Липшица обеспечивает в среднем значительно более быстрое решение задач данного класса, чем алгоритм с использованием единственной оценки константы Липшица.
 
 
-При этом при решении задач класса Simple в GSA использовался параметр $r=4.8$, в GSA-DL использовались параметры $r_{glob}=4.8$ and $r_{loc}=1.8$; для класса Hard в GSA использовался параметр $r=5.6$, в GSA-DL использовались параметры $r_{glob}=5.6$ and $r_{loc}=2.4$.
 
 
 
