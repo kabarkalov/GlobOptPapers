@@ -759,7 +759,7 @@ FUNCTION {format.vol.num.pages}
       "volume" bibinfo.check
     }
   if$
-  bolden 	
+  bolden
   number "number" bibinfo.check duplicate$ empty$ 'skip$
     {
       swap$ duplicate$ empty$
@@ -1494,9 +1494,9 @@ FUNCTION {begin.bib}
   write$ newline$
   "\expandafter\ifx\csname urlstyle\endcsname\relax"
   write$ newline$
-  "  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else"
+  "  \providecommand{\doi}[1]{doi: \discretionary{}{}{}#1}\else"
   write$ newline$
-  "  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup \urlstyle{rm}\Url}\fi"
+  "  \providecommand{\doi}{doi: \discretionary{}{}{}\begingroup \urlstyle{rm}\Url}\fi"
   write$ newline$
 }
 EXECUTE {begin.bib}
@@ -1510,4 +1510,3 @@ EXECUTE {end.bib}
 %% End of customized bst file
 %%
 %% End of file `spmpsci.bst'.
-
