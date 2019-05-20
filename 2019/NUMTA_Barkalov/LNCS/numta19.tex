@@ -15,8 +15,8 @@
 % to display URLs in blue roman font according to Springer's eBook style:
 % \renewcommand\UrlFont{\color{blue}\rmfamily}
 
-\usepackage[utf8x]{inputenc}
-\usepackage[english,russian]{babel}
+%\usepackage[utf8x]{inputenc}
+%\usepackage[english,russian]{babel}
 
 
 \begin{document}
@@ -77,31 +77,31 @@ where the objective function is a black-box function and assumed to satisfy the 
 with the constant $L$ unknown a priori.
 
 %Russian
-Предположение липшицевости целевой функции является типичным для многих подходов к разработке алгоритмов глобальной оптимизации \cite{Evtushenko2013,Zilinskas2010,Pinter1996,Strongin2000}. При этом наиболее важной проблемой, так или иначе решаемой в данных алгоритмах, является адаптивная оценка неизвестной Lipschitz constant на основе полученной поисковой информации. 
+The assumption of the objective function to be Lipschitzian is typical for many approaches to the development of the global optimization algorithms \cite{Evtushenko2013,Zilinskas2010,Pinter1996,Strongin2000}. At that, the adaptive estimate of the unknown Lipschitz constant based on the obtained search information is the most important problem being solved in these algorithms anyway. 
+The Lipschitz constant value affects the convergence rate of the global optimization algorithms essentially. Therefore, the issue of its correct estimate is so important. 
+The underestimate of the constant true value may result in losing the convergence of the algorithm to the global solution. At the same time, too large value of the estimate of the constant for the objective function not matching its real behavior results in slow convergence of the algorithm to the global minimizer. 
 
-Значение Lipschitz constant существенно влияет на скорость сходимости алгоритмов липшицевой глобальной оптимизации, поэтому столь важным является вопрос ее корректной оценки. Заниженная оценка инстинного значения константы может привести к потере сходимости алгоритма к глобальному решению. В то же время слишком большое значение оценки константы $L$ для целевой функции, не соответствующее ее истинному поведению, влечет за собой медленную сходимость алгоритма к точке глобального минимума. 
-
-Известны несколько типичных способов адаптивного оценивания Lipschitz constant:
+Several typical methods of adaptive estimation of the Lipschitz constant are known:
 \begin{itemize}
-	\item глобальная оценка константы $L$ во всей области поиска $D$ \cite{Horst1996,Pinter1996,Strongin2000}.
-	\item локальные оценки константы $L_i$ в различных подобластях $D_i$ области поиска $D$ \cite{Kvasov2003,Sergeyev2010,Sergeyev2016}.
-	\item выбор оценок константы $L$ из некоторого множества возможных значений \cite{Gablonsky2001,Jones1993,Jones2009,Sergeyev2006}.
+	\item global estimation of the constant $L$ in the whole search domain $D$ \cite{Horst1996,Pinter1996,Strongin2000}.
+	\item local estimations of the constants $L_i$ in different subdomains $D_i$ of the search domain $D$ \cite{Kvasov2003,Sergeyev2010,Sergeyev2016}.
+	\item the choice of the estimates of the constant $L$ from a set of possible values \cite{Gablonsky2001,Jones1993,Jones2009,Sergeyev2006}.
 \end{itemize}
 
-Каждый из указанных подходов обладает своими достоинствами и недостатками. Например, использование только глобальной оценки во всей области поиска может замедлить сходимость алгоритма к точке глобального минимума. А использование локальных оценок, ускоряющих сходимость, требует адекватной настройки параметров алгоритма для сохранения глобальной сходимости. 
+Each approach from the above has its own advantages and disadvantages. For example, the use of the global estimate over the whole search domain can slow down the convergence of the algorithm to the global minimizer. The use of the local estimates accelerating the convergence requires an adequate adjustment of the algorithm parameters in order to preserve the global convergence. 
 
-В данной работе рассмотрен алгоритм, котором предлагается использовать две глобальных оценки Lipschitz constant, одна из которых значительно больше другой. 
+In the present work, an algorithm, in which it is proposed to use two global estimates of the Lipschitz constant, one being much greater than another, is considered. 
 The larger estimate ensures global convergence and the smaller one reduces the total number of trials needed to find the global optimizer.
-Выбор того, какая из двух оценок будет использоваться в правилах алгоритма, осуществляется адаптивно, в зависимости от поведения функции и фазы поиска.
+The choice of the one of two estimates to be used in the algorithm rules is performed adaptively subject to the function behavior and to the search phase.
 
-Строгое обоснование предложенного подхода выходит за рамки данной первоначальной публикации и будет сделано в последующих работах. Здесь же приведем результаты вычислительных экспериментов, наглядно демонстрирующие эффективность нового алгоритма. При проведении вычислительных экспериментов было решено несколько сотен тестовых многоэкстремальных задач разной размерности.
-
+The rigorous substantiation of the proposed approach goes beyond the present initial publication and will be done in the forthcoming works. Here we present the results of numerical experiments clearly demonstrating the efficiency of the novel algorithm. When conducting the numerical experiments, several hundred multiextremal test problems of various dimensionalities have been solved.
 
 \section{Global search algorithm and dimensionality reduction}
-%Russian - два абзаца
-Типичным способом конструирования алгоритмов глобальной оптимизации является адаптация эффективных алгоритмов для решения одномерных задач к решению многомерных задач, see, for example, the diagonal partitions method in \cite{Sergeyev2006} or the simplicial partitions method in \cite{Zilinskas2008}.
+%Russian 
 
-В данной статье используется подход, основанный на идеях редукции размерности с помощью Peano-Hilbert curves \cite{Sergeyev2013,Strongin2000}, which continuously and unambiguously maps the unit interval $[0,1]$ onto the $n$-dimensional cube $D$ from (\ref{D}). By using this kind of mapping it is possible to reduce the multidimensional problem (\ref{problem}) to a univariate problem
+The adaptation of the efficient algorithms of solving the one-dimensional problems to solving the multidimensional problems is typical method of constructing the global optimization algorithms, see, for example, the diagonal partitions method in \cite{Sergeyev2006} or the simplicial partitions method in \cite{Zilinskas2008}.
+
+In the present paper, the approach based on the ideas of dimensionality reduction with the use of the Peano-Hilbert curves \cite{Sergeyev2013,Strongin2000}, which continuously and unambiguously maps the unit interval $[0,1]$ onto the $n$-dimensional cube $D$ from (\ref{D}) has been used. By using this kind of mapping, it is possible to reduce the multidimensional problem (\ref{problem}) to a univariate problem
 \[
 \varphi(y^\ast)=\varphi(y(x^\ast))=\min{\left\{\varphi(y(x)): x\in[0,1]\right\}},
 \]
@@ -117,7 +117,7 @@ Let us call the process of computing a function value (including the constructio
 The global search algorithm (according to \cite{Strongin2000}) can be formulated as follows.
 The first two trials are executed at 
 the points $y^0=y(0), y^1=y(1)$. The choice of the point $y^{k+1},k\geq 1,$  
-for the next $(k+1)$-th trial is defined by the following rules.
+for the next $(k+1)^{\rm th}$ trial is defined by the following rules.
 
 \begin{enumerate}
 	\item 
@@ -173,49 +173,51 @@ The theory of convergence of this algorithm is provided in \cite{Strongin2000}.
 \section{Algorithm with Dual Lipschitz Constant Estimates}
 
 %Russian
-Алгоритм глобального поиска, изложенной в предыдущем разделе, предназначен для решения многоэкстремальных задач, в которых целевая функция удовлетворяет Lipschitz condition. При этом для для работы алгоритма не требуется задания  значений константы. Оценка константы осуществляется в процессе глобального поиска на основе имеющейся поисковой информации. 
-В соответствии с теоремой из \cite{Strongin2000}, последовательность точек испытаний $\{y^k\}$ будет сходиться к global minimizer $y^*$, если выполнено условие  
+The global search algorithm presented in previous section is intended for solving the multiextremal problems, in which the objective function satisfies the Lipschitz condition. It is not necessary to define the value of the constant for the algorithm convergence. The estimation of the constant is performed in the course of global search on the base of available search information. 
+According to the theorem in \cite{Strongin2000}, the sequence of the trial points $\{y^k\}$ will converge to the global minimizer $y^*$ if the condition 
 \begin{equation}\label{cond}
 r\mu > 2^{3-1/N}L\sqrt{N+3}.
 \end{equation}
-Таким образом, подходящий выбор параметра $r$ из (\ref{R}) позволяет использовать значение $r\mu / 2^{3-1/N}\sqrt{N+3}$ как оценку Lipschitz constant для целевой функции $\varphi(y)$.
+\noindent is satisfied. Thus,  an appropriate choice of the parameter $r$ from (\ref{R}) allows using the value $r\mu / 2^{3-1/N}\sqrt{N+3}$ as an estimate of the Lipschitz constant for the objective function $\varphi(y)$.
 
-Выполнение условия (\ref{cond}) будет гарантировано при выборе большого значения параметра $r$, однако при этом метод выполнит большое количество испытаний до выполнения условия остановки.
-Выбор малого значения параметра $r$ (что соответствует заниженной оценке Lipschitz constant) значительно сократит число испытаний, но может нарушить сходимость к глобальному экстремуму.
+Satisfying the condition (\ref{cond}) will be guaranteed at choosing large enough value of the parameter $r$. However, in this case the method will perform a large number of trials until the stop condition is satisfied.
+The choice of small value of the parameter $r$ (that corresponds to the lower estimate of the Lipschitz constant) would considerably reduce the number of trials but may violate the convergence to the global extremum.
 
-Перспективным является подход, при котором в правилах алгоритма будут использованы две оценки Lipschitz constant, одна из которых будет значительно выше другой, что соответствует использованию в алгоритме двух парметров $r_{glob}$ и $r_{loc}$, где $r_{glob} > r_{loc}$.
+An approach, in which two estimates of the Lipschitz constant %, one of which is essentially greater than another, 
+are used in the rules of algorithm, is a promising one. 
+This approach implies the use of two parameters $r_{glob}$ and $r_{loc}$ where $r_{glob} > r_{loc}$ in the algorithm.
 
-Правила алгоритма с двойной оценкой Lipschitz constant будут полностью повторять алгоритм глобального поиска, за исключением правила 3 (вычисление характеристики).
+The rules of the algorithm with two estimates of the Lipschitz constant reproduce the ones of global search algorithm completely except Rule 3 (computing the characteristic).
 
-Новое правило вычисления характеристики $R(i)$ интервала $(x_{i-1}, x_i)$ будет состоять из следующих действий:
+New rule of calculating the characteristic $R(i)$ of the interval $(x_{i-1}, x_i)$ will consist of the following operations:
 \begin{itemize}
 \item
-Вычислить значение $R_{glob}(i)$, соответствующее большей оценке Lipschitz constant
+Calculate the value $R_{glob}(i)$ corresponding to the larger estimate of the Lipschitz constant
 \[
 R_{glob}(i)=\Delta_i+\frac{(z_i-z_{i-1})^2}{r_{glob}^2\mu^2\Delta_i}-2\frac{z_i+z_{i-1}-2z^*}{r_{glob}\mu}.
 \]
 \item
-Вычислить значение $R_{loc}(i)$, соответствующее меньшей оценке Lipschitz constant
+Calculate the value $R_{loc}(i)$ corresponding to the smaller estimate of the Lipschitz constant
 \[
 R_{loc}(i)=\Delta_i+\frac{(z_i-z_{i-1})^2}{r_{loc}^2\mu^2\Delta_i}-2\frac{z_i+z_{i-1}-2z^*}{r_{loc}\mu}.
 \]
 \item
-Определить характеристику интервала $R(i)$ как
+Determine the characteristic $R(i)$ as
 \begin{equation}\label{pho}
-R(i) = \max\{\rho R_{loc}(i),R_{glob}(i)\}, где \rho = \left(\frac{1-1/r_{glob}}{1-1/r_{loc}}\right)^2,
+R(i) = \max\{\rho R_{loc}(i),R_{glob}(i)\}, where \rho = \left(\frac{1-1/r_{glob}}{1-1/r_{loc}}\right)^2,
 \end{equation}
-и зафиксировать значение $r = r_{loc}$, если  $\rho R_{loc}(i) > R_{glob}(i)$, иначе зафиксировать $r=r_{glob}$.
+and fix the value $r = r_{loc}$ if $\rho R_{loc}(i) > R_{glob}(i)$, otherwise fix $r=r_{glob}$.
 \item
-Данное значение $r$ использовать в правиле 5 алгоритма при вычислении точки нового испытания.   
+This value of $r$ is used in Rule 5 of the algorithm in the computing of the next trial point.   
 \end{itemize}.
 
-Указанный способ вычисления характеристики имеет следующее обоснование. 
-Пусть текущее минимальное значение $z^*$ из (\ref{z}) достигается в левой точке $i$-го интервала, т.е. $z^* = z_{i-1}$. Тогда, в соответствии с правилом (\ref{R}), будут верно неравенство
+This method of computing the characteristic is substantiated as follows. 
+Let current minimum value of $z^*$ from (\ref{z}) is achieved at the left point of the $i^{\rm th}$ interval, i.e. $z^* = z_{i-1}$. Then, according to the rule (\ref{R}) the following inequality will be true: 
 \[
 R(i) \geq \Delta_i \left( 1 - \frac{1}{r} \right)^2.
 \]
-Следовательно, две нижние оценки для двух характеристик текущего лучшего интервала $R_{loc}(i)$ и $R_{glob}(i)$, вычисленных с разными параметрами $r_{loc}$ и $r_{glob}$, будут иметь разные значения.
-Однако если первую из них домножить на коэффициент $\rho$ из (\ref{pho}), то нижние оценки характеристик лучшего интервала будут совпадать, что сделает сравнимыми и характеристики, вычисленные для остальных интервалов.
+Consequently, two lower estimates of the two characteristics of current best interval $R_{loc}(i)$ and $R_{glob}(i)$ calculated with different parameters $r_{loc}$ and $r_{glob}$ will take different values.
+However, if the former is multiplied by the coefficient $\rho$ from (\ref{pho}), the lower estimates of the characteristics of the best interval would match each other that would make the characteristics calculated for other intervals comparable as well.
 
 \section{Numerical Experiments}
 
@@ -234,12 +236,13 @@ i.e. $\left|y^k-y^\ast\right| <\delta\left\|b-a\right\|$,
 $a$ and $b$ are the boundaries of the search domain $D$. 
 
 %Russian
-Каждая серия задач была решена с помощью исходного алгоритма глобального поиска (GSA) и спомощью метода с двойной оценкой Lipschitz constant (GSA-DL). Для редукции размерности в обоих алгоритмах использовалась evolvent, построенная с параметром $m = 10$. Относительная точность поиска решения при $N=3,4$ составляла $\delta = 0.01$, а при $N=5$ -- $\delta = 0.03$. The maximum allowable number of iterations per problem was $K_{max} = 10^6$.
+Each series of problems has been solved by the original global search algorithm (GSA) and by the method with two estimates of the Lipschitz constant (GSA-DL). The evolvent constructed using the parameter $m = 10$ was used for the dimensionality reduction in both algorithms. The relative accuracy of the solution search was $\delta = 0.01$ for $N=3,4$ and $\delta = 0.03$ for $N=5$.
+The maximum allowable number of iterations per problem was $K_{max} = 10^6$.
 
-Среднее число итераций, выполненное алгоритмами, отражено в Table \ref{tab:1}.
-При этом при решении задач класса Simple в GSA использовалось значение параметра $r=4.8$, при решении задач класса Hard -- $r=5.6$.
-Указанное значение является минимальным (с точностью 0.1) значением, при котором успешно решились все задачи.
-При решении данных классов задач с использованием GSA-DL указанное ранее значение параметра $r$ выбиралось для верхней оценки Lipschitz constant, т.е. задавалось значение $r_{glob} = r$, которое дополнялось значениями $r_{loc}=1.8$, $r_{loc}=2.1$ $r_{loc}=2.4$.  
+The averaged numbers of iterations performed by the algorithms are presented in Table \ref{tab:1}.
+At that, for GSA the values of parameter $r=4.8$ when solving the problems of Simple class and $r=5.6$ when solving the problems of Hard class were used. 
+These values are the minimum ones (with the accuracy 0.1), at which all problems have been solved successfully.
+When solving the problems from the above classes by GSA-DL, the value of parameter $r$ specified above was selected for the upper estimate of the Lipschitz constant, i.e. the value $r_{glob} = r$ was set, which was complemented by the values $r_{loc}=1.8$, $r_{loc}=2.1$ and $r_{loc}=2.4$. 
 
 \begin{table}
 	\caption{Average number of iterations}
@@ -260,12 +263,12 @@ AGS-DL, $r_{loc}=2.4$	&	1567	&	2868	& &	19447	&	40342	& &		&		\\
 \end{table}
 
 
-Превосходство алгоритма GSA-DL над его прототипом  подтверждается также и операционными характеристиками алгоритмов. 
+The advantage of the GSA-DL algorithm over its prototype is confirmed by the operational characteristics of the algorithms as well. 
 
-Пусть решается некоторая серия тестовых задач. Результат решения серии можно представить функцией $p(k)$, характеризующей долю задач, решенных за $k$ итераций. Такую функцию будем называть \textit{operational characteristic} of the algorithm. 
+Assume a series of test problems to be solved. The results of solving the series can be presented by a function $p(k)$ featuring the fraction of the total number of problems solved in $k$ iterations. Such a function will be called the \textit{operational characteristic} of the algorithm. 
 
 
-Операционные характеристики для методов GSA и GSA-DL, полученные при решении серий задач \textit{Simple} and \textit{Hard} размерностей $N=4$ и $N=5$ представлены соответственно на Fig. \ref{oper4} и \ref{oper5}. Значения параметров $r$, используемых для оценки Lipschitz constant, приведены на рисунках.
+The operational characteristics for the GSA and GSA-DL methods obtained when solving the \textit{Simple} and \textit{Hard} problem series with the dimensionalities $N=4$ and $N=5$ are presented in Fig. \ref{oper4} and \ref{oper5}, respectively. The values of the parameters $r$ used for estimating the Lipschitz constant are given in the figures.
 
 \begin{figure}
 \begin{minipage}{0.5\linewidth}
@@ -291,9 +294,8 @@ AGS-DL, $r_{loc}=2.4$	&	1567	&	2868	& &	19447	&	40342	& &		&		\\
 \label{oper5}
 \end{figure}
 
-Нижние кривые на Fig. \ref{oper4} и \ref{oper5} характеризуют GSA, а верхние линии — GSA-DL. Указанное расположение кривых показывает, что алгоритм с двумя оценками Lipschitz constant обеспечивает в среднем значительно более быстрое решение задач серии, чем алгоритм с использованием единственной оценки константы.
+The lower curves in Fig. \ref{oper4} and \ref{oper5} feature GSA whereas the upper ones --- GSA-DL. Such positions of the curves show the algorithm with two estimates of the Lipschitz constant provides much faster solving of the problem series in average that the algorithm using single estimate of the constant.
 
-%
 % ---- Bibliography ----
 %
 % BibTeX users should specify bibliography style 'splncs04'.
