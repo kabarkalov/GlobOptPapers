@@ -21,7 +21,7 @@
 
 \begin{document}
 %
-\title{Acceleration of Global Search through Dual Lipschitz Constant Estimates\thanks{This research was supported by the the Russian Science Foundation, project No.\,16-11-10150.}}
+\title{Acceleration of Global Search by Implementing Dual Estimates for Lipschitz Constant\thanks{This research was supported by the the Russian Science Foundation, project No.\,16-11-10150.}}
 %
 \titlerunning{Acceleration of Global Search}
 % If the paper title is too long for the running head, you can set
@@ -167,14 +167,16 @@ x^{k+1} = \frac{x_t+x_{t-1}}{2} - \mathrm{sign}(z_t-z_{t-1})\frac{1}{2r}
 The algorithm terminates if the condition $\Delta_t < \epsilon$ is satisfied
 where $t$ is from (\ref{MaxR}), and $\epsilon>0$ is the predefined accuracy. 
 
-The theory of convergence of this algorithm is provided in \cite{Strongin2000}.
+The theory of convergence of this algorithm is provided in \cite{Strongin2000}. 
+The algorithm is allows for an efficient
+parallelization for shared and distributed memory \cite{Gergel2003}  and for accelerators \cite{Gergel2016}.
 
 
 \section{Algorithm with Dual Lipschitz Constant Estimates}
 
 %Russian
 The global search algorithm presented in previous section is intended for solving the multiextremal problems, in which the objective function satisfies the Lipschitz condition. It is not necessary to define the value of the constant for the algorithm convergence. The estimation of the constant is performed in the course of global search on the base of available search information. 
-According to the theorem in \cite{Strongin2000}, the sequence of the trial points $\{y^k\}$ will converge to the global minimizer $y^*$ if the condition 
+According to the theorem from \cite{Strongin2000}, the sequence of the trial points $\{y^k\}$ will converge to the global minimizer $y^*$ if the condition 
 \begin{equation}\label{cond}
 r\mu > 2^{3-1/N}L\sqrt{N+3}.
 \end{equation}
@@ -204,7 +206,7 @@ R_{loc}(i)=\Delta_i+\frac{(z_i-z_{i-1})^2}{r_{loc}^2\mu^2\Delta_i}-2\frac{z_i+z_
 \item
 Determine the characteristic $R(i)$ as
 \begin{equation}\label{pho}
-R(i) = \max\{\rho R_{loc}(i),R_{glob}(i)\}, where \rho = \left(\frac{1-1/r_{glob}}{1-1/r_{loc}}\right)^2,
+R(i) = \max\{\rho R_{loc}(i),R_{glob}(i)\}, \textrm{where} \; \rho = \left(\frac{1-1/r_{glob}}{1-1/r_{loc}}\right)^2,
 \end{equation}
 and fix the value $r = r_{loc}$ if $\rho R_{loc}(i) > R_{glob}(i)$, otherwise fix $r=r_{glob}$.
 \item
@@ -236,13 +238,14 @@ i.e. $\left|y^k-y^\ast\right| <\delta\left\|b-a\right\|$,
 $a$ and $b$ are the boundaries of the search domain $D$. 
 
 %Russian
-Each series of problems has been solved by the original global search algorithm (GSA) and by the method with two estimates of the Lipschitz constant (GSA-DL). The evolvent constructed using the parameter $m = 10$ was used for the dimensionality reduction in both algorithms. The relative accuracy of the solution search was $\delta = 0.01$ for $N=3,4$ and $\delta = 0.03$ for $N=5$.
+Each series of problems has been solved by the original global search algorithm (GSA) and by the method with two estimates of the Lipschitz constant (GSA-DL). The evolvent constructed using the parameter $m = 10$ was used for the dimensionality reduction in both algorithms. The relative accuracy of the solution search was $\delta = 0.01$.% for $N=3,4$ and $\delta = 0.02$ for $N=5$. 
 The maximum allowable number of iterations per problem was $K_{max} = 10^6$.
 
 The averaged numbers of iterations performed by the algorithms are presented in Table \ref{tab:1}.
 At that, for GSA the values of parameter $r=4.8$ when solving the problems of Simple class and $r=5.6$ when solving the problems of Hard class were used. 
 These values are the minimum ones (with the accuracy 0.1), at which all problems have been solved successfully.
 When solving the problems from the above classes by GSA-DL, the value of parameter $r$ specified above was selected for the upper estimate of the Lipschitz constant, i.e. the value $r_{glob} = r$ was set, which was complemented by the values $r_{loc}=1.8$, $r_{loc}=2.1$ and $r_{loc}=2.4$. 
+The number of unsolved problems is specified in brackets.
 
 \begin{table}
 	\caption{Average number of iterations}
@@ -254,10 +257,10 @@ When solving the problems from the above classes by GSA-DL, the value of paramet
 		\noalign{\smallskip} \cline{2-3} \cline{5-6} \cline{8-9} \noalign{\smallskip}
 		 & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard} & & \textit{Simple} & \textit{Hard}  \\
 		\noalign{\smallskip} \hline \noalign{\smallskip}
-									AGS	&	2444	&	5345	& &	28415	&	77470	& &		&		\\
-AGS-DL, $r_{loc}=1.8$	&	1372	&	2632	& &	13273	&	37715	& &		&		\\
-AGS-DL, $r_{loc}=2.1$	&	1502	&	2805	& &	14826	&	38843	& &		&		\\
-AGS-DL, $r_{loc}=2.4$	&	1567	&	2868	& &	19447	&	40342	& &		&		\\
+									AGS	&	2444	&	5345	& &	28415	&	77470	& & 25220(1) & 126138(4)		\\
+AGS-DL, $r_{loc}=1.8$	&	1372	&	2632	& &	13273	&	37715	& &	12702    & 94296(1)			\\
+AGS-DL, $r_{loc}=2.1$	&	1502	&	2805	& &	14826	&	38843	& &	15213    & 90792(2)			\\
+AGS-DL, $r_{loc}=2.4$	&	1567	&	2868	& &	19447	&	40342	& &	18239    & 106438(2)		\\
 		\noalign{\smallskip}\hline
 	\end{tabular}
 \end{table}
