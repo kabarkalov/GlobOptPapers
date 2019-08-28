@@ -15,8 +15,8 @@
 % to display URLs in blue roman font according to Springer's eBook style:
 % \renewcommand\UrlFont{\color{blue}\rmfamily}
 
-%\usepackage[utf8x]{inputenc}
-%\usepackage[english,russian]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[english,russian]{babel}
 
 
 \begin{document}
@@ -68,7 +68,7 @@ functions demonstrate the efficiency of the suggested approach.
 The paper considers global optimization problems of the form 
 \begin{gather}
  \varphi(y^\ast)=\min{\left\{\varphi(y):y\in D\right\}}, \label{problem}\\
- D=\left\{y\in R^N: a_i\leq y_i \leq b_i, 1\leq i \leq N\right\} \label{D},
+ D=\left\{y\in R^N: a_i\leq y_i \leq b_i, \; a_i,b_i\in R, \;  1\leq i \leq N\right\} \label{D},
 \end{gather}
 where the objective function is a black-box function and it is assumed to satisfy the Lipschitz condition
 \[
@@ -76,7 +76,7 @@ where the objective function is a black-box function and it is assumed to satisf
 \]
 with the constant $L, \; L<\infty,$ unknown a priori.
 
-%Russian
+
 The assumption of the objective function to be Lipschitzian is typical for many approaches to the development of the global optimization algorithms \cite{Evtushenko2013,Zilinskas2010,Pinter1996,Strongin2000}. Moreover, the adaptive estimate of the unknown Lipschitz constant, based on the obtained search information, is one of the most important problems being solved in these algorithms. 
 The value of the Lipschitz constant affects the convergence rate of the global optimization algorithms essentially. Therefore, the issue of its correct estimate is so important. 
 The underestimation of the real value of this constant may result in losing the convergence of the algorithm to the global solution. At the same time, a too large value of the estimate of the constant could bring the objective function not matching its real behavior. This produces slow convergence of the algorithm to the global minimizer. 
@@ -97,7 +97,6 @@ The choice of one of the two estimates in the algorithm is performed adaptively 
 The rigorous substantiation of the proposed approach goes beyond the present initial publication and will be done in the forthcoming works. Here we present the results of numerical experiments that clearly demonstrate the efficiency of the new algorithm. Several hundred multiextremal test problems of various dimensionalities have been solved conducting numerical experiments.
 
 \section{Global search algorithm and dimensionality reduction}
-%Russian 
 
 The adaptation of the efficient algorithms that solve one-dimensional problems to solve multidimensional problems is a typical method to construct global optimization algorithms, see, for example, the diagonal partitions method in \cite{Sergeyev2006} or the simplicial partitions method in \cite{Zilinskas2008}.
 
@@ -111,6 +110,8 @@ where the function $\varphi(y(x))$ will satisfy a uniform H{\"o}lder condition
 \]
 with the H{\"o}lder constant $H$ linked to the Lipschitz constant $L$ by the relation
 $ H=2 L \sqrt{N+3}$ and $y(x)$ is a Peano-Hilbert curve from $[0,1]$ onto $D$.
+%Russian
+Отметим, что теоретически Peano-Hilbert curve $y(x)$ определяется as a limit object. Поэтому при практической реализации может быть построено лишь некоторое приближение к истинной space-filling curve. Методы построения подобных approximations (называемых evolvents) рассмотрены в \cite{Sergeyev2013,Strongin2000}. При этом точность приближения развертки к истинной кривой $y(x)$ зависит от плотности развертки $m$ (являющейся параметром ее построения) и составляет величину порядка $2^{-m}$ по каждой координате.
 
 Let us call the process of computing a function value (including the construction of the image $y=y(x)$) as a \textit{trial}, and the pair $\{x, z = \varphi(y(x))\}$ as the outcome of the trial.
 
@@ -147,7 +148,6 @@ where $\Delta_i=\left(x_i-x_{i-1}\right)^{1/N}$ and let
 \right.
 \end{equation}
 
- %If $\mu = 0$, set $\mu = 1$.
 \item
 For each interval $(x_{i-1}, x_i), \; 1\leq i \leq k,$  calculate the value 
 $R(i)$ called the \textit{characteristic} of the interval
@@ -183,7 +183,7 @@ The algorithm can be efficiently parallelized for shared and distributed memory 
 
 \section{Algorithm with Dual Lipschitz Constant Estimates}
 
-%Russian
+
 The global search algorithm presented in previous section is intended for solving the multiextremal problems, in which the objective function satisfies the Lipschitz condition. It is not necessary to define the value of the constant for the algorithm convergence. The estimation of the constant is performed in the course of global search on the base of available search information. 
 According to the theorem from \cite{Strongin2000}, the sequence of the trial points $\{y^k\}$ will converge to the global minimizer $y^*$ if the condition 
 \begin{equation}\label{cond}
@@ -198,7 +198,8 @@ An approach, in which two estimates of the Lipschitz constant %, one of which is
 are used in the rules of the algorithm, is a promising one. 
 This approach implies the use of two parameters $r_{glob}$ and $r_{loc}$ where $r_{glob} > r_{loc}>1$ in the algorithm.
 
-The rules of the algorithm with two estimates of the Lipschitz constant reproduce the ones of global search algorithm completely except Rule 3 (the computation of the characteristic).
+%Russian
+The rules of the algorithm with two estimates of the Lipschitz constant reproduce the ones of global search algorithm completely except Rule 3 (the computation of the characteristic) and Rule 4 (поиск интервала с максимальной характеристикой).
 
 New rule of calculating the characteristic $R(i)$ of the interval $(x_{i-1}, x_i)$ will consist of the following operations:
 \begin{itemize}
@@ -216,11 +217,23 @@ R_{loc}(i)=\Delta_i+\frac{(z_i-z_{i-1})^2}{r_{loc}^2\mu^2\Delta_i}-2\frac{z_i+z_
 Determine the characteristic $R(i)$ as
 \begin{equation}\label{pho}
 R(i) = \max\{\rho R_{loc}(i),R_{glob}(i)\}, \textrm{where} \; \rho = \left(\frac{1-1/r_{glob}}{1-1/r_{loc}}\right)^2,
-\end{equation}
-and fix the value $r = r_{loc}$ if $\rho R_{loc}(i) > R_{glob}(i)$, otherwise fix $r=r_{glob}$.
-\item
-This value of $r$ is used in Rule 5 of the algorithm in the computing of the next trial point.   
+\end{equation}   
 \end{itemize}
+
+%Russian
+Новые правила поиска интервала с максимальной характеристикой будут состоять в следующем:
+\begin{itemize}
+\item 
+Select the interval $(x_{t-1},x_t)$ corresponding to the maximum characteristic
+\[
+R(t)= \max_{1 \leq i \leq k}R(i).
+\]
+\item
+Fix the value $r = r_{loc}$ if $\rho R_{loc}(t) > R_{glob}(t)$, otherwise fix $r=r_{glob}$.
+\item
+This value of $r$ is used in Rule 5 of the algorithm in the computing of the next trial point.
+\end{itemize}
+
 
 This method of computing the characteristic is substantiated as follows. 
 Let current minimum value of $z^*$ from (\ref{z}) be achieved at the left point of the $i^{\rm th}$ interval, i.e. $z^* = z_{i-1}$. Then, according to the rule (\ref{R}) the following inequality will be true: 
@@ -232,22 +245,15 @@ However, if the former is multiplied by the coefficient $\rho$ from (\ref{pho}),
 
 \section{Numerical Experiments}
 
-The numerical comparison of the algorithms has been carried out using the GKLS 
-test problem generator \cite{Gaviano2003}. 
-This generator of multiextremal functions is often used for the investigations of the global 
-optimization algorithms ~\cite{Barkalov2018,Paulavicius2014,Sergeyev2015}.
-Six GKLS classes of 100 differentiable test functions of the dimensions $N = 3,4,5$
-have been used. For each dimension, both \textit{Hard} and \textit{Simple}
-classes have been considered. The difficulty of a class was increased either by
-decreasing the radius of the attraction region of the global minimizer, or by
-decreasing the distance from the global minimizer $y^\ast$ to the domain
-boundaries. The global minimizer $y^\ast$ was considered to be found, if the
-algorithm generated a trial point $y^k$ in the vicinity of the global minimum,
-i.e. $\left\|y^k-y^\ast\right\| <\delta\left\|b-a\right\|$, 
-$a$ and $b$ are the boundaries of the search domain $D$. 
-
 %Russian
-Each series of problems has been solved by the original global search algorithm (GSA) and by the method with two estimates of the Lipschitz constant (GSA-DL). The evolvent constructed using the parameter $m = 10$ was used for the dimensionality reduction in both algorithms. The relative accuracy of the solution search was $\delta = 0.01$.% for $N=3,4$ and $\delta = 0.02$ for $N=5$. 
+Численное сравление алгоритмов было выполнено посредством решения нескольких серий задач, порожденных генератором GKLS \cite{Gaviano2003}. Данный генератор многоэкстремальных функций широко используется для сравнения методов глобальной оптимизации (see, for example, \cite{Barkalov2018,Paulavicius2014,Sergeyev2015}). В данном исследовании были решены шесть серий по 100 задач размерностей $N = 3,4,5$. Для каждой размерности генерировались \textit{Simple} and \textit{Hard} problems, отличающиеся размерами attraction region локальных и глобального minimizer.
+Задача считалась решенной, если метод проводил очередное испытание в точке $y^k$, которая находилась в $\delta$-октрестности global minimizer $y^\ast$, 
+т.е. $\left\|y^k-y^\ast\right\| <\delta\left\|b-a\right\|$, где  $a$ and $b$ --- границы search domain $D$.
+
+The numerical comparison of the algorithms has been carried out using the GKLS test problem generator \cite{Gaviano2003}. This generator of multiextremal functions is often used for the investigations of the global optimization algorithms ~\cite{Barkalov2018,Paulavicius2014,Sergeyev2015}. Six GKLS classes of 100 differentiable test functions of the dimensions $N = 3,4,5$ have been used. For each dimension, both \textit{Hard} and \textit{Simple} classes have been considered. The difficulty of a class was increased either by decreasing the radius of the attraction region of the global minimizer, or by decreasing the distance from the global minimizer $y^\ast$ to the domain boundaries. The global minimizer $y^\ast$ was considered to be found, if the algorithm generated a trial point $y^k$ in the vicinity of the global minimum, i.e. $\left\|y^k-y^\ast\right\| <\delta\left\|b-a\right\|$, $a$ and $b$ are the boundaries of the search domain $D$. 
+
+
+Each series of problems has been solved by the original global search algorithm (GSA) and by the method with two estimates of the Lipschitz constant (GSA-DL). The evolvent constructed using the parameter $m = 10$ was used for the dimensionality reduction in both algorithms. The relative accuracy of the solution search was $\delta = 0.01$. 
 The maximum allowable number of iterations per problem was $K_{max} = 10^6$.
 
 The averaged numbers of iterations performed by the algorithms are presented in Table \ref{tab:1}.
@@ -274,14 +280,6 @@ AGS-DL, $r_{loc}=2.4$	&	1567	&	2868	& &	19447	&	40342	& &	18239    & 106438(2)		
 	\end{tabular}
 \end{table}
 
-
-The advantage of the GSA-DL algorithm over its prototype is confirmed by the operational characteristics of the algorithms as well. 
-
-Assume a series of test problems to be solved. The results of solving the series can be presented by a function $p(k)$ featuring the fraction of the total number of problems solved in $k$ iterations. Such a function will be called the \textit{operational characteristic} of the algorithm. 
-
-
-The operational characteristics for the GSA and GSA-DL methods obtained when solving the \textit{Simple} and \textit{Hard} problem series with the dimensionalities $N=4$ and $N=5$ are presented in Fig. \ref{oper4} and \ref{oper5}, respectively. The values of the parameters $r$ used for estimating the Lipschitz constant are given in the figures.
-
 \begin{figure}
 \begin{minipage}{0.5\linewidth}
 \center{\includegraphics[width=1.0\linewidth]{Operating_characteristic_gklss_4.png} \\ (a)}
@@ -306,7 +304,15 @@ The operational characteristics for the GSA and GSA-DL methods obtained when sol
 \label{oper5}
 \end{figure}
 
+The advantage of the GSA-DL algorithm over its prototype is confirmed by the operational characteristics of the algorithms as well. 
+
+Assume a series of test problems to be solved. The results of solving the series can be presented by a function $p(k)$ featuring the fraction of the total number of problems solved in $k$ iterations. Such a function will be called the \textit{operational characteristic} of the algorithm. 
+
+The operational characteristics for the GSA and GSA-DL methods obtained when solving the \textit{Simple} and \textit{Hard} problem series with the dimensionalities $N=4$ and $N=5$ are presented in Fig. \ref{oper4} and \ref{oper5}, respectively. The values of the parameters $r$ used for estimating the Lipschitz constant are given in the figures.
+
 The lower curves in Fig. \ref{oper4} and \ref{oper5} feature GSA whereas the upper ones --- GSA-DL. Such positions of the curves show the algorithm with two estimates of the Lipschitz constant provides much faster solving of the problem series in average that the algorithm using single estimate of the constant.
+%Russian
+Отметим, что для решения задач всех классов (кроме класса  \textit{Hard} при $N=5$) метод GSA-DL требует примерно в два раза меньше испытаний, чем GSA. Ухудшение результатов на классе \textit{Hard} при $N=5$ объясняется сложностью функций данного класса, характеризующихся большими attraction region локальных минимумов и узкой attraction region глобального минимума. Для корректного решения таких задач метод  GSA-DL чаще использует бОльшую оценку константы Липшица, что сближает скорость работы алгоритмов GSA и GSA-DL.
 
 % ---- Bibliography ----
 %
