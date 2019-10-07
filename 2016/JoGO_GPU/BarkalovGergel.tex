@@ -75,7 +75,7 @@ This work considers a parallel algorithm of solution of multidimensional multiex
 
 \section{Introduction} \label{intro}
 
-This present paper considers parallel algorithms for the solution of problems of multiextremal optimization. In multiextremal problems the possibility of a reliable estimation of the global optimum is essentially based on the availability of a priori information about the function, allowing us to link possible values of an optimizable function with known values in search points. Very often, such information about the solvable problem is presented as the assumption that the objective function $\varphi$ satisfies a Lipschitz condition with a priori unknown constant $L$. The objective function can be represented by the algorithm of calculation of its values in the search domain, i.e. it can be a ``black-box'' function. Similar problems are widespread in applications (problems of optimal design of objects and technological processes in various fields of technology, problems of model fitting according to observed data in scientific research, optimization of control processes, etc., see the review \cite{RefPinter}).
+This present paper considers parallel algorithms for the solution of problems of multiextremal optimization. The objective function in such problems is characterized by existence of several local optima (usually their number is not known and can be large). In multiextremal problems the possibility of a reliable estimation of the global optimum is essentially based on the availability of a priori information about the function, allowing us to link possible values of an optimizable function with known values in search points. Very often, such information about the solvable problem is presented as the assumption that the objective function $\varphi$ satisfies a Lipschitz condition with a priori unknown constant $L$. The objective function can be represented by the algorithm of calculation of its values in the search domain, i.e. it can be a ``black-box'' function. Similar problems are widespread in applications (problems of optimal design of objects and technological processes in various fields of technology, problems of model fitting according to observed data in scientific research, optimization of control processes, etc., see the review \cite{RefPinter}).
 
 Multiextremal optimization problems offer little in terms of analytical solution and numerical solution is computationally challenging as computational costs often grow exponentially in dimension. Employing modern parallel computational systems broadens the area of applicability of global optimization methods and, at the same time, poses a problem of efficient parallelization of the global search process. Therefore development of efficient parallel methods for numerical solution of multiextremal optimization problems and their software implementation for modern computational systems is the main direction of research in this area.
 
@@ -104,7 +104,7 @@ There is a number of ways to adapt effective one-dimensional algorithms for solv
 \[
 \left\{y\in R^N: -2^{-1}\leq y_i \leq 2^{-1}, 1 \leq i \leq N\right\}=\left\{y(x):0\leq x \leq 1 \right\}.
 \]
-Problems of numerical construction of Peano-type space filling curves and the corresponding theory are considered in detail in \cite{RefStrongin2000}, \cite{RefSergeyev2013}. Here we will note that a numerically constructed curve is an approximation to a theoretical Peano curve with an accuracy $2^{-m}$ , where $m$ is a curve construction parameter.
+Problems of numerical construction of Peano-type space filling curves and the corresponding theory are considered in detail in \cite{RefStrongin2000}, \cite{RefSergeyev2013}. Here we will note that a numerically constructed curve (\textit{evolvent}) is an approximation to a theoretical Peano curve with an accuracy $2^{-m}$ , where $m$ is an evolvent construction parameter. It means that using evolvent we can distinguish points in a multidimensional space, the coordinates of which differ by not less than $2^{-m}$; closer points are considered as coincident. Thereby an evolvent constructed with a fixed m allows obtaining a solution of a problem with an accuracy of not more than $2^{-m}$ by coordinate.
 
 By using mapping of this kind it is possible to reduce the multidimensional problem~(\ref{eq:1}) to a one-dimensional problem
 \[
@@ -182,7 +182,9 @@ f_k^\ast=\min_{1\leq i \leq k}f(x^i), \ x_k^\ast=\arg \min_{1\leq i \leq k}f(x^i
 \]
 are selected.
 
-The proof of convergence of this algorithm is provided in \cite{RefStrongin2000}. The modifications considering existence of inequality constraints in the problem and information about objective function derivative are given in \cite{RefBarkalov,RefGergel1996,RefGergel1997}.
+Remark 1. The normalized characteristics $R(i)$ from (\ref{eq:14}) can be viewed as probabilities of locating of a global minimize within the interval $[x_{i-1},x_i], 1\leq i \leq k+1$. This statement is proved in \cite{RefStrongin2000}. Thus, at each iteration a new trial point is selected inside the interval, which has the greatest probability of finding a global minimum. 
+
+Remark 2. The proof of convergence of this algorithm is provided in \cite{RefStrongin2000}. The modifications considering existence of inequality constraints in the problem and information about objective function derivative are given in \cite{RefBarkalov,RefGergel1996,RefGergel1997}.
 
 Let us illustrate the work of this \textit{global search algorithm} (GSA) using a dimension reduction for minimization of a two-dimensional multiextremal function
 \begin{eqnarray} \nonumber \label{eq:19}
@@ -243,7 +245,7 @@ The modifications of the parallel algorithm considering information about the mi
 
 This method of organizing parallel computing has the following justification \cite{RefStrongin2000,RefGrishagin1997}. The characteristics of intervals (\ref{eq:14}) used in the algorithm of global search can be considered as probability measures of location of the global minimum point in these intervals. Inequalities (\ref{eq:21}) arrange intervals according to their characteristics, and trials are carried out in parallel in the first $p$ intervals with the largest probabilities.
 
-Let us use a parallel algorithm of global search for solution of a problem from section \ref{sec:2} with numbers of parallel trials $p=2$ and $p=4$. With $p=2$ the number of iterations was $569$, and the number of trials was $1138$. With $p=4$ the number of iterations was reduced to $270$, and $1080$ trials were carried out. Contour lines of the function are shown in Fig.~\ref{fig:2} with points of the trials carried out by the method when using $p=4$. Comparison of Fig.~\ref{fig:1} and Fig.~\ref{fig:2} shows absence of redundant trial points.
+Let us use a parallel algorithm of global search for solution of a problem from section \ref{sec:2} with numbers of parallel trials $p=2$ and $p=4$. With $p=2$ the number of iterations was $569$, and the number of trials was $1138$. With $p=4$ the number of iterations was reduced to $270$, and $1080$ trials were carried out. Contour lines of the function are shown in Fig.~\ref{fig:2} with points of the trials carried out by the method when using $p=4$. Points of redundant trials carried out using a parallel algorithm are marked in the figure by "+". In more detail the concept of redundancy is discussed in the following section.
 \begin{figure}
 	\center
   \includegraphics[width=0.75\textwidth]{fig2.jpg} 
@@ -368,7 +370,7 @@ Keep in mind that widely known test problems from the domain of multidimensional
 
 Therefore, for the purpose of imitation of the computational complexity inherent to applied problems of optimization \cite{RefBarkalov2013}, calculation of the objective function in all performed experiments was complicated by additional calculations without changing the type of function and arrangement of its minimums (series summation from 20 thousand elements).
 
-It is noteworthy that an important parameter for starting any GPU program (unlike a parallel program on CPU) is not only the number of threads $p$, but also the size of the \textit{thread block}. Separate threads on GPU are grouped in blocks of threads of identical size, thus each thread block is executed on a separate multiprocessor. Threads in a thread block can interact effectively using information in shared memory and synchronization. For the purpose of assessing the importance of the size of a thread block during the period of execution of a GPU algorithm let us perform a preliminary series of experiments with the test function (\ref{eq:33}) with $N=5$. Let us vary the number $p$ of the used GPU cores and the size $pB$ of a thread block. All the other parameters of the method do not change ($r=2.3$, $\epsilon = 10^{-3}$, the evolvent construction parameter $m=10$). Table \ref{tab:2} shows the GPU algorithm operating time depending on $p$ and $pB$.
+It is noteworthy that an important parameter for starting any GPU program (unlike a parallel program on CPU) is not only the number of threads $p$, but also the size of the \textit{thread block}. Separate threads on GPU are grouped in blocks of threads of identical size, thus each thread block is executed on a separate multiprocessor. Threads in a thread block can interact effectively using information in shared memory and synchronization. For the purpose of assessing the importance of the size of a thread block during the period of execution of a GPU algorithm let us perform a preliminary series of experiments with the test function (\ref{eq:33}) with $N=5$. Let us vary the number $p$ of the used GPU threads and the size $pB$ of a thread block. All the other parameters of the method do not change ($r=2.3$, $\epsilon = 10^{-3}$, the evolvent construction parameter $m=10$). Table \ref{tab:2} shows the GPU algorithm operating time depending on $p$ and $pB$.
 \begin{table}
 	\caption{GPU algorithm operating time depending on thread block size}
 	\label{tab:2}
@@ -390,7 +392,7 @@ It is noteworthy that an important parameter for starting any GPU program (unlik
 	\end{tabular}
 \end{table}
 
-As is seen from this table, there is a speedup of the algorithm in the case of an increase in the number of trials at one iteration up to the number of cores on GPU, with subsequent saturation. Owing to a weak information dependence the size of the thread block $pB$ does not have determining influence, therefore let us use $pB=64$ in all subsequent experiments.
+As is seen from this table, there is a speedup of the algorithm in the case of an increase in the number of trials at one iteration up to the number of cores on GPU, with subsequent saturation. Owing to a weak information dependence the size of the thread block $pB$ does not have determining influence, therefore let us use $pB=64$ in all subsequent experiments. When carrying out this set of experiments the load on GPU was 15 -- 85 \% (depending on the number of threads); the load was measured by GPUZ program.
 
 After fixing the GPU parameters let us make the main computing experiments on a series of multidimensional multiextremal problems. In work \cite{RefGaviano} a GKLS generator allowing generation of multiextremal optimization problems with known properties (number of local minima, size of their domains of attraction, global minimum point, function value, etc.) is described.  
 
@@ -518,7 +520,7 @@ Let us estimate now the speedup when using the parallel global search algorithm 
 
 The data show quintuple time speedup, when using 32 cores for all classes (except 5-\textit{Hard}). Delay in class 5-\textit{Hard} in transition from 16 to 32 cores is explained by an increase in average number of iterations and by the fact that out of 32 cores 16 are physical, and other 16 are virtual in hyper-threading mode, i.e. a real gain in performance in transition from 16 to 32 cores is less than double.
 
-Let us make a similar experiment using a GPU version of the algorithm. Also let us fix the average number of iterations and average time spent on one problem (see the following two tables). Let us measure the speedup and redundancy of GPU algorithm in relation to the CPU algorithm started with 32 cores (see column $p=32$ in tables 4 and 5). The number of the used $p$ GPU cores varied, all other parameters of the method did not change.
+Let us make a similar experiment using a GPU version of the algorithm. Also let us fix the average number of iterations and average time spent on one problem (see the tables \ref{tab:last4} -- \ref{tab:last}). Let us measure the speedup and redundancy of GPU algorithm in relation to the CPU algorithm started with 32 cores (see column $p=32$ in tables \ref{tab:4} and \ref{tab:5}). The number of the used threads $p$ on GPU varied, all other parameters of the method did not change. The number of threads, which is greater, than the number of cores, was chosen to show the following effect: the number of iterations executed by an algorithm will be reduced in case of an increase in number of threads, while time of operation will not. The minimum time of operation is reached, if the number of used threads does not surpass the number of GPU cores.
 
 
 \begin{table}
@@ -635,6 +637,14 @@ The results of experiments show advantage of the GPU algorithm in comparison wit
 
 \section{Conclusions} \label{sec:7}
 
+By now, parallel implementations of the majority of the developed sequential algorithms have been suggested. Please find a review of modern methods of parallel global optimization, for example, in \cite{RefApuzzo}. 
+
+The methods described in \cite{RefApuzzo} can be divided into two classes: deterministic methods of global optimization (including the algorithm of global search considered in this article), and heuristic methods, which are one way or another based on the concept random search. Algorithms belonging to the latter class provide for use of massive parallelism and are easily implemented on GPU (see works \cite{RefFerreiro,RefZhu,RefGarcia,RefMussi} and the review \cite{RefLangdon}).
+
+Global optimization of implementations on GPU for deterministic algorithms has not been suggested yet. For example, parallelization of algorithms based on the ideas of the branch and bound method is carried out for a small number of processors using OpenMP and MPI \cite{RefPaulavicius}. It is noteworthy that the branch and bound method is applied in other sections of optimization; in particular, combinatorial optimization and integer programming. Using GPU shows good results in these domains (see \cite{RefBoukedjar}, \cite{RefCarneiro}). It is explained by the following factor. Problems of this class (such as travelling salesman problem or knapsack problem) are characterized by short time of criterion value calculation in one point and, at the same time, relatively long time of results processing. Therefore, the most labor-intensive operations here are branching and bound computation, which are implemented on GPU (see \cite{RefBoukedjar}, \cite{RefCarneiro}).
+
+This paper considers the problems of lipshitzian global optimization, that are frequently met in applications. They are characterized by a considerable time of calculation of function value in one point (in comparison with processing of results of such calculation). Therefore, calculation of the value of an optimized function in one point is done via GPU, and the main objective of the algorithm (working at CPU) is to efficiently select points of parallel trials. This is carried out in the parallel implementation of GSA on GPU.
+
 Summing up the results, let us note that use of graphics processing units for solution of global optimization problems is a new, promising direction of research as high efficiency of modern supercomputers is reached (generally) due to use of graphics accelerators. 
 
 This paper considers a parallel algorithm of solution of multidimensional multiextremal optimization problems and its implementation on GPU. This algorithm was developed within the framework of information-statistical approach. Theoretical information on properties of parallel algorithm characterizing conditions of non-redundant parallelization are provided.
@@ -734,6 +744,14 @@ Jones, D.R., Perttunen, C.D., Stuckman, B.E.: Lipschitzian optimization without 
 \bibitem{RefGablonsky}
 Gablonsky, J.M., Kelley, C.T.: A locally-biased form of the DIRECT algorithm. J. Glob. Optim., 21(1), 27--37 (2001)
 
+\bibitem{RefApuzzo}
+M. D’Apuzzo, M. Marino, A. Migdalas, P.M. Pardalos, and G. Toraldo, Parallel computing in global optimization, in Handbook of Parallel Computing and Statistics, E.J. Kontoghiorghes, ed. Chapman \& Hall, London, 2006, pp. 225–258
+
+\bibitem{RefBoukedjar}
+Boukedjar A., Lalami M. E., El Baz D. Parallel Branch and Bound on a CPU-GPU System //PDP. – 2012. – С. 392-398
+
+\bibitem{RefCarneiro}
+Carneiro T. et al. A new parallel schema for branch-and-bound algorithms using GPGPU //Computer Architecture and High Performance Computing (SBAC-PAD), 2011 23rd International Symposium on. – IEEE, 2011. – С. 41-47.
 
 \end{thebibliography}
 
