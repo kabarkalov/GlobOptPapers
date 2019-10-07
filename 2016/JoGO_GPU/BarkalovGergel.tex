@@ -95,7 +95,12 @@ By now, parallel implementations have been suggested for most of the existing se
 
 Some parallel variants are proposed for deterministic algorithms of Lipschitzian global optimization in \cite{RefGergel2005,RefEvtushenko,RefHe,RefPaulavicius}. However, these versions of algorithms are parallelized on a computing cluster with distributed memory using multi-core CPU; implementations of Lipschitzian global optimization algorithms on GPU have not been suggested yet. For example, parallelization of algorithms based on the ideas of the branch and bound method is carried out for a small number of nodes using OpenMP and MPI technologies \cite{RefPaulavicius}. It is noteworthy that the branch and bound method is applied in other areas of optimization; in particular, combinatorial optimization and integer programming. Using GPU shows good results in these areas \cite{RefBoukedjar,RefCarneiro}. It is explained by the following factor. Problems of this class (such as the Travelling Salesman Problem or the Knapsack Problem) are characterized by short time of objective function value calculation at one point and, at the same time, relatively long time required to process the results. Therefore, the most of labor-intensive operations here consist in branching and bound computations, which are implemented on GPU (see \cite{RefBoukedjar,RefCarneiro}).
 
-This paper considers the problems of Lipschitzian global optimization that are frequently encountered in applications. They are characterized by a considerable time required to calculate the function value at one point (in comparison with the processing of the results of such calculation). For example, the objective function can be defined by solving SLAE, ODE, PDE, or Monte Carlo simulation. Currently, GPU may be used to solve all these types of problems \cite{RefKindratenko}. Therefore, calculation of values of an optimized function can be done using a GPU, and the main objective of the algorithm (working at CPU) is to efficiently select points of parallel trials. The article contains the results of an investigation into the GPU implementation of the global search parallel algorithm developed according to the information-statistical approach presented in the monograph \cite{RefStrongin2000}. Some preliminary results of research in this area have been published in \cite{RefLebedevBarkalov}.
+This paper considers the problems of Lipschitzian global optimization that are frequently encountered in applications. They are characterized by a considerable time required to calculate the function value at one point (in comparison with the processing of the results of such calculation). For example, the objective function can be defined by solving SLAE, ODE, PDE, or Monte Carlo simulation. Currently, GPU can be used to solve all these types of problems. 
+%rev4 text begin
+Moreover, a set of problems can be solved on GPU simultaneously. For example, algorithm of solving of a large amount of independent SLAE on GPU is considered in \cite{RefKindratenko}, chapter 5. Results of simultaneously solving $2 \cdot 10^4$ systems of variable size are presented. Algorithm of parallel integration of large numbers of independent ODE systems on GPU is discussed in \cite{RefKindratenko}, chapter 8. Experimental results that show good speedup in solving a set (from $10^3$ up to $10^5$) of independent ODE systems are presented. Assuming that the objective function in global optimization problem is given as SLAE or ODE system many function values can be computed simultaneously.
+%rev4 text end
+
+Therefore, calculation of an objective function values can be done using a GPU, and the main goal of the algorithm	 (working at CPU) is to efficiently select points of parallel trials. The article contains the results of an investigation into the GPU implementation of the global search parallel algorithm developed according to the information-statistical approach presented in the monograph \cite{RefStrongin2000}. Some preliminary results of research in this area have been published in \cite{RefLebedevBarkalov}.
 %new text end
 
 The main part of the paper has the following structure. Section \ref{sec:2} contains a description of the basic algorithm of global search. Section \ref{sec:3} describes a scheme of its parallelization, and section \ref{sec:4} includes theoretical statements that characterize the speedup and non-redundancy of the parallel algorithm. In section \ref{sec:5}, ways of possible implementation of the parallel algorithm on GPU are discussed. Section \ref{sec:6} contains the results of numerical experiments; a comparison of the sequential algorithm and parallel CPU and GPU versions for solving a series of test multidimensional multiextremal problems is also made. Section \ref{sec:7} concludes the paper.
@@ -124,18 +129,17 @@ Here we will note that a numerically constructed curve (\textit{evolvent}) is $2
 
 %Here we will note that a numerically constructed curve (\textit{evolvent}) is an approximation to a theoretical Peano curve with an accuracy $2^{-m}$ , where $m$ is an evolvent construction parameter. It means that using an evolvent we can distinguish points in a multidimensional space, the coordinates of which differ by not less than $2^{-m}$; closer points are considered as coincident. Thereby an evolvent constructed with a fixed $m$ allows obtaining a solution of a problem with an accuracy of not more than $2^{-m}$ by coordinate. 
 
-\begin{figure}
+\begin{figure}[ht]
 \begin{minipage}{0.32\linewidth}
 \center{\includegraphics[width=1.0\linewidth]{fig1a.JPG} \\ (a)}
 \end{minipage}
-\hfill
 \begin{minipage}{0.32\linewidth}
 \center{\includegraphics[width=1.0\linewidth]{fig1b.JPG} \\ (b)}
 \end{minipage}
 \begin{minipage}{0.32\linewidth}
 \center{\includegraphics[width=1.0\linewidth]{fig1c.JPG} \\ (c)}
 \end{minipage}
-\caption{Elvolvents in two dimensions with (a) $m=3$, (b) $m=4$ and (c) $m=5$}
+\caption{Evolvents in two dimensions with (a) $m=3$, (b) $m=4$ and (c) $m=5$}
 \label{fig:0}
 \end{figure}
 %new text end
@@ -249,6 +253,13 @@ and coefficients $A_{ij}, B_{ij}, C_{ij}, D_{ij}$  are taken uniformly in the in
   \label{fig:1}       % Give a unique label
 \end{figure}
 
+\begin{figure}
+	\center
+  \includegraphics[width=0.75\textwidth]{fig3.jpg} 
+  \caption{Minimization of a function of two variables by the parallel algorithm}
+  \label{fig:2}
+\end{figure}
+
 \section{Synchronous parallel algorithm} \label{sec:3}
 
 Let us now consider $p>1$ computing elements (cores in CPU or GPU). In this case, search process parallelization can be organized in several ways.
@@ -292,12 +303,6 @@ The modifications of the parallel algorithm which takes into account the informa
 This method of organizing parallel computing has the following justification \cite{RefStrongin2000,RefGrishagin1997}. The characteristics of intervals (\ref{eq:14}) used in the global search algorithm can be considered as probability measures of the global minimum point location in these intervals. Inequalities (\ref{eq:21}) arrange intervals according to their characteristics, and trials are carried out in parallel in the first $p$ intervals with the largest probabilities.
 
 Let us use a parallel algorithm of global search for solving a problem from section \ref{sec:2} with the numbers of parallel trials $p=2$ and $p=4$. With $p=2$ the number of iterations was $569$, and the number of trials was $1138$. With $p=4$ the number of iterations was reduced to $270$, and $1080$ trials were carried out. Fig.~\ref{fig:2} shows level lines of the function with points of the trials performed by the method with $p=2$. Points of redundant trials carried out using a parallel algorithm are marked in the figure by "+". The concept of redundancy is discussed in more detail in the following section.
-\begin{figure}
-	\center
-  \includegraphics[width=0.75\textwidth]{fig3.jpg} 
-  \caption{Minimization of a function of two variables by the parallel algorithm}
-  \label{fig:2}
-\end{figure}
 
 \section{Speedup and non-redundancy of a parallel algorithm} \label{sec:4}
 
@@ -410,10 +415,11 @@ The use of several hundred parallel computing elements (as in modern GPU) might 
 
 Computational experiments were carried out on one of the nodes of a high-performance cluster of the State University of Nizhny Novgorod. The cluster node includes 2 Intel Sandy Bridge E5-2660 2.2 GHz CPUs, 64 Gb RAM, and NVIDIA Tesla M2090 GPU. The CPU has 8 cores (i.e., 16 physical cores and 16 virtual cores in hyper-threading mode are available in the node). The graphics processing unit includes 16 multiprocessors (512 cores). For implementation of the GPU algorithm CUDA Toolkit 6.0 was used.
 
-It should be noted that widely known test problems from the field of multidimensional global optimization are characterized by small time required to calculate the objective function value. Usually, such a calculation is nothing else than a summation of several (according to problem dimension) values of elementary functions. For example, the well known Rastrigin test function, the global minimum of which is located in $y^\ast = (0,\dots,0)$ with $\varphi(y^\ast)=0$, is set by the expression
+It should be noted that widely known test problems from the field of multidimensional global optimization are characterized by small time required to calculate the objective function value. Usually, such a calculation is nothing else than a summation of several (according to problem dimension) values of elementary functions. For example, the well known Rastrigin test function 
 \begin{equation}\label{eq:33}
-\varphi(y)=10N+\sum^{N}_{i=1}\left[y^2_i-10\cos(2\pi y_i)\right], \; -2.2\leq y_i \leq 1.8, \; 1\leq i \leq N.
+\varphi(y)=10N+\sum^{N}_{i=1}\left[y^2_i-10\cos(2\pi y_i)\right], \; -2.2\leq y_i \leq 1.8, \; 1\leq i \leq N,
 \end{equation}
+has the global minimum value $\varphi(y^\ast)=0$ at the point $y^\ast = (0,\dots,0)$.
 
 Therefore, for the purpose of simulation of the computational complexity inherent to applied problems of optimization \cite{RefBarkalov2013}, calculation of the objective function in all performed experiments was made more complex by additional calculations without changing the type of function and arrangement of its minima (series summation from 20 thousand elements).
 
@@ -680,7 +686,7 @@ Let us make a similar experiment using a GPU version of the algorithm. Also let 
 	\end{tabular}
 \end{table}
 
-The results of our experiments show some obvious advantages of the GPU algorithm in comparison with the CPU algorithm. The algorithm, which uses the maximal number of cores of CPU, works slower than any of the given GPU implementations. In addition, the results show a considerable speedup in the number of iterations. For example, on average only 353 parallel iterations on GPU were sufficient to solve problems of the most difficult class considered -- 5-\textit{Hard}, whereas even with the use of all computing CPU cores over eleven thousand iterations were required. Finally, the GPU algorithm is almost non-redundant in relation to the CPU algorithm.
+The results of our experiments show some obvious advantages of the GPU algorithm in comparison with the CPU algorithm. The algorithm, which uses the maximal number of cores of CPU, works slower than any of the given GPU implementations. In addition, the results show a considerable decrease of the number of iterations. For example, on average only 353 parallel iterations on GPU were sufficient to solve problems of the most difficult class considered -- 5-\textit{Hard}, whereas even with the use of all computing CPU cores over eleven thousand iterations were required. Finally, the GPU algorithm is almost non-redundant in relation to the CPU algorithm.
 
 \section{Conclusions} \label{sec:7}
 
@@ -812,5 +818,3 @@ Gablonsky, J.M., Kelley, C.T.: A locally-biased form of the DIRECT algorithm. J.
 \end{thebibliography}
 
 \end{document}
-% end of file template.tex
-
