@@ -1,0 +1,359 @@
+\documentclass[runningheads]{llncs}
+%
+%
+\usepackage{graphicx}
+\usepackage{mathtools,amssymb}
+\usepackage{bbding}
+%
+% \usepackage{mathptmx}      % use Times fonts if available on your TeX system
+%
+% insert here the call for the packages your document requires
+%\usepackage{latexsym}
+% etc.
+%
+% please place your own definitions here and don't use \def but
+% \newcommand{}{}
+%
+% Insert the name of "your journal" with
+% \journalname{myjournal}
+%
+\begin{document}
+
+\title{A Highly Parallel Approach for Solving Computationally Expensive Multicriteria Optimization Problems}
+
+\titlerunning{A Highly Parallel Approach for Solving MCO Problem}        % if too long for running head
+
+\author{Victor Gergel\orcidID{0000-0002-4013-2329} (\Envelope) \and Evgeny Kozinov \orcidID{0000-0001-6776-0096}}
+
+\authorrunning{V. Gergel et al.} % if too long for running head
+
+\institute{Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia \\
+              \email{gergel@unn.ru, evgeny.kozinov@itmm.unn.ru}
+}
+
+
+
+\maketitle
+
+\begin{abstract}
+In this paper, a highly parallel approach for solving multicriteria optimization problems is proposed. The considered approach is based on the reduction of the multicriterial problems to the global optimization ones using the minimax convolution of the partial criteria, the dimensionality reduction with the use of the Peano space-filling curves, and the application of the efficient parallel information-statistical global optimization methods. The required computations can be time-consuming since functions representing individual criteria can be multiextremal and computationally expensive. The proposed approach comprises two different schemes for efficient parallel computations on high performance systems with shared and distributed memory and with a large number of computational units. The computational efficiency is achieved by storing all the computed criteria values and their intensive reuse for finding new solutions. The results of numerical experiments have demonstrated that this approach allows to reduce the computational costs of solving multicriteria optimization problems by a factor between 10 and 100. 
+\keywords{Multicriteria optimization \and Parallel computing \and Dimensionality reduction \and Criteria convolution \and Global optimization algorithm \and Computational complexity}
+\end{abstract}
+
+\section{Introduction}
+\label{sec:1}
+
+The multicriteria optimization (MCO) problems arise in a general formulation of a decision making problem. Reviews of the state of the art in multicriteria optimization can be found in \cite{c1,c2,c3,c12} and reviews of relevant techniques and applications in \cite{c4,c5,c6,c7,c13,c50}.
+
+At the same time, the MCO problems are some of the most complex ones. To solve an MCO problem compromise decisions need to be found and having to find a representative set of those increases the computational complexity of solving the MCO problems. Bearing in mind that finding even a single efficient solution may require a large amount of computations, obtaining the whole Pareto set or even a limited subset of efficient decisions becomes a problem of high computational complexity. In order to solve such problems huge computational capabilities of high-performance systems are required. 
+
+The structure of this paper is as follows. Section \ref{sec:2} presents a general statement of a multicriteria optimization problem. A scheme of parallel computations to simultaneously solve a set of multicriteria global optimization problems is proposed in Section \ref{sec:3}. A parallel algorithm of multicriteria global search is presented in Section \ref{sec:4}. To demonstrate the proposed techniques, Section \ref{sec:5} presents results of numerical experiments.
+
+\section{Statement of a Multicriteria Optimization Problem}
+\label{sec:2}
+The problem of multicriteria (or multi-objective) optimization (MCO) can be defined as follows:
+\begin{equation}
+f(y) =(f_1 (y),f_2 (y),\dots,f_s (y) )\to min,y\in D,	
+\label{eq:1}
+\end{equation}
+where $y = (y_1,y_2,\dots,y_N)$ is a vector of varied parameters describing a system being designed, $N$ is the dimensionality of the optimization problem, and $D$ is the search domain being an $N$-dimensional hyperinterval
+\begin{equation*}
+D= \{ y \in R^N: a_i \leq y_i \leq b_i,1 \leq i \leq N \}
+\end{equation*}
+with given boundary vectors $a$ and $b$. Without a loss of generality, the efficiency criteria values in the problem (\ref{eq:1}) are assumed to be non-negative, and the decrease of these ones corresponds to the increase of the efficiency of the considered solutions $y \in D$. In addition it is assumed the efficiency criteria $f_i(y)$, $1 \leq i \leq s$ can be multiextremal, and the obtaining of the criteria values at the points of the search domain $y \in D$ can require a large amount of computations. It is assumed that the efficiency criteria $f_i(y)$, $1 \leq i \leq s$ satisfy the Lipschitz condition
+\begin{equation}
+|f_i (y') - f_i (y'') | \leq L_i ||y' - y''||, y', y'' \in D, 1\leq i\leq s	
+\label{eq:2}
+\end{equation}
+where $L_i$, $1 \leq i \leq s$ are the Lipschitz constants for the corresponding efficiency criteria $f_i(y)$, $1 \leq i \leq s$, and $||.||$  denotes the norm in the $R^N$ space. 
+
+As \textit{a solution} of the MCO problem, any efficient decision  is considered. In a general case, it is required to find the whole set of Pareto-optimal solutions $PD(f,D)$, i.e. \textit{the complete solution of an MCO problem}.
+
+A general approach to solving the MCO problem used in this paper consists in the replacement of solving the original MCO problems by solving a series of simpler optimization problems: 
+\begin{equation}\label{eq:3}
+\begin{split}
+\min{(\phi(x) = F(\lambda, y(x)), y(x) \in D, x \in [0,1])},\\
+F(\lambda,y(x))=\max{(\lambda_i f_i(y(x)), 1 \leq i \leq s)},\\
+\lambda=(\lambda_1,\lambda_2,\dots,\lambda_s) \in \Lambda \subset R^s : \sum_{i=1}^s{\lambda_i}=1, \lambda_i \geq 0, 1 \leq i \leq s
+\end{split}
+\end{equation}
+where $F(\lambda,y(x))$ is the minimax convolution of the efficiency criteria of the MCO problem \cite{c2,c6,c19} with the use of the vector of the convolution coefficients $\lambda \in \Lambda$ and $y(x)$ is a continuous and unambiguous mapping of the interval [0,1] onto an $N$-dimensional search domain $D$ -- see, for example, \cite{c7,c8}.
+
+The necessity and sufficiency of this approach for solving MCO problems is a key property of the minimax convolution. The result of the minimization of $F(\lambda,y)$ leads to obtaining an efficient variant\footnote{More precisely, the minimization of $F(\lambda,y)$ can lead to the obtaining of the weakly-efficient variants (the set of the weakly-efficient decisions includes the Pareto domain).} of the MCO problem and vice versa, any efficient variant of an MCO problem can be obtained as a result of the minimization of $F(\lambda,y)$ at corresponding values of the convolution coefficients $\lambda_i$, $1 \leq i \leq s$. In order to obtain several efficient decisions (or in order to evaluate the whole Pareto domain) the problem (\ref{eq:3}) should be solved for the corresponding set of values of the vector $\lambda \in \Lambda$.
+
+The dimensionality reduction applied in (\ref{eq:3}) allows to replace solving multidimensional MCO problems by the optimization of one-dimensional functions $F(\lambda,y(x))$ which satisfy the uniform H\"{o}lder condition i.e.
+\begin{eqnarray} \label{eq:04}
+|F(\lambda, y(x')) - F(\lambda, y(x''))| \leq H |x' - x''|^{1/N}, x', x'' \in [0,1], 
+\end{eqnarray}
+where the constant $H$ is defined as $H=2L\sqrt{N+3}$, $L$ is the Lipschitz constant of the function $F(\lambda,y)$ and $N$ is the dimensionality of the optimization problem (\ref{eq:1}).
+
+\section{Parallel Computations for Solving the Multicriteria Global Optimization Problems}
+\label{sec:3}
+The scalarization of the vector criterion allows reducing the solving of the MCO problem (\ref{eq:1}) to solving a series of the multiextremal problems (\ref{eq:3}). Therefore, the problem of development of the methods for solving the MCO problems is resolved by the possibility of an extensive use of efficient parallel global optimization algorithms.
+
+Multiextremal optimization is a research area being actively developed -- its state of the art is presented, for example, in \cite{c7,c9,c10,c60}. The information-statistical theory of global optimization is considered to be one of the promising approaches \cite{c7}. HPC systems are used widely for solving time-consuming global search problems \cite{c7,c11,c14,c15}.
+
+The proposed approach to the use of parallel computations for solving time-consuming global optimization problems is based on the following main statements:
+\begin{itemize}
+
+\item The parallelism of the performed computations is provided by means of simultaneous computing the values of the efficiency criteria $f_i (y)$, $1 \leq i \leq s$ at several points of the search domain $D$. Such an approach provides the parallelization of the most computation-costly part of global optimization and is a general one -- it can be applied with many global optimization methods for various global optimization problems.
+
+\item The parallel computations are provided by means of simultaneous solving of several global optimization problems (\ref{eq:3}) for varying values of the coefficients $\lambda_i$, $1 \leq i \leq s$. For solving the problems of the family (\ref{eq:3}), a set of computational nodes of the high performance systems with distributed memory can be applied.
+
+\item The optimization data obtained in the course of parallel computations is exchanged between all employed processors because of the information compatibility of the global optimization problems of the family (\ref{eq:3}).
+\end{itemize}
+
+All these statements will be considered in more details below.
+
+
+\subsection{General Scheme of Parallel Computations }
+\label{ssec:31}
+
+As mentioned above, when solving a multicriteria optimization problem (\ref{eq:1}), solving a series of scalar problems (\ref{eq:3}) with varying coefficients of the minimax convolution of the efficiency criteria may be required in order to find several different efficient decisions:
+\begin{equation}
+\Phi(y)=\{\phi_1 (y),\dots,\phi_q(y) \}, \phi_i(y)=F(\lambda_i,y), 1 \leq l \leq q.
+\label{eq:5}
+\end{equation}
+
+Such problems can be solved sequentially by various global optimization methods. Alternatively, these problems can be solved simultaneously using several processors. It is important to note that the obtained family of the one-dimensional problems $\Phi(y)$ is an information-dependent one because the values of the optimized functions computed for any problem $\phi_l (y)$, $1 \leq l \leq q$ can be transformed to the values of all the remaining problems of the family without time-consuming recalculations of the efficiency criteria values $f_i (y)$, $1 \leq i \leq s$ (see Section \ref{ssec:32}).
+
+The information compatibility of the problems from the family (\ref{eq:5}) allows to propose the following unified scheme of parallel computations:
+\begin{enumerate}
+	\item The family of the information-linked problems $\Phi(y)$ in (\ref{eq:5}) is distributed among the processors of the computing system. 
+  \item For solving the optimization problems (\ref{eq:5}), a global optimization method implemented on each processor should be updated following the following rules:
+  \begin{enumerate}
+		\item Upon completing the iteration for any problem $\phi_l(y)$, $1 \leq l \leq q$ at any point $y' \in D$, the point $y'$ with the particular criteria values $f_i(y)$, $1 \leq i \leq s$ computed at this point should be transferred to all employed processors.
+	  \item Prior to the start of the next global search iteration, the method should check the queue of the received messages; if there are any data in the queue, the received information should be included into the search information.
+	\end{enumerate}
+\end{enumerate}
+	
+The possibility of the asynchronous data transfer is a key feature of such a scheme of the parallel computations. It is important to note that this scheme does not depend on any of the single control nodes, and the number of computational nodes can vary in the course of global optimization.
+
+
+\subsection{Accumulation and Reuse of Calculated Optimization Data}
+\label{ssec:32}
+
+For solving the stated optimization problems, the values of the efficiency criteria $f^i=f(y^i)$ at the points $y^i$, $1 \leq i \leq k$ of the search domain $D$ are computed. The search information obtained as a result of these computations can be represented in the form of the \textit{Search Information Set} (SIS):
+\begin{equation}\label{eq:6}
+\Omega_k=\{(y^i,f^i=f(y^i ) )^T:1 \leq i \leq k\}.
+\end{equation}
+As a result of the dimensionality reduction, the search information $\Omega_k$ from (\ref{eq:6}) can be transformed into the \textit{Matrix of the Search State} (MSS) 
+\begin{equation}\label{eq:7}
+A_k=\{(x_i,z_i,l_i )^T:1 \leq i \leq k\}
+\end{equation}
+where $x_i$, $1 \leq i \leq k$ are the reduced points of the executed global search  iterations\footnote{The lower indices denote the increasing order of the coordinate values of the points $x_i$, $1 \leq i \leq k$.}, $z_i$, $1 \leq i \leq k$ are the values of the scalar criterion of the current optimization problem (\ref{eq:3}), $l_i$, $1 \leq i \leq k$ are the indices of the optimization iterations where the points $x_i$, $1 \leq i \leq k$ were computed.
+
+The matrix of the search state can be used by the optimization algorithms in order to improve the efficiency of the global search -- selecting the points for the scheduled iterations can be performed taking into account the results of all previously executed computations. 
+
+
+
+\subsection{Parallel Computations on Multiprocessors with Shared Memory }
+\label{ssec:33}
+
+Within the proposed approach, for solving the reduced one-dimensional multiextremal optimization subproblems (\ref{eq:3}) it is proposed to use the well-known Parallel Algorithm of Global Search (PAGS) developed within the framework of the information-statistical theory of the multiextremal optimization \cite{c7,c25}. This method has a good theoretical background and has demonstrated its efficiency as compared to other global search algorithms (see also the results of numerical experiments in Section \ref{sec:4}).
+
+For completeness, let us briefly discuss the general computational scheme of PAGS, which consists in the following.
+
+Let $p$ be the number of employed parallel computers (processors or cores) of a computational system with shared memory. The initial two iterations of the algorithm are performed at the boundaries of the interval $x^0=0$, $x^1=1$. Apart from these boundary points, the algorithm should perform additional iterations at the points $x^i$, $1<i \leq p$ which can be defined \textit{a priori} or computed by any auxiliary computational procedure. Then, let $(k>p)$ global search iterations be completed, at each of which the computation of the value of the minimized function $\phi(x)$ from (\ref{eq:3}) (hereafter called \textit{a trial}) has been performed. The choice of the points for trials performed within the next iteration in parallel is determined by the following rules.
+
+\textit{Rule 1.} Renumber the trial points of the completed search iterations with the lower indices in the order of increasing coordinate values
+\begin{eqnarray} \label{eq:08}
+	0=x_0<x_1<\dots<x_i<\dots<x_k=1.
+\end{eqnarray}
+
+\textit{Rule 2.} Compute the current estimate of the H\"{o}lder constant of the function $\phi(x)$:
+\begin{eqnarray} \label{eq:09}
+	m = 
+ \begin{cases}
+   r M, & M > 0 \\
+   1,   & M = 0
+ \end{cases} ,
+ M = \max_{1 \leq i \leq k} {\frac{|z_i - z_{i-1}|} {\varrho_i} }
+\end{eqnarray}
+where $z_i=\phi(x_i)$, $\varrho_i=\sqrt[N]{x_i-x_{i-1}}$, $1 \leq i \leq k$. The constant $r$, $r>1$, is the \textit{reliability parameter} of the algorithm.
+
+\textit{Rule 3.} Compute \textit{the characteristic} $R(i)$ for each interval $(x_{i-1},x_i)$, $1 \leq i \leq k$ according to the expression 
+\begin{eqnarray} \label{eq:10}
+R(i) = \varrho_i + \frac{(z_i - z_{i-1})^2}{m^2 \varrho_i} - 2 \frac{(z_i + z_{i-1})}{m}, 1 \leq i \leq k.
+\end{eqnarray}
+
+\textit{Rule 4.} Arrange the characteristics of the intervals $(x_{i-1},x_i)$, $1 \leq i \leq k$ obtained according to (\ref{eq:10}) in the decreasing order 
+\begin{eqnarray} \label{eq:11}
+R(t_1) \geq R(t_2)\geq \dots \geq R(t_{k-1}) \geq R(t_k) 
+\end{eqnarray}
+and select $p$ intervals with the indices $t_j$, $1 \leq j \leq p$ having the maximum values of the characteristics.
+
+\textit{Rule 5.} Perform new trials at the points $x^{k+j}$, $1 \leq j \leq p$ placed in the intervals with the maximum characteristics from (\ref{eq:11}) according to the expressions 
+
+\begin{eqnarray} \label{eq:12}
+	x^{k+j} = \frac{x_{t_j} + x_{t_j-1}}{2}
+	- sign(z_{t_j} - z_{t_j-1}) \frac{[\frac{|z_{t_j} - z_{t_j-1}|}{m}]^N}{2r} , 1\leq j \leq p.
+\end{eqnarray}
+
+\textit{Termination condition} for the algorithm, according to which the execution of the algorithm is terminated, consists of checking the lengths of the intervals in which the scheduled trials are performed with respect to a required \textit{accuracy} of the problem solution, i. e.
+
+\begin{eqnarray} \label{eq:13}
+\varrho_{t_j} \leq \varepsilon, 1 \leq t_j \leq p.
+\end{eqnarray}
+
+As the current estimate of the optimization problem solution, the minimum computed value of the optimization function is accepted i. e.
+\begin{eqnarray} \label{eq:14}
+z_k^*=\min{\{z_i:1\leq i \leq k\}}.
+\end{eqnarray}
+
+Within the framework of the proposed approach, PAGS is applied to solving the MCO problem (\ref{eq:1}) according to the scheme (\ref{eq:3}). The availability of SIS from (\ref{eq:6}) allows transforming the results of the previous computations to the values of a next optimization problem (\ref{eq:3}) without any time-consuming computations of the efficiency criteria values for new values of the convolution coefficients, i.e.
+\begin{eqnarray} \label{eq:15}
+z_i'=\max{(\lambda_j' f_i^j,1\leq j \leq s)},1 \leq i \leq k.
+\end{eqnarray}
+
+As a result, all the search information accumulated so far can be employed for continuing the computations. In general, the reuse of the search information will provide a smaller and smaller amount of computations for solving every successive optimization problem (see the results of numerical experiments in Section \ref{sec:4}).
+
+The method obtained as a result of such extension is called hereafter Parallel Multicriteria Global Algorithm (PMGA) for multiprocessors with shared memory. The PMGA algorithm in combination with a general scheme of the parallel computations presented in Section \ref{ssec:31} will be referred to as the Multilevel Parallel Multicriteria Global Algorithm (MPMGA) for high-performance computational systems with shared and distributed memory.
+
+Theoretical properties of MPMGA can be established by a theoretical analysis of the sequential one-dimensional variant of the method, i.e. the MGA algorithm. Here is a summary (without a proof) of the theoretical results from \cite{c16}.
+
+\textbf{Theorem 1.} When switching from solving the optimization subproblem (\ref{eq:3}) with the convolution coefficients $\lambda' \in \Lambda$ to solving the next subproblem (\ref{eq:3}) with the coefficients $\lambda'' \in \Lambda$, the value of the function $F(\lambda'',y(x))$ at the point of the global minimum differs from the estimated minimum value $z_k^*$ from (\ref{eq:14}) obtained by minimizing the function $F(\lambda',y(x))$, by no more than the bounded value 
+\begin{eqnarray} \label{eq:16}
+|z_k^*-F(\lambda'',y(x^*))| \leq \frac{\alpha H \varepsilon}{2} + \delta, \alpha>1,
+\end{eqnarray} 
+where $\delta$ is the maximum possible change of the function $\phi(x)$ (being minimized) from one subproblem (\ref{eq:3}) to the next:
+
+\begin{equation} \label{eq:17}
+\begin{split}
+\delta=\Delta \phi_{max}=\max{\{\Delta \lambda_{max} f_i^{max}, 1 \leq i \leq s \}},\\
+\Delta \lambda_{max}=\max{\{|\lambda_i'-\lambda_i'' |, 1 \leq i \leq s\}},	\\
+f_i^{max} = \max {\{f_i (y), y \in D\} }, 1 \leq i \leq s.
+\end{split}
+\end{equation} 
+and for the value $m$ from (\ref{eq:09}) the following inequality is satisfied
+\begin{equation*}
+m \geq H\left(1+\sqrt{\frac{\alpha+4\beta(1+\beta)}{\alpha-1}} \right), \beta = \frac{2r\delta}{H\varepsilon(r-1)}
+\end{equation*} 
+with $z_k^*$ from (\ref{eq:14}), $\phi(x^*)$ from (\ref{eq:3}), $\varepsilon$ from (\ref{eq:13}), $r$ from (\ref{eq:09}) and $H$ from (\ref{eq:04}).
+
+This statement means that if the deviation $\Delta \phi_{max}$ from (\ref{eq:17}) of the estimates of the minimum values of $F(\lambda'',y(x))$ is acceptable, then solving the subproblem (\ref{eq:3}) with the new convolution coefficients $\lambda'' \in \Lambda$ does not require any additional optimization iterations because the estimates of the minimum value of the function $F(\lambda'',x)$ can be obtained according to (\ref{eq:16}) using the values $z_i$, $1 \leq i \leq k$, located within the search information $A_k$ from (\ref{eq:7}).
+
+As a result, two different schemes for selecting various convolution coefficients $\lambda \in \Lambda$ can be proposed, with whose use the required conditions of the Theorem 1 will be satisfied. In the first scheme, initially a sparse grid can be built on the set $\Lambda$, so that when setting new values of $\lambda$, the values that are close to the ones already established on the grid built in $\Lambda$ earlier could always be found. In the second scheme, new values of $\lambda$ could be chosen by small perturbations of the values used earlier (this method is often used in solving practical MCO problems when the decision maker wants to refine the estimates of the efficient solutions obtained earlier). It is worth noting that the reuse of the search information could be beneficial even with significant differences in the chosen values of the coefficients $\lambda$ from the previously established ones, see the results of numerical experiments in Section \ref{sec:4}.
+
+
+\section{Results of Numerical Experiments}
+\label{sec:4}
+
+The numerical experiments have been carried out on the \textit{Lobachevsky} supercomputer at State University of Nizhni Novgorod. Each supercomputer node has 2 Intel Sandy Bridge E5-2660 2.2 GHz octa-core processors, 64 Gb RAM. 
+
+To evaluate the efficiency the proposed approach, the MGA\footnote{MGA is the sequential implementation of the parallel MPMGA method} algorithm was compared with a number of other popular multicriteria optimization methods. In \cite{c20} MGA was tested against four multicriteria optimization methods: the Monte-Carlo (MC) method where the trial points are selected within the search domain $D$ randomly and uniformly, the genetic algorithm SEMO from the PISA library \cite{c21}, the Non-Uniform Coverage (NUC) method \cite{c17} and the Bi-objective Lipschitz Optimization (BLO) method \cite{c18}.
+
+In \cite{c16} a series of numerical experiments were executed to compare MGA with four other MCO methods considered in \cite{c22}, namely the Linear Combination Method (LCM), the Multi-Objective Genetic Algorithm (MOGA), the Global Criterion Method (GCM), the $\varepsilon$-Constraint Method (ECM).
+
+The results of the numerical experiments have demonstrated that MGA has a considerable advantage compared to the considered multicriteria optimization methods even when solving the relatively simple MCO problems.
+
+In this paper, we present the results of computational experiments to evaluate the efficiency of the MPMGA algorithm. The computations have been carried out for 100 of four-dimensional MKO problems with ten criteria, i.e. $N = 4$, $s = 10$. The criteria in these problems were obtained by the GKLS generator \cite{c23} that generates multiextremal optimization problems with a priori known properties: the number of local minima, the size of their attraction domains, the point of the global minimum, etc. 
+
+In these experiments 100 multicriteria problems has been solved. To obtain the Pareto domain approximation, each problem has been solved for 50 coefficients $\lambda$ uniformly distributed in $\Lambda$ from (\ref{eq:3}). The obtained results were averaged over the number of solved MCO problems. The accuracy $\varepsilon$ from (\ref{eq:13}) was 0.025 and the reliability parameter $r$ from (\ref{eq:09}) was 5.6.
+
+The following approach was used to evaluate the accuracy of the Pareto domain approximation calculated for each of the 100 solved MCO problems. First of all, for the domain $D$ from (\ref{eq:1}) a uniform grid $D_\delta$ was constructed with the step $\delta = 0.01$ for each coordinate. On this grid $D_\delta$, the minimum values were found for all 50 subproblems $F(\lambda,y(x))$  from (\ref{eq:3}) generated in accordance with the chosen set of coefficients $\lambda \in \Lambda$ -- the resulting set $y\in PD_\delta (f,D)\subset D_\delta$ was taken as the $\delta$-approximation of the Pareto domain of the MCO problem being solved.
+
+To solve each subproblems $F(\lambda,y(x))$ in (\ref{eq:3}), the termination condition (\ref{eq:13}) was replaced by the termination condition by the condition
+\begin{equation*}
+F(\lambda,y(x^{k+j})) \leq F(\lambda,y^* )+\varepsilon,1 \leq j \leq p,  F(\lambda,y^*) = \min_{y\in D_\delta}{F(\lambda,y)}.
+\end{equation*}
+
+After solving subproblems (\ref{eq:3}) for 50 values of $\lambda$ a numerical approximation of the Pareto domain $PD_{\Omega_k}(f,D)$ is constructed using the search information accumulated in $\Omega_k$ from (\ref{eq:6}) as result of the solution of the MCO problem. The resulting estimation of the accuracy of the calculated approximation $PD_{\Omega_k}(f,D)$ is defined as the closeness to the $\delta$-approximation $PD_\delta(f,D)$ of the Pareto domain of the MCO problem 
+\begin{equation}\label{eq:18}
+\Delta=\frac{1}{M} \sum_{y\in PD_\delta(f,D)}{d(y)}, d(y)=\min_{\overline{y}\in PD_{\Omega_k}(f,D)}{\|y-\overline{y}\|},
+\end{equation}
+where $\|.\|$ denotes the norm in the $R^N$ space, and $M$ is the number of points used in the approximation $PD_{\delta}(f,D)$.
+
+Results of the numerical experiments are presented in Table \ref{tab:01}. The first two columns in Table \ref{tab:01} show the numbers of the processors (\textit{P}) and of the parallel computational cores on each processor (\textit{Q}) employed. The third column (\textit{P*Q}) contains the total number of cores employed. In the fourth (\textit{Iters}) column the average numbers of iterations spent on solving the problems for the corresponding numbers of the different coefficients $\lambda$ from (\ref{eq:3}) are given. In the fifth column (\textit{Nums}) the average numbers of the calculated solutions used to establish the approximation $PD_{\Omega_k}(f,D)$ are shown. In the sixth column (\textit{Approx}) the accuracy $\Delta$ of the $\delta$-approximation $PD_\delta(f,D)$ is presented.
+
+The last two columns show the speedup \footnote{Due to the initial assumption that the computational complexity of multicriteria optimization problems is determined by the complexity of calculations of the criteria values, the speedup is defined as the reduction of the number of  executed iterations.} of the parallel computations obtained with the use of the search information (\textit{S}1) and without (\textit{S}2).
+
+\begin{table}[ht]
+\centering
+\caption{Numerical results for solving four-dimensional problems with ten criteria}
+\label{tab:01}
+\begin{tabular}{cccccccc}
+\hline
+P     & Q     & P*Q    & Iters       & Nums        & Approx   & S1         & S2       \\ \hline
+\multicolumn{8}{c}{\textbf{Computations without the reuse of the search information}} \\ \hline
+1     & 1     & 1      & 82,244.11   & 26,014.27   & 0.05     &            & 1,0      \\ \hline
+\multicolumn{8}{c}{\textbf{Computations with the reuse of the search information}}    \\ \hline
+1     & 1     & 1      & 23,791.81   & 8,185.07    & 0.08     & 1.00       & 3.5      \\
+5     & 1     & 5      & 4,977.63    & 8,077.38    & 0.08     & 4.78       & 16.5     \\
+1     & 20    & 20     & 1,223.45    & 8,452.35    & 0.08     & 19.45      & 67.2     \\
+25    & 1     & 25     & 1,063.22    & 8,704.86    & 0.08     & 22.38      & 77.4     \\
+1     & 40    & 40     & 616.37      & 8,416.06    & 0.07     & 38.60      & 133.4    \\
+50    & 1     & 50     & 594.46      & 9,561.09    & 0.07     & 40.02      & 138.4    \\
+5     & 20    & 100    & 252.65      & 8,510.26    & 0.07     & 94.17      & 325.5    \\
+5     & 40    & 200    & 131.68      & 8,914.21    & 0.07     & 180.68     & 624.6    \\
+25    & 20    & 500    & 66.54       & 11,022.32   & 0.07     & 357.56     & 1236.0   \\
+25    & 40    & 1000   & 36.81       & 12,226.82   & 0.07     & 646.34     & 2234.3   \\
+50    & 20    & 1000   & 37.94       & 12,552.88   & 0.07     & 627.09     & 2167.7   \\
+50    & 40    & 2000   & 20.98       & 14,399.94   & 0.07     & 1,134.02   & 3920.1   \\ \hline
+\end{tabular}
+\end{table}
+
+The obtained results of experiments demonstrate that even simple reuse of the search information allows reducing the total amount of computations by the factor of 3.5 without the use of additional computational resources. When 1000 computational cores were used, the obtained speedup varied from 627 to 646. If 2000 computational cores are used, the speedup with the reuse of the search information reaches 1134. The overall speedup in this case relative to the initial algorithm without the reuse of the search information was 3920.
+
+\section{Conclusion}
+\label{sec:5}
+In this paper, a new computationally efficient approach is proposed that allows a parallel solution of time-consuming multicriteria optimization problems where individual criteria can be multiextremal and their evaluation may require a large computing effort. The main feature of this approach is its efficient handling of the computational complexity of solving such multicriteria optimization problems. Improvements of the efficiency resulting in a significant reduction of the required computations have been achieved by an intensive use of the search information obtained in the course of computations. Within the framework of this approach, methods for a re-use of the already available search information for a currently handled scalar nonlinear pro-gramming problem have been proposed. Such search information is then used by the optimization methods for the adaptive planning of the iterative process of global search.
+
+Results of numerical experiments demonstrate that such an approach allows reducing the computation costs of solving multicriteria optimization problems by a factor between tens and hundreds. 
+
+In conclusion, it was shown that the developed approach is a promising one that needs a further investigation. It is important to continue numerical experiments of solving multicriteria optimization problems with a larger number of criteria and of a larger dimensionality. 
+
+\section*{Acknowledgements}
+This work has been supported by Russian Science Foundation, project No 16-11-10150 ``Novel efficient methods and software tools for time-consuming decision making problems using superior-performance supercomputers.''
+
+%\begin{acknowledgements}
+%If you'd like to thank anyone, place your comments here
+%and remove the percent signs.
+%\end{acknowledgements}
+
+% BibTeX users please use one of
+%\bibliographystyle{spbasic}      % basic style, author-year citations
+%\bibliographystyle{spmpsci}      % mathematics and physical sciences
+%\bibliographystyle{spphys}       % APS-like style for physics
+%\bibliography{}   % name your BibTeX data base
+
+% Non-BibTeX users please use
+\begin{thebibliography}{}
+%
+% and use \bibitem to create references. Consult the Instructions
+% for authors for reference list style.
+%
+\bibitem{c1} 	Miettinen, K.: Nonlinear Multiobjective Optimization. In: Springer (1999)
+\bibitem{c2} 	Ehrgott, M.: Multicriteria Optimization. In: Springer (2nd ed., 2010)
+\bibitem{c3} 	Collette, Y., Siarry, P.: Multiobjective Optimization: Principles and Case Studies (Decision Engineering). In: Springer (2011)
+\bibitem{c4} 	Marler, R. T., Arora, J. S.: Survey of Multi-Objective Optimization Methods for Engineering. In: Struct. Multidisciplinary Optimization, \textbf{26}, pp. 369--395 (2004)
+\bibitem{c5} 	Figueira,J., Greco, S., Ehrgott, M. (eds.): Multiple Criteria Decision Analysis: State of the Art Surveys. In: New York (NY), Springer (2005)
+\bibitem{c6} 	Eichfelder, G.: Scalarizations for Adaptively Solving Multi-Objective Optimization Problems. In: Comput. Optim. Appl., \textbf{44}, pp. 249--273 (2009)
+\bibitem{c7} 	Strongin, R., Sergeyev, Ya.: Global Optimization with Non-Convex Constraints. Sequential and Parallel Algorithms. In: Kluwer Academic Publishers, Dordrecht (2000, 2nd ed. 2013, 3rd ed. 2014)
+\bibitem{c8} 	Sergeyev, Y.D., Strongin, R.G., Lera, D.: Introduction to Global Optimization Exploiting Space-Filling Curves. In: Springer (2013)
+\bibitem{c9} 	Floudas, C.A., Pardalos, M.P.: Recent Advances in Global Optimization. In: Princeton University Press (2016)
+\bibitem{c10}	Locatelli, M., Schoen, F.: Global Optimization: Theory, Algorithms, and Applications. In: SIAM (2013)
+\bibitem{c11}	Sergeyev, Y.D., Grishagin, V.A.: Parallel Asynchronous Global Search and the Nested Optimization Scheme. In: J. Comput. Anal. Appl., \textbf{3}(2), pp. 123--145 (2001)
+\bibitem{c12}	Marler, R. T., Arora, J. S.: Multi-Objective Optimization: Concepts and Methods for Engineering. In: VDM Verlag (2009)
+\bibitem{c13}	Hillermeier, C., Jahn, J.: Multiobjective Optimization: Survey of Methods and Industrial Applications. In: Surv. Math. Ind., \textbf{11}, pp. 1--42 (2005)
+\bibitem{c14}	Gergel, V., Sidorov, S.: A Two-Level Parallel Global Search Algorithm for Solution of Computationally Intensive Multiextremal Optimization Problems. In: LNCS, Springer-Verlag, Berlin Heidelberg, \textbf{9251}, pp. 505--515 (2015)
+\bibitem{c15}	Barkalov, K., Gergel, V., Lebedev, I.: Solving global optimization problems on GPU cluster. AIP Conference Proceedings, \textbf{1738}, pp. 400006 (2016) \doi{10.1063/1.4952194}
+\bibitem{c16}	Gergel, V., Kozinov, E.: Efficient Multicriteria Optimization Based on Intensive Reuse of Search Information. In: Journal of Global Optimization, \textbf{71}(1), pp. 73--90 (2018) 
+\bibitem{c17}	Evtushenko, Yu.G., Posypkin, M.A.: A Deterministic Algorithm for Global Multi-Objective Optimization. In: Optimization Methods and Software, \textbf{29}(5), pp. 1005--1019 (2014)
+\bibitem{c18}	{\v Z}ilinskas, A., {\v Z}ilinskas, J.: Adaptation of a One-Step Worst-Case Optimal Univariate Algorithm of Bi-Objective Lipschitz Optimization to Multidimensional Problems. In: Commun Nonlinear Sci Numer Simulat, \textbf{21}, pp. 89--98 (2015)
+\bibitem{c19}	Pardalos, P.M., {\v Z}ilinskas, A., {\v Z}ilinskas, J.: Non-Convex Multi-Objective Optimization. In: Springer (2017)
+\bibitem{c20}	Gergel, V., Kozinov, E.: Accelerating Parallel Multicriterial Optimization Methods Based on Intensive Using of Search Information. In: Procedia Computer Science, \textbf{108}, pp. 1463--1472 (2017) 
+\bibitem{c21}	Bleuler, S., Laumanns, M., Thiele, L., Zitzler, E.: PISA-A Platform and Programming Language Independent Interface for Search Algorithms. Evolutionary Multi-Criterion Optimization. In: LNCS, Springer-Verlag, Berlin Heidelberg, \textbf{2632}, pp. 494--508 (2003)
+\bibitem{c22}	Chiandussi, G., Codegone, M., Ferrero, S., Varesio, F.E.: Comparison of Multi-Objective Optimization Methodologies for Engineering Applications. In: Comput. Math. Appl., \textbf{63}(5), pp. 912--942 (2012)
+\bibitem{c23}	Gaviano, M., Kvasov, D.E., Lera, D., Sergeyev, Ya.D.: Software for Generation of Classes of Test Functions with Known Local and Global Minima for Global Optimization. In: ACM Transactions on Mathematical Software, \textbf{29}(4), pp. 469--480 (2003)
+
+\bibitem{c50}	Borisenko, A., Gorlatch, S.: Parallelizing Metaheuristics for Optimal Design of Multiproduct Batch Plants on GPU. In: LNCS, Springer, Cham, \textbf{10421}, pp. 405--417 (2017)
+\bibitem{c25}	Strongin, R.G., Gergel, V.P.: Parallel computing for globally optimal decision making. In: Lecture Notes in Computer Science, \textbf{2763}, pp. 76--88 (2003)  
+\bibitem{c60}	Sakharov, M.K., Karpenko, A.P.:Adaptive Load Balancing in the Modified Mind Evolutionary Computation Algorithm In: Supercomputing Frontiers and Innovations, \textbf{5}(4), pp. 5--14 (2018) 
+
+
+\end{thebibliography}
+
+\end{document}
+% end of file template.tex
+
