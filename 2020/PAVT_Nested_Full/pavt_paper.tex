@@ -81,7 +81,7 @@ $\cdot$ Parallel algorithms}
 
 \section{Introduction}
 
-The global optimization problems arise in various fields of modern science and technology often. For 
+The global optimization problems arise often in various fields of modern science and technology. For 
 example, the problems of finding the configurations of various chemical compounds corresponding to 
 the minimum interaction energy are relevant \cite{Posypkin2014}. In particular,  such problems arise 
 in the development of new medical drugs \cite{Sulimov}. The global optimization problems arise in 
@@ -89,7 +89,7 @@ many other applications as well (see the review \cite{Pinter2006}).
 
 The application of the global optimization methods for the identification of the parameters of the 
 mathematical models based on the data of experiments became a classical one. In the problems of this 
-kind, it is required to carry out a search for the values of the unknown parameters of the model, at 
+type, it is required to carry out a search for the values of the unknown parameters of the model, at 
 which the results of computations according to the model are close to the results obtained 
 experimentally.
 
@@ -109,16 +109,16 @@ So far, the development of the parallel algorithms for the minimization of the e
 multidimensional functions (hundreds of variables), which account for different character of 
 dependence of the objective function on different groups of parameters is relevant. Namely, the 
 objective function is assumed to be multiextremal with respect to a part of variables only. The rest 
-variables have a local effect i. e. the objective function is monoextremal with respect to these ones. 
+variables have a local effect, i.e. the objective function is unimodal with respect to these ones. 
 In this case, the solving of the problem can be organized according to the nested (recursive) 
 optimization scheme. The solving of the multiextremal subproblem, for which the use of complex 
-global search algorithms is required will be performed at the upper level of recursion.
-The monoextremal subproblems (each corresponding to a fixed set of values of the first part of 
-parameters) will be solved at the lower level. For solving the monoextremal problems, the efficient 
+global search algorithms is required, will be performed at the upper level of recursion.
+The unimodal subproblems (each corresponding to a fixed set of values of the first part of 
+parameters) will be solved at the lower level. For solving these subproblems, the efficient 
 methods of local optimization, linear programming, or linear algebra can be applied (subject to the 
 character of the local subproblems).
 
-The paper text describing the results of the present study, is organized as follows. 
+The paper text describing the results of the present study is organized as follows. 
 In Section 2, the description of the nested optimization scheme taking into account different properties 
 of the objective function at different nesting level is given. Particular example of a problem of this 
 class is presented. A general scheme of organization of the parallel computations is described. 
@@ -127,7 +127,7 @@ curves. The computational scheme of the parallel algorithm is presented, its mai
 described.
 In Section 4, the methods of solving the local subproblems within the framework of the nested 
 optimization scheme are discussed. A brief description of the properties of the local extremum search 
-problems and known methods of solving these ones is  given. 
+problems and known methods of solving these ones is given. 
 Section 5 contains the results of numerical experiment. Here, the evaluation of the scalability of the 
 proposed parallel computation scheme in solving a series of test problems is performed.  
 Section 6 concludes the paper.
@@ -135,7 +135,7 @@ Section 6 concludes the paper.
 
 \section{Nested optimization scheme}
 
-Let us consider an optimization problem of the kind
+Let us consider an optimization problem of the type
 \begin{eqnarray}\label{main_problem}
 & f(x^\ast,y^\ast)=\min{\left\{f(x,y):x\in S, y\in D\right\}}, \nonumber \\
 & S=\left\{x\in R^M: a_i\leq x_i \leq b_i, 1\leq i \leq M\right\}, \\
@@ -149,15 +149,15 @@ multiextremal one and satisfies Lipschitz condition
 \]
 with the constant $L$ unknown a priori.
 At the same time, at any fixed set of values $\overline{y}$ the function $f(x,\overline{y})$ is a 
-unimodal one i.e. the function $f(x,\overline{y})$ has a single minimum point $x^*$ (depending, in 
+unimodal one, i.e. the function $f(x,\overline{y})$ has a single minimum point $x^*$ (depending, in 
 general, on $\overline{y}$). 
 
-Accounting for such a peculiarity of the considered problem class can reduce the computational costs 
-of the optimum search essentially. Indeed, according to known nested optimization scheme 
+Accounting for such a peculiarity of the considered problem class can reduce essentially the computational costs 
+of the optimum search. Indeed, according to known nested optimization scheme 
 \cite{Carr}, the solving of the initial problem can be reduced to the problem of finding the global 
 minimum of the function $\varphi(y)$
 \begin{equation}\label{global_problem}
-\varphi(y^*) = \min_{y\in D}  \varphi (y)
+\varphi(y^*) = \min_{y\in D}  \varphi (y),
 \end{equation}
 where 
 \begin{equation}\label{local_problem}
@@ -169,10 +169,10 @@ which can be performed by one of the local search methods. The efficiency and so
 local optimization methods allow solving the subproblems (\ref{local_problem}) with the precision 
 exceeding the one of the global optimization methods essentially. Correspondingly, the problem 
 (\ref{global_problem}) can be considered as a global optimization problem, in which the objective 
-function value can be computed with high precision but this operation is computation-costly. 
+function value can be computed with high precision but this operation is time-consuming. 
 
 The following approximation problem can be considered as a particular example of a problem, in 
-which different character of dependence on different groups of parameters Takes place. 
+which different character of dependence on different groups of parameters takes place. 
 Let us assume $m$ values $u_j = u(t_j), 1 \leq j \leq m, $ of the function $u(t)$ to have been obtained 
 in the experiment and the analytical expression for $u(t)$ is known to take the form 
 \begin{equation}\label{ex_func}
@@ -182,7 +182,7 @@ In this expression, $c=\left(c_1,\ldots,c_{2n+2}\right)$,
 $\omega=\left(\omega_0,\omega_1,\ldots,\omega_n\right)$ are the unknown parameters defining 
 particular function $u(t)$.
 
-Let us introduce a measure of response of the function $u(t,\omega,c)$ to the experiential data as a 
+Let us introduce a measure of the deviation of the function $u(t,\omega,c)$ from the experiential data as a 
 sum of squares 
 \[
 \Delta(\omega,c)= \sum^{m}_{j=1}\left[u_j-u(t_j,\omega,c)\right]^2. 
@@ -204,11 +204,11 @@ The problem (\ref{ex_prob}) can be written in a recursive form
 The nested subproblem (\ref{inner_prob}) is a classical linear least squares problem, and its solution 
 can be obtained by solving a system of linear algebraic equations regarding the unknown $c$, which 
 can be done e.g. by Gaussian elimination. At the same time, the external problem (\ref{outer_prob}) 
-will be, generally speaking, a multiextremal one, and its solving will require considerable 
+will be, in general, a multiextremal one, and its solving will require considerable 
 computational resources.
 
 So far, to solve the problem (\ref{main_problem}) in the nested scheme (\ref{global_problem}), 
-(\ref{local_problem}), one can apply parallel global search algorithm for solving the external 
+(\ref{local_problem}) one can apply parallel global search algorithm for solving the external 
 subproblems (\ref{global_problem}). At that, a set of independent subproblems (\ref{local_problem}) 
 will be generated at every iteration of the algorithm, the solving of which can be performed in parallel 
 using the local methods.
@@ -237,7 +237,7 @@ sections.
 \section{Parallel global search algorithm}
 
 An efficient parallel global optimization algorithm intended for solving the problems of the kind 
-(\ref{global_problem}) has been developed in Lobachevskii University of Nizhnii Novgorod (UNN) 
+(\ref{global_problem}) has been developed in Lobachevsky University of Nizhni Novgorod (UNN) 
 \cite{Barkalov2018,globalizerSystem,Strongin2018}. 
 The main idea of the parallelization consists in such of organization of computations that several trials 
 are performed in parallel. This approach is featured by high efficiency (the part of the computational 
@@ -249,7 +249,7 @@ the problems to be solved is applied.
 The reduction of the dimensionality is based on a fundamental fact, according to which an 
 $N$-dimensional hyperparallelepiped $D$ and the interval $[0,1]$ of the real axis are the 
 equal-power sets, and the interval $[0,1]$ can be mapped continuously into $D$ using the Peano 
-curve $y(x)$ i. e. $D = \left\{y(x):0\leq x\leq 1\right\}$.
+curve $y(x)$, i.e. $D = \left\{y(x):0\leq x\leq 1\right\}$.
 
 Utilizing this fact, one can reduce the solving of the problem of minimization of a multidimensional 
 function $\varphi(y)$ to the minimization of a one-dimensional function $\varphi(y(x))$
@@ -288,7 +288,7 @@ multidimensional problems \cite{Evtushenko2013,Sergeyev2006,Zilinskas2008}.
 According to \cite{Strongin2018,Strongin2000}, the rules of the global search algorithm, in which 
 $p$ trials are performed in parallel at every iteration, are as follows.
 At the first iteration of the method, the trials are performed in parallel in two boundary points $x^1 = 
-0, \; x^2 = 1$ as well as in $(p-2)$ arbitrary internal points of the interval $[0,1]$ i. e. 
+0, \; x^2 = 1$ as well as in $(p-2)$ arbitrary internal points of the interval $[0,1]$, i.e. 
 $x^i\in(0,1),3\leq i \leq p$.
 
 %English begin
@@ -317,7 +317,7 @@ R(i)=\Delta_i+\frac{(z_i-z_{i-1})^2}{r^2 \mu^2\Delta_i}-2\frac{z_i+z_{i-1}}{r \m
 where $\Delta_i=(x_i-x_{i-1})^{1/N}$. The value $r > 1$ is parameter of the algorithm. An 
 appropriate selection
 of $r$ allows to consider the product $r \mu$ as an estimate
-of the objective function Lipschitz constant $L$.
+of the Lipschitz constant $L$ of the objective function .
 
 Rule 4. Arrange characteristics  $R(i), 2 \leq i \leq k$, in decreasing order 
 \begin{equation}\label{Rule_Max}
@@ -360,7 +360,7 @@ To date, a huge number of various local optimization methods for the problems of
 have been developed. Among these ones, there are, for example, the gradient methods, Newton and 
 quasi-Newton methods, the methods of conjugate directions, etc. The majority of these ones utilize 
 the principle of local descent, when the method passes to the points with smaller values of the 
-objective function at every step progressively. Almost all these methods cam be represented in the 
+objective function at every step progressively. Almost all these methods can be represented in the 
 form of the iterative relation 
 \[
 x^{k+1} = x^k + s^k d^k,
@@ -377,15 +377,15 @@ $x^{k+1}$ is performed in such a way that an essential decrease of the value of 
 f( x^k )$ is provided as a result of the step.
 
 The set of the computed local characteristics $I^k=I(x^k)$ may include: the function values $f^k = 
-f( x^k )$, the vector of gradient $\nabla f^k = \nabla f(x^k)$, the matrix of the second derivatives 
+f( x^k )$, the gradient $\nabla f^k = \nabla f(x^k)$, the matrix of the second derivatives 
 (Hessian) $\Gamma_k=\Gamma^f(x^k)$. Particular set of the characteristics to be measured depends 
 on the properties of the problem being solved as well as on the optimization method chosen.
 
 In the local optimization problems arising in the applications, the a priori information on the objective 
-functions is quite limited usually. For example, a local character of the dependence of the function on 
+functions is usually quite limited. For example, a local character of the dependence of the function on 
 the parameters may be suggested only whereas the gradient values (and, moreover, Hessian) are
 unknown. In this case, the direct search methods are applied, which don't utilize any suggestions on
-the smoothness of the minimized function. When searching for the minimum, these methods measure 
+the smoothness of the objective function. When searching for the minimum, these methods measure 
 the function values only. The rules of the placement of the iteration points in these ones is based on 
 some heuristic logical schemes. 
 
@@ -410,7 +410,7 @@ supercomputer GCC 5.5.0 compiler and Intel MPI 2017 were used.
 In order to simulate the applied problems, in which the locally-affecting parameters can be selected, 
 the test function of the kind 
 \begin{equation}\label{test_problem}
-f(x,y) = G(y)+R(x),
+f(x,y) = G(y)+R(x)
 \end{equation}
 were used when conducting the experiments. Here $G(y)$ is a multiextremal function of the 
 dimensionality $N=2$ and $R(x)$ is a unimodal function of the dimensionality $N \gg 2$.
@@ -421,7 +421,7 @@ G(y)=
 &\left.\left(\sum^{7}_{i=1}\sum^{7}_{j=1}C_{ij}g_{ij}(y)+D_{ij}h_{ij}(y)\right)^2\right\}^{1/2
 },\\ \nonumber
 \end{eqnarray}
-were considered where
+were considered, where
 \begin{eqnarray} \nonumber
 & y=(y_1,y_2)\in R^2, 0 \leq y_1,y_2 \leq 1, \\ \nonumber
 & g_{ij}(y)=\sin(i\pi y_1)\sin(j\pi y_2),  \\ \nonumber
@@ -429,7 +429,7 @@ were considered where
 \end{eqnarray}
 and the coefficients $A_{ij}, B_{ij}, C_{ij}, D_{ij}$ are the random numbers distributed uniformly 
 in the interval $[-1,1]$.
-The class of functions is used for testing the global optimization algorithms often. 
+This class of functions is often used for testing the global optimization algorithms. 
 As the local part of the problem, the modified Rosenbrock function 
 \[
 R(x)= \sum_{i=1}^{N-1}{\left[(1-x_i)^2+100(x_{i+1}-x_i^2)^2\right]}, -2 \leq x_i \leq 2 , 1\leq 
@@ -440,8 +440,8 @@ coordinate transform.
 
 As an example, a contour plot of a pair of functions  $G(y)$ and $R(x)$ is presented in 
 Fig.~\ref{fig_level}(a),(b). These functions are the complex ones for corresponding global and local 
-optimization methods since the functions $G(y)$ are essentially multiextremal ones, and the functions 
-$R(x)$ have a ravine structure manifested clearly.
+optimization methods since the function $G(y)$ is essentially multiextremal one, and the function 
+$R(x)$ has a ravine structure manifested clearly.
 
 \begin{figure}
 \center
@@ -458,16 +458,16 @@ $R(x)$ have a ravine structure manifested clearly.
 In Fig.~\ref{fig_level}, the trial points performed by the global search algorithm and Hooke--Jeeves 
 method when solving corresponding problems are marked also. 
 The positions of the trial points demonstrate clearly the multiextremality of the function $G(y)$ (the 
-trial points form a nonuniform coverage of the search domain) as well as well as the ravine character 
+trial points form a nonuniform coverage of the search domain) as well as the ravine character 
 of the function $R(x)$ (the trial points form an elongated group along the ravine bottom).
 
 The problem was considered to be solved if in the course of minimization of the function $G(y)$, the 
 global search algorithm generates the next trial point $y^k$ in the $\epsilon$-nearness of the global 
-minimum $y^*$ i. e. $\left\|y^* - y^k\right\|\leq\epsilon$ where $\epsilon = 10^{-2}$. 
+minimum $y^*$, i.e. $\left\|y^* - y^k\right\|\leq\epsilon$, where $\epsilon = 10^{-2}$. 
 At that, the precision of finding the minimum when minimizing the unimodal function $R(x)$ was 
-selected 1000 times lower i. e. $\delta = 10^{-5}$.
+selected 1000 times lower, i.e. $\delta = 10^{-5}$.
 In the global search algorithm, the parameter $r=4.5$ from (\ref{Rule_R}) and the evolvent building 
-parameter $m=10$ were used; the local method employed has no additional parameters.
+parameter $m=10$ were used; the local Hooke--Jeeves method employed has no additional parameters.
 
 In the first series of experiments, 100 problems of the kind (\ref{test_problem}) were solved, in which 
 the dimensionality of the local subproblems was $N=50$. The problems were solved using 1, 4, and 8 
@@ -475,11 +475,11 @@ cluster nodes, in which from 2 up to 32 MPI-processes were employed. According t
 parallelization scheme presented in Fig.~\ref{MPI_tree}, the solving of the global optimization 
 problem at the upper nesting level was performed in a single (master) process, which initiated the 
 parallel solving of the local problems of the lower level (from 1 up to 31 problems, respectively). So 
-far, the minimum possible number of processes employed was equals to 2: one per each nesting level.
+far, the minimum possible number of processes employed was equals to 2, one per each nesting level.
 
 Table \ref{tab1} presents the averaged number of iterations $K_{av}$ performed by the global search 
 algorithm when minimizing the function $G(y)$, the averaged time of solving the whole problem 
-$T_{av}$, and the speed-up in time $S$ subject to the number of MPI-processes employed $p$. 
+$T_{av}$, and the speed-up in time $S$ subject to the number of employed MPI-processes $p$. 
 
 \begin{table}
 \centering
@@ -518,15 +518,15 @@ the same as in the previous series of experiments. The results of solving are pr
 
 \section{Conclusion}
 
-The results of experiments performed on the series of the optimization problems, in which a 
-multiextremal part and a unimodal one can be selected demonstrated the scheme of organization of the 
+The results of experiments performed on the series of the optimization problems
+%, in which a multiextremal part and a unimodal one can be selected,
+demonstrated the scheme of the 
 parallel computations proposed in the present work to have a good potential for parallelization. 
 In particular, when solving a series of 100 problems with total number of variables equal to 52 (from 
 which, two first variables cause a global effect on the objective function and fifty affected this one 
 locally), a speedup of 24.6 has been obtained when using  32 processes. 
 In the case of solving  the problems with more complex local subproblems (with the number of the 
 local variables $N=100$), the speedup increased up to 27.4 when using 32 processes.
-
 The developed scheme of parallel computations can be applied in the identification of complex 
 mathematical models, which are featured by a large number (tens and hundreds) of unknown 
 parameters.
