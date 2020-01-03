@@ -1,6 +1,7 @@
 \documentclass[review]{elsarticle}
 
 \usepackage{lineno,hyperref}
+\usepackage[T1]{fontenc}
 \modulolinenumbers[5]
 
 \journal{Journal of \LaTeX\ Templates}
@@ -41,69 +42,275 @@
 
 \begin{frontmatter}
 
-\title{Elsevier \LaTeX\ template\tnoteref{mytitlenote}}
-\tnotetext[mytitlenote]{Fully documented templates are available in the elsarticle package on \href{http://www.ctan.org/tex-archive/macros/latex/contrib/elsarticle}{CTAN}.}
+\title{Global optimization method with dual Lipschitz constant estimates for problems with non-convex constraints}
 
 %% Group authors per affiliation:
-\author{Elsevier\fnref{myfootnote}}
-\address{Radarweg 29, Amsterdam}
-\fntext[myfootnote]{Since 1880.}
-
-%% or include affiliations in footnotes:
-\author[mymainaddress,mysecondaryaddress]{Elsevier Inc}
-\ead[url]{www.elsevier.com}
-
-\author[mysecondaryaddress]{Global Customer Service\corref{mycorrespondingauthor}}
-\cortext[mycorrespondingauthor]{Corresponding author}
-\ead{support@elsevier.com}
-
-\address[mymainaddress]{1600 John F Kennedy Boulevard, Philadelphia}
-\address[mysecondaryaddress]{360 Park Avenue South, New York}
+\author{Roman Strongin}
+\author{Konstantin Barkalov}
+\author{Semen Bevzuk}
+%\address[mymainaddress]{Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia}
+%\author[mysecondaryaddress]{Global Customer Service\corref{mycorrespondingauthor}}
+%\cortext[mycorrespondingauthor]{Corresponding author}
+%\ead{support@elsevier.com}
+\address{Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia}
 
 \begin{abstract}
-This template helps you to create a properly formatted \LaTeX\ manuscript.
+In the present work, the constrained global optimization problems, in which the functions are of the “black box” type and satisfy the Lipschitz condition, are considered. The algorithms for solving the problems of this class require the use of the adequate estimates of the a priori unknown Lipschitz constants for the problem functions. A novel approach presented in this paper is based on a simultaneous use of two estimates of the Lipschitz constant: an overestimated and the underestimated ones. The upper estimate provides the global convergence whereas the lower one reduces the number of trials necessary to find the global optimizer with required precision. At that, the considered algorithm of solving the constrained problems doesn’t use the ideas of the penalty function method; each constraint of the problem is accounted for separately. The convergence conditions of the proposed algorithm are formulated according to corresponding theorem. The results of the numerical experiments on the series of the multiextremal problems with the non-convex constraints demonstrating the efficiency of the proposed scheme of dual Lipschitz constant estimates are presented.
 \end{abstract}
 
 \begin{keyword}
-\texttt{elsarticle.cls}\sep \LaTeX\sep Elsevier \sep template
-\MSC[2010] 00-01\sep  99-00
+Global optimization, Multiextremal problems, Non-convex constraints, Lipschitz constant estimates 
 \end{keyword}
 
 \end{frontmatter}
 
 \linenumbers
 
-\section{The Elsevier article class}
 
-\paragraph{Installation} If the document class \emph{elsarticle} is not available on your computer, you can download and install the system package \emph{texlive-publishers} (Linux) or install the \LaTeX\ package \emph{elsarticle} using the package manager of your \TeX\ installation, which is typically \TeX\ Live or Mik\TeX.
+\section{Introduction}
 
-\paragraph{Usage} Once the package is properly installed, you can use the document class \emph{elsarticle} to create a manuscript. Please make sure that your manuscript follows the guidelines in the Guide for Authors of the relevant journal. It is not necessary to typeset your manuscript in exactly the same way as an article, unless you are submitting to a camera-ready copy (CRC) journal.
 
-\paragraph{Functionality} The Elsevier article class is based on the standard article class and supports almost all of the functionality of that class. In addition, it features commands and options to format the
-\begin{itemize}
-\item document style
-\item baselineskip
-\item front matter
-\item keywords and MSC codes
-\item theorems, definitions and proofs
-\item lables of enumerations
-\item citation style and labeling.
-\end{itemize}
+\section{Index Method of Accounting for the Constraints and Dimensionality Reduction}
 
-\section{Front matter}
+\begin{equation}\label{problem}
+	\min{\left\{\varphi(y):y \in D, \; g_j(y)\leq 0, \; 1 \leq j \leq m\right\}},
+\end{equation}
 
-The author names and affiliations could be formatted in two ways:
-\begin{enumerate}[(1)]
-\item Group the authors per affiliation.
-\item Use footnotes to indicate the affiliations.
-\end{enumerate}
-See the front matter of this document for examples. You are recommended to conform your choice to the journal you are submitting to.
+\begin{equation}\label{D}
+	D=\left\{y\in R^N: a_i\leq y_i \leq b_i, 1\leq i \leq N\right\}.
+\end{equation}
 
-\section{Bibliography styles}
+\begin{equation}\label{lipschitz_condition}
+	\left|g_j(y')-g_j (y'')\right| \leq L_j \|y'-y''\|, \; y', y''\in D, \; 1\leq j \leq m+1.
+\end{equation}
+
+\begin{equation}\label{epsilon_reserved_solution}
+	\varphi(y_{\epsilon})=\min{\left\{\varphi(y):y \in D, \; g_j(y)\leq -{\epsilon}_j, \; 1 \leq j \leq m\right\}},
+\end{equation}
+
+\begin{equation}\label{Y_epsilon}
+	Y_{\epsilon}=\left\{ y \in D, \; g_j(y) \leq 0, \; 1 \leq j \leq m, \; \varphi(y) \leq \varphi(y_{\epsilon}) \right\}.
+\end{equation}
+
+\begin{equation}\label{D_sets}
+	D_1 = D, \; D_{j+1} = \left\{ y \in D_j: \; g_j(y) \leq 0 \right\}, \; 1 \leq j \leq m.
+\end{equation}
+
+\begin{equation}\label{one_dimensional_problem}
+	\varphi(y(x^\ast))=\min \left\{\varphi(y(x)): x \in [0,1], \; g_j(y(x))\leq 0, \; 1 \leq j \leq m\right\},
+\end{equation}
+
+\[
+	\left|g_j(y(x'))-g_j(y(x''))\right| \leq K_j \left|x'-x'' \right|^{1/N}, \; x', x''\in [0,1], \; 1\leq j \leq m+1,
+\]
+
+\begin{equation}\label{Q_intervals}
+	Q_1=[0,1], \; Q_{j+1}=\left\{x \in Q_j : g_j(y(x)) \leq 0 \right\}, \; 1 \leq j \leq m.
+\end{equation}
+
+\[
+	g_j(y(x)) \leq 0, \; 1 \leq j \leq \nu-1, \; g_{\nu}(y(x))>0,
+\]
+
+\begin{equation}\label{trial_result}
+	x^k, \; z^k = g_{\nu}\left( y(x^k) \right), \; \nu = \nu(x^k),
+\end{equation}
+
+\begin{equation}\label{reduction_problem}
+	\psi(x^*)=\min \left\{\psi(x): x \in [0,1] \right\},
+\end{equation}
+
+$$\[
+	\psi(x)=\frac{g_{\nu}(y(x))}{K_{\nu}} - 
+	\left\{
+   \begin{array}{lr}
+     0, & \nu \leq m,\\
+     \frac{\varphi^*}{K_{m+1}}, & \nu = m + 1.
+   \end{array}
+	\right
+\]$$
+
+\[
+	\psi(x)=\frac{\varphi(y(x))-\varphi^*}{K_{m+1}}
+\]
+
+\section{Index Algorithm of Global Search}
+
+\[
+	0=x_0<x_1<\dots <x_k<x_{k+1}=1,
+\]
+
+\[
+	I_\nu =\left\{i:1 \leq i \leq k, \; \nu=\nu(x_i) \right\}, \; 1 \leq \nu \leq m+1,
+\]
+
+\[
+	M=\max\left\{\nu=\nu(x_i), \; 1 \leq i \leq k \right \}.
+\]
+
+\begin{equation}\label{current_lower_bounds}
+	\mu_{\nu} = \max\left\{ \frac{\left|z_i-z_j\right|}{ (x_i - x_j)^{1/N} }, \; i,j \in I_\nu, \; i>j \right\},
+\end{equation}
+
+\begin{equation}\label{z_estimates}
+	z_\nu^\ast = \left\{
+   \begin{array}{lr}
+     -\epsilon_\nu, & \nu < M,\\
+     \min\{ z_i: i\in I_\nu \}, & \nu = M,
+   \end{array}
+	\right.
+\end{equation}
+
+\begin{equation}\label{R_1}
+	R(i)=\Delta_i+\frac{(z_i-z_{i-1})^2}{r_\nu^2 \mu_\nu^2\Delta_i}-2\frac{z_i+z_{i-1}-2z_\nu^\ast}{r_\nu \mu_\nu}, \;  \nu=\nu(x_i)=\nu(x_{i-1}),
+\end{equation}
+\begin{equation}\label{R_2}
+	R(i)=2\Delta_i-4\frac{z_i-z_\nu^\ast}{r_\nu \mu_\nu}, \; \nu=\nu(x_i)>\nu(x_{i-1}),
+\end{equation}
+\begin{equation}\label{R_3}
+R(i)=2\Delta_i-4\frac{z_{i-1}-z_\nu^\ast}{r_\nu \mu_\nu}, \; \nu=\nu(x_{i-1})>\nu(x_i),
+\end{equation}
+
+\begin{equation}\label{MaxR}
+	R(t)=\max{\left\{R(i): 1 \leq i \leq k+1\right\}}.
+\end{equation}
+
+\[
+	x^{k+1} = \frac{x_t + x_{t-1}}{2}, \; \nu(x_{t-1}) \neq \nu(x_t).
+\]
+
+\[
+	x^{k+1} = \frac{x_t+x_{t-1}}{2} + \frac{\mathrm{sign}(z_t-z_{t-1})}{2r_\nu}\left[\frac{\left|z_t-z_{t-1}\right|}{\mu_\nu}\right]^N, \; \nu=\nu(x_{t-1})=\nu(x_t).
+\]
+
+\[
+	g_j \left( y(x) \right) = G_j \left( y(x) \right), \; x \in Q_j, \; 1 \leq j \leq m+1,
+\]
+
+\begin{equation}\label{theorem_inequalities}
+	r_{\nu}\mu_{\nu} > 2^{3-\frac{1}{N}}L_{\nu}\sqrt{N+3}, \; 1 \leq \nu \leq m+1, 
+\end{equation}
+
+\[
+	\varphi(\bar y) = \inf\left\{\varphi(y^q):g_j(y^q) \leq 0, 1 \leq j \leq m, q = 1,2,\ldots \right\} \leq \varphi(y_{\epsilon}).
+\]
+
+\begin{equation}\label{epsilon_nu}
+	\epsilon_{\nu} = \mu_{\nu}\delta, \; 1 \leq \nu \leq m, 
+\end{equation}
+
+
+\section{Index Algorithm with Dual Lipschitz Constant Estimates}
+
+\begin{equation}\label{estimates_Lipschitz_constants}
+	\frac{r_{\nu}\mu_{\nu}}{2^{3-\frac{1}{N}}L_{\nu}\sqrt{N+3}}, \; 1 \leq \nu \leq m+1, 
+\end{equation}
+
+\begin{equation}\label{R_glob_1}
+	R(i)=R_{glob}(i)=R_{loc}(i)=2\Delta_i>0. 
+\end{equation}
+
+\[
+	z_i+z_{i-1}-2z_M^* = |z_i-z_{i-1}|\leq \mu_M\Delta_i
+\]
+
+\begin{eqnarray}
+	R(i) = \Delta_i + \frac{(z_i-z_{i-1})^2}{r_M^2\mu_M^2\Delta_i} - 2\frac{z_i+z_{i-1}-2z_M^*}{r_M\mu_M} \geq \Delta_i + \frac{(z_i-z_{i-1})^2}{r_M^2\mu_M^2\Delta_i} - 2\frac{\mu_M\Delta_i}{r_M\mu_M} \nonumber \\
+	\geq \Delta_i + \frac{(z_i-z_{i-1})^2}{r_M^2\mu_M^2\Delta_i} - 2\frac{\Delta_i}{r_M} = \Delta_i + \Delta_i\frac{(z_i-z_{i-1})^2/\Delta_i^2}{r_M^2\mu_M^2\Delta_i^2} - 2\frac{\Delta_i}{r_M}
+\nonumber \\
+	\geq \Delta_i + \frac{\Delta_i}{r_M^2} - 2\frac{\Delta_i}{r_M} = \Delta_i \left( 1-\frac{1}{r_M} \right)^2>0
+	\nonumber
+\end{eqnarray}
+
+\begin{equation}\label{R_glob_greater_R_loc}
+	R_{glob}(i)=\Delta_i\left(1-\frac{1}{r_M^{glob}} \right)^2 > \Delta_i\left(1-\frac{1}{r_M^{loc}} \right)^2 = R_{loc}(i)
+\end{equation}
+
+\begin{equation}\label{R_glob_equal_R_loc}
+	R_{glob}(i) = \rho R_{loc}(i)
+\end{equation}
+
+\begin{equation}\label{R_max}
+	R(i) = \max{\left\{ R_{glob}(i), \rho R_{loc}(i) \right\}}
+\end{equation}
+
+\begin{equation}\label{R_max_t}
+	R(t) = \max{\left\{ R(i): 1 \leq i \leq k+1\right\}}
+\end{equation}
+
+\[
+	x^{k+1} = \frac{x_t + x_{t-1}}{2}, \; \nu(x_{t-1}) \neq \nu(x_t).
+\]
+
+\[
+	x^{k+1} = \frac{x_t+x_{t-1}}{2} + \frac{\mathrm{sign}(z_t-z_{t-1})}{2r_\nu}\left[\frac{\left|z_t-z_{t-1}\right|}{\mu_\nu}\right]^N, \; \nu=\nu(x_{t-1})=\nu(x_t).
+\]
+
+\begin{eqnarray}
+	\varphi(y_1, y_2)=-1.5y_1^2\exp{\left\{1-y_1^2-20.25(y_1-y_2)^2\right\}}- \nonumber \\
+	-\left(0.5(y_1-1)(y_2-1)\right)^4\exp{\left\{2-\left(0.5(y_1-1)\right)^4-(y_2-1)^4\right\}}
+	\nonumber
+\end{eqnarray}
+
+\begin{eqnarray}
+	g_1(y_1, y_2)= 0.01 \left( (y_1-2.2)^2+(y_2-1.2)^2-2.25 \right) \leq 0, \nonumber \\
+	g_2(y_1, y_2)= 100 \left(1-(y_1-2)^2/1.44+(0.5y_2)^2 \right) \leq 0, \nonumber \\
+	g_3(y_1, y_2)= 10 \left( y_2 - 1.5 - 1.5 \sin{\left( 6.283(y_1-1.75) \right)}\right) \leq 0
+	\nonumber
+\end{eqnarray}
+
+\begin{equation}\label{phi_bar_y}
+	\varphi(\bar y) = \inf\left\{\varphi(y^k):g_j(y^k) \leq 0, 1 \leq j \leq m, k = 1,2,\ldots \right\} \leq \varphi(y_{\epsilon}).
+\end{equation}
+
+\[
+	R_{glob}(t) < \rho R_{loc}(t)
+\]
+
+\[
+	z_j=g_{\nu}\left( y(x_j) \right) \leq g_{\nu}\left( y(\bar x) \right) + 2L_{\nu}\sqrt{N+3}(x_j-\bar x)^{1/N}, \; \nu=\nu(x_j)
+\]
+
+\[
+	z_{j-1}=g_{\nu}\left( y(x_{j-1}) \right) \leq g_{\nu}\left( y(\bar x) \right) + 2L_{\nu}\sqrt{N+3}(\bar x - x_{j-1})^{1/N}, \; \nu=\nu(x_{j-1})
+\]
+
+\[
+	g_{\nu}\left( y(\bar x) \right) \leq -\epsilon_{\nu}, \; 1\leq\nu\leq m.
+\]
+
+\[
+	g_{m+1}\left( y(\bar x) \right) \leq z_{m+1}^*
+\]
+
+\begin{eqnarray}
+	R(j) = \Delta_i + \frac{(z_j-z_{j-1})^2}{r_{\nu}^2\mu_{\nu}^2\Delta_i} - 2\frac{z_j+z_{j-1}-2z_{\nu}^*}{r_{\nu}\mu_{\nu}} \geq \nonumber \\
+	\Delta_i + 4\frac{z_{\nu}^*-\left( g_{\nu}\left( y(\bar x) \right)+L_{\nu}\sqrt{N+3}\left( (x_j-\bar x)^{\frac{1}{N}}+(\bar x - x_{j-1})^{\frac{1}{N}} \right)\right)}{r_{\nu}\mu_{\nu}} \nonumber \\
+	=\Delta_i-4\frac{L_{\nu}\sqrt{N+3}\left( (x_j-\bar x)^{\frac{1}{N}}+(\bar x - x_{j-1})^{\frac{1}{N}} \right)}{r_{\nu}\mu_{\nu}}+4\frac{z_{\nu}^*-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} \nonumber \\
+	=\Delta_i-4\frac{L_{\nu}\sqrt{N+3}\left( \alpha^{\frac{1}{N}}+(1-\alpha)^{\frac{1}{N}} \right)}{r_{\nu}\mu_{\nu}}+4\frac{z_{\nu}^*-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} \nonumber \\
+	\geq \Delta_i\left(1-4\frac{L_{\nu}\sqrt{N+3}\max_{0\leq\alpha\leq1} {\left( \alpha^{\frac{1}{N}}+(1-\alpha)^{\frac{1}{N}} \right)}}{r_{\nu}\mu_{\nu}} \right)+4\frac{z_{\nu}^*-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} \nonumber \\
+	= \Delta_i\left(1-4\frac{2^{3-1/N}L_{\nu}\sqrt{N+3}}{r_{\nu}\mu_{\nu}} \right)+4\frac{z_{\nu}^*-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} \geq 0
+	\nonumber
+\end{eqnarray}
+
+\begin{eqnarray}
+	R(j) = 2\Delta_i - 4\frac{z_j-z_{\nu}^*}{r_{\nu}\mu_{\nu}} \geq 2\Delta_i+4\frac{z_{\nu}^*-\left( g_{\nu}\left(y(\bar x)\right)+2L_{\nu}\sqrt{N+3}(x_j-\bar x)^{\frac{1}{N}} \right)}{r_{\nu}\mu_{\nu}} \nonumber \\
+	= 2\Delta_i - 8\frac{L_{\nu}\sqrt{N+3}(x_j-\bar x)^{\frac{1}{N}}}{r_{\nu}\mu_{\nu}}+4\frac{z_{\nu}^*-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} \nonumber \\
+	\geq 2\Delta_i\left( 1-4\frac{L_{\nu}\sqrt{N+3}}{r_{\nu}\mu_{\nu}} \right) + 4\frac{z_{\nu}^*-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} > 0
+	\nonumber
+\end{eqnarray}
+
+\begin{equation}
+	R_{glob}(j) > \rho R_{loc}(t)
+\end{equation}
+
+\section{TEST}
 
 There are various bibliography styles available. You can select the style of your choice in the preamble of this document. These styles are Elsevier styles based on standard styles like Harvard and Vancouver. Please use Bib\TeX\ to generate your bibliography and include DOIs whenever available.
 
-Here are two sample references: \cite{Feynman1963118,Dirac1953888}.
+Here are two sample references: 
+
+\cite{Evtushenko, Piyavskii1972, Strongin1970, Shubert1972, Evtushenko2009, Evtushenko2013, Strongin2000, Sergeyev2013, Pinter1996, Jones2009, Wood1991, Meewella1988, Mladineo1986, Vaz2009, Stripinis2019, Paulavicius2016, Pillo2012, Pillo2016, Barkalov2017_1, Barkalov2017_2, Sergeyev2006, Zilinskas2008, Sovrasov2019}.
 
 \section*{References}
 
