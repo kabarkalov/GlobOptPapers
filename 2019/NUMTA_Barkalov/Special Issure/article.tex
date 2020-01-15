@@ -196,7 +196,7 @@ where the last inequality is insufficient if $\nu = m+1$.
 \begin{equation}\label{reduction_problem}
 	\psi(x^*)=\min \left\{\psi(x): x \in [0,1] \right\},
 \end{equation}
-\begin{eqnarray}
+\begin{eqnarray} \nonumber
 	\psi(x)=\frac{g_{\nu}(y(x))}{K_{\nu}} - 
 	\left\{
    \begin{array}{lr}
@@ -218,23 +218,30 @@ and, consequently, the set of the points, in which the function $\psi(x)$ turns 
 
 
 \section{Index-Based Global Search Algorithm}
-
-\[
+	The index-based global search algorithm under consideration for solving the problem (\ref{problem}) (here it is given according to \cite{Strongin2000}) involves the construction of a sequence of points $x^k \in (0,1)$, at which the search trials are conducted with the results of the type (\ref{trial_result}). The set of triplets $\{x^k, z^k=g_{\nu}\big(y(x^k)\big), \nu=\nu(x^k)\}, 1 \leq k \leq n$  makes up the search information accumulated by the method after performing $n$ steps. The operation of the index-based global search algorithm is defined by the following rules.
+	
+	The first trial is executed at an arbitrary internal point $x^1 \in (0,1)$. The selection of the point $ x^{k+1}, k \geq 1$, of any next trial is determined by the following steps. \\
+Step 1. Renumber the points $x^1, \ldots, x^k$ of the preceding trials by the lower indices in the increasing order of the coordinate values, i.e.
+$$
 	0=x_0<x_1<\dots <x_k<x_{k+1}=1,
-\]
-
-\[
+$$
+and juxtapose to them the values $z_i=g_{\nu}\big(y(x_i)\big),\nu=\nu(x_i), 1 \leq i \leq k$, computed at these points. The points $x_0=0$ and $x_{k+1}=1$ are introduced additionally and the values $z_0$ and $z_{k+1}$ are not defined. \\
+Step 2. Classify the indices $i, 1 \leq i \leq k$, of the trial points in accordance with the number of the constraints of the problem fulfilled at these points by constructing the sets
+$$
 	I_\nu =\left\{i:1 \leq i \leq k, \; \nu=\nu(x_i) \right\}, \; 1 \leq \nu \leq m+1,
-\]
+$$
+including the numbers of all points $x_i, 1 \leq i \leq k$ with the same values of $\nu$. The end points $x_0=0$ and $x_{k+1}=1$ are interpreted as the ones having the indices equal to zero. An additional set $I_0=\{0, k+1\}$ corresponds to these points.
 
-\[
+	Determine the maximum value of the index 
+$$
 	M=\max\left\{\nu=\nu(x_i), \; 1 \leq i \leq k \right \}.
-\]
-
+$$ \\
+Step 3. Compute the current lower bounds
 \begin{equation}\label{current_lower_bounds}
 	\mu_{\nu} = \max\left\{ \frac{\left|z_i-z_j\right|}{ (x_i - x_j)^{1/N} }, \; i,j \in I_\nu, \; i>j \right\},
 \end{equation}
-
+for the unknown H\"{o}lder constants $K_{\nu}$ of the functions $g_{\nu}, 1 \leq \nu \leq m+1$. If the set $I_{\nu}$ includes less than two elements or if $\mu_{\nu}$ appears to be equal to zero, then set $\mu_{\nu}=1$. \\
+Step 4. For all nonempty sets $I_{\nu}, 1 \leq \nu \leq m+1$, compute the estimates
 \begin{equation}\label{z_estimates}
 	z_\nu^\ast = \left\{
    \begin{array}{lr}
@@ -243,7 +250,8 @@ and, consequently, the set of the points, in which the function $\psi(x)$ turns 
    \end{array}
 	\right.
 \end{equation}
-
+where the nonnegative numbers $(\epsilon_1,\ldots,\epsilon_m )$ are the algorithm parameters. \\
+Step 5. For each interval $(x_{i-1}, x_i), 1 \leq i \leq k+1$, compute the \textit{characteristics} $R(i)$:
 \begin{equation}\label{R_1}
 	R(i)=\Delta_i+\frac{(z_i-z_{i-1})^2}{r_\nu^2 \mu_\nu^2\Delta_i}-2\frac{z_i+z_{i-1}-2z_\nu^\ast}{r_\nu \mu_\nu}, \;  \nu=\nu(x_i)=\nu(x_{i-1}),
 \end{equation}
@@ -253,34 +261,52 @@ and, consequently, the set of the points, in which the function $\psi(x)$ turns 
 \begin{equation}\label{R_3}
 R(i)=2\Delta_i-4\frac{z_{i-1}-z_\nu^\ast}{r_\nu \mu_\nu}, \; \nu=\nu(x_{i-1})>\nu(x_i),
 \end{equation}
-
+where $\Delta_i=(x_i-x_{i-1})^{1/N}$. The values $r_{\nu} > 1, 1 \leq \nu \leq m+1$, are the parameters of the algorithm. With an appropriate selection of $r_{\nu}$ one can use the product $r_{\nu}\mu_{\nu}$ as an estimate of H\"{o}lder constants $K_{\nu}, 1 \leq \nu \leq m+1$. \\
+Step 6. Find the interval $(x_{t-1}, x_t)$ with the maximum characteristic
 \begin{equation}\label{MaxR}
 	R(t)=\max{\left\{R(i): 1 \leq i \leq k+1\right\}}.
-\end{equation}
-
-\[
+\end{equation} \\
+Step 7. Execute the next trial at the middle point of the interval $(x_{t-1}, x_t)$ if the indices of the points $x_{t-1}, x_t$ are not the same, i.e.,
+$$
 	x^{k+1} = \frac{x_t + x_{t-1}}{2}, \; \nu(x_{t-1}) \neq \nu(x_t).
-\]
-
-\[
+$$
+Otherwise, execute a trial at the point
+$$
 	x^{k+1} = \frac{x_t+x_{t-1}}{2} + \frac{\mathrm{sign}(z_t-z_{t-1})}{2r_\nu}\left[\frac{\left|z_t-z_{t-1}\right|}{\mu_\nu}\right]^N, \; \nu=\nu(x_{t-1})=\nu(x_t).
-\]
+$$
+The inequality $\Delta_t \leq \epsilon$ can be taken as the termination condition, where $t$ is from (\ref{MaxR}) and $\epsilon>0$ is the predefined accuracy.
 
-\[
+	The convergence conditions for the index global search algorithm can be formulated in the form of the following theorem from \cite{Strongin2000}. 
+\\
+\textbf{Theorem}. Assume that the following conditions are satisfied:
+\begin{enumerate} 
+  \item Problem (\ref{problem}) has an $\varepsilon$-reserved solution $y_{\varepsilon}$ from (\ref{epsilon_reserved_solution}).
+  \item Functions $g_j(y), 1 \leq j \leq m+1$ admit Lipschitzian (with the constants $L_j$) extensions $G_{j}(y)$ over the whole feasible domain $D$ from (\ref{D}), i.e.
+$$
 	g_j \left( y(x) \right) = G_j \left( y(x) \right), \; x \in Q_j, \; 1 \leq j \leq m+1,
-\]
-
-\begin{equation}\label{theorem_inequalities}
-	r_{\nu}\mu_{\nu} > 2^{3-\frac{1}{N}}L_{\nu}\sqrt{N+3}, \; 1 \leq \nu \leq m+1, 
-\end{equation}
-
-\[
+$$
+where the sets $Q_j$ are from (\ref{Q_intervals}), and $y(x)$ is the curve from (\ref{one_dimensional_problem}).
+	\item The parameters of the method $\epsilon_{\nu}, 1 \leq \nu \leq m$ used in the rule (\ref{z_estimates}) are the corresponding components of the reserve vector $\epsilon_{R}$ from (\ref{epsilon_reserved_solution}).
+	\item For a sufficiently large iteration number $q$, the values $\mu_{\nu}$ from (\ref{current_lower_bounds}) satisfy the inequalities
+		\begin{equation}\label{theorem_inequalities}
+			r_{\nu}\mu_{\nu} > 2^{3-\frac{1}{N}}L_{\nu}\sqrt{N+3}, \; 1 \leq \nu \leq m+1, 
+		\end{equation}
+Then, any limit point $\bar{y}$ of the sequence of the trials $\{y^k\}=\big\{y\big(x^k\big)\big\}$ generated by the index algorithm for problem (\ref{problem}) belongs to the set $Y_{\epsilon}$ form (\ref{Y_epsilon}) and satisfies the conditions	
+$$
 	\varphi(\bar y) = \inf\left\{\varphi(y^q):g_j(y^q) \leq 0, 1 \leq j \leq m, q = 1,2,\ldots \right\} \leq \varphi(y_{\epsilon}).
-\]
-
+$$
+\end{enumerate}
+\textbf{Note 1}. The computational scheme of the algorithm is described in the form convenient for  formulating its theoretical properties. The software implementation of this scheme may be made more frugal. For example, according to Step 7, the point $x^{k+1}$ of the scheduled trial will be an internal point of the interval $(x_{t-1}, x_t)$, i.e. $x^{k+1} \in (x_{t-1}, x_t)$. Therefore, the set of trial points $x^1,\ldots, x^k$ (and the related trial results (\ref{trial_result})) may not be ordered  at every step of the algorithm but may be maintained in an ordered state using appropriate data structures.
+\\
+\textbf{Note 2}. The use of the set of parameters $\epsilon_1,\ldots,\epsilon_m$ (the values of which correspond to the coordinates of the reserve vector $\epsilon_R$) in the index algorithm will significantly reduce the density of the trial sequence in the vicinity of the feasible domain boundaries. However, this raises a question about the particular values of the reserve vector components $\epsilon_R$. In \cite{Strongin2000}, it was proposed to choose the components of the vector $\epsilon_R$ according to the formula 
 \begin{equation}\label{epsilon_nu}
 	\epsilon_{\nu} = \mu_{\nu}\delta, \; 1 \leq \nu \leq m, 
 \end{equation}
+where $\mu_{\nu}$ are the current estimates of the H\"{o}lder constant from (\ref{current_lower_bounds}) and $\delta>0$ is a parameter. This approach to choosing the reserve vector components allows one to take into account the properties of different problem functions characterized by their Lipschitz constants. This method for choosing the reserve vector was used in the numerical experiments, the results of which are presented below.
+\\
+\textbf{Note 3}. The index algorithm for solving the constrained problems is based on the information-statistical algorithm of global search (AGS) for solving unconstrained problems. AGS has been compared repeatedly with both deterministic and nature-inspired global optimization algorithms. The results of the experimental comparison (see, for example, \cite{Sovrasov2019}) show that AGS is superior to many known methods of similar purpose, including DIRECT and DIRECT\textit{l}.
+
+	At the same time, the index scheme of accounting for the constraints also demonstrated its advantages (in the number of computed values of the problem functions) over the traditional penalty functions method in solving a wide range of model problems (see the results of the experimental comparison in \cite{Barkalov2017_1, Barkalov2017_2}.)
 
 
 \section{Index Algorithm with Dual Lipschitz Constant Estimates}
