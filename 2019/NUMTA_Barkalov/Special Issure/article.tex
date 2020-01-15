@@ -101,71 +101,123 @@ in which the preliminary results have been obtained for the unconstrained proble
 	
 	The main part of the paper has the following structure. In Section 2, the index method of accounting for the constraints and the dimensionality reduction scheme for the constrained global optimization problems are described. In Section 3, a description of the computational rules of the index global search algorithm is given and its theoretical properties are formulated. In Section 4, the index algorithm with dual Lipschitz constant estimates is formulated and its convergence is proved. Section 5 presents the results of the numerical experiments carried out on several series of the multiextremal problems with non-convex constraints. Section 6 concludes the paper.
 
-\section{Index Method of Accounting for the Constraints and Dimensionality Reduction}
 
+
+\section{Index Method of Accounting for the Constraints and Dimensionality Reduction}
+	We consider the global optimization problems of the form
 \begin{equation}\label{problem}
 	\min{\left\{\varphi(y):y \in D, \; g_j(y)\leq 0, \; 1 \leq j \leq m\right\}},
 \end{equation}
-
 \begin{equation}\label{D}
 	D=\left\{y\in R^N: a_i\leq y_i \leq b_i, 1\leq i \leq N\right\}.
 \end{equation}
 
+	It is supposed that the objective function $\varphi(y)$ (henceforth denoted by $g_{m+1}(y)$) and the left-hand sides $g_{j}(y), 1 \leq j \leq m$, of the constraints satisfy the Lipschitz condition
 \begin{equation}\label{lipschitz_condition}
 	\left|g_j(y')-g_j (y'')\right| \leq L_j \|y'-y''\|, \; y', y''\in D, \; 1\leq j \leq m+1.
 \end{equation}
+with \textit{a priori} unknown constant $L_j, 1\leq j \leq m+1$, and may be multiextremal.
 
+	The analytical form of the functions $g_{j}(y)$ may be unknown, i.e. these functions may be defined algorithmically (“black-box” functions). In this case, it is supposed that even a single search trial may be a computationally costly operation since in applied problems it involves the need to perform numerical modeling. 
+	
+	Along with the exact solution $y^\ast$ of the problem (\ref{problem}), we will consider also the $\varepsilon$-reserved solution $y_{\epsilon}$, for which 
 \begin{equation}\label{epsilon_reserved_solution}
 	\varphi(y_{\epsilon})=\min{\left\{\varphi(y):y \in D, \; g_j(y)\leq -{\epsilon}_j, \; 1 \leq j \leq m\right\}},
 \end{equation}
-
+and the set of solutions $Y_{\epsilon}$, which are not worse than the $\varepsilon$-reserved solution in the objective function value, i.e.
 \begin{equation}\label{Y_epsilon}
 	Y_{\epsilon}=\left\{ y \in D, \; g_j(y) \leq 0, \; 1 \leq j \leq m, \; \varphi(y) \leq \varphi(y_{\epsilon}) \right\}.
 \end{equation}
+Fig. \ref{fig:eps_reserved_solution} illustrates the concepts introduced.
 
+\begin{figure}[h]
+	\center{\includegraphics[width=0.7\linewidth]{img/epsilon_reserved_solution}}
+	\caption{$\varepsilon$-reserved solution}
+	\label{fig:eps_reserved_solution}
+\end{figure}
+
+	The existence of the $\varepsilon$-reserved solutions of problem (\ref{problem}) can be interpreted as some analog of the regularity condition in classical nonlinear programming problems. The applied role of this condition should be also noted. Even if the exact solution $y^\ast$ is found, its practical implementation is possible as some approximation of $y^\ast$ only. Therefore, it is important that there are feasible points from $Q_{m+1}$ close enough to $y^\ast$ (in coordinates and values). The existence of the $\varepsilon$-reserved solution guarantees the existence of such points. In this case, the domain $Y_{\epsilon}$ may play the role of a set of suitable approximations.
+
+	We will consider the initial problem (\ref{problem}) assuming that the problem functions $g_{j}(y), 1 \leq j \leq m+1$ may be defined only partly. It means that they are defined and calculable only in the sets 
 \begin{equation}\label{D_sets}
 	D_1 = D, \; D_{j+1} = \left\{ y \in D_j: \; g_j(y) \leq 0 \right\}, \; 1 \leq j \leq m.
 \end{equation}
+This situation is typical for the optimal design problems when some conditions for the functioning of the modeled object are not met and its other characteristics appear to be undefined. In this approach, the first violation of any constraint indicating that the point ybeing considered is no longer feasible terminates further computations at the point $y$.
 
+	Many well known approaches to solving the multidimensional global optimization problems are based on either explicit or implicit reduction of multidimensional problems to one-dimensional ones (see, for example, the description of methods using the diagonal partitions \cite{Sergeyev2006} or simplicial partitions \cite{Zilinskas2008}). In this paper, we will use the approach based on the dimensionality reduction with the use of the space-filling curve $y(x)$ (the Peano curve). Continuous unambiguous mapping $y(x)$ projecting the interval [0,1] onto an $N$-dimensional hypercube $D$ allows reducing a multidimensional constrained minimization problem in the domain $D$ to a one-dimensional constrained optimization problem in the interval [0,1]
 \begin{equation}\label{one_dimensional_problem}
 	\varphi(y(x^\ast))=\min \left\{\varphi(y(x)): x \in [0,1], \; g_j(y(x))\leq 0, \; 1 \leq j \leq m\right\},
 \end{equation}
+The issues of the numerical construction of the Peano space filling curve-type mappings and the corresponding theory were described in detail in \cite{Strongin2000, Sergeyev2013}. Note that the theoretical Peano curve $y(x)$ is a limit object and in practice is replaced by its approximation (called \textit{evolvent}) with predefined precision $2^{-m}$ where the number $m>1$ is a parameter of the construction (the density of the evolvent). In this case, the construction density of the evolvent is determined by the accuracy of the possible practical implementation of the problem solution found. For  illustration, Fig. \ref{fig:evolvent} (a), (b) shows the projections of the interval [0,1] are shown for the mapping $y(x)$ with $N=2$ and $m=4,5$, correspondingly.
+\begin{figure}[h]
+	\begin{minipage}[h]{0.48\linewidth}
+		\center{\includegraphics[width=0.8\linewidth]{img/evolvent_N=2_m=4} \\ a)}
+	\end{minipage}
+	\hfill
+	\begin{minipage}[h]{0.48\linewidth}
+		\center{\includegraphics[width=0.8\linewidth]{img/evolvent_N=2_m=5} \\ b)}
+	\end{minipage}
+	\caption{Evolvent for $N=2$ and $m=4$ (a), $m=5$ (b)}
+	\label{fig:evolvent}
+\end{figure}
 
-\[
+	The dimensionality reduction scheme considered here matches a multidimensional problem with Lipschitzian minimized function and Lipschitzian constraints to a one-dimensional problem, in which the corresponding functions satisfy the uniform H\"{o}lder condition (see \cite{Strongin2000, Sergeyev2013}), i.e.
+$$
 	\left|g_j(y(x'))-g_j(y(x''))\right| \leq K_j \left|x'-x'' \right|^{1/N}, \; x', x''\in [0,1], \; 1\leq j \leq m+1,
-\]
+$$
+where $N$ is the dimensionality of the initial multidimensional problem and the coefficients $K_j$ are related to the Lipschitz constants $L_j$ of the initial problem by the relations $K_j \leq 2L_j \sqrt{(N+3}$.
 
+	According to (\ref{D_sets}) and (\ref{one_dimensional_problem}), the reduced one-dimensional functions $g_j (y(x)), 1 \leq j \leq m+1$ will also be defined and calculable in the corresponding intervals 
 \begin{equation}\label{Q_intervals}
 	Q_1=[0,1], \; Q_{j+1}=\left\{x \in Q_j : g_j(y(x)) \leq 0 \right\}, \; 1 \leq j \leq m.
 \end{equation}
-
-\[
+These relations allow introducing a classification of the points $x \in [0,1]$ according to the number $\nu = \nu(x)$ of the constraints calculable at the given point. We will call this number $\nu = \nu(x)$ the \textit{index} of the point $x$. The index can be determined from the conditions 
+$$
 	g_j(y(x)) \leq 0, \; 1 \leq j \leq \nu-1, \; g_{\nu}(y(x))>0,
-\]
+$$
+where the last inequality is insufficient if $\nu = m+1$. 
 
+	Thus, a search trial at some point $x^k \in [0,1]$ performed at the $k^{th}$ iteration of the algorithm will consist of the following sequence of operations:
+\begin{enumerate} 
+  \item Determine the image $y^k=y(x^k )$ with the use of the evolvent $y(x)$. 
+  \item Compute the values $g_1 (y^k ), \ldots ,g_{\nu} (y^k )$ where $\nu = \nu(x)$ is the index of the point.
+	\item Fix the result of the trial as three values 
+\end{enumerate}
+	
 \begin{equation}\label{trial_result}
 	x^k, \; z^k = g_{\nu}\left( y(x^k) \right), \; \nu = \nu(x^k),
 \end{equation}
 
+	According to this scheme, the trial is terminated at the point $y^k=y(x^k)$ when the first violated constraint  is found.
+	
+	In the case when the point $y^k$ is a feasible one, i.e. when $y(x^k) \in Q_(m+1)$, the trial involves checking all constraints and computing the objective function. Here, the value of the index is accepted to be equal to the quantity $\nu = m+1$.
+	
+	The main idea of the index scheme of accounting for the constraints consists in the reduction of the constrained problem (\ref{one_dimensional_problem}) (the functions of which satisfy the H\"{o}lder condition with corresponding coefficients $K_j$) to an unconstrained problem of the form
 \begin{equation}\label{reduction_problem}
 	\psi(x^*)=\min \left\{\psi(x): x \in [0,1] \right\},
 \end{equation}
-
 \begin{eqnarray}
 	\psi(x)=\frac{g_{\nu}(y(x))}{K_{\nu}} - 
 	\left\{
    \begin{array}{lr}
      0, & \nu \leq m,\\
-     \frac{\varphi^*}{K_{m+1}}, & \nu = m + 1.
+     \frac{\varphi^\ast}{K_{m+1}}, & \nu = m + 1.
    \end{array}
 	\right.
 \end{eqnarray}
+where $\nu = \nu(x)$ and $\varphi^\ast$ is the objective function value at the point of the problem solution (\ref{one_dimensional_problem}).
 
-\[
-	\psi(x)=\frac{\varphi(y(x))-\varphi^*}{K_{m+1}}
-\]
+	The value $\psi(x)$ at $\nu(x) \leq m$ matches the value of the left-hand part of the first constraint violated at this point $g_{\nu}(y(x))$ divided by the constant $K_{\nu}$. In the case when $\nu(x) = m+1$ 
+$$
+	\psi(x)=\frac{\varphi(y(x))-\varphi^\ast}{K_{m+1}}
+$$
+and, consequently, the set of the points, in which the function $\psi(x)$ turns to zero matches the set of the global minimum points of the problem (\ref{one_dimensional_problem}). It should be noted that in any subdomain $Q_j$ the function $\psi(x)$ has the H\"{o}lder coefficient equal to 1.
+	
+	These considerations constitute the basis of the index global search algorithm, according to which the unknown constants $K_{\nu}$ and the unknown minimum value $\varphi^\ast$ are substituted in the course of computations by their current approximations.
 
-\section{Index Algorithm of Global Search}
+
+
+\section{Index-Based Global Search Algorithm}
 
 \[
 	0=x_0<x_1<\dots <x_k<x_{k+1}=1,
