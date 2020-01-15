@@ -4,7 +4,7 @@
 %\usepackage[T1]{fontenc}
 \modulolinenumbers[5]
 
-\journal{Journal of \LaTeX\ Templates}
+%\journal{Journal of \LaTeX\ Templates}
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Elsevier bibliography styles
@@ -55,7 +55,7 @@
 \address{Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia}
 
 \begin{abstract}
-In the present work, the constrained global optimization problems, in which the functions are of the “black box” type and satisfy the Lipschitz condition, are considered. The algorithms for solving the problems of this class require the use of the adequate estimates of the a priori unknown Lipschitz constants for the problem functions. A novel approach presented in this paper is based on a simultaneous use of two estimates of the Lipschitz constant: an overestimated and the underestimated ones. The upper estimate provides the global convergence whereas the lower one reduces the number of trials necessary to find the global optimizer with required precision. At that, the considered algorithm of solving the constrained problems doesn’t use the ideas of the penalty function method; each constraint of the problem is accounted for separately. The convergence conditions of the proposed algorithm are formulated according to corresponding theorem. The results of the numerical experiments on the series of the multiextremal problems with the non-convex constraints demonstrating the efficiency of the proposed scheme of dual Lipschitz constant estimates are presented.
+This paper considers the constrained global optimization problems, in which the functions are of the “black box” type and satisfy the Lipschitz condition. The algorithms for solving the problems of this class require the use of adequate estimates of the a priori unknown Lipschitz constants for the problem functions. A novel approach presented in this paper is based on a simultaneous use of two estimates of the Lipschitz constant: an overestimated and an underestimated one. The upper estimate provides the global convergence whereas the lower one reduces the number of trials necessary to find the global optimizer with the required accuracy. In this case,  the considered algorithm for solving the constrained problems doesn’t use the ideas of the penalty function method; each constraint of the problem is accounted for separately. The convergence conditions of the proposed algorithm are formulated in the corresponding theorem. The results of the numerical experiments on a series of multiextremal problems with non-convex constraints demonstrating the efficiency of the proposed scheme of dual Lipschitz constant estimates are presented.
 \end{abstract}
 
 \begin{keyword}
@@ -68,7 +68,38 @@ Global optimization, Multiextremal problems, Non-convex constraints, Lipschitz c
 
 
 \section{Introduction}
+	In this paper, we consider constrained global optimization problems and the numerical methods for solving problems of this type. Such problems are often encountered in applications (see, for example, the review \cite{Pinter2006}). As a rule, problem functions are defined by a program code, i.e. they are “black-box” functions, for which the computing of the values can be a computationally costly operation since in applied problems it will require  numerical modeling. Any  possibility to estimate reliably the global optimum in the multiextremal problems with “black-box” functions is based fundamentally on the auxiliary assumptions relating the possible values of the problem functions to their known values at the points of the trials already performed.
+	
+	The assumption that the problem functions satisfy the Lipschitz condition is typical for many applied problems (in this case, one can speak about the Lipschitzian optimization problems) because the ratio of the functions’ variations to corresponding ones of the variables usually cannot exceed some threshold determined by the limited energy of variations in the system. This threshold can be described using the Lipschitz constant.
+	
+	The methods for solving the Lipschitzian optimization problems constitute a very important area in the development of the global optimization methods and are the objects of investigations of many researchers. The first algorithms of this class were proposed as early as in the 1970s \cite{Evtushenko1971, Piyavskii1972, Shubert1972, Strongin1970}; since that time, this area has been continuing to develop extensively (see, for example \cite{Evtushenko2009, Evtushenko2013, Strongin2000, Sergeyev2013, Jones2009}). Note that these global optimization algorithms are, as a rule, oriented towards solving either  unconstrained optimization problems 
+	\cite{Zilinskas, Sergeyev, Pinter, Jones}
+or problems with constraints of a simple structure \cite{Vaz2009, Paulavicius2016}. The solving of the problems with complex non-convex constraints is usually performed with the use of the penalty functions method \cite{Stripinis2019, Pillo2012, Pillo2016}, which has a number of drawbacks.  In particular, this method cannot be applied to the problems with the partially defined functions (i.e. when any constraint is violated, the values of all the other functions of the problem remain undefined).
+	
+	This situation is typical of many optimal design problems, when, in case of violation of some conditions of the modeled object's functioning, other characteristics of the object appear to be undefined. For example, the modeled object is an electronic device, and its response time is minimized. However, the response time is undefined if at a given combination of parameters the device fails to operate. Such a partial computability of the functions in the constrained optimization problems complicates essentially (in some cases, makes impossible) the application of the penalty functions method. 
+	
+	Within the framework of our research, an original approach to the minimization of the multiextremal functions with non-convex constraints called the index method of the accounting for the constraints 
+	\cite{Strongin} 
+was used. This approach is based on separate accounting for each constraint of the problem and does not involve the use of the penalty functions. According to the rules of the index method, every iteration called trial at the corresponding point of the search domain includes a sequential checking of the feasibility of the problem constraints at this point. When the first violation of any constraint is found, the trial is terminated (the values of the remaining problem functions are not computed at this point) and the transition to the next iteration point is initiated. This allows solving the problems with partially defined functions. The experimental comparison of the index method of accounting for the constraints and the penalty function method demonstrated the advantages of the index method in terms of the number of iterations and the number of computations of the problem functions \cite{Barkalov2017_1, Barkalov2017_2}.
+	
+	Note that the values of the Lipschitz constant for the problem functions are usually not known a priori, which  makes their estimation one of the key problems in the construction of the Lipschitzian optimization methods. The methods utilizing the values of the Lipschitz constant predefined a priori (see, for example, \cite{Piyavskii1972, Shubert1972, Wood1991, Meewella1988, Mladineo1986}) are important in the theoretical aspect, but it is difficult to apply such methods in applied problems (in which the information of the Lipschitz constant values is absent).
+		
+		The value of the unknown Lipschitz constant estimate affects the convergence rate of the algorithm essentially. Therefore, the issue of its correct estimate is very important. An underestimate of the true value of the constant may lead to the loss of the algorithm convergence to the global solution. At the same time, too high a value of the constant estimate not corresponding to real behavior of the function results in slow convergence of the algorithm to the global minimum point. 
+		
+		Several typical methods for adaptive estimation of the Lipschitz constant according to the results of the performed search trial are known:
+\begin{itemize}[\labelitemii]
+  \item global estimate of the constant $L$ in the whole search domain $D$ \cite{Horst1996, Pinter1996, Strongin2000}.
+  \item local estimates of the constants $L_i$ in different subdomains $D_i$ of the search domain $D$ \cite{Kvasov2003, Sergeyev2010, Sergeyev2016}.
+	\item choice of the estimates of the constant $L$ from some set of possible values \cite{Gablonsky2001, Jones1993, Jones2009, Sergeyev2006}.
+\end{itemize}
 
+	Each of the approaches listed above has its own advantages and drawbacks. For example, the use of the global estimate only in the entire search domain may slow down the convergence of the algorithm to the global minimum point. On the other hand, the use of the local estimates accelerating the convergence requires an adequate adjustment of the algorithm parameters in order to ensure the global convergence. 
+
+	In this paper, we consider an algorithm, in which it is proposed to use two global estimates of the Lipschitz constant, one of them being much greater than the other one. The larger estimate ensures global convergence and the smaller one reduces the total number of trials needed to find the global optimizer. The choice of one of the two estimates to be used in the rules of the algorithm is performed in the adaptive manner, depending on the behavior of the function. This work continues the research reported in the paper 
+	\cite{NUMTA2019},
+in which the preliminary results have been obtained for the unconstrained problems.
+	
+	The main part of the paper has the following structure. In Section 2, the index method of accounting for the constraints and the dimensionality reduction scheme for the constrained global optimization problems are described. In Section 3, a description of the computational rules of the index global search algorithm is given and its theoretical properties are formulated. In Section 4, the index algorithm with dual Lipschitz constant estimates is formulated and its convergence is proved. Section 5 presents the results of the numerical experiments carried out on several series of the multiextremal problems with non-convex constraints. Section 6 concludes the paper.
 
 \section{Index Method of Accounting for the Constraints and Dimensionality Reduction}
 
