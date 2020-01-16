@@ -165,7 +165,10 @@ The issues of the numerical construction of the Peano space filling curve-type m
 $$
 	\left|g_j(y(x'))-g_j(y(x''))\right| \leq K_j \left|x'-x'' \right|^{1/N}, \; x', x''\in [0,1], \; 1\leq j \leq m+1,
 $$
-where $N$ is the dimensionality of the initial multidimensional problem and the coefficients $K_j$ are related to the Lipschitz constants $L_j$ of the initial problem by the relations $K_j \leq 2L_j \sqrt{(N+3}$.
+where $N$ is the dimensionality of the initial multidimensional problem and the coefficients $K_j$ are related to the Lipschitz constants $L_j$ of the initial problem by the relations
+\begin{equation}\label{K_leq_L}
+	K_j \leq 2L_j \sqrt{N+3}, \; 1\leq j \leq m+1.
+\end{equation}
 
 	According to (\ref{D_sets}) and (\ref{one_dimensional_problem}), the reduced one-dimensional functions $g_j (y(x)), 1 \leq j \leq m+1$ will also be defined and calculable in the corresponding intervals 
 \begin{equation}\label{Q_intervals}
@@ -309,20 +312,44 @@ where $\mu_{\nu}$ are the current estimates of the H\"{o}lder constant from (\re
 	At the same time, the index scheme of accounting for the constraints also demonstrated its advantages (in the number of computed values of the problem functions) over the traditional penalty functions method in solving a wide range of model problems (see the results of the experimental comparison in \cite{Barkalov2017_1, Barkalov2017_2}.)
 
 
-\section{Index Algorithm with Dual Lipschitz Constant Estimates}
 
+\section{Index Algorithm with Dual Lipschitz Constant Estimates}
+	The index global search algorithm described in the previous section is intended for solving  the multiextremal problems, in which the objective function and the functions of constraints satisfy the Lipschitz condition.  In this case, \textit{a priori} estimates of the constant values are not required for the algorithm to work. These estimates are computed in the course of global search, based on the available search information. 
+	
+	According to Theorem 1 from Section 3, the sequence of trial points $\{y^k\}$ will converge to a global minimizer $y^\ast$ if the condition (\ref{theorem_inequalities}) is satisfied. So far, an appropriate choice of the parameters $r_{\nu}$ from (\ref{R_2}) allows using the values
 \begin{equation}\label{estimates_Lipschitz_constants}
 	\frac{r_{\nu}\mu_{\nu}}{2^{3-\frac{1}{N}}L_{\nu}\sqrt{N+3}}, \; 1 \leq \nu \leq m+1, 
 \end{equation}
+as the estimates of the Lipschitz constants for the problem functions $g_{j}(y), 1 \leq j \leq m+1$.
 
+	Compliance with condition (\ref{estimates_Lipschitz_constants}) will be achieved when choosing a high value of the parameters $r_{\nu}$. However, in this case the constant will be overestimated, and the method will perform a large number of trials until the stopping condition is fulfilled.
+	
+	The choice of low values of the parameters $r_{\nu}$ (which corresponds to an underestimate of the Lipschitz constant) would reduce the number of trials considerably but could destroy the convergence to the global extremum (due to possible violation of the condition (\ref{theorem_inequalities})).
+	
+	An approach, in which two estimates of the Lipschitz constant for each function are used in the rules of the algorithm, is promising. One of these estimates is significantly greater than the other, which corresponds to the use of two sets of parameters $r_{\nu}^{glob}$ and $r_{\nu}^{loc}$ in the algorithm where $r_{\nu}^{glob}>r_{\nu}^{loc}>1, 1 \leq \nu \leq m+1$. When using the parameter $r_{\nu}^{loc}$ we shall deal with the smaller estimate of the Lipschitz constant, and using the parameter $r_{\nu}^{glob}$ will correspond to the larger one.
+	
+	We will refer to the characteristics of the $i^{th}$ interval as the global ones $(R_{glob}(i))$ if the parameters $r_{\nu}=r_{\nu}^{glob}$ were used when computing the characteristic according to (\ref{R_1}), (\ref{R_2}), (\ref{R_3}) and as the local ones  $(R_{loc}(i))$ if the parameters $r_{\nu}=r_{\nu}^{loc}$ were used. 
+
+	The key idea of the novel method is computing two characteristics for each interval and balancing (based on these two) the local and global search. The local search provides a new trial in the vicinity of the current point $y_k^\ast$  whereas during the global search, a new trial could be performed in a subdomain located far away from $y_k^\ast$. 
+	
+	Note that Theorem 1 on the convergence of the index method implies the generation of an infinite sequence of trials $\{y^k\}=\big\{y(x^k )\big\}$ by the algorithm. In this case, at the final stage of the search (i.e. in the case when one of the points of this trial sequence falls into the vicinity of the $\varepsilon$-reserved solution $y^\ast$) there always exists an interval, at one of the boundaries of which the current minimum value of the objective function $z_{m+1}^\ast$  from (\ref{z_estimates}) is achieved. It is this interval that will have the highest characteristic since it is the most promising one for performing further trials. 
+
+	Let us establish the following important property for the global and local characteristics of an interval containing the current optimal point.
+
+	\textbf{Statement}. Let us assume that the current minimum value $z_M^\ast$  from (\ref{z_estimates}) at the $k^{th}$ iteration is achieved at the boundary point of some interval $(x_{i-1}, x_i), i=i(k)$. Then, $R_{glob}(i) \geq R_{loc}(i)$.
+
+	\textbf{Proof}. Let us consider two possible cases of the values of the indices $\nu(x_{i-1})$ and $\nu(x_i)$. 
+\begin{enumerate} 
+  \item If $\nu(x_{i-1}) \neq \nu(x_i)$, then according to  formulae (\ref{R_2}), (\ref{R_3}) 
 \begin{equation}\label{R_glob_1}
 	R(i)=R_{glob}(i)=R_{loc}(i)=2\Delta_i>0. 
 \end{equation}
-
-\[
+  \item If $\nu(x_{i-1}) = \nu(x_i) = M$, then, taking into account the rules (\ref{current_lower_bounds}), the following inequality will hold
+$$
 	z_i+z_{i-1}-2z_M^* = |z_i-z_{i-1}|\leq \mu_M\Delta_i
-\]
-
+$$
+\end{enumerate}
+From here, it will follow that for any value $r_M>1$ the following inequalities will hold
 \begin{eqnarray}
 	R(i) & = & \Delta_i + \frac{(z_i-z_{i-1})^2}{r_M^2\mu_M^2\Delta_i} - 2\frac{z_i+z_{i-1}-2z_M^*}{r_M\mu_M} \geq \Delta_i + \frac{(z_i-z_{i-1})^2}{r_M^2\mu_M^2\Delta_i} - 2\frac{\mu_M\Delta_i}{r_M\mu_M} \nonumber \\
 	& \geq & \Delta_i + \frac{(z_i-z_{i-1})^2}{r_M^2\mu_M^2\Delta_i} - 2\frac{\Delta_i}{r_M} = \Delta_i + \Delta_i\frac{(z_i-z_{i-1})^2/\Delta_i^2}{r_M^2\mu_M^2\Delta_i^2} - 2\frac{\Delta_i}{r_M}
@@ -330,68 +357,115 @@ where $\mu_{\nu}$ are the current estimates of the H\"{o}lder constant from (\re
 	& \geq & \Delta_i + \frac{\Delta_i}{r_M^2} - 2\frac{\Delta_i}{r_M} = \Delta_i \left( 1-\frac{1}{r_M} \right)^2>0  
 	\nonumber
 \end{eqnarray}
-
+And because $r_{M}^{glob} > r_{M}^{loc} > 1$ then
 \begin{equation}\label{R_glob_greater_R_loc}
 	R_{glob}(i)=\Delta_i\left(1-\frac{1}{r_M^{glob}} \right)^2 > \Delta_i\left(1-\frac{1}{r_M^{loc}} \right)^2 = R_{loc}(i)
 \end{equation}
+The statement is proved.
 
+	This statement can be interpreted as the incomparability of the local and global characteristics: the global characteristic of the best interval is always larger. At the same time, it follows from the formulae (\ref{R_glob_1}), (\ref{R_glob_greater_R_loc}) that 
 \begin{equation}\label{R_glob_equal_R_loc}
-	R_{glob}(i) = \rho R_{loc}(i)
+	R_{glob}(i) = \rho R_{loc}(i),
 \end{equation}
+where $\rho=\Big(\frac{1-1/r_{M}^{glob}}{1-1/r_{M}^{loc}}\Big)^2$, if $\nu(x_{i-1})=\nu(x_i)=M$, and $\rho=1$, if $\nu(x_{i-1}) \neq \nu(x_i)$. In the case of the multiplication by the coefficient $\rho$, the local and global characteristics of the search intervals become comparable, and one can choose the best (i.e. the largest) one.
 
+	Based on the relation (\ref{R_glob_equal_R_loc}), one can formulate an \textit{index algorithm with dual estimate of the Lipschitz constants} (hereafter referred to as IA-DL).
+	
+	The first four steps of the algorithm repeat Step 1 -- Step 4 of the initial index algorithm from Section 3.
+	Step 5. For each interval $(x_{i-1}, x_i), 1 \leq i \leq k+1$ 
+\begin{flushleft}
+	\begin{itemize}[\labelitemii]
+		\item Compute the global characteristics $R_{glob}(i)$ according to formulae (\ref{R_1}), (\ref{R_2}), (\ref{R_3}) using the value $r_{\nu}=r_{\nu}^{glob}$
+		\item Compute the local characteristics $R_{loc}(i)$ according to formulae (\ref{R_1}), (\ref{R_2}), (\ref{R_3}) using the value $r_{\nu}=r_{\nu}^{loc}$
+		\item Determine the characteristic $R(i)$ as
 \begin{equation}\label{R_max}
 	R(i) = \max{\left\{ R_{glob}(i), \rho R_{loc}(i) \right\}}
 \end{equation}
+where $\rho=\Big(\frac{1-1/r_{M}^{glob}}{1-1/r_{M}^{loc}}\Big)^2$, if $\nu(x_{i-1})=\nu(x_i)=\nu$, and $\rho=1$, if $\nu(x_{i-1}) \neq \nu(x_i)$.
+	\end{itemize}
+\end{flushleft}
 
+	Step 6. Find the interval $(x_{t-1}, x_t)$ with the maximum characteristic
 \begin{equation}\label{R_max_t}
 	R(t) = \max{\left\{ R(i): 1 \leq i \leq k+1\right\}}
 \end{equation}
+and fix the value $r_{\nu}=r_{\nu}^{loc}$ if $\rho R_{loc}(t) > R_{glob}(t)$, otherwise fix $r_{\nu}=r_{\nu}^{glob}$.
 
-\[
+	Step 7. Execute the next trial at the middle point of the interval $(x_{t-1}, x_t)$ if the indices of the points $x_{t-1}$, $x_t$ are not the same, i.e.
+$$
 	x^{k+1} = \frac{x_t + x_{t-1}}{2}, \; \nu(x_{t-1}) \neq \nu(x_t).
-\]
-
-\[
+$$
+Otherwise, execute a trial at the poin
+$$
 	x^{k+1} = \frac{x_t+x_{t-1}}{2} + \frac{\mathrm{sign}(z_t-z_{t-1})}{2r_\nu}\left[\frac{\left|z_t-z_{t-1}\right|}{\mu_\nu}\right]^N, \; \nu=\nu(x_{t-1})=\nu(x_t).
-\]
+$$
+When computing the point $x^{k+1}$, use the value of the parameter $r_{\nu}$ fixed at Step 6. The algorithm terminates if the condition $\Delta_{t} \leq \epsilon$ is satisfied where $t$ is from (\ref{R_max_t}) and $\epsilon>0$ is the predefined accuracy.
 
+	Let us illustrate the work of the algorithms IA and IA-DL when minimizing the function
 \begin{eqnarray}
 	\varphi(y_1, y_2)=-1.5y_1^2\exp{\left\{1-y_1^2-20.25(y_1-y_2)^2\right\}}- \nonumber \\
 	-\left(0.5(y_1-1)(y_2-1)\right)^4\exp{\left\{2-\left(0.5(y_1-1)\right)^4-(y_2-1)^4\right\}}
 	\nonumber
 \end{eqnarray}
-
+in the range $0 \leq y_1 \leq 4$, $1 \leq y_2 \leq 3$ subject to the constraints
 \begin{eqnarray}
 	g_1(y_1, y_2) &=& 0.01 \left( (y_1-2.2)^2+(y_2-1.2)^2-2.25 \right) \leq 0, \nonumber \\
 	g_2(y_1, y_2) &=& 100 \left(1-(y_1-2)^2/1.44+(0.5y_2)^2 \right) \leq 0, \nonumber \\
 	g_3(y_1, y_2) &=& 10 \left( y_2 - 1.5 - 1.5 \sin{\left( 6.283(y_1-1.75) \right)}\right) \leq 0
 	\nonumber
 \end{eqnarray}
+The feasible domain of this problem is not connected and consists of three non-convex subdomains. The global minimum $\varphi(y^\ast)=-1.489$ is achieved at the point $y^\ast =(0.942, 0.944)$ (the values are given with the accuracy of $10^{-3}$).
 
+\begin{figure}[h]
+	\begin{minipage}[h]{0.48\linewidth}
+		\center{\includegraphics[width=\linewidth]{img/stronginC3_IA} \\ a)}
+	\end{minipage}
+	\hfill
+	\begin{minipage}[h]{0.48\linewidth}
+		\center{\includegraphics[width=\linewidth]{img/stronginC3_IA-DL} \\ b)}
+	\end{minipage}
+	\caption{Solving a problem by IA (a) and IA-DL (b) methods}
+	\label{fig:example_strongin}
+\end{figure}
+
+	In Fig. \ref{fig:example_strongin}, the search domain (square) is shown, the feasible domain is highlighted by green, and the trial points generated by IA (a) and IA-DL (b) are marked. The best point is marked by red. For both methods, the evolvent with the parameter $m=10$ was used, the accuracy of the search for the solution $\epsilon=0.002$; the adaptive reserve parameter $\delta=0.008$ from (\ref{epsilon_nu}). For the IA method, the parameters $r_{\nu}=2.3, 1 \leq \nu \leq 4$ were used. The same values were used for the IA-DL method as the parameters $r_{\nu}^{glob}, 1 \leq \nu \leq 4$. Also, the parameters $r_{\nu}^{loc}=1.5, 1 \leq \nu \leq 4$ were used. To solve the problem with a predefined accuracy, 478 trials were required for the IA method compared to only 303 trials for the IA-DL method. The results of larger-scale numerical experiments are presented in Section 4.
+
+	Let us formulate and prove the convergence conditions for the new algorithm IA-DL.\\
+\textbf{Theorem 2}. Let us assume the index algorithm (IA) is applied to solve the problem (\ref{problem}) and for the values $r_{\nu}=r_{\nu}^{glob}, 1 \leq \nu \leq m+1$ the conditions of Theorem 1 are fulfilled. Then, the algorithm with dual estimate of the Lipschitz constants (IA-DL) with the parameters $r_{\nu}^{glob}>r_{\nu}^{loc}>1, 1\leq \nu \leq m+1$ when solving the same problem also generates a sequence of the trial points $\{y^k\}=\{y(x^k)\}$, any limit point $\bar{y}$ of which belongs to the set $Y_{\epsilon}$ from (\ref{Q_intervals}), i.e. satisfies the condition 
 \begin{equation}\label{phi_bar_y}
 	\varphi(\bar y) = \inf\left\{\varphi(y^k):g_j(y^k) \leq 0, 1 \leq j \leq m, k = 1,2,\ldots \right\} \leq \varphi(y_{\epsilon}).
 \end{equation}
+\textbf{Proof}.
 
-\[
+	Because for the IA with the parameters $r_{\nu}=r_{\nu}^{glob}, 1 \leq \nu \leq m+1$ the conditions of Theorem 1 are fulfilled, then any limit point $\bar{y}=y(\bar{x})$ of the trial sequence generated by the IA for the problem (\ref{problem}) satisfies the conditions (\ref{phi_bar_y}).
+
+	Let us show that $\bar y$ is also the limit point of the sequence of trials $\{y^k\}=\{y(x^k)\}$, generated by the IA-Dl, and the sequence $\{y^k\}$ has no new limit points. Let us carry out the proof by contradiction. Assume that $\bar y$ is not a limit point of the sequence $\{y^k\}$ and there exists a limit point $y' \neq \bar y$.
+
+	At every iteration of the IA-DL method there will exist such interval $[x_{j-1}, x_j], j=j(k)$ that $\bar x \in [x_{j-1}, x_j]$. According to our assumption that $\bar x$ is not the limit point, there will exist such index $k$, starting from which the trial points will not fall into the interval $[x_{j-1}, x_j]$. That is, to conduct a new trial at the point $x^{k+1} \in [x_{t-1}, x_t]$ at every iteration such interval $[x_{t-1}, x_t], t=t(k)$ will be selected that $t \neq j$.
+
+	Therefore, in the formula (\ref{R_max}) for computing the characteristic, the second component takes the highest values, i.e. 
+$$
 	R_{glob}(t) < \rho R_{loc}(t)
-\]
+$$
+Then, there will exist a limit point $x' \neq \bar x$, at that either $\nu(x') \leq m$ (i.e. the point $y(x')$ is not a feasible one) or $z_{m+1}^\ast =g_{m+1}(y(x'))>g_{m+1}(y(\bar x))$ (i.e. the value of the objective function at the limit point $y(x')$ is greater than at the point $y(\bar x)$).
 
-\[
+	Let us show that if the conditions of Theorem 1 are satisfied, the inequality $R_{glob}(j)>0$ will hold. According to the second condition of Theorem 1 and to the condition (\ref{K_leq_L}), 
+$$
 	z_j=g_{\nu}\left( y(x_j) \right) \leq g_{\nu}\left( y(\bar x) \right) + 2L_{\nu}\sqrt{N+3}(x_j-\bar x)^{1/N}, \; \nu=\nu(x_j)
-\]
-
-\[
+$$
+$$
 	z_{j-1}=g_{\nu}\left( y(x_{j-1}) \right) \leq g_{\nu}\left( y(\bar x) \right) + 2L_{\nu}\sqrt{N+3}(\bar x - x_{j-1})^{1/N}, \; \nu=\nu(x_{j-1})
-\]
+$$
 
-\[
+	Since the limit point $\bar u = y(\bar x)$ belongs to the set $Y_{\epsilon}$, then
+$$
 	g_{\nu}\left( y(\bar x) \right) \leq -\epsilon_{\nu}, \; 1\leq\nu\leq m.
-\]
-
-\[
+$$
+$$
 	g_{m+1}\left( y(\bar x) \right) \leq z_{m+1}^*
-\]
+$$
 
+	Then, the characteristic $R_{glob}(j)$ of the interval $[x_{j-1}, x_j], j=j(k)$ will be strictly positive, i.e. $R_{glob}(j)>0$. Indeed, at $\nu=\nu(x_j)=\nu(x_{j-1})$ and the value $r_{\nu}=r_{\nu}^{glob}$
 \begin{eqnarray}
 	R(j) &=& \Delta_i + \frac{(z_j-z_{j-1})^2}{r_{\nu}^2\mu_{\nu}^2\Delta_i} - 2\frac{z_j+z_{j-1}-2z_{\nu}^*}{r_{\nu}\mu_{\nu}}  \nonumber \\
 	&\geq& \Delta_i + 4\frac{z_{\nu}^*-\left( g_{\nu}\left( y(\bar x) \right)+L_{\nu}\sqrt{N+3}\left( (x_j-\bar x)^{\frac{1}{N}}+(\bar x - x_{j-1})^{\frac{1}{N}} \right)\right)}{r_{\nu}\mu_{\nu}} \nonumber \\
@@ -401,7 +475,7 @@ where $\mu_{\nu}$ are the current estimates of the H\"{o}lder constant from (\re
 	&=& \Delta_i\left(1-4\frac{2^{3-1/N}L_{\nu}\sqrt{N+3}}{r_{\nu}\mu_{\nu}} \right)+4\frac{z_{\nu}^*-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} \geq 0
 	\nonumber
 \end{eqnarray}
-
+At $\nu=\nu(x_j ) > \nu(x_{j-1})$ and the value $r_{\nu}=r_{\nu}^{glob}$
 \begin{eqnarray}
 	R(j) &=& 2\Delta_i - 4\frac{z_j-z_{\nu}^*}{r_{\nu}\mu_{\nu}} \geq 2\Delta_i+4\frac{z_{\nu}^*-\left( g_{\nu}\left(y(\bar x)\right)+2L_{\nu}\sqrt{N+3}(x_j-\bar x)^{\frac{1}{N}} \right)}{r_{\nu}\mu_{\nu}} \nonumber \\
 	&=& 2\Delta_i - 8\frac{L_{\nu}\sqrt{N+3}(x_j-\bar x)^{\frac{1}{N}}}{r_{\nu}\mu_{\nu}}+4\frac{z_{\nu}^*-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} \nonumber \\
@@ -409,15 +483,23 @@ where $\mu_{\nu}$ are the current estimates of the H\"{o}lder constant from (\re
 	\nonumber
 \end{eqnarray}
 
+	The case of $\nu=\nu(x_{j-1})>\nu(x_j)$ is treated similarly and leads to the same inequality $R(j)>0$.
+
+	Since we have assumed that $x'$ is a limit point for the IM-DL and  $x' \neq \bar x$, then there exists such a sequence of the intervals $[x_{t-1}, x_t], t=t(k)$ that $x' \in [x_{t-1}, x_t], R_{loc}(t)>0$, and $R_{loc}(t) \rightarrow 0$. This property of the characteristics of the intervals shrinking to the limit point has been established when proving the theorem on the convergence of the IA in \cite{Sergeyev2013}.
+
+	Therefore, for large enough, the following inequality will be true
 \begin{equation}
 	R_{glob}(j) > \rho R_{loc}(t)
 \end{equation}
+and (according to Rules 5 and 6 of the IA-DL method) the next iteration falls into the interval $[x_{j-1}, x_j]$, which contradicts our assumption regarding the non-limit nature of the point $\bar x$. The theorem is proven.
+
+
+
+\section{Numerical experiments}
+
+
 
 \section{TEST}
-
-There are various bibliography styles available. You can select the style of your choice in the preamble of this document. These styles are Elsevier styles based on standard styles like Harvard and Vancouver. Please use Bib\TeX\ to generate your bibliography and include DOIs whenever available.
-
-Here are two sample references: 
 
 \cite{Evtushenko1971, Piyavskii1972, Shubert1972, Strongin1970, Evtushenko2009, Evtushenko2013, Strongin2000, Sergeyev2013, Pinter1996, Jones2009, Wood1991, Meewella1988, Mladineo1986, Vaz2009, Stripinis2019, Paulavicius2016, Pillo2012, Pillo2016, Barkalov2017_1, Barkalov2017_2, Sergeyev2006, Zilinskas2008, Sovrasov2019, Kvasov2003, Sergeyev2010,Sergeyev2016, Horst1996, Gablonsky2001, Jones1993, Gaviano2003, Barkalov2018, Paulavicius2014, Sergeyev2015, Strongin2018, Gergel2017_2, Gergel2019}.
 
