@@ -263,7 +263,7 @@ FUNCTION {bbl.in}
 { "in" }
 
 FUNCTION {bbl.pages}
-{ "pp." }
+{ "P." }
 
 FUNCTION {bbl.page}
 { "p." }
@@ -492,10 +492,11 @@ FUNCTION {format.editors}
   if$
 }
 FUNCTION {format.doi}
-{ doi "doi" bibinfo.check
+{ DOI "DOI" bibinfo.check
   duplicate$ empty$ 'skip$
     {
       new.block
+      capitalize
       "\doi{" swap$ * "}" *
     }
   if$
@@ -759,7 +760,6 @@ FUNCTION {format.vol.num.pages}
       "volume" bibinfo.check
     }
   if$
-  bolden
   number "number" bibinfo.check duplicate$ empty$ 'skip$
     {
       swap$ duplicate$ empty$
@@ -814,7 +814,7 @@ FUNCTION {format.in.ed.booktitle}
           * swap$
           * }
       if$
-      word.in swap$ *
+      " " swap$ *
     }
   if$
 }

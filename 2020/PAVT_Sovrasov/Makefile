@@ -15,7 +15,7 @@ texsecond: refs
 	pdflatex -output-directory=build $(paper_source_name).tex
 
 clean:
-	if [ -d "$build" ]; then rm -Rf build; fi
+	if [ -d "$ build" ]; then rm -Rf build; fi
 
 release: clean all
 	cp ./build/$(paper_source_name).pdf ./
