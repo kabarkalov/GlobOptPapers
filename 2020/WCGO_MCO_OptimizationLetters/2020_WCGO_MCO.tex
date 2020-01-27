@@ -22,6 +22,7 @@
 \usepackage{graphicx}
 \usepackage{amssymb}
 \usepackage{amsmath}
+\usepackage{hyperref}
 %\usepackage{academicons}
 %\RequirePackage[colorlinks,citecolor=blue,urlcolor=blue]{hyperref}
 %
@@ -39,7 +40,7 @@
 %
 \begin{document}
 
-\title{A Computationally Efficient Approach for Solving Lexicographic Multicriteria Optimization Problems\thanks{This research was supported by the Russian Science Foundation, project No 16-11-10150 ``Novel efficient methods and software tools for time-consuming decision making problems using supercomputers of superior performance.''}
+\title{A Computationally Efficient Approach for Solving Lexicographic Multicriteria Optimization Problems\thanks{This research was supported by the Russian Science Foundation, project No 16-11-10150 ``Novel efficient methods and software tools for time-consuming decision making problems using supercomputers of superior performance''.}
 }
 
 \titlerunning{Efficient Approach for Solving Multicriteria Optimization Problems}        % if too long for running head
@@ -67,7 +68,7 @@ Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia \\
 \and
 K. Barkalov \at
 Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia \\
-\email{barkalov@vmk.unn.ru}
+\email{konstantin.barkalov@itmm.unn.ru}
 }
 
 \date{Received: date / Accepted: date}
@@ -77,7 +78,7 @@ Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia \\
 
 \begin{abstract}
 This paper proposes a computationally efficient approach for solving complex lexicographic multicriteria optimization problems in which efficiency criteria can be multiextremal and computing the values of criteria can be time-consuming. It is also assumed that in the course of calculations, how problems are formulated may change and consequently, solving dynamically defined sets of multicriteria optimization problems may become necessary. The proposed approach is based on reducing multidimensional problems to one-dimensional global optimization problems, utilizing efficient global search algorithms, and reusing the search information obtained in the process of calculations. Results of computational experiments demonstrate that the proposed approach can significantly reduce the computational complexity of solving multicriteria optimization problems.
-\keywords{Multicriteria optimization \and Lexicographic ordering \and Global optimization \and Dimensional reduction \and Search information \and Computational complexity}
+\keywords{Multicriteria optimization \and Lexicographic ordering \and Global optimization \and Dimensionality reduction \and Search information \and Computational complexity}
 \end{abstract}
 
 \section{Introduction}
@@ -102,17 +103,17 @@ The further structure of the paper is as follows. Section \ref{sec:2} presents a
 
 The multicriteria (or vector) optimization (MCO) problem can be defined as follows:
 \begin{equation}\label{eq:1}
-f(y) = (f_1(y), f_2(y), \dots , f_s(y)) \to min,  y \in D,
+f(y) = (f_1(y), f_2(y), \dots , f_s(y)) \to min, \; y \in D,
 \end{equation}
 where $f(y) = (f_1(y), f_2(y), \dots , f_s(y))$ is the vector efficiency criterion, $y = (y_1, y_2, \dots , y_N)$ is the vector of variable parameters, and $N$ is the dimension of the multicriteria optimization problem to be solved. The search domain $D$ defines the set of possible parameter values and is usually an $N$-dimensional hypercube
 \begin{equation}\label{eq:2}
-D  = \{ y\in R^N: a_i \leq y_i \leq b_i, 1 \leq i \leq N \}
+D  = \{ y\in R^N: a_i \leq y_i \leq b_i, \; 1 \leq i \leq N \}
 \end{equation}
 for the given boundary vectors $a$ and $b$.
 
 Without a loss of generality, it is assumed that the values of the efficiency criteria are not negative and their decrease corresponds to an increase in the effectiveness of the considered decisions $y \in D$. Problem (\ref{eq:1}) is considered in relation to the most difficult decision-making problems in which the efficiency criteria $f_i(y)$, $1 \leq i \leq s$, can be significantly multiextremal, and the procedures for calculating the values of efficiency criteria at points of the search domain $y \in D$ can be computationally expensive. It is also assumed that the criteria $f_i(y)$, $1 \leq i \leq s$, satisfy the Lipschitz condition
 \begin{equation}\label{eq:2l}
-|f_i (y')-f_i (y'')| \leq L_i \|y'-y''\|, y',y''\in D, 1 \leq i \leq s
+|f_i (y')-f_i (y'')| \leq L_i \|y'-y''\|, \; y',y''\in D,\; 1 \leq i \leq s,
 \end{equation}
 where $L_i$ is the Lipschitz constants for the function $f_i(y)$, $1 \leq i \leq s$, and $\|*\|$ denotes the Euclidean norm in $R^N$. Fulfillment of the Lipschitz condition means that for small variations of the decision $y \in D$, corresponding changes in the values of the criteria $f_i(y)$, $1 \leq i \leq s$, are limited.
 
@@ -154,7 +155,7 @@ P_{lex}^\delta(f,\delta,D) = Arg \min_{y \in D}{f_s(y)},f_j(y) \leq f^*_j + \del
 \end{matrix}
 \end{equation}
 
-This approach is also widely known as the method of successive concessions (MSC) \cite{c3,c4,c5}. The choice of feasible concessions $\delta_i$, $1 \leq i < s$ in the computational scheme (\ref{eq:7}) allows one to obtain any efficient decision $\widetilde{y}^* \in P_{lex}(f,D)$ and take into account the peculiarities of the MCOlex problem being solved. At the same time, this approach makes it necessary, at each stage of scheme (\ref{eq:7}), to solve more complex global optimization problems with nonlinear constraints.
+This approach is also widely known as the method of successive concessions (MSC) \cite{c3,c4,c5}. The choice of feasible concessions $\delta_i$, $1 \leq i < s$, in the computational scheme (\ref{eq:7}) allows one to obtain any efficient decision $\widetilde{y}^* \in P_{lex}(f,D)$ and take into account the peculiarities of the MCOlex problem being solved. At the same time, this approach makes it necessary, at each stage of scheme (\ref{eq:7}), to solve more complex global optimization problems with nonlinear constraints.
 
 It should also be noted that during the calculation process, it may be necessary to change the selected values of the feasible concessions $\delta_i$, $1 \leq i < s$; the concessions may be quite rigid or, conversely, excessively large. In general, one may need to change the order of importance in efficiency criteria. Such assumptions necessitate a more general formulation of how to solve the MCOlex problem and to provide possible solutions to many problems of the form (\ref{eq:7})
 \begin{equation}\label{eq:8}
@@ -165,7 +166,7 @@ which can be changed dynamically during calculations by adding new or deleting e
 \section{The Approach: Key Ideas and Methods}
 \label{sec:3}
 
-The extended formulation of lexicographic multicriteria optimization problems (\ref{eq:7})-(\ref{eq:8}) involves multiple solutions of multiextremal optimization problems with nonlinear constraints. Problems of this type are computationally time-consuming and subject to the ``curse of dimensionality'' -- computational complexity increases exponentially with increasing dimensionality. The proposed approach for solving such problems is based on three key ideas:
+The extended formulation of lexicographic multicriteria optimization problems (\ref{eq:7})--(\ref{eq:8}) involves multiple solutions of multiextremal optimization problems with nonlinear constraints. Problems of this type are computationally time-consuming and subject to the ``curse of dimensionality'' -- computational complexity increases exponentially with increasing dimensionality. The proposed approach for solving such problems is based on three key ideas:
 \begin{itemize}
   \item Reduction of multidimensional problems of multiextremal optimization to problems of one-dimensional global search by using mappings based on Peano curves;
   \item Using the index method of global optimization, which allows solving optimization problems with constraints without using penalty functions;
@@ -180,20 +181,20 @@ y^{k+1}=G_k(\omega_k), \omega_k=\{(y^i,f^i=f(y^i)): 1 \leq i \leq k \},
 \end{equation}
 where $k$ is the number of the global search iterations being performed, $G_k$ is the decisive rule of the applied global search algorithm, according to which the point $y^{k+1}$ of the next iteration is selected, and $\omega_k$ is the search information available at the $k$ step of the global search.
 
-Adaptive selection of points $y^{k+1} \in D$ at the iterations of the global search involves the analysis of volumetric multidimensional search information $\omega_k (k \gg 1)$, which determines the high computational complexity of the decisive rules $G_k$,$k=1,2,\dots$ of global search algorithms. This computational complexity can be significantly simplified by reducing the optimization problems to be solved using Peano \textit{space-filling curves} or \textit{evolvents} $y(x)$, that uniquely and continuously map the interval $[0,1]$ to an $N$-dimensional hypercube D (see, e.g., \cite{c17,c18,c23}). As a result of this reduction, the initial multidimensional multicriteria optimization problem (\ref{eq:5}) is reduced to a one-dimensional problem:
+Adaptive selection of points $y^{k+1} \in D$ at the iterations of the global search involves the analysis of volumetric multidimensional search information $\omega_k$ $(k \gg 1)$, which determines the high computational complexity of the decisive rules $G_k$, $k=1,2,\dots$ of global search algorithms. This computational complexity can be significantly simplified by reducing the optimization problems to be solved using Peano \textit{space-filling curves} or \textit{evolvents} $y(x)$, that uniquely and continuously map the interval $[0,1]$ to an $N$-dimensional hypercube $D$ (see, e.g., \cite{c17,c18,c23}). As a result of this reduction, the initial multidimensional multicriteria optimization problem (\ref{eq:5}) is reduced to a one-dimensional problem:
 \begin{equation}\label{eq:10}
-f(y(x)) = (f_1(y(x)), f_2(y(x)), \dots , f_s(y)(x)) \to min_{leq},  x \in [0,1].
+f(y(x)) = (f_1(y(x)), f_2(y(x)), \dots , f_s(y(x)) \to min_{leq},  x \in [0,1].
 \end{equation}
 
 It should be noted that the one-dimensional functions obtained as a result of the reduction satisfy the uniform H\"older condition (see \cite{c17,c18}), that is
 \begin{equation}\label{eq:11}
-|f_i (y(x'))-f_i (y(x';))| \leq H_i \|x'-x''\|, x',x''\in [0,1], 1 \leq i \leq s,
+|f_i (y(x'))-f_i (y(x''))| \leq H_i \|x'-x''\|, \; x',x''\in [0,1],\; 1 \leq i \leq s,
 \end{equation}
 where the constants $H_i$ are determined by the ratio $H_i=2L_i\sqrt{N+3}$, $1 \leq i \leq m$, $L_i$ are the Lipschitz constants from (\ref{eq:2l}), and $N$ is the dimension of the optimization problem (\ref{eq:1}).
 
 Using dimension reduction the search information $\omega_k$ can be converted from (\ref{eq:9}) to the form
 \begin{equation}\label{eq:12}
-A_k=\{(x_i, y(x_i), f_i=f(y(x_i)): 1 \leq i \leq k \},
+A_k=\{(x_i, y(x_i), f_i=f(y(x_i))): 1 \leq i \leq k \},
 \end{equation}
 in which, in addition to the reduced representation, the data is arranged in ascending order\footnote{Data ordering is reflected by using a subscript.} of points $x_i$, $1 \leq i \leq k$, that is
 \begin{equation}
@@ -208,11 +209,11 @@ nonlinear constraints}
 
 The problems solved in the framework of the computational scheme (\ref{eq:7}) are one-dimensional global optimization problems with nonlinear constraints
 \begin{equation}\label{eq:13}
-\min{\{\varphi(x):g_i(x)\leq 0, 1 \leq i \leq m, x\in \Delta=[0,1]\}}
+\min{\{\varphi(x):g_i(x)\leq 0, \; 1 \leq i \leq m,\; x\in \Delta=[0,1]\}}
 \end{equation}
 (the notation $g_{m+1}(x) = \varphi(x)$ will also be used later).
 
-The presence of nonlinear constraints significantly complicates the complexity of solving global optimization problems; the resulting solutions must belont to a feasible domain
+The presence of nonlinear constraints significantly complicates the complexity of solving global optimization problems; the resulting solutions must belong to a feasible domain
 \begin{equation}\label{eq:14}
 \Delta_g  = \{ x\in \Delta=[0,1]:g_i(x)\leq 0,   1 \leq i \leq m \}.
 \end{equation}
@@ -248,7 +249,7 @@ The function $F(x)$ consists of separate fragments of the constraints $g_i(x) \l
 \end{equation}
 where $M$ is the constraint number for which there are no feasible points (the maximum value of the index is $\nu(x)$), $z^*_M$ is the value of the minimum constraint violation $g_M(x)$\footnote{If $M=m+1$, then $z_M^*$ is the minimum value of the function $\varphi(x)$.}, and $H_\nu$, $1\leq \nu \leq M$, are the H\"older constants from (\ref{eq:11}). As a rule, these values are a priori unknown, but when performing calculations, instead of these values, their adaptive estimates obtained in the process of calculations can be applied. For this, the search information $A_k$ from (\ref{eq:12}) should be expanded with data
 \begin{equation}\label{eq:18}
-A_k=\{(x_i, z_i, \nu_i, y(x_i), f_i=f( y(x_i)): 1 \leq i \leq k \},
+A_k=\{(x_i, z_i, \nu_i, y(x_i), f_i=f( y(x_i))): 1 \leq i \leq k \},
 \end{equation}
 where $z_i= \Phi(x_i)$, $1 \leq i \leq k$. Then estimates of the required values can be determined as follows
 \begin{equation}\label{eq:19}
@@ -271,7 +272,7 @@ If $h_l^k$ in (\ref{eq:21}) turns out to be indefinite or equal to zero, then $h
 
 The general computational scheme of the global search algorithm for multiextremal optimization problems with nonlinear constraints \footnote{This method is also known as the index method -- see \cite{c18}.} (AGCS) is as follows \cite{c18}.
 
-The first trial is carried out at an arbitrary internal point $x^1\in (0,1)$. The calculation results are constantly added to the set $A_k$ from (\ref{eq:12}); in addition, into $A_k$ are also added the points $x_0=0$ and $x_{k+1}=1$ (the values $z_0$ and $z_{k+1}$ are not defined and not used) for the convenience of subsequent formulations. The choice of the point $x^{k+1}$, $k\geq 1$ of any next trial is determined by the following rules.
+The first trial is carried out at an arbitrary internal point $x^1\in (0,1)$. The calculation results are constantly added to the set $A_k$ from (\ref{eq:12}); in addition, into $A_k$ are also added the points $x_0=0$ and $x_{k+1}=1$ (the values $z_0$ and $z_{k+1}$ are not defined and not used) for the convenience of subsequent formulations. The choice of the point $x^{k+1}$, $k\geq 1$, of any next trial is determined by the following rules.
 
 \textit{Rule 1.} For each interval $(x_{i-1},x_i)$, $1 \leq i \leq k+1$, in the set $A_k$ calculate the characteristic $R(i)$, where
 \begin{equation}\label{eq:22}
@@ -308,7 +309,7 @@ Iterations of the algorithm are terminated if the stop condition is satisfied
 \end{equation}
 where $t$ from (\ref{eq:23}) and $\varepsilon > 0$ is the given accuracy.
 
-Results of using the AGCS algorithm to solve the test problem from Fig. \ref{fig:1} with the parameters $r_1=r_2=r_3=2$ and $\varepsilon=10^5$are shown in Fig. \ref{fig:2}.  The coordinates of the trial points performed by the algorithm in the process of solving the problem are marked in Fig. \ref{fig:1} by three rows of vertical strokes. The strokes in the upper row correspond to points with a unit index, the second row to points whose indices equal to 2; the points marked with strokes in the bottom row belong to the feasible domain. The coordinates of trials performed at close points are marked with a dark rectangle. In total, the value of the first constraint was computed 147 times, the value of the second constraint -- 84 times, and the value of the minimized function was calculated only 35 times.
+Results of using the AGCS algorithm to solve the test problem from Fig.~\ref{fig:1} with the parameters $r_1=r_2=r_3=2$ and $\varepsilon=10^{-5}$ are shown in Fig. \ref{fig:2}.  The coordinates of the trial points performed by the algorithm in the process of solving the problem are marked in Fig. \ref{fig:1} by three rows of vertical strokes. The strokes in the upper row correspond to points with a unit index, the second row to points whose indices equal to 2; the points marked with strokes in the bottom row belong to the feasible domain. The coordinates of trials performed at close points are marked with a dark rectangle. In total, the value of the first constraint was computed 147 times, the value of the second constraint -- 84 times, and the value of the minimized function was calculated only 35 times.
 
 \begin{figure}
   \centering
@@ -342,12 +343,12 @@ P_{\delta lex} (f,\delta,D)=Arg \min_{y\in D}{f_s(y)}, f_j(y)\leq f_j^*+\delta_j
 where for the unknown a priori values $f_j^*$, $1 \leq j < s$, can be used the estimates $z_j^k$, $1 \leq j < s$, from (\ref{eq:20}) obtained from the search information $A_k$,  and for the constants $\delta_j$, $1 \leq j<s$, we can use the values normalized to the range of constraints values, that is
 \begin{equation}\label{eq:27}
 	\begin{matrix}
-	\delta_j=z_j^k+\theta_j (g_j^k-z_j^k ), 0\leq \theta_j\leq 1,1\leq j < s,\\
-	g_j^k= \max{\{ g_j (x_i ) : \nu(x_i)=j,1\leq i\leq k \}}.
+	\delta_j=z_j^k+\theta_j (g_j^k-z_j^k ),\; 0\leq \theta_j\leq 1, \; 1 \leq j < s,\\
+	g_j^k= \max{\{ g_j (x_i ) : \nu(x_i)=j,\; 1\leq i\leq k \}}.
 	\end{matrix}
 \end{equation}
 
-The applicability of such a one-step scheme (\ref{eq:26})-(\ref{eq:27}) instead of the scheme (\ref{eq:7}) is computationally evaluated in Section \ref{sec:4}.
+The applicability of such a one-step scheme (\ref{eq:26})--(\ref{eq:27}) instead of the scheme (\ref{eq:7}) is computationally evaluated in Section \ref{sec:4}.
 
 With a complete scheme for calculating criteria values, i.e. when at the iteration points $x_i$, $1 \leq i \leq k$,  the values of all criteria $f_j (x_i)$, $1 \leq j \leq s$, $1 \leq i \leq k$, are calculated, the effect of using the search information $A_k$ can be even more significant. In this case, the search information can also be used when changing the values of the concessions $\delta_j$, $1 \leq j < s$, and thus, the solution of the next problem from the $\mathbb{P}_t$ family (\ref{eq:8}) can be carried out repeatedly using the results of all previously performed calculations. Results of computational experiments (see Section \ref{sec:4}), demonstrate that the volume of computations performed, based on reusing search information, is reduced by a factor of no less than 6.
 
