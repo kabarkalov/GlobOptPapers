@@ -40,7 +40,8 @@
 %
 \begin{document}
 
-\title{A Computationally Efficient Approach for Solving Lexicographic Multicriteria Optimization Problems\thanks{This research was supported by the Russian Science Foundation, project No 16-11-10150 ``Novel efficient methods and software tools for time-consuming decision making problems using supercomputers of superior performance''.}
+\title{A Computationally Efficient Approach for Solving Lexicographic Multicriteria Optimization Problems\thanks{This research was supported by the Russian Science Foundation, project No 16-11-10150. %``Novel efficient methods and software tools for time-consuming decision making problems using supercomputers of superior performance''.
+}
 }
 
 \titlerunning{Efficient Approach for Solving Multicriteria Optimization Problems}        % if too long for running head
@@ -142,7 +143,7 @@ f(y) = (f_1(y), f_2(y), \dots , f_s(y)) \to min_{lex},  y \in D,
 \end{equation}
 the solution of which is carried out in stages: initially, the first (most important) criterion is optimized; next, if the solution is not the only one, then the second criterion is optimized on the set of solutions of the first stage, and so on.
 \begin{equation}\label{eq:6}
-D_1=Arg \min_{y \in D}{f_1(y)},\dots, D_i=Arg \min_{y \in D_{i-1}}{f_i(y)},1 \leq i \leq s,D_0=D,
+D_0=D,\; D_1=Arg \min_{y \in D_0}{f_1(y)},\dots, D_i=Arg \min_{y \in D_{i-1}}{f_i(y)},1 \leq i \leq s,
 \end{equation}
 where \textit{Arg} means the set of all decisions that achieve the minimum value of the optimized criterion. It should be noted that the sequence of steps in (\ref{eq:6}) may not be fully completed if at some stage $l$, $1 \leq l \leq s$, the set $D_l$ degenerates and contains only a single decision $y \in D$.
 
@@ -166,11 +167,11 @@ which can be changed dynamically during calculations by adding new or deleting e
 \section{The Approach: Key Ideas and Methods}
 \label{sec:3}
 
-The extended formulation of lexicographic multicriteria optimization problems (\ref{eq:7})--(\ref{eq:8}) involves multiple solutions of multiextremal optimization problems with nonlinear constraints. Problems of this type are computationally time-consuming and subject to the ``curse of dimensionality'' -- computational complexity increases exponentially with increasing dimensionality. The proposed approach for solving such problems is based on three key ideas:
+The extended formulation of lexicographic multicriteria optimization problems (\ref{eq:7})--(\ref{eq:8}) involves multiple solutions of multiextremal optimization problems with nonlinear constraints. Problems of this type are computationally time-consuming and subject to the ``curse of dimensionality'': computational complexity increases exponentially with increasing dimensionality. The proposed approach for solving such problems is based on three key ideas:
 \begin{itemize}
-  \item Reduction of multidimensional problems of multiextremal optimization to problems of one-dimensional global search by using mappings based on Peano curves;
-  \item Using the index method of global optimization, which allows solving optimization problems with constraints without using penalty functions;
-  \item Repeated use of search information obtained in the process of computing, for solving multiple global optimization problems.
+  \item reduction of multidimensional problems of multiextremal optimization to problems of one-dimensional global search by using mappings based on Peano curves;
+  \item using the index method of global optimization, which allows solving optimization problems with constraints without using penalty functions;
+  \item repeated use of search information obtained in the process of computing, for solving multiple global optimization problems.
 \end{itemize}
 
 \subsection{Dimension reduction of multidimensional multicriteria optimization problems}
@@ -179,9 +180,9 @@ The search for numerical estimates of globally optimal points involves the const
 \begin{equation}\label{eq:9}
 y^{k+1}=G_k(\omega_k), \omega_k=\{(y^i,f^i=f(y^i)): 1 \leq i \leq k \},
 \end{equation}
-where $k$ is the number of the global search iterations being performed, $G_k$ is the decisive rule of the applied global search algorithm, according to which the point $y^{k+1}$ of the next iteration is selected, and $\omega_k$ is the search information available at the $k$ step of the global search.
+where $k$ is the number of the global search iterations being performed, $G_k$ is the decision rule of the applied global search algorithm, according to which the point $y^{k+1}$ of the next iteration is selected, and $\omega_k$ is the search information available at the $k$ step of the global search.
 
-Adaptive selection of points $y^{k+1} \in D$ at the iterations of the global search involves the analysis of volumetric multidimensional search information $\omega_k$ $(k \gg 1)$, which determines the high computational complexity of the decisive rules $G_k$, $k=1,2,\dots$ of global search algorithms. This computational complexity can be significantly simplified by reducing the optimization problems to be solved using Peano \textit{space-filling curves} or \textit{evolvents} $y(x)$, that uniquely and continuously map the interval $[0,1]$ to an $N$-dimensional hypercube $D$ (see, e.g., \cite{c17,c18,c23}). As a result of this reduction, the initial multidimensional multicriteria optimization problem (\ref{eq:5}) is reduced to a one-dimensional problem:
+Adaptive selection of points $y^{k+1} \in D$ at the iterations of the global search involves the analysis of volumetric multidimensional search information $\omega_k$, $k \gg 1$, which determines the high computational complexity of the decision rules $G_k$, $k=1,2,\dots$, of global search algorithms. This computational complexity can be significantly simplified by reducing the optimization problems to be solved using Peano \textit{space-filling curves} or \textit{evolvents} $y(x)$, that uniquely and continuously map the interval $[0,1]$ to an $N$-dimensional hypercube $D$ (see, e.g., \cite{c17,c18,c23}). As a result of this reduction, the initial multidimensional multicriteria optimization problem (\ref{eq:5}) is reduced to a one-dimensional problem:
 \begin{equation}\label{eq:10}
 f(y(x)) = (f_1(y(x)), f_2(y(x)), \dots , f_s(y(x)) \to min_{leq},  x \in [0,1].
 \end{equation}
@@ -205,26 +206,26 @@ for a more efficient execution of global search algorithms.
 Dimension reduction using Peano curves is widely used in the development of efficient global search algorithms in the framework of the information-statistical theory of multiextremal optimization \cite{c17,c18,c23,c26,c27}. Numerical methods for constructing approximations of Peano curves (\textit{evolvents}) with a given accuracy are considered in \cite{c17,c18}.
 
 \subsection{An efficient method for solving global optimization problems with 
-nonlinear constraints}
+non-convex constraints}
 
-The problems solved in the framework of the computational scheme (\ref{eq:7}) are one-dimensional global optimization problems with nonlinear constraints
+The problems solved in the framework of the computational scheme (\ref{eq:7}) are one-dimensional global optimization problems with non-convex constraints
 \begin{equation}\label{eq:13}
 \min{\{\varphi(x):g_i(x)\leq 0, \; 1 \leq i \leq m,\; x\in \Delta=[0,1]\}}
 \end{equation}
 (the notation $g_{m+1}(x) = \varphi(x)$ will also be used later).
 
-The presence of nonlinear constraints significantly complicates the complexity of solving global optimization problems; the resulting solutions must belong to a feasible domain
+The presence of non-convex constraints significantly complicates the complexity of solving global optimization problems; the resulting solutions must belong to a feasible domain
 \begin{equation}\label{eq:14}
 \Delta_g  = \{ x\in \Delta=[0,1]:g_i(x)\leq 0,   1 \leq i \leq m \}.
 \end{equation}
 
-To reduce the complexity of solving optimization problems with constraints, simpler cases are often highlighted; for example, problems with linear or quadratic constraints are selected. Various methods of approximating complex constraints with the aid of simpler forms (linear, convex, etc.) are widely used. However, the penalty function method is most commonly used, when calculating in an unfeasible region $\Delta \setminus \Delta_g$, some ``penalty'' is added to the values of the minimized function. But the penalty function method often involves repeatedly solving the optimization problem to determine a sufficient value of the penalty coefficient. More complete information on methods for solving optimization problems with constraints can be obtained, for example, in monographs \cite{c18,c26,c27}.
+To reduce the complexity of solving optimization problems with constraints, simpler cases are often highlighted; for example, problems with linear or quadratic constraints are selected. Various methods of approximating complex constraints with the aid of simpler forms (linear, convex, etc.) are widely used. However, the penalty function method is most commonly used, when calculating in an unfeasible region $\Delta \setminus \Delta_g$, some ``penalty'' is added to the values of the minimized function. But the penalty function method often involves repeatedly solving the optimization problem to determine a sufficient value of the penalty coefficient. More complete information on methods for solving optimization problems with constraints can be obtained, for example, in monographs \cite{c18,c26,c27,c28,c29}.
 
 The proposed approach is based on the original method of separate accounting for constraints developed in the framework of the information-statistical theory of multiextremal optimization \cite{c18}. The key idea of the approach consists in constructing a certain integral objective function without constraints, the solution of which also provides a solution to the initial constrained optimization problem (\ref{eq:13}); a more detailed presentation of this method is given below.
 
-We apply a sequential scheme to obtain the constraint values $g_i(y(x)) \leq 0$, $1 \leq i \leq m$, and the minimized function $\varphi(x)$, according to which the constraint values are calculated strictly in the order of their numbers, and the calculations immediately stop when the first violated constraint is detected (the partial computability scheme). The number of constraints in which the values were calculated will be indicated below as the index $\nu=\nu(x)$, that is
+We apply a sequential scheme to obtain the constraint values $g_i(y(x))$, $1 \leq i \leq m$, and the objective function $\varphi(x)$, according to which the constraint values are calculated strictly in the order of their numbers, and the calculations immediately stop when the first violated constraint is detected (the partial computability scheme). The number of constraints in which the values were calculated will be indicated below as the index $\nu=\nu(x)$, that is
 \begin{equation}\label{eq:15}
-\nu(x) : g_\nu(x)>0, g_j(x)\leq 0, 1 \leq j\leq \nu - 1, 1\leq \nu = \nu(x) \leq m
+\nu(x) : g_\nu(x)>0,\; g_j(x)\leq 0,\; 1 \leq j\leq \nu - 1,\; 1\leq \nu = \nu(x) \leq m
 \end{equation}
  (when all the constraints are satisfied, $\nu=m+1$ is assumed). Introducing the index concept allows us to determine the integrated function for the problem (\ref{eq:13}) (see Fig. \ref{fig:1})
 \begin{equation}\label{eq:16}
@@ -239,7 +240,7 @@ defined and computable everywhere in $[0,1]$. Its value at the point $x\in [0,1]
   \label{fig:1}
 \end{figure}
 
-The function $F(x)$ consists of separate fragments of the constraints $g_i(x) \leq 0$, $1 \leq i \leq m$, and the minimized function $\varphi(x)$. For the homogeneity of the components, the function $F(x)$ is then converted to the form 
+The function $F(x)$ consists of separate fragments of the constraints $g_i(x)$, $1 \leq i \leq m$, and the objective function $\varphi(x)$. For the homogeneity of the components, the function $F(x)$ is then converted to the form 
 \begin{equation}\label{eq:17}
 \Phi (x) = 
  \begin{cases}
@@ -265,12 +266,12 @@ z^k_\nu =
 \end{equation}
 
 \begin{equation}\label{eq:21}
-h^k_l=\max{\{|z_i-z_j|/\sqrt[N]{x_i-x_j},\nu_i=\nu_j=l,i>j,1\leq l\leq M^k\}}
+h^k_l=\max{\{|z_i-z_j|/\sqrt[N]{x_i-x_j},\; \nu_i=\nu_j=l,\; i>j, \;1\leq l\leq M^k\}}.
 \end{equation}
 
-If $h_l^k$ in (\ref{eq:21}) turns out to be indefinite or equal to zero, then $h_l^k=1$ is taken. For the initial values of these quantities, $M^0 = H_l^0=1$, $z_l^0=0$, $1 \leq i \leq m+1$ can be taken.
+If $h_l^k$ in (\ref{eq:21}) turns out to be indefinite or equal to zero, then $h_l^k=1$ is taken. For the initial values of these quantities, $M^0 = H_l^0=1$, $z_l^0=0$, $1 \leq i \leq m+1$, can be taken.
 
-The general computational scheme of the global search algorithm for multiextremal optimization problems with nonlinear constraints \footnote{This method is also known as the index method -- see \cite{c18}.} (AGCS) is as follows \cite{c18}.
+The general computational scheme of the global search algorithm for multiextremal optimization problems with non-convex constraints \footnote{This method is also known as the index method -- see \cite{c18}.} (AGCS) is as follows \cite{c18}.
 
 The first trial is carried out at an arbitrary internal point $x^1\in (0,1)$. The calculation results are constantly added to the set $A_k$ from (\ref{eq:12}); in addition, into $A_k$ are also added the points $x_0=0$ and $x_{k+1}=1$ (the values $z_0$ and $z_{k+1}$ are not defined and not used) for the convenience of subsequent formulations. The choice of the point $x^{k+1}$, $k\geq 1$, of any next trial is determined by the following rules.
 
@@ -334,7 +335,7 @@ then the set of limit points of the sequence $\{x^k\}$, generated by the algorit
 
 \subsection{Acceleration of computations based on the re-use of search information}
 
-As noted earlier, the MCOlex problem at each stage of the successive concessions method (\ref{eq:7}) is a global optimization problem with nonlinear constraints (\ref{eq:13}). Generally, the solution to such problems must start at the beginning, and multiple solutions of such global optimization problems may require extensive calculations. However, the presence of search information $A_k$ from (\ref{eq:18}) allows us to bring the results of previous calculations to the values of any next solved optimization problem in the scheme (\ref{eq:7}) without any time-consuming calculations of the values of the criteria $f_i (y)$, $1 \leq j \leq s$,  of the initial problem (\ref{eq:1}) \cite{c30,c31}. This re-use of search information, to find the next efficient decision, reduces the amount of computations needed to solve each next optimization problem to just a few iterations; see Section \ref{sec:4} for the results of computational experiments.
+As noted earlier, the MCOlex problem at each stage of the successive concessions method (\ref{eq:7}) is a global optimization problem with non-convex constraints (\ref{eq:13}). Generally, the solution to such problems must start at the beginning, and multiple solutions of such global optimization problems may require extensive calculations. However, the presence of search information $A_k$ from (\ref{eq:18}) allows us to bring the results of previous calculations to the values of any next solved optimization problem in the scheme (\ref{eq:7}) without any time-consuming calculations of the values of the criteria $f_i (y)$, $1 \leq j \leq s$,  of the initial problem (\ref{eq:1}) \cite{c30,c31}. This re-use of search information, to find the next efficient decision, reduces the amount of computations needed to solve each next optimization problem to just a few iterations; see Section \ref{sec:4} for the results of computational experiments.
 
 Moreover, using search information $A_k$ allows to reduce the multistage solution of the MCO problem in accordance with the scheme (\ref{eq:7}) to the solution of the only global optimization problem in the last stage of the scheme (\ref{eq:7}), namely 
 \begin{equation}\label{eq:26}
@@ -352,14 +353,14 @@ The applicability of such a one-step scheme (\ref{eq:26})--(\ref{eq:27}) instead
 
 With a complete scheme for calculating criteria values, i.e. when at the iteration points $x_i$, $1 \leq i \leq k$,  the values of all criteria $f_j (x_i)$, $1 \leq j \leq s$, $1 \leq i \leq k$, are calculated, the effect of using the search information $A_k$ can be even more significant. In this case, the search information can also be used when changing the values of the concessions $\delta_j$, $1 \leq j < s$, and thus, the solution of the next problem from the $\mathbb{P}_t$ family (\ref{eq:8}) can be carried out repeatedly using the results of all previously performed calculations. Results of computational experiments (see Section \ref{sec:4}), demonstrate that the volume of computations performed, based on reusing search information, is reduced by a factor of no less than 6.
 
-The AGCS algorithm, supplemented by the ability to use search information to solve multiple MCOlex  problems, will be referred to below as the global search algorithm for multistage solutions of a set of multiextremal optimization problems with nonlinear constraints (MAGCS).
+The AGCS algorithm, supplemented by the ability to use search information to solve multiple MCOlex  problems, will be referred to below as the global search algorithm for multistage solutions of a set of multiextremal optimization problems with non-convex constraints (MAGCS).
 
 \section{Results of computational experiments}
 \label{sec:4}
 
 The computational experiments were carried out on the Lobachevsky supercomputer at Nizhny Novgorod State University (the operating system CentOS 6.4, the management system SLURM). A supercomputer node has 2 Intel Sandy Bridge E5-2660 2.2 GHz, 64 Gb RAM processors. Each CPU is 8-core; that is, there are 16 CPU cores available on the node. The Intel C++ 14.0.2 compiler was used to obtain an executable program code. The numerical experiments were performed using the Globalizer system \cite{c32}.
 
-The global optimization algorithms used within the framework of the proposed approach have proven to be efficient in the process of conducting test computational experiments and have been widely used in solving practical optimization problems (see, e. g., \cite{c33,c34}). The results of computational experiments in solving multicriteria optimization problems are given below.
+The global optimization algorithms used within the framework of the proposed approach have proven to be efficient in the process of conducting test computational experiments and have been widely used in solving practical optimization problems (see, e.g., \cite{c33,c34}). The results of computational experiments in solving multicriteria optimization problems are given below.
 
 In the first series of computational experiments, the developed MAGCS algorithm was compared with several multicriteria optimization algorithms. To make a comparison, we used the test two-criteria problem proposed in \cite{c35}:
 \begin{equation}\label{eq:28}
@@ -448,7 +449,7 @@ Results from the executed experiments show that with increased dimensions of MCO
 
 This paper proposes a new approach for solving computationally expensive lexicographic multicriteria optimization problems (MCOlex), in which the efficiency criteria can be multiextremal, and calculating the criteria values may require a large amount of computation. A key feature of this class of problems is the ability, during the computation process, to alter the ordering of efficiency criteria in terms of importance, which in turn necessitates a multistage solution for MCOlex problems.
 
-Overcoming the enormous computational complexity of addressing the formulated new class of MCOlex problems is ensured by solving a sequence of global optimization problems with nonlinear constraints using efficient information-statistical methods of global optimization by using an original index constraint accounting scheme instead of the commonly used penalty functions. A core element in this approach is the ability to use all the search information obtained in the computation process, utilizing the multistage solution of MCOlex problems. Starting to solve each new stage of the solution, this search information allows us to incorporate the previously calculated values of efficiency criteria into the values of the next scalar problem of multiextremal optimization. The search information retrieved becomes part of the current optimization state and through optimization methods, results in adaptive planning of the iterations to run the global search. 
+Overcoming the enormous computational complexity of addressing the formulated new class of MCOlex problems is ensured by solving a sequence of global optimization problems with non-convex constraints using efficient information-statistical methods of global optimization by using an original index constraint accounting scheme instead of the commonly used penalty functions. A core element in this approach is the ability to use all the search information obtained in the computation process, utilizing the multistage solution of MCOlex problems. Starting to solve each new stage of the solution, this search information allows us to incorporate the previously calculated values of efficiency criteria into the values of the next scalar problem of multiextremal optimization. The search information retrieved becomes part of the current optimization state and through optimization methods, results in adaptive planning of the iterations to run the global search. 
 
 Results of computational experiments demonstrate that this approach can significantly reduce the computational complexity of multistage MCOlex problem solving.
 
