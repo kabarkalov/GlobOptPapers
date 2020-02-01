@@ -7,13 +7,15 @@
 %
 \smartqed  % flush right qed marks, e.g. at end of proof
 %
-\usepackage{graphicx}
-\usepackage{lineno,hyperref,amsmath}
-%
 % \usepackage{mathptmx}      % use Times fonts if available on your TeX system
 %
 % insert here the call for the packages your document requires
 %\usepackage{latexsym}
+\usepackage{graphicx}
+\usepackage{lineno,hyperref,amsmath,array}
+\usepackage{multirow}
+\usepackage[round]{natbib} 
+\usepackage[misc]{ifsym}
 % etc.
 %
 % please place your own definitions here and don't use \def but
@@ -24,30 +26,19 @@
 %
 \begin{document}
 
-\title{Global optimization method with dual Lipschitz constant estimates for problems with non-convex constraints%\thanks{Grants or other notes
-%about the article that should go on the front page should be
-%placed here. General acknowledgments should be placed at the end of the article.}
+\title{Global optimization method with dual Lipschitz constant estimates for problems with non-convex constraints\thanks{This research was supported by the Russian Science Foundation, project No. 16-11-10150.}
 }
-%\subtitle{Do you have a subtitle?\\ If so, write it here}
-
-%\titlerunning{Short form of title}        % if too long for running head
 
 \author{Roman Strongin        \and
         Konstantin Barkalov   \and
 				Semen Bevzuk
 }
 
-%\authorrunning{Short form of author list} % if too long for running head
-
-\institute{F. Author \at
-              first address \\
-              Tel.: +123-45-678910\\
-              Fax: +123-45-678910\\
-              \email{fauthor@example.com}           %  \\
-%             \emph{Present address:} of F. Author  %  if needed
-           \and
-           S. Author \at
-              second address
+\institute{Roman Strongin        \and
+					 Konstantin Barkalov (\Letter) \and
+					 Semen Bevzuk \at
+              Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, 603950, Russia \\
+              \email{konstantin.barkalov@itmm.unn.ru}
 }
 
 \date{Received: date / Accepted: date}
@@ -56,12 +47,9 @@
 \maketitle
 
 \begin{abstract}
-%Insert your abstract here. Include keywords, PACS and mathematical
-%subject classification numbers as needed.
 This paper considers the constrained global optimization problems, in which the functions are of the “black box” type and satisfy the Lipschitz condition. The algorithms for solving the problems of this class require the use of adequate estimates of the a priori unknown Lipschitz constants for the problem functions. A novel approach presented in this paper is based on a simultaneous use of two estimates of the Lipschitz constant: an overestimated and an underestimated one. The upper estimate provides the global convergence whereas the lower one reduces the number of trials necessary to find the global optimizer with the required accuracy. The considered algorithm for solving the constrained problems doesn’t use the ideas of the penalty function method; each constraint of the problem is accounted for separately. The convergence conditions of the proposed algorithm are formulated in the corresponding theorem. The results of the numerical experiments on a series of multiextremal problems with non-convex constraints demonstrating the efficiency of the proposed scheme of dual Lipschitz constant estimates are presented.
 \keywords{Global optimization \and Multiextremal problems \and Non-convex constraints \and Lipschitz constant estimates \and Dimensionality reduction \and Numerical methods}
-% \PACS{PACS code1 \and PACS code2 \and more}
-% \subclass{MSC code1 \and MSC code2 \and more}
+\subclass{MSC code1 \and MSC code2 \and more}
 \end{abstract}
 
 \section{Introduction}
@@ -97,12 +85,12 @@ was used. This approach is based on separate accounting for each constraint of t
 	\cite{NUMTA2019},
 in which the preliminary results have been obtained for the unconstrained problems.
 	
-	The main part of the paper has the following structure. In Section 2, the index method of accounting for the constraints and the dimensionality reduction scheme for the constrained global optimization problems are described. In Section 3, a description of the computational rules of the index global search algorithm is given and its theoretical properties are formulated. In Section 4, the index algorithm with dual Lipschitz constant estimates is formulated and its convergence is proved. Section 5 presents the results of the numerical experiments carried out on several series of the multiextremal problems with non-convex constraints. Section 6 concludes the paper.
+	The main part of the paper has the following structure. In Section \ref{sec:2}, the index method of accounting for the constraints and the dimensionality reduction scheme for the constrained global optimization problems are described. In Section \ref{sec:3}, a description of the computational rules of the index global search algorithm is given and its theoretical properties are formulated. In Section \ref{sec:4}, the index algorithm with dual Lipschitz constant estimates is formulated and its convergence is proved. Section \ref{sec:5} presents the results of the numerical experiments carried out on several series of the multiextremal problems with non-convex constraints. Section \ref{sec:6} concludes the paper.
 
 
 
 \section{Index Method of Accounting for the Constraints and Dimensionality Reduction}
-\label{sec:1}
+\label{sec:2}
 	We consider the global optimization problems of the form
 \begin{equation}\label{problem}
 	\min{\left\{\varphi(y):y \in D, \; g_j(y)\leq 0, \; 1 \leq j \leq m\right\}},
@@ -122,17 +110,17 @@ with a priori unknown constants $L_j, 1\leq j \leq m+1$, and may be multiextrema
 	
 	Along with the exact solution $y^\ast$ of the problem (\ref{problem}), we will consider also the $\varepsilon$-reserved solution $y_{\epsilon}$, for which 
 \begin{align}\label{epsilon_reserved_solution}
-	\varphi(y_{\epsilon}) &= \nonumber \\
-	&\min{\left\{\varphi(y):y \in D, g_j(y)\leq -{\epsilon}_j, 1 \leq j \leq m\right\}},
+	\varphi(y_{\epsilon}) & = \nonumber \\
+	& \min{\left\{\varphi(y):y \in D, g_j(y)\leq -{\epsilon}_j, 1 \leq j \leq m\right\}},
 \end{align}
 and the set of solutions $Y_{\epsilon}$, which are not worse than the $\varepsilon$-reserved solution in the objective function value, i.e.
 \begin{align}\label{Y_epsilon}
-	Y_{\epsilon} &= \nonumber \\
-	&\left\{ y \in D, \; g_j(y) \leq 0, \; 1 \leq j \leq m, \; \varphi(y) \leq \varphi(y_{\epsilon}) \right\}.
+	Y_{\epsilon} & = \nonumber \\
+	& \left\{ y \in D, \; g_j(y) \leq 0, \; 1 \leq j \leq m, \; \varphi(y) \leq \varphi(y_{\epsilon}) \right\}.
 \end{align}
 Fig. \ref{fig:eps_reserved_solution} illustrates the concepts introduced.
 
-\begin{figure}%[h]
+\begin{figure}
 	\center{\includegraphics[width=0.6\linewidth]{epsilon_reserved_solution}}
 	\caption{$\varepsilon$-reserved solution.}
 	\label{fig:eps_reserved_solution}
@@ -149,10 +137,10 @@ This situation is typical for the optimal design problems when some conditions f
 
 	Many well known approaches to solving the multidimensional global optimization problems are based on either explicit or implicit reduction of multidimensional problems to one-dimensional ones (see, for example, the description of methods using the diagonal partitions \cite{Sergeyev2006} or simplicial partitions \cite{Zilinskas2008}). In this paper, we will use the approach based on the dimensionality reduction with the use of the space-filling curve $y(x)$ (the Peano curve). Continuous unambiguous mapping $y(x)$ projecting the interval [0,1] onto an $N$-dimensional hypercube $D$ allows reducing a multidimensional constrained minimization problem in the domain $D$ to a one-dimensional constrained optimization problem in the interval [0,1]
 \begin{align}\label{one_dimensional_problem}
-	\varphi(y(x^\ast)) =  
-	\min \left\{\varphi(y(x)): x \in [0,1], \; g_j(y(x))\leq 0, \; 1 \leq j \leq m\right\}.
+	& \varphi(y(x^\ast)) =  \nonumber \\
+	& \min \left\{\varphi(y(x)): x \in [0,1], \; g_j(y(x))\leq 0, \; 1 \leq j \leq m\right\}.
 \end{align}
-The issues of the numerical construction of the Peano space filling curve-type mappings and the corresponding theory were described in detail in \cite{Strongin2000,Sergeyev2013}. Note that the theoretical Peano curve $y(x)$ is a limit object and in practice is replaced by its approximation (called \textit{evolvent}) with predefined precision $2^{-m}$, where the number $m>1$ is a parameter (the \textit{density} of the evolvent). The evolvent density is determined by the accuracy of the possible practical implementation of the problem solution found. For  illustration, Fig. \ref{fig:evolvent} (a), (b) shows the projections of the interval $[0,1]$ for the mapping $y(x)$ with $N=2$ and $m=4,5$, correspondingly.
+The issues of the numerical construction of the Peano space filling curve-type mappings and the corresponding theory were described in detail in \cite{Strongin2000,Sergeyev2013}. Note that the theoretical Peano curve $y(x)$ is a limit object and in practice is replaced by its approximation (called \textit{evolvent}) with predefined precision $2^{-m}$, where the number $m>1$ is a parameter (the \textit{density} of the evolvent). The evolvent density is determined by the accuracy of the possible practical implementation of the problem solution found. For  illustration, Fig. \ref{fig:evolvent} (a), (b) shows the projections of the interval [0,1] for the mapping $y(x)$ with $N=2$ and $m=4,5$, correspondingly.
 \begin{figure}
 	\begin{minipage}[h]{0.45\linewidth}
 		\center{\includegraphics[width=1.0\linewidth]{evolvent_N=2_m=4} \\ {\footnotesize(a)}}
@@ -226,7 +214,7 @@ and, consequently, the set of the points, in which the function $\psi(x)$ turns 
 
 
 \section{Index-Based Global Search Algorithm}
-\label{sec:2}
+\label{sec:3}
 	The index-based global search algorithm under consideration for solving the problem (\ref{problem}) (here it is given according to \cite{Strongin2000}) involves the construction of a sequence of points $x^k \in (0,1)$, at which the search trials are conducted with the results of the type (\ref{trial_result}). The set of triplets 
 $\{x^k,\; z^k=g_{\nu}\big(y(x^k)\big),\; \nu=\nu(x^k)\},\; 1 \leq k \leq n,$
 makes up the search information accumulated by the method after performing $n$ steps. The operation of the index-based global search algorithm is defined by the following rules.
@@ -291,24 +279,26 @@ The inequality $\Delta_t \leq \epsilon$ can be taken as the termination conditio
 
 	The convergence conditions for the index global search algorithm can be formulated in the form of the following theorem from \cite{Strongin2000}. 
 \\
-\textbf{Theorem 1}. Assume that the following conditions are satisfied:
-\begin{enumerate} 
-  \item Problem (\ref{problem}) has an $\varepsilon$-reserved solution $y_{\varepsilon}$ from (\ref{epsilon_reserved_solution}).
-  \item Functions $g_j(y), 1 \leq j \leq m+1,$ admit Lipschitzian (with the constants $L_j$) extensions $G_{j}(y)$ over the whole feasible domain $D$ from (\ref{D}), i.e.
-$$
-	g_j \left( y(x) \right) = G_j \left( y(x) \right), \; x \in Q_j, \; 1 \leq j \leq m+1,
-$$
-where the sets $Q_j$ are from (\ref{Q_intervals}), and $y(x)$ is the curve from (\ref{one_dimensional_problem}).
-	\item The parameters of the method $\epsilon_{\nu}, 1 \leq \nu \leq m,$ used in the rule (\ref{z_estimates}) are the corresponding components of the reserve vector $\epsilon_{R}$ from (\ref{epsilon_reserved_solution}).
-	\item For a sufficiently large iteration number $k$, the values $\mu_{\nu}$ from (\ref{current_lower_bounds}) satisfy the inequalities
-		\begin{equation}\label{theorem_inequalities}
-			r_{\nu}\mu_{\nu} > 2^{3-\frac{1}{N}}L_{\nu}\sqrt{N+3}, \; 1 \leq \nu \leq m+1. 
-		\end{equation}
-Then, any limit point $\bar{y}$ of the sequence of the trials $\{y^k\}=\big\{y\big(x^k\big)\big\}$ generated by the index algorithm for problem (\ref{problem}) belongs to the set $Y_{\epsilon}$ form (\ref{Y_epsilon}) and satisfies the conditions	
-\end{enumerate}
-\begin{eqnarray*}
-	\varphi(\bar y) =	\inf\left\{\varphi(y^k):g_j(y^k) \leq 0, 1 \leq j \leq m, k = 1,2,\ldots \right\} \\ \leq \varphi(y_{\epsilon}).
-\end{eqnarray*}
+\begin{theorem}\label{theorem:1} Assume that the following conditions are satisfied:
+	\begin{enumerate} 
+		\item Problem (\ref{problem}) has an $\varepsilon$-reserved solution $y_{\varepsilon}$ from (\ref{epsilon_reserved_solution}).
+		\item Functions $g_j(y), 1 \leq j \leq m+1,$ admit Lipschitzian (with the constants $L_j$) extensions $G_{j}(y)$ over the whole feasible domain $D$ from (\ref{D}), i.e.
+	$$
+		g_j \left( y(x) \right) = G_j \left( y(x) \right), \; x \in Q_j, \; 1 \leq j \leq m+1,
+	$$
+	where the sets $Q_j$ are from (\ref{Q_intervals}), and $y(x)$ is the curve from (\ref{one_dimensional_problem}).
+		\item The parameters of the method $\epsilon_{\nu}, 1 \leq \nu \leq m,$ used in the rule (\ref{z_estimates}) are the corresponding components of the reserve vector $\epsilon_{R}$ from (\ref{epsilon_reserved_solution}).
+		\item For a sufficiently large iteration number $k$, the values $\mu_{\nu}$ from (\ref{current_lower_bounds}) satisfy the inequalities
+			\begin{equation}\label{theorem_inequalities}
+				r_{\nu}\mu_{\nu} > 2^{3-\frac{1}{N}}L_{\nu}\sqrt{N+3}, \; 1 \leq \nu \leq m+1. 
+			\end{equation}
+	\end{enumerate}
+	Then, any limit point $\bar{y}$ of the sequence of the trials $\{y^k\}=\big\{y\big(x^k\big)\big\}$ generated by the index algorithm for problem (\ref{problem}) belongs to the set $Y_{\epsilon}$ form (\ref{Y_epsilon}) and satisfies the conditions	
+	\begin{eqnarray*}
+		\varphi(\bar y) =	\inf\left\{\varphi(y^k):g_j(y^k) \leq 0, 1 \leq j \leq m, k = 1,2,\ldots \right\} \\
+		\leq \varphi(y_{\epsilon}).
+	\end{eqnarray*}
+\end{theorem}
 \textbf{Note 1}. The computational scheme of the algorithm is described in the form convenient for  formulating its theoretical properties. The software implementation of this scheme may be made more frugal. For example, according to Step 7, the point $x^{k+1}$ of the next trial will be an internal point of the interval $(x_{t-1}, x_t)$, i.e. $x^{k+1} \in (x_{t-1}, x_t)$. Therefore, the set of trial points $x^1,\ldots, x^k$ (and the related trial results (\ref{trial_result})) may not be ordered  at every step of the algorithm but may be maintained in an ordered state using appropriate data structures.
 \\
 \textbf{Note 2}. The use of the set of parameters $\epsilon_1,\ldots,\epsilon_m$ (the values of which correspond to the coordinates of the reserve vector $\epsilon_R$) in the index algorithm will significantly reduce the density of the trial sequence in the vicinity of the feasible domain boundaries. However, this raises a question about the particular values of the reserve vector components $\epsilon_R$. In \cite{Strongin2000}, it was proposed to choose the components of the vector $\epsilon_R$ according to the formula 
@@ -324,10 +314,10 @@ where $\mu_{\nu}$ are the current estimates from (\ref{current_lower_bounds}) an
 
 
 \section{Index Algorithm with Dual Lipschitz Constant Estimates}
-\label{sec:3}
+\label{sec:4}
 	The index global search algorithm described in the previous section (hereafter referred to as IA) is intended for solving  the multiextremal problems, in which the objective function and the constraints satisfy the Lipschitz condition.  In this case, a priori estimates of the constant values are not required for the algorithm to work. These estimates are computed in the course of global search, based on the available search information. 
 	
-	According to Theorem 1, the sequence of trial points $\{y^k\}$ will converge to a point $\bar y \in Y_\epsilon$ if the condition (\ref{theorem_inequalities}) is satisfied. So far, an appropriate choice of the parameters $r_{\nu}$ allows using the values
+	According to Theorem \ref{theorem:1}, the sequence of trial points $\{y^k\}$ will converge to a point $\bar y \in Y_\epsilon$ if the condition (\ref{theorem_inequalities}) is satisfied. So far, an appropriate choice of the parameters $r_{\nu}$ allows using the values
 \begin{equation}\label{estimates_Lipschitz_constants}
 	\frac{r_{\nu}\mu_{\nu}}{2^{3-\frac{1}{N}}\sqrt{N+3}}, \; 1 \leq \nu \leq m+1, 
 \end{equation}
@@ -342,7 +332,7 @@ as the estimates of the Lipschitz constants for the problem functions $g_{j}(y),
 
 	The key idea of the novel method is computing two characteristics for each interval and balancing (based on these two) the local and global search. The local search provides a new trial in the vicinity of the current minimum point $y_k^\ast$  whereas during the global search a new trial could be performed in a subdomain located far away from $y_k^\ast$. 
 	
-	Note that Theorem 1 on the convergence of the index method implies the generation of an infinite sequence of trials $\{y^k\}=\big\{y(x^k )\big\}$ by the algorithm. In this case, at the final stage of the search (i.e. in the case when one of the points of this trial sequence falls into the vicinity of the $\varepsilon$-reserved solution $y_\epsilon$) there always exists an interval, at one of the boundaries of which the current minimum value of the objective function $z_{m+1}^\ast$  from (\ref{z_estimates}) is achieved. It is this interval that will have the highest characteristic since it is the most promising one for performing further trials. 
+	Note that Theorem \ref{theorem:1} on the convergence of the index method implies the generation of an infinite sequence of trials $\{y^k\}=\big\{y(x^k )\big\}$ by the algorithm. In this case, at the final stage of the search (i.e. in the case when one of the points of this trial sequence falls into the vicinity of the $\varepsilon$-reserved solution $y_\epsilon$) there always exists an interval, at one of the boundaries of which the current minimum value of the objective function $z_{m+1}^\ast$  from (\ref{z_estimates}) is achieved. It is this interval that will have the highest characteristic since it is the most promising one for performing further trials. 
 
 	Let us establish the following important property for the global and local characteristics of an interval containing the current minimum point.
 
@@ -358,7 +348,7 @@ as the estimates of the Lipschitz constants for the problem functions $g_{j}(y),
 $$
 	z_i+z_{i-1}-2z_M^* = |z_i-z_{i-1}|\leq \mu_M\Delta_i .
 $$
-\end{enumerate}
+\end{enumerate} 
 From here, it will follow that for any value $r_M>1$ the following inequalities will hold
 \begin{align}
 	R(i) & = \Delta_i + \frac{(z_i-z_{i-1})^2}{r_M^2\mu_M^2\Delta_i} - 2\frac{z_i+z_{i-1}-2z_M^*}{r_M\mu_M} \nonumber \\
@@ -382,7 +372,7 @@ where $\rho=\Big(\frac{1-1/r_{M}^{glob}}{1-1/r_{M}^{loc}}\Big)^2$, if $\nu(x_{i-
 
 	Based on the relation (\ref{R_glob_equal_R_loc}), one can formulate an \textit{index algorithm with dual estimate of the Lipschitz constants} (hereafter referred to as IA-DL).
 	
-	The first four steps of the algorithm repeat Step 1 -- Step 4 of the initial index algorithm from Section 3.
+	The first four steps of the algorithm repeat Step 1 -- Step 4 of the initial index algorithm from Section \ref{sec:3}.
 	
 	Step 5. For each interval $(x_{i-1}, x_i), 1 \leq i \leq k+1$: 
 \begin{flushleft}
@@ -410,7 +400,7 @@ $$
 Otherwise, execute a trial at the point
 \begin{eqnarray*}
 	x^{k+1} = \frac{x_t+x_{t-1}}{2} + \frac{\mathrm{sign}(z_t-z_{t-1})}{2r_\nu}\left[\frac{\left|z_t-z_{t-1}\right|}{\mu_\nu}\right]^N, \\
-	\nu=\nu(x_{t-1})=\nu(x_t).
+	\nu = \nu(x_{t-1})=\nu(x_t).
 \end{eqnarray*}
 When computing the point $x^{k+1}$, use the value of the parameter $r_{\nu}$ fixed at Step~6. 
 
@@ -418,17 +408,17 @@ The algorithm terminates if the condition $\Delta_{t} \leq \epsilon$ is satisfie
 
 	Let us illustrate the work of the algorithms IA and IA-DL when minimizing the function
 \begin{align*}
-	\varphi(y_1, y_2)&=-1.5y_1^2\exp{\left\{1-y_1^2-20.25(y_1-y_2)^2\right\}}-\\
-	&-\left(0.5(y_1-1)(y_2-1)\right)^4 \\
+	\varphi(y_1, y_2) & = -1.5y_1^2\exp{\left\{1-y_1^2-20.25(y_1-y_2)^2\right\}}-\\
+	& -\left(0.5(y_1-1)(y_2-1)\right)^4 \\
 	& \exp{\left\{2-\left(0.5(y_1-1)\right)^4-(y_2-1)^4\right\}}
 \end{align*}
 in the range $0 \leq y_1 \leq 4$, $1 \leq y_2 \leq 3$ subject to the constraints
-\begin{eqnarray}
-	g_1(y_1, y_2) &=& 0.01 \left( (y_1-2.2)^2+(y_2-1.2)^2-2.25 \right) \leq 0, \nonumber \\
-	g_2(y_1, y_2) &=& 100 \left(1-(y_1-2)^2/1.44+(0.5y_2)^2 \right) \leq 0, \nonumber \\
-	g_3(y_1, y_2) &=& 10 \left( y_2 - 1.5 - 1.5 \sin{\left( 6.283(y_1-1.75) \right)}\right) \leq 0. \nonumber
-\end{eqnarray}
-The feasible domain of this problem is non-connected and consists of three subdomains. The global minimum $\varphi(y^\ast)=-1.489$ is achieved at the point $y^\ast =(0.942, 0.944)$ (the values are given with the accuracy of $10^{-3}$).
+\begin{eqnarray*}
+	g_1(y_1, y_2) & = & 0.01 \left( (y_1-2.2)^2+(y_2-1.2)^2-2.25 \right) \leq 0, \\
+	g_2(y_1, y_2) & = & 100 \left(1-(y_1-2)^2/1.44+(0.5y_2)^2 \right) \leq 0, \\
+	g_3(y_1, y_2) & = & 10 \left( y_2 - 1.5 - 1.5 \sin{\left( 6.283(y_1-1.75) \right)}\right) \leq 0.
+\end{eqnarray*}
+The feasible domain of this problem is non-connected and consists of three subdomains. The global minimum $\varphi(y^\ast)=-1.489$ is achieved at the point \\ $y^\ast =(0.942, 0.944)$ (the values are given with the accuracy of $10^{-3}$).
 
 \begin{figure}[h]
 	\begin{minipage}[h]{0.48\linewidth}
@@ -442,16 +432,17 @@ The feasible domain of this problem is non-connected and consists of three subdo
 	\label{fig:example_strongin}
 \end{figure}
 
-	In Fig. \ref{fig:example_strongin}, the search domain (square) is shown, the feasible domain is highlighted by green, and the trial points generated by IA (a) and IA-DL (b) are marked. The best point is marked by red. For both methods, the evolvent with the parameter $m=10$ was used, the accuracy of the search for the solution $\epsilon=0.002$; the adaptive reserve parameter $\delta=0.008$ from (\ref{epsilon_nu}). For the IA method, the parameters $r_{\nu}=2.3, 1 \leq \nu \leq 4$, were used. The same values were used for the IA-DL method as the parameters $r_{\nu}^{glob}, 1 \leq \nu \leq 4$. Also, the parameters $r_{\nu}^{loc}=1.5, 1 \leq \nu \leq 4,$ were used. To solve the problem with a predefined accuracy $\epsilon=0.002$, 478 trials were required for the IA method compared to only 303 trials for the IA-DL method. The results of larger-scale numerical experiments are presented in Section 4.
+	In Fig. \ref{fig:example_strongin}, the search domain (square) is shown, the feasible domain is highlighted by green, and the trial points generated by IA (a) and IA-DL (b) are marked. The best point is marked by red. For both methods, the evolvent with the parameter $m=10$ was used, the accuracy of the search for the solution $\epsilon=0.002$; the adaptive reserve parameter $\delta=0.008$ from (\ref{epsilon_nu}). For the IA method, the parameters $r_{\nu}=2.3, 1 \leq \nu \leq 4$, were used. The same values were used for the IA-DL method as the parameters $r_{\nu}^{glob}, 1 \leq \nu \leq 4$. Also, the parameters $r_{\nu}^{loc}=1.5, 1 \leq \nu \leq 4,$ were used. To solve the problem with a predefined accuracy $\epsilon=0.002$, 478 trials were required for the IA method compared to only 303 trials for the IA-DL method. The results of larger-scale numerical experiments are presented in Section \ref{sec:4}.
 
 	Let us formulate and prove the convergence conditions for the new algorithm IA-DL.\\
-\textbf{Theorem 2}. Let us assume the index algorithm (IA) is applied to solve the problem (\ref{problem}) and for the values $r_{\nu}=r_{\nu}^{glob}, 1 \leq \nu \leq m+1,$ the conditions of Theorem 1 are fulfilled. Then, the algorithm with dual estimate of the Lipschitz constants (IA-DL) with the parameters $r_{\nu}^{glob}>r_{\nu}^{loc}>1,\; 1\leq \nu \leq m+1,$ when solving the same problem also generates a sequence of the trial points $\{y^k\}=\{y(x^k)\}$, any limit point $\bar{y}$ of which belongs to the set $Y_{\epsilon}$ from (\ref{Q_intervals}), i.e. satisfies the condition 
+\begin{theorem}\label{theorem:2} Let us assume the index algorithm (IA) is applied to solve the problem (\ref{problem}) and for the values $r_{\nu}=r_{\nu}^{glob}, 1 \leq \nu \leq m+1,$ the conditions of Theorem \ref{theorem:1} are fulfilled. Then, the algorithm with dual estimate of the Lipschitz constants (IA-DL) with the parameters $r_{\nu}^{glob}>r_{\nu}^{loc}>1,\; 1\leq \nu \leq m+1,$ when solving the same problem also generates a sequence of the trial points $\{y^k\}=\{y(x^k)\}$, any limit point $\bar{y}$ of which belongs to the set $Y_{\epsilon}$ from (\ref{Q_intervals}), i.e. satisfies the condition 
 \begin{align}\label{phi_bar_y}
 	\varphi(\bar y) & = \inf\left\{\varphi(y^k):g_j(y^k) \leq 0, 1 \leq j \leq m, k = 1,2,\ldots \right\} \nonumber \\
 	& \leq \varphi(y_{\epsilon}).
 \end{align}
+\end{theorem}
 
-\textbf{Proof}. Because for the IA with the parameters $r_{\nu}=r_{\nu}^{glob}, 1 \leq \nu \leq m+1,$ the conditions of Theorem 1 are fulfilled, then any limit point $\bar{y}=y(\bar{x})$ of the trial sequence generated by the IA for the problem (\ref{problem}) satisfies the conditions (\ref{phi_bar_y}).
+\textbf{Proof}. Because for the IA with the parameters $r_{\nu}=r_{\nu}^{glob}, 1 \leq \nu \leq m+1,$ the conditions of Theorem \ref{theorem:1} are fulfilled, then any limit point $\bar{y}=y(\bar{x})$ of the trial sequence generated by the IA for the problem (\ref{problem}) satisfies the conditions (\ref{phi_bar_y}).
 
 	Let us show that $\bar y$ is also the limit point of the sequence of trials $\{y^k\}=\{y(x^k)\}$, generated by the IA-DL, and the sequence $\{y^k\}$ has no new limit points. Let us carry out the proof by contradiction. Assume that $\bar y$ is not a limit point of the sequence $\{y^k\}$ and there exists a limit point $y' \neq \bar y$.
 
@@ -460,15 +451,15 @@ The feasible domain of this problem is non-connected and consists of three subdo
 	Therefore, in the formula (\ref{R_max}) for computing the characteristic, the second component takes the highest values, i.e. $ R_{glob}(t) < \rho R_{loc}(t)$.
 Then, there will exist a limit point $x' \neq \bar x$, at that either $\nu(x') \leq m$ (i.e. the point $y(x')$ is not a feasible one) or $z_{m+1}^\ast =g_{m+1}(y(x'))>g_{m+1}(y(\bar x))$ (i.e. the value of the objective function at the limit point $y(x')$ is greater than at the point $y(\bar x)$).
 
-	Let us show that if the conditions of Theorem 1 are satisfied, the inequality $R_{glob}(j)>0$ will hold. According to the second condition of Theorem 1 and to the condition (\ref{K_leq_L}), 
+	Let us show that if the conditions of Theorem \ref{theorem:1} are satisfied, the inequality $R_{glob}(j)>0$ will hold. According to the second condition of Theorem \ref{theorem:1} and to the condition (\ref{K_leq_L}), 
 \begin{align}
-	z_j &= g_{\nu}\left( y(x_j) \right) \leq g_{\nu}\left( y(\bar x) \right) + 2L_{\nu}\sqrt{N+3}(x_j-\bar x)^{1/N}, \nonumber \\
-	&\nu=\nu(x_j),
+	z_j & = g_{\nu}\left( y(x_j) \right) \leq g_{\nu}\left( y(\bar x) \right) + 2L_{\nu}\sqrt{N+3}(x_j-\bar x)^{1/N}, \nonumber \\
+	& \nu=\nu(x_j),
 \end{align}
 \begin{align}
 	z_{j-1} &= g_{\nu}\left( y(x_{j-1}) \right) \nonumber \\
-	&\leq g_{\nu}\left( y(\bar x) \right) + 2L_{\nu}\sqrt{N+3}(\bar x - x_{j-1})^{1/N}, \nonumber \\ 
-	&\nu=\nu(x_{j-1}).
+	& \leq g_{\nu}\left( y(\bar x) \right) + 2L_{\nu}\sqrt{N+3}(\bar x - x_{j-1})^{1/N}, \nonumber \\ 
+	& \nu=\nu(x_{j-1}).
 \end{align}
 
 	Since the point $\bar y = y(\bar x)$ belongs to the set $Y_{\epsilon}$, then
@@ -481,18 +472,18 @@ $$
 
 	Then, the characteristic $R_{glob}(j)$ of the interval $[x_{j-1}, x_j], j=j(k)$ will be strictly positive, i.e. $R_{glob}(j)>0$. Indeed, at $\nu=\nu(x_j)=\nu(x_{j-1})$ and the value $r_{\nu}=r_{\nu}^{glob}$
 \begin{align*}
-	R(j) &= \Delta_i + \frac{(z_j-z_{j-1})^2}{r_{\nu}^2\mu_{\nu}^2\Delta_i} - 2\frac{z_j+z_{j-1}-2z_{\nu}^{\ast}}{r_{\nu}\mu_{\nu}} \\
-	&\geq \Delta_i + 4\frac{z_{\nu}^*-\left( g_{\nu}\left( y(\bar x) \right)+L_{\nu}\sqrt{N+3}\left( (x_j-\bar x)^{\frac{1}{N}}+(\bar x - x_{j-1})^{\frac{1}{N}} \right)\right)}{r_{\nu}\mu_{\nu}} \\
-	&= \Delta_i-4\frac{L_{\nu}\sqrt{N+3}\left( (x_j-\bar x)^{\frac{1}{N}}+(\bar x - x_{j-1})^{\frac{1}{N}} \right)}{r_{\nu}\mu_{\nu}}+4\frac{z_{\nu}^\ast-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} \\
-	&\geq \Delta_i\left(1-4\frac{L_{\nu}\sqrt{N+3}\max_{0\leq\alpha\leq1} {\left( \alpha^{\frac{1}{N}}+(1-\alpha)^{\frac{1}{N}} \right)}}{r_{\nu}\mu_{\nu}} \right)+4\frac{z_{\nu}^{\ast}-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} \\
-	&= \Delta_i\left(1-4\frac{2^{3-1/N}L_{\nu}\sqrt{N+3}}{r_{\nu}\mu_{\nu}} \right)+4\frac{z_{\nu}^{\ast}-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} > 0.
+	& R(j) = \Delta_i + \frac{(z_j-z_{j-1})^2}{r_{\nu}^2\mu_{\nu}^2\Delta_i} - 2\frac{z_j+z_{j-1}-2z_{\nu}^{\ast}}{r_{\nu}\mu_{\nu}} \\
+	& \geq \Delta_i + 4\frac{z_{\nu}^*-\left( g_{\nu}\left( y(\bar x) \right)+L_{\nu}\sqrt{N+3}\left( (x_j-\bar x)^{\frac{1}{N}}+(\bar x - x_{j-1})^{\frac{1}{N}} \right)\right)}{r_{\nu}\mu_{\nu}} \\
+	& = \Delta_i-4\frac{L_{\nu}\sqrt{N+3}\left( (x_j-\bar x)^{\frac{1}{N}}+(\bar x - x_{j-1})^{\frac{1}{N}} \right)}{r_{\nu}\mu_{\nu}}+4\frac{z_{\nu}^\ast-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} \\
+	& \geq \Delta_i\left(1-4\frac{L_{\nu}\sqrt{N+3}\max_{0\leq\alpha\leq1} {\left( \alpha^{\frac{1}{N}}+(1-\alpha)^{\frac{1}{N}} \right)}}{r_{\nu}\mu_{\nu}} \right)+4\frac{z_{\nu}^{\ast}-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} \\
+	& = \Delta_i\left(1-4\frac{2^{3-1/N}L_{\nu}\sqrt{N+3}}{r_{\nu}\mu_{\nu}} \right)+4\frac{z_{\nu}^{\ast}-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} > 0.
 \end{align*}
 At $\nu=\nu(x_j ) > \nu(x_{j-1})$ and the value $r_{\nu}=r_{\nu}^{glob}$
 \begin{align*}
-	R(j) &= 2\Delta_i - 4\frac{z_j-z_{\nu}^{\ast}}{r_{\nu}\mu_{\nu}} \\
-	&\geq 2\Delta_i+4\frac{z_{\nu}^{\ast}-\left( g_{\nu}\left(y(\bar x)\right)+2L_{\nu}\sqrt{N+3}(x_j-\bar x)^{\frac{1}{N}} \right)}{r_{\nu}\mu_{\nu}} \\
-	&= 2\Delta_i - 8\frac{L_{\nu}\sqrt{N+3}(x_j-\bar x)^{\frac{1}{N}}}{r_{\nu}\mu_{\nu}}+4\frac{z_{\nu}^{\ast}-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} \\
-	&\geq 2\Delta_i\left( 1-4\frac{L_{\nu}\sqrt{N+3}}{r_{\nu}\mu_{\nu}} \right) + 4\frac{z_{\nu}^{\ast}-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} > 0.
+	& R(j) = 2\Delta_i - 4\frac{z_j-z_{\nu}^{\ast}}{r_{\nu}\mu_{\nu}} \\
+	& \geq 2\Delta_i+4\frac{z_{\nu}^{\ast}-\left( g_{\nu}\left(y(\bar x)\right)+2L_{\nu}\sqrt{N+3}(x_j-\bar x)^{\frac{1}{N}} \right)}{r_{\nu}\mu_{\nu}} \\
+	& = 2\Delta_i - 8\frac{L_{\nu}\sqrt{N+3}(x_j-\bar x)^{\frac{1}{N}}}{r_{\nu}\mu_{\nu}}+4\frac{z_{\nu}^{\ast}-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} \\
+	& \geq 2\Delta_i\left( 1-4\frac{L_{\nu}\sqrt{N+3}}{r_{\nu}\mu_{\nu}} \right) + 4\frac{z_{\nu}^{\ast}-g_{\nu}\left( y(\bar x) \right)}{r_{\nu}\mu_{\nu}} > 0.
 \end{align*}
 
 	The case of $\nu=\nu(x_{j-1})>\nu(x_j)$ is treated similarly and leads to the same inequality $R(j)>0$.
@@ -508,7 +499,7 @@ and (according to Rules 5 and 6 of the IA-DL method) the next iteration falls in
 
 
 \section{Numerical experiments}
-\label{sec:4}
+\label{sec:5}
 To demonstrate the efficiency of the proposed algorithm, let us consider the results of solving several series of multidimensional constrained global optimization problems. In order to construct the problems, the functions generated by the GKLS generator \cite{Gaviano2003} were used. This generator of multiextremal functions is often used for investigating global optimization algorithms \cite{Paulavicius2014,Sergeyev2015,Barkalov2018}. According to \cite{Gaviano2003}, we used simpler and more complex functions, which are  further denoted as ``Simple'' and ``Hard'', respectively. The complexity of the functions is determined, in particular, by the radius of the global minimizer's attraction region and by the distance between global and local minimizers.
 	
 	In \cite{Gergel2017_2,Gergel2019}, an approach was proposed that allows constructing the constrained global optimization problems using certain classes of multiextremal functions (in particular, the GKLS functions), in which:
@@ -552,43 +543,39 @@ To demonstrate the efficiency of the proposed algorithm, let us consider the res
 	Since all functions involved in the statement of each particular problem belong to the same class, equal parameters $r_{\nu}=4.1$ were set for the problems of the “Simple” class and $r_{\nu}=6.2$ for the problems of the “Hard” class. When solving the problems of these classes by the IA-DL method, the values of the parameters $r_{\nu}$ given above were selected for the upper estimate of the Lipschitz constants, i.e. the values $r_{\nu}^{glob}=4.1$ and $r_{\nu}^{glob}=6.2$ were set, which were supplemented by various values of $r_{\nu}^{loc}$. The average number of iterations performed by the algorithms with different values of $r_{\nu}^{loc}$ is given in Table \ref{tab:average_number_of_iterations_simple} and \ref{tab:average_number_of_iterations_hard}. The number of unsolved problems is given in brackets.
 
 \begin{table}[h!]
-	\small
-	%\centering
 	\caption{Average number of iterations performed by the methods on “Simple” class}
 	\label{tab:average_number_of_iterations_simple}
-	
-		%\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}ccccc}
-		\begin{tabular}{ccccc}
-			\hline
-			& $N=2$ & $N=3$ & $N=4$ & $N=5$ \\
-			\hline
-			IA-DL, $r_{\nu}^{loc}=1.4$ & 316 & 7403 & 40419 & 296357 \\
-			%\hline
-			IA-DL, $r_{\nu}^{loc}=2.0$ & 350 & 8990(1) & 41230 & 360497 \\
-			%\hline
-			IA & 439 & 11804(1) & 41973(3) & 404660(2) \\
-			\hline
-		\end{tabular}
-	\normalsize
+	\begin{tabular}[]{ccccc}
+		\hline\noalign{\smallskip}
+		                    & $N=2$                & $N=3$                    & $N=4$                  & $N=5$                   \\
+		\noalign{\smallskip}\hline\noalign{\smallskip}
+		IA-DL,              & \multirow{2}{*}{316} & \multirow{2}{*}{7403}    & \multirow{2}{*}{40419} & \multirow{2}{*}{296357} \\
+		$r_{\nu}^{loc}=1.4$ &                      &                          &                        &                         \\
+		%\hline
+		IA-DL,              & \multirow{2}{*}{350} & \multirow{2}{*}{8990(1)} & \multirow{2}{*}{41230} & \multirow{2}{*}{360497} \\
+		$r_{\nu}^{loc}=2.0$ &                      &                          &                        &                         \\
+		%\hline
+		IA                  & 439                  & 11804(1)                 & 41973(3)               & 404660(2)               \\
+		\hline\noalign{\smallskip}
+	\end{tabular}
 \end{table}
 
 \begin{table}[h!]
-	\small
-	%\centering
 	\caption{Average number of iterations performed by the methods on “Hard” class}
 	\label{tab:average_number_of_iterations_hard}
-	
-		\begin{tabular}{ccccc}
-			\hline
-			& $N=2$ & $N=3$ & $N=4$ & $N=5$ \\
-			\hline
-			IA-DL, $r_{\nu}^{loc}=1.4$ & 766 & 9636 & 60904 & 763711 \\
-			%\hline
-			IA-DL, $r_{\nu}^{loc}=2.0$ & 830 & 12020 & 57473 & 743874(1) \\
-			%\hline
-			IA & 1074 & 20327 & 87310(2) & 1084990(2) \\
-			\hline
-		\end{tabular}
+	\begin{tabular}{ccccc}
+		\hline\noalign{\smallskip}
+		                    & $N=2$                & $N=3$                    & $N=4$                  & $N=5$                      \\
+		\noalign{\smallskip}\hline\noalign{\smallskip}
+		IA-DL,              & \multirow{2}{*}{766} & \multirow{2}{*}{9636}    & \multirow{2}{*}{60904} & \multirow{2}{*}{763711}    \\
+		$r_{\nu}^{loc}=1.4$ &                      &                          &                        &                            \\
+		%\hline
+		IA-DL,              & \multirow{2}{*}{830} & \multirow{2}{*}{12020}   & \multirow{2}{*}{57473} & \multirow{2}{*}{743874(1)} \\
+		$r_{\nu}^{loc}=2.0$ &                      &                          &                        &                            \\
+		%\hline
+		IA                  & 1074                 & 20327                    & 87310(2)               & 1084990(2)                 \\
+		\hline\noalign{\smallskip}
+	\end{tabular}
 \end{table}
 
 	In addition to the average number of trials required to solve the problems, the results of solving the series of problems can be also presented by the function $p(k)$, which describes the number of problems solved for $k$ iterations. This function will be called the \textit{operational characteristic} of the algorithms.
@@ -641,7 +628,7 @@ To demonstrate the efficiency of the proposed algorithm, let us consider the res
 
 
 \section{Conclusion}
-\label{sec:5}
+\label{sec:6}
 	In this paper, a method for solving the Lipschitz optimization problems, which constitute an important class of the global optimization problems, was considered. In applied global optimization problems, the functions are usually defined as the “black boxes”. Consequently, the values of the Lipschitz constant for them are unknown a priori, which makes their estimation one of the key problems when constructing the Lipschitz optimization methods.  
 	
 	A correct estimate of the Lipschitz constant is especially important in solving constrained problems since the feasible domain in these problems has a complex structure, which is largely determined by the values of the constants for the constraints of the problem. An underestimate of the true value of the constant may lead to the loss of convergence of the method to the global optimizer whereas an overestimated value results in a slow convergence to the solution of the problem.
@@ -652,56 +639,16 @@ To demonstrate the efficiency of the proposed algorithm, let us consider the res
 
 
 
-\section{Section title}
-\label{sec:10}
-Text with citations \cite{RefB} and \cite{RefJ}.
-\subsection{Subsection title}
-\label{sec:20}
-as required. Don't forget to give each section
-and subsection a unique label (see Sect.~\ref{sec:1}).
-\paragraph{Paragraph headings} Use paragraph headings as needed.
-\begin{equation}
-a^2+b^2=c^2
-\end{equation}
-
-
-% For tables use
-\begin{table}
-% table caption is above the table
-\caption{Please write your table caption here}
-\label{tab:1}       % Give a unique label
-% For LaTeX tables use
-\begin{tabular}{lll}
-\hline\noalign{\smallskip}
-first & second & third  \\
-\noalign{\smallskip}\hline\noalign{\smallskip}
-number & number & number \\
-number & number & number \\
-\noalign{\smallskip}\hline
-\end{tabular}
-\end{table}
-
-
 \begin{acknowledgements}
 This research was supported by the Russian Science Foundation, project No. 16-11-10150.
 \end{acknowledgements}
 
-
-% Authors must disclose all relationships or interests that 
-% could have direct or potential influence or impart bias on 
-% the work: 
-%
-% \section*{Conflict of interest}
-%
-% The authors declare that they have no conflict of interest.
-
-
 % BibTeX users please use one of
 %\bibliographystyle{spbasic}      % basic style, author-year citations
-%\bibliographystyle{spmpsci}      % mathematics and physical sciences
+%\bibliographystyle{spbasic}      % mathematics and physical sciences
 %\bibliographystyle{spphys}       % APS-like style for physics
 %\bibliography{}   % name your BibTeX data base
-\bibliographystyle{spmpsci}
+\bibliographystyle{spbasic}
 \bibliography{bibliography}
 
 \end{document}
