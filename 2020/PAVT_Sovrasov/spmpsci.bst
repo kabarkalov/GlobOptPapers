@@ -625,7 +625,7 @@ FUNCTION {format.date}
     'skip$
     {
       before.all 'output.state :=
-    " (" swap$ * ")" *
+    ". " swap$ * "." *
     }
   if$
 }
@@ -731,7 +731,7 @@ FUNCTION {format.journal.pages}
     { swap$ duplicate$ empty$
         { pop$ pop$ format.pages }
         {
-          ", " *
+          " P. " *
           swap$
           n.dashify
           "pages" bibinfo.check
@@ -758,6 +758,7 @@ FUNCTION {format.vol.num.pages}
   duplicate$ empty$ 'skip$
     {
       "volume" bibinfo.check
+      "Vol. " swap$ *
     }
   if$
   number "number" bibinfo.check duplicate$ empty$ 'skip$
@@ -767,7 +768,7 @@ FUNCTION {format.vol.num.pages}
         'skip$
       if$
       swap$
-      "(" swap$ * ")" *
+      ", No. " swap$ * "." *
     }
   if$ *
   eid empty$
@@ -814,7 +815,7 @@ FUNCTION {format.in.ed.booktitle}
           * swap$
           * }
       if$
-      " " swap$ *
+      "// " swap$ *
     }
   if$
 }
@@ -969,18 +970,19 @@ FUNCTION {format.organization.address}
 FUNCTION {article}
 { output.bibitem
   format.authors "author" output.check
-  add.colon
   new.block
   format.title "title" output.check
   new.block
   crossref missing$
     {
+      " //" *
       journal
       "journal" bibinfo.check
       "journal" output.check
-      add.blank
-      format.vol.num.pages output
+      new.sentence
       format.date "year" output.check
+      new.sentence
+      format.vol.num.pages output
     }
     { format.article.crossref output.nonnull
       format.pages output
@@ -1119,14 +1121,12 @@ FUNCTION {incollection}
 FUNCTION {inproceedings}
 { output.bibitem
   format.authors "author" output.check
-  add.colon
   new.block
   format.title "title" output.check
   new.block
   crossref missing$
     { format.in.ed.booktitle "booktitle" output.check
       format.number.series output
-      format.pages output
       new.sentence
       publisher empty$
         { format.organization.address output }
@@ -1135,6 +1135,8 @@ FUNCTION {inproceedings}
         }
       if$
       format.date "year" output.check
+      new.sentence
+      format.pages output
     }
     { format.incoll.inproc.crossref output.nonnull
       format.pages output
