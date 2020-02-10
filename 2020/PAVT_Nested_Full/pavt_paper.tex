@@ -59,20 +59,7 @@ Lebedev\orcidID{0000-0002-8736-0652} \and Maria Kocheganova \orcidID{0000-0002-4
 
 \begin{abstract}
 
-In the present paper, the global optimization problems and the numerical methods of solving these 
-ones are considered. 
-Regarding the character of the dependence of the objective function on its parameters, an assumption 
-is made that it is multiextremal with respect to selected variables only, and the dependence on the rest 
-ones has a local character. 
-The problems of this type may arise in the identification of the unknown parameters of the 
-mathematical models on the base of the results of experiments. 
-A parallel computational scheme, which accounts for this feature has been proposed.
-The novel scheme is based on the idea of the nested (recursive) optimization when at the upper 
-recursion level the optimization with respect to the globally-meaning variables is performed (using 
-the global optimization method), and at the lower one the local optimization problems are solved (using 
-the local method). The generated local subproblems will not affect each other, and solving of these 
-ones can be performed in parallel. The numerical experiments have been conducted on several 
-hundred test problems confirming the efficiency of the proposed scheme of parallel computations.
+The present paper considers global optimization problems and the numerical methods of solving them. An assumption is made regarding the dependence of the objective function on its parameters: it is multiextremal with respect to selected variables only, and the dependence on the other variables has a local character. Problems of this type may arise in identifying the unknown parameters of the mathematical models, based on experimental results. A parallel computational scheme, which accounts for this feature, is being proposed. This novel scheme is based on the idea of nested (recursive) optimization, when at the upper recursion level the optimization with respect to the significant variables is performed (using the global optimization method), and at the lower one local optimization problems are solved (using the local method). The generated local subproblems will not affect each other, and solving these problems can be performed in parallel. Numerical experiments have been conducted on several hundred test problems, confirming the efficiency of the proposed scheme of parallel computations.
 
 
 \keywords{Global optimization $\cdot$ Local optimization $\cdot$ Recursive optimization scheme 
@@ -81,57 +68,20 @@ $\cdot$ Parallel algorithms}
 
 \section{Introduction}
 
-The global optimization problems arise often in various fields of modern science and technology. For 
-example, the problems of finding the configurations of various chemical compounds corresponding to 
-the minimum interaction energy are relevant \cite{Posypkin2014}. In particular,  such problems arise 
+Global optimization problems arise frequently in various fields of modern science and technology. For example, problems of finding the configurations of various chemical compounds corresponding to the minimum interaction energy are relevant \cite{Posypkin2014}. In particular,  such problems arise 
 in the development of new medical drugs \cite{Sulimov}. 
 Another example is the problem of finding optimal control parameters for complex processes \cite{Kalyulin2017,Modorskii2016}.
-The global optimization problems arise in many other applications as well (see the review \cite{Pinter2006}). 
+Global optimization problems arise in many other applications as well (see the review \cite{Pinter2006}). 
 
-The application of the global optimization methods for the identification of the parameters of the 
-mathematical models based on the data of experiments became a classical one. In the problems of this 
-type, it is required to carry out a search for the values of the unknown parameters of the model, at 
-which the results of computations according to the model are close to the results obtained 
-experimentally.
+Application of global optimization methods for identifying the parameters of the mathematical models based on the data of experiments has become a classical practice. Problems of this type require a search for the values of the unknown parameters of the model, from which computational results according to the model are close to the results obtained experimentally.
 
-The number of parameters, which are required to be identified in such a way may be tens and hundreds 
-in complex mathematical models \cite{Akhmadullina2017,Nurislamova2016}. In the problems of 
-such dimensionality, the regular methods of search for the global solutions cannot be applied because 
-of extremely large computational costs for covering the search domain by the trial points. This 
-remains to be true even in the case of the use of efficient algorithms (for example, 
-\cite{Evtushenko2009,Jones2009,Paulavicius2011}) constructing essentially nonuniform coverages. 
+The number of parameters which are required to be identified in such a way, may reach tens and hundreds in complex mathematical models \cite{Akhmadullina2017,Nurislamova2016}. In problems of such dimensionality, regular search methods for global solution cannot be applied because of the extremely large computational costs for covering the search domain by the trial points. This remains true even with the use of efficient algorithms (for example, \cite{Evtushenko2009,Jones2009,Paulavicius2011}) constructing essentially nonuniform coverages. 
 
-However, in the problems of the model identification, the parameters, which will affect the result 
-mostly can be selected often. The number of such parameters is small as a rule. The rest parameters 
-either cause an insufficient effect (in this case, the multiextremality can be neglected) or the 
-dependence on the second group of parameters have a local character.
+However, in the problems of model identification, the parameters, which will affect the result most significantly, can often be selected. As a rule, the number of such parameters is small. The rest of the parameters either cause an insufficient effect (in this case, multiextremality can be neglected) or dependence on the second group of parameters has a local character.
 
-So far, the development of the parallel algorithms for the minimization of the essentially 
-multidimensional functions (hundreds of variables), which account for different character of 
-dependence of the objective function on different groups of parameters is relevant. Namely, the 
-objective function is assumed to be multiextremal with respect to a part of variables only. The rest 
-variables have a local effect, i.e. the objective function is unimodal with respect to these ones. 
-In this case, the solving of the problem can be organized according to the nested (recursive) 
-optimization scheme. The solving of the multiextremal subproblem, for which the use of complex 
-global search algorithms is required, will be performed at the upper level of recursion.
-The unimodal subproblems (each corresponding to a fixed set of values of the first part of 
-parameters) will be solved at the lower level. For solving these subproblems, the efficient 
-methods of local optimization, linear programming, or linear algebra can be applied (subject to the 
-character of the local subproblems).
+So far, the development of parallel algorithms for minimizing the essentially multidimensional functions (hundreds of variables), which accounts for the dependence of the objective function on different groups of parameters, is relevant. Specifically, the objective function is assumed to be multiextremal with respect to some of the variables. The rest of the variables have a local effect, i.e., the objective function is unimodal with respect to them. In this case, solving the problem can be organized according to the nested (recursive) optimization scheme. Solving the multiextremal subproblem, which requires the use of complex global search algorithms, will be performed at the upper level of recursion. The unimodal subproblems (each corresponding to a fixed set of values of the first part of parameters) will be solved at the lower level. For solving these subproblems, efficient methods of local optimization, linear programming, or linear algebra can be applied (subject to the character of the local subproblems).
 
-The paper text describing the results of the present study is organized as follows. 
-In Section 2, the description of the nested optimization scheme taking into account different properties 
-of the objective function at different nesting level is given. Particular example of a problem of this 
-class is presented. A general scheme of organization of the parallel computations is described. 
-Section 3 is devoted to the description of the parallel global search algorithm using the space-filling 
-curves. The computational scheme of the parallel algorithm is presented, its main properties are 
-described.
-In Section 4, the methods of solving the local subproblems within the framework of the nested 
-optimization scheme are discussed. A brief description of the properties of the local extremum search 
-problems and known methods of solving these ones is given. 
-Section 5 contains the results of numerical experiment. Here, the evaluation of the scalability of the 
-proposed parallel computation scheme in solving a series of test problems is performed.  
-Section 6 concludes the paper.
+The text describing the results of the present study is organized as follows. Section 2 describes the nested optimization scheme taking into account different properties of the objective function at different nesting levels. A particular example of a problem of this class is presented, along with a general scheme of the organization of parallel computations. Section 3 is devoted to the description of the parallel global search algorithm using space-filling curves. The computational scheme of the parallel algorithm is presented, and its main properties are described. Section 4 discusses the methods of solving the local subproblems within the framework of the nested optimization scheme. A brief description of the properties of the local extremum search problems and known methods of solving them is given. Section 5 contains the results of a numerical experiment. The evaluation of the scalability of the proposed parallel computation scheme in solving a series of test problems was performed. Section 6 concludes the paper.
 
 
 \section{Nested optimization scheme}
@@ -519,11 +469,11 @@ the same as in the previous series of experiments. The results of solving are pr
 % В последней серии экспериментов было решено 10 задач, в которых в качестве многоэкстремальной части использовались трехмерные задачи из класса GKLS. Данный класс задач часто используется для тестирования методов глобальной оптимизации [ссылки]. Размерность локальных подзадач была равна N = 100. Задачи решались на 1, 8, 16 и 32 узлах кластера, на которых использовалось от 4 до 128 MPI-процессов. Параметры запуска такие же, как в предыдущих сериях экспериментов. Результаты решения представлены в таблице, ускорение посчитано относительно запуска на одном узле на 4 mpi процесса. 
 
 In the last series of experiments, 10 problems were solved, in which three-dimensional functions from GKLS class \cite{Gaviano2003} were used as a multiextremal part. 
-This class of functions is often used for investigating global optimization algorithms \cite{Sergeyev2015,Paulavicius2014,Barkalov2018}.
+This class of functions is often used for investigating global optimization algorithms \cite{Barkalov2018,Paulavicius2014,Sergeyev2015}.
 The dimensionality of the local subproblems was equal $N=100$.
 The problems were solved at 1, 8, 16 and 32 cluster nodes, on which from 4 to 128 MPI processes were used.
 The running parameters were the same as in the previous series of experiments.
-The results of solving are presented in Table \ref{tab3}, where speedup is calculated relative to running on a single node using 4 MPI processes.
+The results of solving are presented in Table \ref{tab3}, where speedup is calculated with respect to  running on a single node using 4 MPI processes.
 
 %In the last series of experiments, 10 problems of the kind (\ref{test_problem}) were solved, in which the dimensionality of the local subproblems was equal $N=100$. The running parameters were the same as in the previous series of experiments. The results of solving are presented in Table \ref{tab3}.
 
@@ -546,19 +496,8 @@ The results of solving are presented in Table \ref{tab3}, where speedup is calcu
 
 \section{Conclusion}
 
-The results of experiments performed on the series of the optimization problems
-%, in which a multiextremal part and a unimodal one can be selected,
-demonstrated the scheme of the 
-parallel computations proposed in the present work to have a good potential for parallelization. 
-In particular, when solving a series of 100 problems with total number of variables equal to 52 (from 
-which, two first variables cause a global effect on the objective function and fifty affected this one 
-locally), a speedup of 24.6 has been obtained when using  32 processes. 
-In the case of solving  the problems with more complex local subproblems (with the number of the 
-local variables $N=100$), the speedup increased up to 35 when using 128 processes. In the last case the speedup was calculated with respect to the use of 4 processes on one node.
-The developed scheme of parallel computations can be applied in the identification of complex 
-mathematical models, which are featured by a large number (tens and hundreds) of unknown 
-parameters.
-
+Results of experiments performed on the series of optimization problems demonstrate that the scheme of parallel computations proposed in the present work has good potential for parallelization. Specifically, when solving a series of 100 problems with a total number of variables equal to 52 (from which the two first variables caused a global effect on the objective function and fifty affected the one locally), a speedup of 24.6 was obtained when using 32 processes. When solving  problems with more complex local subproblems (with the number of the local variables N=100), the speedup increased up to 35 when using 128 processes. In the last case the speedup was calculated with respect to the use of 4 processes on one node.
+The developed scheme of parallel computations can be applied in identifying complex mathematical models, which are featured by large numbers (tens and hundreds) of unknown parameters.
 %
 % ---- Bibliography ----
 %
