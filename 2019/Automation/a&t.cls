@@ -48,8 +48,16 @@ LaTeX class for preparing papers to "Avtomatika i Telemekhanika"]
 %%  Аннотация
 \renewenvironment{abstract}%
 {\vspace{6pt}
-\begin{center}\begin{tabular}{p{0.8\textwidth}}\small\indent}%
-{\end{tabular}\end{center}\vspace{12pt}}
+\begin{center}
+\begin{tabular}{p{0.8\textwidth}}\small}%
+{%
+\par
+\vspace*{1ex}
+\hspace{\parindent}{\it Ключевые слова:}~\@KeyWords
+\end{tabular}
+\end{center}
+\vspace{12pt}
+}%
 
 %%  Список литературы
 \def\@biblabel#1{#1.\hfill}
@@ -87,8 +95,6 @@ LaTeX class for preparing papers to "Avtomatika i Telemekhanika"]
 % \vspace*{1ex}
 % \@abstract
 \end{center}
-%\vspace*{1ex}
-%\hspace{\parindent}{\bf Ключевые слова:}~\@KeyWords
  }
 \def\PACS#1{\gdef\@PACS{#1}}
 \def\KeyWords#1{\gdef\@KeyWords{#1}}

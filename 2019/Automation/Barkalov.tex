@@ -7,6 +7,13 @@
 %\usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{soul}
+\usepackage{cite}
+\usepackage[labelsep=period]{caption}
+%						 format=hang,
+%            font=onehalfspacing,
+%            margin=\the\parindent,
+%            figurename=Рисунок,
+            
 
 \usepackage{setspace}
 \onehalfspacing % полуторный интервал для всего текста
@@ -18,10 +25,12 @@
 \thanks{Исследование выполнено за счет гранта Российского научного фонда (проект \mbox{№\,16-11-10150}).}
 
 \authors{
-Р.Г.~СТРОНГИН, д-р~физ.-мат.~наук (strongin@unn.ru)\\
-В.П.~ГЕРГЕЛЬ, д-р~техн.~наук (gergel@unn.ru)\\
+Р.Г.~СТРОНГИН, д-р~физ.-мат.~наук (strongin@unn.ru),\\
+В.П.~ГЕРГЕЛЬ, д-р~техн.~наук (gergel@unn.ru),\\
 К.А.~БАРКАЛОВ, канд.~физ.-мат.~наук (barkalov@vmk.unn.ru)\\
 (Нижегородский государственный университет им. Н.И. Лобачевского)}
+
+\KeyWords{пример}
 
 \maketitle
 
@@ -201,18 +210,10 @@ x^{k+1} = \frac{x_t+x_{t-1}}{2} - \mathrm{sign}(z_t-z_{t-1})\frac{1}{2r}
 %В соответствии с многошаговой схемой на некотором шаге поиска $i, 1 \leq i \leq k_1$  алгоритм начинает минимизировать одномерную функцию $\varphi_1(y_1)$. Для этого, используя накопленную поисковую информацию, алгоритм выбирает точку очередной итерации $\widehat{y}_1$ и вычисляет значение функции в ней. Но для того, чтобы получить значение $\varphi_1(\widehat{y}_1)$ в этой точке, должна быть решена задача минимизации функции $\varphi_2(\widehat{y}_1,y_2)$. То есть, алгоритм приостанавливает минимизацию функции $\varphi_1(y_1)$ и начинает минимизировать $\varphi_2(\widehat{y}_1,y_2)$. В процессе минимизации алгоритм генерирует последовательность точек $\{y_2^j, 1 \leq j \leq k_2\}$, для каждой из которых необходимо решить задачу минимизации функции $\varphi_3(\widehat{y}_1,\widehat{y}_2,y_3)$, и т.д. Данный процесс выполняется рекурсивно до последнего $N$-го уровня. 
 
 %А нужен ли рисунок?
-Возникающие при этом подзадачи и взаимосвязи между ними отображены на рис. \ref{fig0}.
+Возникающие при этом подзадачи и взаимосвязи между ними отображены на рис. \ref{fig0}. \marginpar{\framebox{Рис. 1}}
 Наглядно видно, что структура взаимосвязей имеет форму дерева,
 %Указанная структура может меняться в процессе решения многомерной задачи (\ref{main_problem}): вычисление значения функции $\varphi_i(\widehat{v}_{i-1},y_i), \; 1\leq i < N,$  на $i$-м уровне рекурсии требует решения всех подзадач в одном из поддеревьев $(i+1)$-го уровня. 
 причем функции $\varphi_N(y_1,...,y_N)$ на $N$-м уровне являются листьями дерева задач, их значения вычисляются непосредственно.
-
-\begin{figure}
-\begin{center}%[scale=0.3][width=0.75\textwidth]
-  \includegraphics[width=0.7\textwidth]{fig1.pdf} 
-  \caption{Взаимосвязи между подзадачами в многошаговой схеме.}\label{fig0} 
-\end{center}
-\end{figure}
-
 
 Для описанной выше многошаговой схемы было предложено обобщение --- \textit{блочная многошаговая схема}, которое комбинирует использование разверток и вложенной оптимизации \cite{Barkalov2014}.
 
@@ -254,22 +255,22 @@ $D$ на подпространства, соответствующие переменным $u_i, 1 \leq i \leq M$.
 	\item 
 для вычисления значения функции $i$-го уровня из (\ref{block_nested_i}) порождается новая задача уровня $i+1$, в которой проводится только одно испытание, после чего новая порожденная задача включается в множество уже имеющихся задач, подлежащих решению;
 	\item 
-	итерация глобального поиска состоит в выборе одной (наиболее перспективной) задачи из множества имеющихся задач, в которой проводится одно испытание; точка проведения нового испытания определяется в соответствии с алгоритмом из раздела \ref{SectionPeano};
+	итерация глобального поиска состоит в выборе одной (наиболее перспективной) задачи из множества имеющихся задач, в которой проводится одно испытание; точка проведения нового испытания определяется в соответствии с алгоритмом из подраздела \ref{SectionPeano};
 	\item
 в качестве минимальных значений функций из (\ref{block_nested_i}) используются их текущие оценки, полученные на основе накопленной поисковой информации.
 \end{itemize}
 
 Краткое описание основных шагов блочной адаптивной схемы редукции размерности состоит в следующем.
-Пусть вложенные подзадачи вида (\ref{block_nested_i}) решаются с помощью алгоритма глобального поиска, описанного в разделе \ref{SectionPeano}. Тогда каждой подзадаче (\ref{block_nested_i}) можно присвоить некоторое числовое значение, называемое характеристикой этой задачи. В качестве такой характеристики можно взять значение $R(t)$ из (\ref{MaxR}), т.е. максимальную характеристику интервалов, сформированных в данной задаче. В соответствии с правилом вычисления характеристик (\ref{R}), чем выше значение характеристики, тем более перспективной является подзадача для продолжения поиска в ней глобального минимума исходной задачи (\ref{main_problem}). Поэтому на каждой итерации выбирается подзадача с максимальной характеристикой для проведения в ней очередного испытания. Это испытание либо приводит к вычислению значения целевой функции $\varphi(y)$ (если выбранная подзадача принадлежала уровню $j=M$), либо порождает новые подзадачи согласно (\ref{block_nested_i}) при $j\leq M-1$. В последнем случае новые порожденные задачи добавляются к текущему множеству задач, вычисляются их характеристики и процесс повторяется. Завершение процесса оптимизации происходит, когда в корневой задаче выполняется условие остановки алгоритма, решающего эту задачу.
+Пусть вложенные подзадачи вида (\ref{block_nested_i}) решаются с помощью алгоритма глобального поиска, описанного в подразделе \ref{SectionPeano}. Тогда каждой подзадаче (\ref{block_nested_i}) можно присвоить некоторое числовое значение, называемое характеристикой этой задачи. В качестве такой характеристики можно взять значение $R(t)$ из (\ref{MaxR}), т.е. максимальную характеристику интервалов, сформированных в данной задаче. В соответствии с правилом вычисления характеристик (\ref{R}) чем выше значение характеристики, тем более перспективной является подзадача для продолжения поиска в ней глобального минимума исходной задачи (\ref{main_problem}). Поэтому на каждой итерации выбирается подзадача с максимальной характеристикой для проведения в ней очередного испытания. Это испытание либо приводит к вычислению значения целевой функции $\varphi(y)$ (если выбранная подзадача принадлежала уровню $j=M$), либо порождает новые подзадачи согласно (\ref{block_nested_i}) при $j\leq M-1$. В последнем случае новые порожденные задачи добавляются к текущему множеству задач, вычисляются их характеристики и процесс повторяется. Завершение процесса оптимизации происходит, когда в корневой задаче выполняется условие остановки алгоритма, решающего эту задачу.
 
-Отметим новые элементы предлагаемой схемы редукции размерности.
+\noindent Отметим новые элементы предлагаемой схемы редукции размерности:
 \begin{itemize}
 	\item 
-В адаптивной многошаговой схеме все порождаемые задачи решаются совместно -- на каждой итерации выбирается одна (наиболее перспективная) подзадача из множества подзадач, в которой проводится одно испытание. Такой подход, с одной стороны, требует одновременного хранения поисковой информации во всех решаемых подзадачах. С другой стороны, он позволяет (при необходимости) увеличивать необходимую точность решения задачи (\ref{main_problem}) без проведения повторного решения всех подзадач (\ref{block_nested_i}). Например, начальная стадия оптимизации может быть выполнена с достаточно грубой точностью, что позволит быстро получить некоторую оценку решения; далее (после анализа результатов) точность может быть повышена и процесс глобального поиска может быть продолжен.
+В адаптивной многошаговой схеме все порождаемые задачи решаются совместно -- на каждой итерации выбирается одна (наиболее перспективная) подзадача из множества подзадач, в которой проводится одно испытание. Такой подход, с одной стороны, требует одновременного хранения поисковой информации во всех решаемых подзадачах. С другой стороны, он позволяет (при необходимости) увеличивать необходимую точность решения задачи (\ref{main_problem}) без проведения повторного решения всех подзадач (\ref{block_nested_i}). Например, начальная стадия оптимизации может быть выполнена с достаточно грубой точностью, что позволит быстро получить некоторую оценку решения; далее (после анализа результатов) точность может быть повышена и процесс глобального поиска может быть продолжен;
 	\item
-	В исходной многошаговой схемой редукции размерности решение каждой возникающей подзадачи проводится <<до конца>>, т.е. порождения новой поздадачи не произойдет, пока не будет решена текущая подзадача. Но точка $\overline{u_i}$ ее решения, вообще говоря, не будет совпадать с $i$-й компонентой вектора решения $y^* = (u_1^\ast,...,u_i^\ast,...,u_M^\ast)$ исходной многомерной задачи. В адаптивной схеме подобные бесперспективные подзадачи могут быть отбракованы уже на начальном этапе их решения.
+	В исходной многошаговой схеме редукции размерности решение каждой возникающей подзадачи проводится ``до конца'', т.е. порождения новой подзадачи не произойдет, пока не будет решена текущая подзадача. Но точка $\overline{u_i}$ ее решения, вообще говоря, не будет совпадать с $i$-й компонентой вектора решения $y^* = (u_1^\ast,...,u_i^\ast,...,u_M^\ast)$ исходной многомерной задачи. В адаптивной схеме подобные бесперспективные подзадачи могут быть отбракованы уже на начальном этапе их решения;
 \item
-Наличие правила выбора подзадачи при выполнения очередной итерации в рамках адаптивной схемы позволяет получать различные ее варианты, соответствующие разным правилам выбора подзадачи. Например, как исходная многошаговая схема редукции размерности, так и схема редукции размерности с помощью единственной кривой Пеано могут быть получены как частные случаи нового подхода.
+Наличие правила выбора подзадачи при выполнении очередной итерации в рамках адаптивной схемы позволяет получать различные ее варианты, соответствующие разным правилам выбора подзадачи. Например, как исходная многошаговая схема редукции размерности, так и схема редукции размерности с помощью единственной кривой Пеано могут быть получены как частные случаи нового подхода;
 \item
 Существование множества одновременно решаемых подзадач позволяет организовать их параллельное решение и эффективно задействовать ресурсы современных вычислительных систем. Некоторые результаты в данном направлении представлены в \cite{Gergel19}.
 \end{itemize}
@@ -277,229 +278,276 @@ $D$ на подпространства, соответствующие переменным $u_i, 1 \leq i \leq M$.
 \section{Результаты экспериментов}
 
 Стандартный подход к сравнению алгоритмов глобальной оптимизации основан на решении указанными методами серии задач, выбранных случайно из некоторого класса.
-Будем использовать два класса многоэкстремальных тестовых функций (GKLS \textit{Simple}, GKLS \textit{Hard}), описанные в \cite{Gaviano03}.
+Будем использовать два класса многоэкстремальных тестовых функций (GKLS \textit{Simple}, GKLS \textit{Hard}), описанных в \cite{Gaviano03}.
 
-В работах \cite{Grishagin18,Sovrasov19} было экспериментально установлено, что алгоритм глобального поиска (АГП) как с использованием разверток, так и в сочетании с адаптивной схемой редукции размерности превосходит многие известные алгоритмы глобальной оптимизации, включая методы DIRECT и DIRECT\textit{l}. Поэтому в данном исследовании мы ограничимся сравнением вариантов АГП в сочетании с различными схемами редукции размерности.
+В \cite{Grishagin18,Sovrasov19} было экспериментально установлено, что алгоритм глобального поиска (АГП) как с использованием разверток, так и в сочетании с адаптивной схемой редукции размерности превосходит многие известные алгоритмы глобальной оптимизации, включая методы DIRECT и DIRECT\textit{l}. Поэтому в данном исследовании ограничимся сравнением вариантов АГП в сочетании с различными схемами редукции размерности.
 
 Для сравнения эффективности работы алгоритмов будем использовать два критерия: среднее число испытаний и операционные характеристики.
 Операционной характеристикой алгоритма называется функция $P(k)$, определяемая как доля задач из рассматриваемой серии, для решения которых потребовалось не более чем $k$ испытаний.
-Задачу будем считать решенной, если алгоритм сгенерировал точку $y^k$ очередного испытания в окрестности решения $y^\ast$, т.е. $\left\|y^k-y^\ast\right\| < \delta \left\|b-a\right\|$, где $\delta = 0.01$, $a$ и $b$ --- границы области поиска $D$.
+Задачу будем считать решенной, если алгоритм сгенерировал точку $y^k$ очередного испытания в окрестности решения $y^\ast$, т.е. $\left\|y^k-y^\ast\right\| < \delta \left\|b-a\right\|$, где $\delta = 10^{-2}$, $a$ и $b$ --- границы области поиска $D$.
 
 \begin{table}
 \centering
+\captionsetup{labelfont=bf}
 \caption{Среднее число испытаний на классах GKLS \textit{Simple} и \textit{Hard}, $N=2$}\label{tab1}
-\begin{tabular}{lccc}
-\hline\noalign{\smallskip}
+\begin{tabular}{| lcc |}
+\hline 
+%\smallskip
  & GKLS \textit{Simple} &  GKLS \textit{Hard} \\
-\noalign{\smallskip}\hline\noalign{\smallskip}
+%\noalign{\smallskip}
+\hline
+%\noalign{\smallskip}
  $K_e$ &  252 & 674 \\
  $K_n$ &  697 & 1252 \\
  $K_a$ &  279 & 815 \\
-\noalign{\smallskip}\hline
+%\noalign{\smallskip}
+\hline
 \end{tabular}
 \end{table}
 
-\begin{figure}
-\begin{minipage}{0.5\linewidth}
-\center{\includegraphics[width=1.0\linewidth]{2DSimple.pdf} \\ (a)}
-\end{minipage}
-\begin{minipage}{0.5\linewidth}
-\center{\includegraphics[width=1.0\linewidth]{2DHard.pdf} \\ (b)}
-\end{minipage}
-\caption{Операционные характеристики на классах GKLS \textit{Simple} (a) и \textit{Hard} (b), $N=2$}
-\label{fig2}
-\end{figure}
 
-Первая серия экспериментов была проведена на двумерных задачах классов GKLS \textit{Simple} и GKLS \textit{Hard} (100 функций каждого класса). В табл.~\ref{tab1}  представлено среднее число испытаний, выполненных АГП с использованием разверток ($K_e$), многошаговой схемы ($K_n$) и адаптивной многошаговой схемы ($K_a$). На рис.~\ref{fig2}(a,b) приведены операционные характеристики алгоритмов, полученные на указанных классах задач. Непрерывная линия соответствует алгоритму с использованием разверток, короткий пунктир --- адаптивной многошаговой схеме, длинный пунктир --- многошаговой схеме. Результаты экспериментов показывают, что АГП с использованием адаптивной многошаговой схемы демонстрирует примерно одинаковое быстродействие  по сравнению с развертками, и оба они значительно превосходят алгоритм, использующий многошаговую схему. Поэтому в дальнейших экспериментах мы ограничимся сравнением различных вариантов адаптивной схемы редукции размерности.
+Первая серия экспериментов была проведена на двумерных задачах классов GKLS \textit{Simple} и GKLS \textit{Hard} (100 функций каждого класса). В табл.~\ref{tab1}  представлено среднее число испытаний, выполненных АГП с использованием разверток ($K_e$), многошаговой схемы ($K_n$) и адаптивной многошаговой схемы ($K_a$). На рис.~\ref{fig2} \marginpar{\framebox{Рис. 2}}
+приведены операционные характеристики алгоритмов, полученные на указанных классах задач. Сплошная линия соответствует алгоритму с использованием разверток,точечная линия --- адаптивной многошаговой схеме, штриховая линия --- многошаговой схеме. Результаты экспериментов показывают, что АГП с использованием адаптивной многошаговой схемы демонстрирует примерно одинаковое быстродействие  по сравнению с развертками и оба они значительно превосходят алгоритм, использующий многошаговую схему. Поэтому в дальнейших экспериментах ограничимся сравнением различных вариантов адаптивной схемы редукции размерности.
+
+\begin{table}
+\captionsetup{labelfont=bf}
+\centering
+\caption{Среднее число испытаний на классах GKLS \textit{Simple} и \textit{Hard}, $N=4$}\label{tab2}
+\begin{tabular}{| l c c |}
+\hline
+%\noalign{\smallskip}
+ &    GKLS \textit{Simple} &  GKLS \textit{Hard} \\
+%\noalign{\smallskip}
+\hline
+%\noalign{\smallskip}
+ $K_a$  &  21 747 & 35 633 \\
+ $K_{ba}$ &  15 942 & 33 206 \\
+%\noalign{\smallskip}
+\hline
+\end{tabular}
+\end{table}
 
 
 Вторая серия экспериментов была проведена на четырехмерных задачах классов GKLS \textit{Simple} и GKLS \textit{Hard} (100 функций каждого класса). В табл.~\ref{tab2}  представлено среднее число испытаний, выполненных АГП с использованием адаптивной многошаговой схемы ($K_a$) и блочной адаптивной схемы ($K_{ba}$) с формированием двух уровней подзадач одинаковой размерности $N_1=N_2=2$. Отметим, что при использовании исходного варианта адаптивной многошаговой схемы при решении задачи размерности $N=4$ формируется четыре уровня одномерных подзадач, что усложняет их обработку.
 
-На рис.~\ref{fig3}(a,b) приведены операционные характеристики алгоритмов, полученные на классах GKLS \textit{Simple} и GKLS \textit{Hard}. Пунктирная линия соответствует алгоритму с использованием адаптивной, а непрерывная ---  блочной адаптивной схемы. 
-Результаты экспериментов показывают, что использование блочной адаптивной схемы дает ощутимый выигрыш по числу испытаний (до 35\%) по сравнению с исходной схемой редукции размерности.
-
-\begin{table}
-\centering
-\caption{Среднее число испытаний на классах GKLS \textit{Simple} и \textit{Hard}, $N=4$}\label{tab2}
-\begin{tabular}{lcc}
-\hline\noalign{\smallskip}
- &    GKLS \textit{Simple} &  GKLS \textit{Hard} \\
-\noalign{\smallskip}\hline\noalign{\smallskip}
- $K_a$  &  21 747 & 35 633 \\
- $K_{ba}$ &  15 942 & 33 206 \\
-\noalign{\smallskip}\hline
-\end{tabular}
-\end{table}
-
-\begin{figure}[ht]
-\begin{minipage}{0.5\linewidth}
-\center{\includegraphics[width=1.0\linewidth]{4DSimple.pdf} \\ (a)}
-\end{minipage}
-\begin{minipage}{0.5\linewidth}
-\center{\includegraphics[width=1.0\linewidth]{4DHard.pdf} \\ (b)}
-\end{minipage}
-\caption{Операционные характеристики на классах GKLS \textit{Simple} (a) и \textit{Hard} (b), $N=4$}
-\label{fig3}
-\end{figure}
-
+На рис.~\ref{fig3} \marginpar{\framebox{Рис. 3}}
+приведены операционные характеристики алгоритмов, полученные на классах GKLS \textit{Simple} и GKLS \textit{Hard}. Точечная линия соответствует алгоритму с использованием адаптивной, а сплошная ---  блочной адаптивной схемы. 
+Результаты экспериментов показывают, что использование блочной адаптивной схемы дает ощутимый выигрыш по числу испытаний (до 35 \%) по сравнению с исходной схемой редукции размерности.
 
 Последняя серия экспериментов была проведена на шестимерных задачах класса GKLS \textit{Simple} (100 функций). Сравнивалась работа АГП с использованием разверток и блочной адаптивной схемы с формированием двух уровней подзадач одинаковой размерности $N_1=N_2=3$.
 Среднее число испытаний, выполненных АГП с использованием разверток, составило 102 987, тогда как с использованием блочной адаптивной схемы  --- 75 390. 
-На рис.~\ref{fig4} приведены операционные характеристики алгоритмов. Пунктирная линия соответствует алгоритму с использованием разверток, а непрерывная --- блочной адаптивной схемы. 
-
-\begin{figure}
-\center
-\includegraphics[width=0.5\linewidth]{6DSimple.pdf}
-\caption{Операционные характеристики на классе GKLS \textit{Simple}, $N=6$}
-\label{fig4}
-\end{figure}
-
-
+На рис.~\ref{fig4} \marginpar{\framebox{Рис. 4}}
+приведены операционные характеристики алгоритмов. Точечная линия соответствует алгоритму с использованием разверток, а сплошная --- блочной адаптивной схемы. 
 
 \section{Заключение}
 
-В данной работе предложена обобщенная адаптивная схема редукции размерности для задач глобальной оптимизации, комбинирующая использование кривых Пеано и схему вложенной (рекурсивной) оптимизации. Для решения редуцированных подзадач используется алгоритм глобального поиска. Приведена вычислительная схема алгоритма, рассмотрены основные вопросы, связанные с использованием адаптивной схемы редукции размерности. Проведены вычислительные эксперименты на серии тестовых задач с целью сравнения эффективности различных схем редукции размерности. 
+В данной статье предложена обобщенная адаптивная схема редукции размерности для задач глобальной оптимизации, комбинирующая использование кривых Пеано и схему вложенной (рекурсивной) оптимизации. Для решения редуцированных подзадач используется алгоритм глобального поиска. Приведена вычислительная схема алгоритма, рассмотрены основные вопросы, связанные с использованием адаптивной схемы редукции размерности. Проведены вычислительные эксперименты на серии тестовых задач с целью сравнения эффективности различных схем редукции размерности. 
 Результаты экспериментов показывают, что использование блочной адаптивной схемы редукции размерности может значительно сократить число испытаний, необходимое для решения задачи с заданной точностью. 
 
 \begin{thebibliography}{10}
 
 
 \bibitem{Evtushenko71}
-{\it	Евтушенко Ю.Г.} Численный метод поиска глобального экстремума функций (перебор на неравномерной сетке) // Ж. вычисл. матем. и матем. физ. 1971. T. 11, №6, С. 1390--1403.
+{\it	Евтушенко Ю.Г.} Численный метод поиска глобального экстремума функций (перебор на неравномерной сетке) // Журн. вычисл. матем. и матем. физ. 1971. T.~11. №~6. С.~1390--1403.
 
 \bibitem{Pijavski72}
-{\it	Пиявский С.А.} Один алгоритм отыскания абсолютного экстремума функций // Ж. вычисл. матем. и матем. физ. 1972. Т. 12, № 4. С. 888--896.
+{\it	Пиявский С.А.} Один алгоритм отыскания абсолютного экстремума функций // Журн. вычисл. матем. и матем. физ. 1972. Т. 12. № 4. С. 888--896.
 
 \bibitem{Shubert72}
-{\it Shubert B.O.} A sequential method seeking the global maximum of a function // SIAM J. Numer. Anal. 1972. V. 9. P. 379–388.
+{\it Shubert B.O.} A Sequential Method Seeking the Global Maximum of a Function // SIAM J. Numer. Anal. 1972. V. 9. P. 379–388.
 
 \bibitem{Jones93} 
-{\it Jones D.R., Perttunen C.D., Stuckman B.E.} Lipschitzian optimization without the Lipschitz constant // J. Optim. Theory Appl. 1993. V. 79. No. 1. P. 157--181.
+{\it Jones D.R., Perttunen C.D., Stuckman B.E.} Lipschitzian Optimization without the Lipschitz Constant // J. Optim. Theory Appl. 1993. V. 79. No. 1. P. 157--181.
 
 \bibitem{Pinter96}
-{\it Pinter J. D.} Global Optimization in Action (Continuous and Lipschitz Optimization: Algorithms, Implementations and Applications). Dordrecht: Kluwer Academic Publishers, 1996.
+{\it Pinter J.D.} Global Optimization in Action (Continuous and Lipschitz Optimization: Algorithms, Implementations and Applications). Dordrecht: Kluwer Acad. Publishers, 1996.
 
 \bibitem{Zilinskas08}
-{\it {\v Z}ilinskas J.} Branch and bound with simplicial partitions for global optimization // Math. Model. Anal. 2008. V. 13. No. 1. P. 145--159.
+{\it {\v Z}ilinskas J.} Branch and Bound with Simplicial Partitions for Global Optimization // Math. Model. Anal. 2008. V. 13. No. 1. P.~145--159.
 
 \bibitem{Evtushenko07}
-{\it Евтушенко Ю.Г., Малкова В.У., Станевичюс А.-И. А.} Распараллеливание процесса поиска глобального экстремума // Автомат. и телемех. 2007. № 5. C. 46--58
+{\it Евтушенко Ю.Г., Малкова В.У., Станевичюс А.-И.А.} Распараллеливание процесса поиска глобального экстремума // АиТ. 2007. №~5. C.~46--58.
+
+{\it Evtushenko Yu.G., Malkova V.U., Stanevichyus A.A.} Parallelization of the Global Extremum Searching Process // Autom. Remote Control. 2007. V. 68. No. 5. P.~787--798.
 
 \bibitem{Evtushenko09}
-{\it Евтушенко Ю.Г., Малкова В.У., Станевичюс А.-И. А.} Параллельный поиск глобального экстремума функций многих переменных // Ж. вычисл. матем. и матем. физ. 2009. Т. 49, №2. C. 255--269.
-
+{\it Евтушенко Ю.Г., Малкова В.У., Станевичюс А.-И.А.} Параллельный поиск глобального экстремума функций многих переменных // Журн. вычисл. матем. и матем. физ. 2009. Т.~49. №~2. C.~255--269.
 
 \bibitem{Jones09}%Проверить формат ссылки!!!
-{\it Jones D. R.} The DIRECT global optimization algorithm. In: Floudas C. A., Pardalos P. M. (eds.) The Encyclopedia of Optimization, Second Edition.  Springer. 2009. P. 725--735.
+{\it Jones D.R.} The DIRECT global optimization algorithm / Floudas C.A., Pardalos P.M. (eds.) The Encyclopedia of Optimization. Second Edition.  Springer, 2009. P.~725--735.
 
 \bibitem{Zilinskas10}
-{\it Paulavi{\v c}ius R., {\v Z}ilinskas J., Grothey A.}: Investigation of selection strategies in branch and bound algorithm with simplicial partitions and combination of Lipschitz bounds // Optim. Lett. 2010. V. 4(1). P. 173–--83
+{\it Paulavi{\v c}ius R., {\v Z}ilinskas J., Grothey A.} Investigation of Selection Strategies in Branch and Bound Algorithm with Simplicial Partitions and Combination of Lipschitz Bounds // Optim. Lett. 2010. V. 4 (1). P. 173--83.
 
 \bibitem{Evtushenko13}
-{\it Evtushenko Y. G., Posypkin M. A.} A deterministic approach to global box-constrained optimization // Optim. Lett. 2013. V. 7(4). P. 819--829
+{\it Evtushenko Y.G., Posypkin M.A.} A Deterministic Approach to Global Box-Constrained Optimization // Optim. Lett. 2013. V. 7 (4). P. 819--829.
 
 \bibitem{Kvasov13}
-{\it Квасов Д.Е., Сергеев Я.Д.} Методы липшицевой глобальной оптимизации в задачах управления // Автомат. и телемех. 2013. № 9. C. 3--19.
+{\it Квасов Д.Е., Сергеев Я.Д.} Методы липшицевой глобальной оптимизации в задачах управления // АиТ. 2013. № 9. C. 3--19.
+
+{\it Kvasov D.E., Sergeyev Ya.D.} Lipschitz Global Optimization Methods in Control Problems // Autom. Remote Control. 2013. V. 74. No. 9. P. 1435--1448.
 
 \bibitem{Paulavicius16}
-{\it Paulavi{\v c}ius R., {\v Z}ilinskas J.} Advantages of simplicial partitioning for Lipschitz optimization problems with linear constraints // Optim. Lett. 2016. V. 10(2). P. 237--246.
+{\it Paulavi{\v c}ius R., {\v Z}ilinskas J.} Advantages of Simplicial Partitioning for Lipschitz Optimization Problems with Linear Constraints // Optim. Lett. 2016. V.~10~(2). P.~237--246.
 
 \bibitem{Kureichik04}
-{\it Гладков Л.А., Курейчик В.В., Курейчик В.М.} Генетические алгоритмы. Учебное пособие. М.: ФИЗМАТЛИТ, 2004.
+{\it Гладков Л.А., Курейчик В.В., Курейчик В.М.} Генетические алгоритмы. Уч. пос. М.: Физматлит, 2004.
 
 \bibitem{Karpenko08}
-{\it Карпенко А.П.} Современные алгоритмы поисковой оптимизации. Алгоритмы, вдохновленные природой: учебное пособие. М.: Издательство МГТУ им. Н. Э. Баумана, 2014.
+{\it Карпенко А.П.} Современные алгоритмы поисковой оптимизации. Алгоритмы, вдохновленные природой. Уч. пос. М.: Изд-во МГТУ им. Н.Э. Баумана, 2014.
 
 \bibitem{Kvasov18}
-{\it Kvasov D.E., Mukhametzhanov M.S.} Metaheuristic vs. deterministic global optimization algorithms: The univariate case // Appl. Math. Comput. 2018. V. 318. P. 245--259.
+{\it Kvasov D.E., Mukhametzhanov M.S.} Metaheuristic vs. Deterministic Global Optimization Algorithms. The Univariate Case // Appl. Math. Comput. 2018. V.~318. P.~245--259.
 
 \bibitem{Sergeyev18}
-{\it Sergeyev Y., Kvasov D., Mukhametzhanov M.} On the efficiency of nature-inspired metaheuristics in expensive global optimization with limited budget // Sci.
-Rep. V. 8(1). Art. No. 435.
+{\it Sergeyev Y., Kvasov D., Mukhametzhanov M.} On the Efficiency of Nature-Inspired Metaheuristics in Expensive Global Optimization with Limited Budget // Sci.
+Rep. V.~8~(1). Art. No. 435.
 
 \bibitem{Neymark66a}
-{\it Неймарк Ю.И., Стронгин Р.Г.} Поиск экстремума функций по принципу максимума информации // Автомат. и телемех. 1966. № 11. С. 113--118.
+{\it Неймарк Ю.И., Стронгин Р.Г.} Поиск экстремума функций по принципу максимума информации // АиТ. 1966. №~11. С.~113--118.
+
+{\it Neimark Yu.I., Strongin R.G.} Function Extremum Search with the Use of Information Maximum Principle // Autom. Remote Control. 1966. V. 27. No. 1. P.~101--105.
 
 \bibitem{Neymark66b}
-{\it Неймарк Ю.И., Стронгин Р.Г.} Информационный подход к задаче поиска экстремума функций // Изв. АН СССР, Техническая кибернетика. 1966. № 1. С. 17--26.
+{\it Неймарк Ю.И., Стронгин Р.Г.} Информационный подход к задаче поиска экстремума функций // Изв. АН СССР, Технич. кибернетика. 1966. №~1. С.~17--26.
 
 \bibitem{Strongin70}
-{\it Стронгин Р.Г.} Многоэкстремальная минимизация // Автомат. и телемех. 1970. № 7. С. 63--67.
+{\it Стронгин Р.Г.} Многоэкстремальная минимизация // АиТ. 1970. №~7. С.~63--67.
+
+{\it Strongin R.G.} Multiextremal Minimization // Autom. Remote Control. 1970. V. 7. P.~1085--1088.
 
 \bibitem{Strongin78}
 {\it Стронгин Р.Г.} Численные методы в многоэкстремальных задачах (информационно-статистические алгоритмы). М.: Наука, 1978.
 
 \bibitem{Strongin86}
-{\it Стронгин Р.Г., Маркин Д.Л.} Минимизация многоэкстремальных функций при невыпуклых ограничениях // Кибернетика. 1986. №4. С.63--69.
+{\it Стронгин Р.Г., Маркин Д.Л.} Минимизация многоэкстремальных функций при невыпуклых ограничениях // Кибернетика. 1986. №~4. С.~63--69.
 
 \bibitem{Strongin87}
-{\it Маркин Д.Л., Стронгин Р.Г.} Метод решения многоэкстремальных задач с невыпуклыми ограничениями, использующий априорную информацию об оценках оптимума // Ж. вычисл. матем. и матем. физ. 1987. Т.27, № 1. С.52--61.
+{\it Маркин Д.Л., Стронгин Р.Г.} Метод решения многоэкстремальных задач с невыпуклыми ограничениями, использующий априорную информацию об оценках оптимума // Журн. вычисл. матем. и матем. физ. 1987. Т.~27. №~1. С.~52--61.
 
 \bibitem{Strongin93}
-{\it Маркин Д.Л., Стронгин Р.Г.} О равномерной оценке множества слабоэффективных точек в многоэкстремальных многокритериальных задачах оптимизации // Ж. вычисл. матем. и матем. физ. 1993 Т. 33, № 2. С. 195--205.
+{\it Маркин Д.Л., Стронгин Р.Г.} О равномерной оценке множества слабоэффективных точек в многоэкстремальных многокритериальных задачах оптимизации // Журн. вычисл. матем. и матем. физ. 1993. Т.~33. №~2. С.~195--205.
 
 \bibitem{Strongin13}
-{\it Стронгин Р.Г., Гергель В.П., Гришагин В.А., Баркалов К.А.} Параллельные вычисления в задачах глобальной оптимизации. М.: Издательство Московского университета, 2013.
+{\it Стронгин Р.Г., Гергель В.П., Гришагин В.А., Баркалов К.А.} Параллельные вычисления в задачах глобальной оптимизации. М.: Изд-во МГУ, 2013.
 
 \bibitem{Strongin91}
-{\it Стронгин Р.Г.} Параллельная многоэкстремальная оптимизация с использованием множества разверток // Ж. вычисл. матем. и матем. физ. 1991. T. 31, № 8. С. 1173--1185.
+{\it Стронгин Р.Г.} Параллельная многоэкстремальная оптимизация с использованием множества разверток // Журн. вычисл. матем. и матем. физ. 1991. T.~31. №~8. С.~1173--1185.
 
 \bibitem{Strongin00}
-{\it Strongin R.G., Sergeev Ya.D.} Global Optimization with Non-Convex Constraints. Sequential and Parallel Algorithms. Dordrecht: Kluwer Academic Publishers, 2000.
+{\it Strongin R.G., Sergeev Ya.D.} Global Optimization with Non-Convex Constraints. Sequential and Parallel Algorithms. Dordrecht: Kluwer Acad. Publishers, 2000.
 
 \bibitem{Grishagin97}
-{\it Grishagin V.A., Sergeyev Y.D., Strongin R.G.} Parallel characteristical algorithms for solving problems of global optimization // J. Glob. Optim. 1997. V. 10(2). P. 185--206.
+{\it Grishagin V.A., Sergeyev Y.D., Strongin R.G.} Parallel Characteristical Algorithms for Solving Problems of Global Optimization // J. Glob. Optim. 1997. V.~10~(2). P. 185--206.
 
 \bibitem{Grishagin01}
-{\it Sergeyev Y., Grishagin V.} Parallel asynchronous global search and the nested optimization scheme // J. Comput. Anal. Appl. 2001. V. 3(2). P. 123--145.
+{\it Sergeyev Y., Grishagin V.} Parallel Asynchronous Global Search and the Nested Optimization Scheme // J. Comput. Anal. Appl. 2001. V.~3~(2). P.~123--145.
 
 \bibitem{Grishagin16}
-{\it Gergel V., Grishagin V., Gergel A.} Adaptive nested optimization scheme for multidimensional global search // J. Glob. Optim. 2016. V. 66(1). P. 35--51.
+{\it Gergel V., Grishagin V., Gergel A.} Adaptive Nested Optimization Scheme for Multidimensional Global Search // J. Glob. Optim. 2016. V.~66~(1). P.~35--51.
 
 \bibitem{Barkalov2014}
-{\it Barkalov K., Gergel V.} Multilevel scheme of dimensionality reduction for parallel
-global search algorithms // In: OPT-i 2014 -- 1st International Conference on Engineering and Applied Sciences Optimization, Proceedings. 2014. P. 2111--2124.
+{\it Barkalov K., Gergel V.} Multilevel Scheme of Dimensionality Reduction for Parallel Global Search Algorithms / OPT-i 2014 --- 1st Int. Conf. on Engineering and Applied Sciences Optimization. Proc. 2014. P. 2111--2124.
 
 \bibitem{Grishagin2001}
-{\it Sergeyev Y., Grishagin V.} Parallel asynchronous global search and the nested optimization scheme // J. Comput. Anal. Appl. 2001. V. 3(2). P. 123--145.
+{\it Sergeyev Y., Grishagin V.} Parallel Asynchronous Global Search and the Nested Optimization Scheme // J. Comput. Anal. Appl. 2001. V. 3~(2). P. 123--145.
 
 \bibitem{Grishagin2015}
-{\it Gergel V., Grishagin V., Israfilov R.} Local tuning in nested scheme of global optimization // Procedia Computer Science. 2015. V. 51(1). P. 865--874
+{\it Gergel V., Grishagin V., Israfilov R.} Local Tuning in Nested Scheme of Global Optimization // Procedia Computer Sci. 2015. V.~51~(1). P.~865--874.
 
 \bibitem{Barkalov2016}
-{\it Barkalov K., Lebedev I.} Solving multidimensional global optimization problems using graphics accelerators // CCIS. 2016. V. 687. P. 224--235.
+{\it Barkalov K., Lebedev I.} Solving Multidimensional Global Optimization Problems using Graphics Accelerators // CCIS. 2016. V. 687. P. 224--235.
 
 \bibitem{Grishagin2016_1}
-{\it Grishagin V., Israfilov R., Sergeyev Y.}: Comparative efficiency of dimensionality reduction schemes in global optimization // AIP Conference Proceedings. 2016. V. 1776, art. no. 060011.
+{\it Grishagin V., Israfilov R., Sergeyev Y.} Comparative Efficiency of Dimensionality Reduction Schemes in Global Optimization // AIP Conf. Proc. 2016. V. 1776. Art. No. 060011.
 
 \bibitem{Grishagin18}
-{\it Grishagin V., Israfiov R., Sergeyev Y.} Convergence conditions and numerical comparison of global optimization methods based on dimensionality reduction schemes // Appl. Math. Comput. 2018. V. 318. P. 270--280.
+{\it Grishagin V., Israfiov R., Sergeyev Y.} Convergence Conditions and Numerical Comparison of Global Optimization Methods Based on Dimensionality Reduction Schemes // Appl. Math. Comput. 2018. V. 318. P. 270--280.
 
 \bibitem{Gergel19}
-{\it Gergel V., Grishagin V., Israfilov R.} Parallel dimensionality reduction for multiextremal optimization problems // LNCS. 2019. V. 11657. P. 166--178. 
-
+{\it Gergel V., Grishagin V., Israfilov R.} Parallel Dimensionality Reduction for Multiextremal Optimization Problems // LNCS. 2019. V. 11657. P. 166--178. 
 
 \bibitem{Gaviano03}
-{\it Gaviano M., Lera D., Kvasov D.E., Sergeyev Ya.D.} Software for generation of classes of test functions with known local and global minima for global optimization // ACM Trans. Math. Software. 2003. V. 29. P. 469--480.
+{\it Gaviano M., Lera D., Kvasov D.E., Sergeyev Ya.D.} Software for Generation of Classes of Test Functions with Known Local and Global Minima for Global Optimization // ACM Trans. Math. Software. 2003. V. 29. P. 469--480.
 
 \bibitem{Sovrasov19}
-{\it Sovrasov V.} Comparison of several stochastic and deterministic derivative-free global optimization algorithms // LNCS. 2019. V. 11548. P. 70--81. 
-
-
-%\bibitem{Sergeyev00} Kvasov, D.E., Pizzuti, C., Sergeyev, Y.D.: Local tuning and partition strategies for diagonal GO methods. Numer. Math. 94(1), 93--106 (2003)
-%\bibitem{Sergeyev06} Sergeyev, Ya.D., Kvasov, D.E.: Global search based on efficient diagonal partitions and a set of Lipschitz constants. SIAM J. Optim. 16(3), 910--937 (2006)
-
-%\bibitem{third} {\it Третий Т.Т.} Публикация в трудах конференции // Тр. Ин-та такого-то РАН. 2000. Т. 1. № 2. С. 3--4.
-%\bibitem{forth} {\it Четвертый Ч.Ч.} Публикация по теме в серийном издании или сборнике / Сб. научн. тр. к 20-летию Института. Новосибирск, Изд-во <<Пирогов>>, 2000. Т. 1. № 2. С. 3--4.
-%\bibitem{fifth} {\it Fifth F.} Some journal publication in English // Appl. Math. Comput. J., Elsevier Publ. 1925. V. 501. No. 1. P. 1234--5678.
-%\bibitem{sixth} {\it Sixth J.Th.} A book in English. Boston: Springer, 1991.
+{\it Sovrasov V.} Comparison of Several Stochastic and Deterministic Derivative-Free Global Optimization Algorithms // LNCS. 2019. V. 11548. P. 70--81. 
 
 \end{thebibliography}
 
-\AdditionalInformation{Стронгин Р.Г.}{Нижегородский государственный университет им. Н.И. Лобачевского, президент, Нижний Новгород}{strongin@unn.ru}
 
-\AdditionalInformation{Гергель В.П.}{Нижегородский государственный университет им. Н.И. Лобачевского, директор института информационных технологий, математики и механики, Нижний Новгород}{gergel@unn.ru}
+\clearpage
 
-\AdditionalInformation{Баркалов К.А.}{Нижегородский государственный университет им. Н.И. Лобачевского, доцент кафедры математического обеспечения и суперкомпьютерных технологий института информационных технологий, математики и механики, Нижний Новгород}{konstantin.barkalov@itmm.unn.ru}
+\begin{center}
+\bfseries ?enoiee e noaoua Aaeaiaei 
+\end{center}
+
+\vfill
+
+\begin{figure}[h]
+\begin{center}%[scale=0.3][width=0.75\textwidth]
+  \includegraphics[width=0.7\textwidth]{fig1.pdf} 
+  %\caption*{Взаимосвязи между подзадачами в многошаговой схеме.}\label{fig0} 
+  \caption{}\label{fig0} 
+\end{center}
+\end{figure}
+
+
+%\begin{figure}[h]
+  %\centering
+  %\includegraphics[scale=1.0]{pic01}
+  %\caption*{Aaeaiaei, ?en. 1}
+%\end{figure}
+\vfill
+
+
+\clearpage
+
+\begin{figure}[h]
+\begin{minipage}{0.5\linewidth}
+ \center{а}  \\ \center{\includegraphics[width=1.0\linewidth]{2DSimple.pdf}}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+ \center{б} \\ \center{\includegraphics[width=1.0\linewidth]{2DHard.pdf}}
+\end{minipage}
+%\caption{Операционные характеристики на классах GKLS \textit{Simple} (а) и \textit{Hard} (б), $N=2$.}
+\caption{} \label{fig2}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h]
+\begin{minipage}{0.5\linewidth}
+\center{а} \\ \center{\includegraphics[width=1.0\linewidth]{4DSimple.pdf}}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+\center{б} \\ \center{\includegraphics[width=1.0\linewidth]{4DHard.pdf}}
+\end{minipage}
+%\caption{Операционные характеристики на классах GKLS \textit{Simple} (а) и \textit{Hard} (б), $N=4$.}
+\caption{} \label{fig3}
+\end{figure}
+
+\clearpage
+
+\begin{figure}
+\center
+\includegraphics[width=0.5\linewidth]{6DSimple.pdf}
+%\caption{Операционные характеристики на классе GKLS \textit{Simple}, $N=6$.}
+\caption{} \label{fig4}
+\end{figure}
+
+
+
+\clearpage
+
+\begin{center}
+\bfseries Iiaiene e ?enoieai noaoue Aaeaiaei 
+\end{center}
+
+\begin{itemize}%[font=\normalfont]
+  \item [Рис. 1.] Noaiaoe?aneia ecia?a?aiea iaaieoiiai iiaaana
+\end{itemize}
+
+
 
 \end{document}
