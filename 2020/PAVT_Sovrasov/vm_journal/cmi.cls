@@ -7,7 +7,7 @@
 %0. Новый стандарт оформления приведен в этом стилевом файле и сопутствующем
 %	ему файле с расширением "tex".
 %1. Во избежании ошибок, просьба брать за основу 2 файла - example.tex, cmi.cls.
-%2. Если в тексте, следующем за командой \maketitle в .tex файле 
+%2. Если в тексте, следующем за командой \maketitle в .tex файле
 %   у Вас появилось выравнивание не "по ширине" - добавьте команду \justifying.
 %3. Уважаемые авторы! Постарайтесь, по вохзможности, ничего не изменять в стилевом файле cmi.cls
 
@@ -56,10 +56,10 @@
 \let\oldenumerate\enumerate
 \let\endoldenumerate\endenumerate
 \def\enumerate{% FIXME: add support of optional arguments
-	\oldenumerate[topsep=0pt, itemsep=0pt, parsep=0pt, widest=9, leftmargin=7mm]
+  \oldenumerate[topsep=0pt, itemsep=0pt, parsep=0pt, widest=9, leftmargin=7mm]
 }
 \def\enumerateparen{% FIXME: delete this one if the trick with enumerate works
-	\oldenumerate[topsep=0pt, itemsep=0pt, parsep=0pt, label=\arabic*), widest=9, leftmargin=7mm]
+  \oldenumerate[topsep=0pt, itemsep=0pt, parsep=0pt, label=\arabic*), widest=9, leftmargin=7mm]
 }
 \let\endenumerateparen\endoldenumerate
 
@@ -161,22 +161,22 @@
 
 
 \renewcommand{\maketitle}{%
-	\ifx\@firsttitle\indefined% если это первый заголовок статьи
+  \ifx\@firsttitle\indefined% если это первый заголовок статьи
 %		\thispagestyle{vestnikfirst}% стиль без колонтитулов
-		\def\@firsttitle{}
-	\fi
+    \def\@firsttitle{}
+  \fi
 
-	\ifx \@classification \@empty% если пустая классификация
-		\vspace{10pt} % то она реально пустая
-	\else%
-		{\large{\begin{flushleft}\textbf{\@classification}\end{flushleft}}}% иначе - пишем её
-	\fi%
-	{\noindent\Large\centering\textbf{\@title}\par\vskip 10pt}% собственно, заголовок
-	{\noindent\large\centering\textbf{\@author}\vskip 3pt}% авторы
-	{\noindent\large\centering\textit{\@address}\\} % почтовые адреса
-	{\noindent\large\centering\textit{\@email} \\} % emailы
-	{\noindent\large\centering{\@received}\\} % дата поступления в редакцию
-	\smallskip%
+  \ifx \@classification \@empty% если пустая классификация
+    \vspace{10pt} % то она реально пустая
+  \else%
+    {\large{\begin{flushleft}\textbf{\@classification}\end{flushleft}}}% иначе - пишем её
+  \fi%
+  {\noindent\Large\centering\textbf{\@title}\par\vskip 10pt}% собственно, заголовок
+  {\noindent\large\centering\textbf{\@author}\vskip 3pt}% авторы
+  {\noindent\large\centering\textit{\@address}\\} % почтовые адреса
+  {\noindent\large\centering\textit{\@email} \\} % emailы
+  {\noindent\large\centering{\@received}\\} % дата поступления в редакцию
+  \smallskip%
 }
 
 % --- формат номера раздела ---
@@ -187,7 +187,7 @@
 \clubpenalty=10000 % вверху абзацев
 
 \usepackage{ifthen,latexsym}
-  
+
 \normalsize
 \usepackage[margin=2.5cm]{geometry}
 
@@ -195,7 +195,7 @@
 \let\olditemize\itemize
 \let\endolditemize\enditemize
 \def\itemize{
-	\olditemize[topsep=0pt, itemsep=0pt, parsep=0pt]
+  \olditemize[topsep=0pt, itemsep=0pt, parsep=0pt]
 }
 
 % --- параметры абзаца ---
@@ -203,7 +203,7 @@
 \parskip=0mm
 \leftskip=0mm
 \rightskip=0mm
- 
+
 % --- вертикальные отступы в строчных и выносных формулах
 \abovedisplayskip=12pt plus 3pt minus 3pt
 \belowdisplayskip=12pt plus 3pt minus 3pt
@@ -224,102 +224,102 @@
 \newcommand{\sectspacp}{\hspace*{\medskipamount}}
 
 \renewcommand{\section}{%
-	\@startsection{section}{1}{0mm}{0.2\baselineskip}{0.5\baselineskip}{\normalfont\raggedright\Large\bf}%
+  \@startsection{section}{1}{0mm}{0.2\baselineskip}{0.5\baselineskip}{\normalfont\raggedright\Large\bf}%
 }
 
 \renewcommand{\subsection}{%
-	\@startsection{subsection}{2}{0mm}{-\baselineskip}{0.5\baselineskip}{\normalfont\raggedright\large\bf}%
+  \@startsection{subsection}{2}{0mm}{-\baselineskip}{0.5\baselineskip}{\normalfont\raggedright\large\bf}%
 }
 
 \renewcommand{\subsubsection}{%
-	\@startsection{subsubsection}{3}{0mm}{-\baselineskip}{0.5\baselineskip}{\normalfont\raggedright\large\it}%
+  \@startsection{subsubsection}{3}{0mm}{-\baselineskip}{0.5\baselineskip}{\normalfont\raggedright\large\it}%
 }
 
 % --- теорема ---
 \newcounter{theocounter}
 \newenvironment{theorem}{%
-	\refstepcounter{theocounter}\par\addvspace{3mm}\noindent%
-	{\bf Теорема \thetheocounter.\ }%
+  \refstepcounter{theocounter}\par\addvspace{3mm}\noindent%
+  {\bf Теорема \thetheocounter.\ }%
 }{%
-	\par\addvspace{3mm}%
+  \par\addvspace{3mm}%
 }
 
 % --- теорема без номера ---
 \newenvironment{theorem*}{%
-	\refstepcounter{theocounter}\par\addvspace{3mm}\noindent%
-	{\bf Теорема.\ }\begin{it}%
+  \refstepcounter{theocounter}\par\addvspace{3mm}\noindent%
+  {\bf Теорема.\ }\begin{it}%
 }{%
-	\end{it}\par\addvspace{3mm}
+  \end{it}\par\addvspace{3mm}
 }
 
 % --- лемма ---
 \newcounter{lemcounter}
 \newenvironment{lemma}{%
-	\refstepcounter{lemcounter}\par\addvspace{3mm}\noindent
-	{\bf Лемма \thelemcounter.\ }%
+  \refstepcounter{lemcounter}\par\addvspace{3mm}\noindent
+  {\bf Лемма \thelemcounter.\ }%
 }{%
-	\par\addvspace{3mm}%
+  \par\addvspace{3mm}%
 }
 
 % --- замечание ---
 \newcounter{remcounter}
 \newenvironment{remark}{%
-	\refstepcounter{remcounter}\par\addvspace{3mm}\noindent
-	{\bf Замечание \theremcounter.\ }%
+  \refstepcounter{remcounter}\par\addvspace{3mm}\noindent
+  {\bf Замечание \theremcounter.\ }%
 }{%
-	\par\addvspace{3mm}%
+  \par\addvspace{3mm}%
 }
 
 % --- определение ---
 \newcounter{defcounter}
 \newenvironment{definition}{%
-	\refstepcounter{defcounter}\par\addvspace{3mm}\noindent
-	{\bf Определение \thedefcounter.\ }%
+  \refstepcounter{defcounter}\par\addvspace{3mm}\noindent
+  {\bf Определение \thedefcounter.\ }%
 }{%
-	\par\addvspace{3mm}%
+  \par\addvspace{3mm}%
 }
 
 % --- пример ---
 \newcounter{examcounter}
 \newenvironment{example}{%
-	\refstepcounter{examcounter}\par\addvspace{3mm}\noindent
-	{\bf Пример \theexamcounter.\ }%
+  \refstepcounter{examcounter}\par\addvspace{3mm}\noindent
+  {\bf Пример \theexamcounter.\ }%
 }{%
-	\par\addvspace{3mm}%
+  \par\addvspace{3mm}%
 }
 
 % --- предложение ---
 \newcounter{propcounter}
 \newenvironment{proposition}{%
-	\refstepcounter{propcounter}\par\addvspace{3mm}\noindent
-	{\bf Предложение \thepropcounter.\ }%
+  \refstepcounter{propcounter}\par\addvspace{3mm}\noindent
+  {\bf Предложение \thepropcounter.\ }%
 }{%
-	\par\addvspace{3mm}%
+  \par\addvspace{3mm}%
 }
 
 % --- следствие ---
 \newcounter{corcounter}
 \newenvironment{corollary}{%
-	\refstepcounter{corcounter}\par\addvspace{3mm}\noindent%
-	{\bf Следствие \thecorcounter.\ }%
+  \refstepcounter{corcounter}\par\addvspace{3mm}\noindent%
+  {\bf Следствие \thecorcounter.\ }%
 }{%
-	\par\addvspace{3mm}%
+  \par\addvspace{3mm}%
 }
 
 % список литературы
 \newenvironment{biblio}[1][9]{% \begin{biblio}[maxval] ...
-	\renewcommand{\refname}{Литература}%
-	\begin{thebibliography}{#1}%
-	\itemsep 0pt%
+  \renewcommand{\refname}{Литература}%
+  \begin{thebibliography}{#1}%
+  \itemsep 0pt%
 }{%
-	\end{thebibliography}%
+  \end{thebibliography}%
 }
-\newenvironment{biblio_lat}[1][9]{% 
-	\renewcommand{\refname}{References}%
-	\begin{thebibliography}{#1}%
-	\itemsep 0pt%
+\newenvironment{biblio_lat}[1][9]{%
+  \renewcommand{\refname}{References}%
+  \begin{thebibliography}{#1}%
+  \itemsep 0pt%
 }{%
-	\end{thebibliography}%
+  \end{thebibliography}%
 }
 \renewcommand{\@biblabel}[1]{#1.} % Формат списка литературы
 
@@ -330,35 +330,35 @@
 \newcommand\Paragraph{\textsection}
 
 \newcommand{\keywords}[1]{%
-	{\footnotesize\it Ключевые слова:~#1}%
+  {\footnotesize\it Ключевые слова:~#1}%
 }
 \newcommand{\keywordsen}[1]{%
-	{\footnotesize\it Keywords:~#1}%
+  {\footnotesize\it Keywords:~#1}%
 }
 
 \renewenvironment{abstract}{%
-	\vspace{8pt}
-	\footnotesize
-	\begin{adjustwidth}{0mm}{0em}%
-		\hspace{2em}%
+  \vspace{8pt}
+  \footnotesize
+  \begin{adjustwidth}{0mm}{0em}%
+    \hspace{2em}%
 }{%
-	\end{adjustwidth}
+  \end{adjustwidth}
 }
 
 \newenvironment{citationplace}{%
-	\begin{adjustwidth}{0mm}{0em}%
-		\citationfont%
-		\hspace{6mm}%
-	}{%
+  \begin{adjustwidth}{0mm}{0em}%
+    \citationfont%
+    \hspace{6mm}%
+  }{%
 \end{adjustwidth}
 }
 
 \newenvironment{citationexample}{%
-	\large
-	\textbf
-	\flushleft
-	\begin{adjustwidth}{0mm}{0em}%
-	}{%
+  \large
+  \textbf
+  \flushleft
+  \begin{adjustwidth}{0mm}{0em}%
+  }{%
 \end{adjustwidth}
 }
 
@@ -375,108 +375,108 @@
 \newlength{\@tblwid}
 \setlength{\@tblwid}{10cm}
 \renewcommand{\@makecaption}[2]{%
-	\def\@tabenvname{table}%
-	\ifx\@currenvir\@tabenvname%
-		% we're in a table environment
-		\vspace{\abovecaptionskip}%
-		\centering\parbox{\@tblwid}{%
-			{\flushright\textbf{\ifthenelse{\totvalue{table} > 1}{#1}{\tablename}}\par\vspace{-1em}}%
-			{\center #2\par\vspace{2mm}}%
-		}
-		\vspace{\belowcaptionskip}%
-	\else%
-		% we're in a figure environment
-		\vspace{\abovecaptionskip}%
-		\sbox{\@tempboxa}{{#1. #2}}%
-		\ifdim \wd\@tempboxa >\hsize%
-			{\textbf{\small\ifthenelse{\totvalue{figure} > 1}{#1.}{\figurename}} #2}%
-		\else%
-			\global\@minipagefalse%
-			\hbox to \hsize {\textbf{\small\hfil\ifthenelse{\totvalue{figure} > 1}{#1.}{\figurename}} #2 \hfil}%
-		\fi%
-		\vspace{\belowcaptionskip}%
-	\fi%
+  \def\@tabenvname{table}%
+  \ifx\@currenvir\@tabenvname%
+    % we're in a table environment
+    \vspace{\abovecaptionskip}%
+    \centering\parbox{\@tblwid}{%
+      {\flushright\textbf{\ifthenelse{\totvalue{table} > 1}{#1}{\tablename}}\par\vspace{-1em}}%
+      {\center #2\par\vspace{2mm}}%
+    }
+    \vspace{\belowcaptionskip}%
+  \else%
+    % we're in a figure environment
+    \vspace{\abovecaptionskip}%
+    \sbox{\@tempboxa}{{#1. #2}}%
+    \ifdim \wd\@tempboxa >\hsize%
+      {\textbf{\small\ifthenelse{\totvalue{figure} > 1}{#1.}{\figurename}} #2}%
+    \else%
+      \global\@minipagefalse%
+      \hbox to \hsize {\textbf{\small\hfil\ifthenelse{\totvalue{figure} > 1}{#1.}{\figurename}} #2 \hfil}%
+    \fi%
+    \vspace{\belowcaptionskip}%
+  \fi%
 }
 
 % --- таблица ---
 \newcommand{\tabref}[1]{табл.~\ref{#1}} % быстрая ссылка на таблицу
 \newsavebox{\@tblbox}
 \newcommand{\tab}[3]{% label, caption, data
-	\begin{table}[h]%
-	\sbox{\@tblbox}{#3}% сохранить таблицу в бокс
-	\settowidth{\@tblwid}{\usebox{\@tblbox}}% измерить ширину полученного бокса
-	\caption{#2}%
-	\label{#1}%
-	\centering%
-	\usebox{\@tblbox}% собственно напечатать таблицу
-	\end{table}%
+  \begin{table}[h]%
+  \sbox{\@tblbox}{#3}% сохранить таблицу в бокс
+  \settowidth{\@tblwid}{\usebox{\@tblbox}}% измерить ширину полученного бокса
+  \caption{#2}%
+  \label{#1}%
+  \centering%
+  \usebox{\@tblbox}% собственно напечатать таблицу
+  \end{table}%
 }
 
 % --- рисунок ---
 \newcommand{\figref}[1]{рис.~\ref{#1}} % быстрая ссылка на рисунок
 \newcommand{\fig}[3]{% params, label, caption
-	\begin{figure}[h]%
-		\centering%
-		\includegraphics[#1]{#2}%
-		\caption{#3}%
-		\label{#2}%
-	\end{figure}%
+  \begin{figure}[h]%
+    \centering%
+    \includegraphics[#1]{#2}%
+    \caption{#3}%
+    \label{#2}%
+  \end{figure}%
 }
 
 % --- исходный код ---
 \newcommand{\code}[4][\linewidth]{% width, params, label, caption
-	\begin{figure}[h]%
-		\centering%
-		\topsep=0pt%
-		\partopsep=0pt%
-		\begin{minipage}{#1}
-		{
-		\small\VerbatimInput[#2]{#3}
+  \begin{figure}[h]%
+    \centering%
+    \topsep=0pt%
+    \partopsep=0pt%
+    \begin{minipage}{#1}
+    {
+    \small\VerbatimInput[#2]{#3}
 
-		}%
-		\end{minipage}
-		\vskip 3pt
-		\caption{#4}%
-		\label{#3}%
-	\end{figure}%
+    }%
+    \end{minipage}
+    \vskip 3pt
+    \caption{#4}%
+    \label{#3}%
+  \end{figure}%
 }
 
 % --- исходный код без номера ---
 \newcommand{\codenonum}[3]{% params, label, caption
-	\begin{figure}[h]%
-		\centering%
-		\topsep=0pt%
-		\partopsep=0pt%
-		\begin{minipage}{\linewidth}
-		{
-		\small\VerbatimInput[#1]{#2}
+  \begin{figure}[h]%
+    \centering%
+    \topsep=0pt%
+    \partopsep=0pt%
+    \begin{minipage}{\linewidth}
+    {
+    \small\VerbatimInput[#1]{#2}
 
-		}%
-		\end{minipage}
-		\vskip 3pt
-		#3%
-		\label{#2}%
-	\end{figure}%
+    }%
+    \end{minipage}
+    \vskip 3pt
+    #3%
+    \label{#2}%
+  \end{figure}%
 }
 
 % --- неплавающий рисунок
 \newcommand{\fignofloat}[3]{% params, label, caption
-	\center%
-	\includegraphics[#1]{#2}%
-	\caption{#3}%
-	\label{#2}%
+  \center%
+  \includegraphics[#1]{#2}%
+  \caption{#3}%
+  \label{#2}%
 }
 
 \newcommand{\MakeUppercaseWithNewline}[1]{%
-	\begingroup
-		\let\SavedOrgNewline\\%
-		\DeclareRobustCommand{\\}{\SavedOrgNewline}%
-		\MakeTextUppercase{#1}%
-	\endgroup
+  \begingroup
+    \let\SavedOrgNewline\\%
+    \DeclareRobustCommand{\\}{\SavedOrgNewline}%
+    \MakeTextUppercase{#1}%
+  \endgroup
 }
 
 \renewcommand\@makefntext[1]{%
-	\noindent\@makefnmark #1%
+  \noindent\@makefnmark #1%
 }
 
 % vim: syntax=tex
