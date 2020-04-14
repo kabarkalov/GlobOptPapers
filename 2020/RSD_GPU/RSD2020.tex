@@ -19,6 +19,7 @@
 \usepackage{marvosym}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{cite}
 
 %\usepackage[russian]{babel}
 
@@ -75,52 +76,47 @@ With regard to many deterministic algorithms of Lipschitzian global optimization
 
 Within the framework of this research, we consider the problems of capturing the optimum, which are characterized by a lengthy period for calculating the values of objective function in comparison with the time needed for processing them. For example, objective function can be specified using systems of linear algebraic equations, systems of ordinary differential equations, etc. Currently, graphics accelerators can be used to solve problems of this type. Moreover, an accelerator can solve several such problems at once \cite{Kindratenko2014}; i.e., using the GPU, one can calculate multiple function values simultaneously.
 
-Thus, calculating the optimization criterion can be implemented on the GPU, and the role of the optimization algorithm (running on the CPU) consists in the effective selection of points for conducting parallel tests. This scheme of working with the accelerator is fully consistent with the work of the parallel global search algorithm developed at the Lobachevsky State University of Nizhni Novgorod and presented in a series of publications [references].
+Thus, calculating the optimization criterion can be implemented on the GPU, and the role of the optimization algorithm (running on the CPU) consists in the effective selection of points for conducting parallel trials. This scheme of working with the accelerator is fully consistent with the work of the parallel global search algorithm developed at the Lobachevsky State University of Nizhni Novgorod and presented in a series of publications \cite{Barkalov2014,Barkalov2020,Barkalov2019,Grishagin2016,Grishagin2015,Grishagin2018,Strongin2000}.
 
 
 \section{Multidimensional parallel global search algorithm}
-Consider the problem of finding the global minimum of the \(N\)-dimensional function \(\varphi(y)\) in the hyperinterval  \(D=\{y\in R^N:a_i\leqslant x_i\leqslant{b_i}, 1\leqslant{i}\leqslant{N}\}\)  We will assume that the function satisfies the Lipschitz condition with an a priori unknown constant \(L\).
+Consider the problem of finding the global minimum of the \(N\)-dimensional function \(\varphi(y)\) in the hyperinterval  \(D=\{y\in R^N:a_i\leqslant x_i\leqslant{b_i}, 1\leqslant{i}\leqslant{N}\}\).  We will assume that the function satisfies the Lipschitz condition with an a priori unknown constant \(L\).
 \begin{equation}
 \label{task}
-\varphi(y^*)=\min\{\varphi(y):y\in D\}
+\varphi(y^*)=\min\{\varphi(y):y\in D\},
 \end{equation}
 \begin{equation}
 \label{lip}
-|\varphi(y_1)-\varphi(y_2)|\leqslant L\Vert y_1-y_2\Vert,y_1,y_2\in D,0<L<\infty
+|\varphi(y_1)-\varphi(y_2)|\leqslant L\Vert y_1-y_2\Vert,y_1,y_2\in D,0<L<\infty.
 \end{equation}
 
 In this paper, we will use an approach based on the idea of reducing dimensionality using the Peano space-filling curve \(y(x)\), which continuously and unambiguously maps a segment of the real axis \([0,1]\) onto an \(n\)-dimensional cube
 \begin{equation}
 \label{cube}
-\lbrace y\in R^N:-2^{-1}\leqslant y_i\leqslant 2^{-1},1\leqslant i\leqslant N\rbrace=\{y(x):0\leqslant x\leqslant 1\}
+\lbrace y\in R^N:-2^{-1}\leqslant y_i\leqslant 2^{-1},1\leqslant i\leqslant N\rbrace=\{y(x):0\leqslant x\leqslant 1\}.
 \end{equation}
 
-The questions of numerical construction of approximations to Piano curve (evolvents) and the corresponding theory are discussed in detail in \cite{Strongin2000}, \cite{Sergeyev2013}. Using evolvents \(y(x)\) reduces the multidimensional problem (\ref{task}) to a one-dimensional problem
+The questions of numerical construction of approximations to Piano curve (evolvents) and the corresponding theory are discussed in detail in \cite{Sergeyev2013,Strongin2000}. Using evolvents \(y(x)\) reduces the multidimensional problem (\ref{task}) to a one-dimensional problem
 \begin{displaymath}
 \label{oneDimTask}
-\varphi(y^*)=\varphi(y(x^*))=\min\{\varphi(y(x)):x\in [0,1]\}
+\varphi(y^*)=\varphi(y(x^*))=\min\{\varphi(y(x)):x\in [0,1]\}.
 \end{displaymath}
 
-An important property is that the relative differences of the function remain limited: if the function \(\varphi(y)\) in the region \(D
-\) satisfies the Lipschitz condition, then the function \(\varphi(y(x))\) in the interval \([0,1]\) will satisfy the uniform Holder condition
+An important property is that the relative differences of the function remain limited: if the function \(\varphi(y)\) in the region \(D\) satisfies the Lipschitz condition, then the function \(\varphi(y(x))\) in the interval \([0,1]\) will satisfy a uniform H{\"o}lder condition
 \begin{displaymath}
 \label{holder}
-|\varphi(y(x_1))-\varphi(y(x_2))|\leqslant H{|x_1-x_2|}^{\frac{1}{N}},x_1,x_2\in[0,1]
+|\varphi(y(x_1))-\varphi(y(x_2))|\leqslant H{|x_1-x_2|}^{\frac{1}{N}}, x_1,x_2\in[0,1],
 \end{displaymath}
-where the Holder constant \(H\) is related to the Lipschitz constant \(L\) by the ratio
+where the H{\"o}lder constant \(H\) is related to the Lipschitz constant \(L\) by the ratio $ H=2L\sqrt{N+3}$. 
+Therefore, without limiting generality, we can consider minimizing the one-dimensional function \(f(x)=\varphi(y(x)), x\in[0,1]\), which satisfies the H{\"o}lder condition.
+
+The considered algorithm for solving this problem involves constructing a sequence of points \(x_k\), in which the values of objective function \(z_k = f(x_k)\) are calculated. We will call the process of computing the value of a function at a single point a trial. Assume that we have \(p\geqslant 1\) computational elements at our disposal and \(p\) trials which are performed simultaneously (synchronously) within a single iteration of the method. Let \(k(n)\) denote the total number of trials performed, after \(n\) parallel iterations.
+
+In the first iteration of the method, the trial is carried out at an arbitrary internal point \(x^1\) of the interval \([0,1]\). Let \(n>1\) iterations of the method be performed, during which trials were carried out at \(k = k(n)\) points \(x^i, 1\leqslant i\leqslant k\). Then the trial points  \(x^{k+1},\dotsc,x^{k+p}\) of the next \((n+1)\)-th iteration are determined in accordance with the following rules.
+
+Step 1. Renumber the points of the set \(X_k=\{x^1,\dotsc,x^k\}\cup\{0\}\cup\{1\}\), which includes the boundary points of the interval \([0,1]\), as well as the points of the previous trials, with the lower indices in the order of their increasing coordinate values, i.e.
 \begin{displaymath}
-H=4Ld\sqrt{N},d=\max\{b_i-a_i:1\leqslant i\leqslant N\}
-\end{displaymath}
-
-Therefore, without limiting generality, we can consider minimizing the one-dimensional function \(f(x)=\varphi(y(x)), x\in[0,1]\), which satisfies the Holder condition.
-
-The considered algorithm for solving this problem involves constructing a sequence of points \(x_k\), in which the values of objective function \(z_k = f(x_k)\) are calculated. We will call the process of computing the value of a function at a single point a trial. Assume that we have \(P\geqslant 1\) computational elements at our disposal and \(P\) tests which are performed simultaneously (synchronously) within a single iteration of the method. Let \(k(n)\) denote the total number of tests performed, after \(n\) parallel iterations.
-
-In the first iteration of the method, the test is carried out at an arbitrary internal point \(x^1\) of the interval \([0,1]\). Let \(n>1\) iterations of the method be performed, during which tests were carried out at \(k = k(n)\) points \(x^i, 1\leqslant i\leqslant k\). Then the points  \(x^{k+1},\dotsc,x^{k+p}\). search tests of the following \((n+1)\)-th iteration are determined in accordance with the rules:
-
-Step 1. Renumber the points of the set \(X_k=\{x^1,\dotsc,x^k\}\cup\{0\}\cup\{1\}\), which includes the boundary points of the interval \([0,1]\), as well as the points of the previous tests, with the lower indices in the order of their increasing coordinate values, i.e.
-\begin{displaymath}
-0=x_0<x_1<\dotsc<x_{k+1}=1
+0=x_0<x_1<\dotsc<x_{k+1}=1.
 \end{displaymath}
 
 Step 2. Assuming \(z_i=f(y(x_i)),1\leqslant i\leqslant k\) calculate the values
@@ -141,11 +137,11 @@ where \(r > 1\) is the specified parameter of the method, and \(\Delta_i=(x_i-x_
 Step 3. For each interval \((x_{i-1},x_i),1\leqslant i\leqslant k+1\), calculate the characteristic in accordance with the formulas 
 \begin{displaymath}
 \label{step3_1}
-R(1)=2\Delta_1-4\dfrac{z_1}{M},R(k+1)=2\Delta_{k+1}-4\dfrac{z_k}{M}
+R(1)=2\Delta_1-4\dfrac{z_1}{M}, \; R(k+1)=2\Delta_{k+1}-4\dfrac{z_k}{M},
 \end{displaymath}
 \begin{displaymath}
 \label{step3_2}
-R(i)=\Delta_i+\dfrac{(z_i-z_{i-1})^2}{M^2\Delta_i}-2\dfrac{z_i+z_{i-1}}{M},1<i<k+1
+R(i)=\Delta_i+\dfrac{(z_i-z_{i-1})^2}{M^2\Delta_i}-2\dfrac{z_i+z_{i-1}}{M},1<i<k+1.
 \end{displaymath}
 
 Step 4. The characteristics \(R(i),1\leqslant i\leqslant k+1\), arrange in descending order 
@@ -153,23 +149,24 @@ Step 4. The characteristics \(R(i),1\leqslant i\leqslant k+1\), arrange in desce
 \label{step4}
 R(t_1)\geqslant R(t_2)\geqslant \dots \geqslant R(t_{k})\geqslant R(t_{k+1})
 \end{displaymath}
-and select \(P\) of the largest characteristics with interval numbers \(t_j,1\leqslant j\leqslant P\).
+and select \(p\) of the largest characteristics with interval numbers \(t_j,1\leqslant j\leqslant p\).
 
-Step 5. Carry out new tests at the points \(x_{k+j},1\leqslant j\leqslant P\), calculated using the formulas
+Step 5. Carry out new trials at the points \(x_{k+j},1\leqslant j\leqslant p\), calculated using the formulas
 \begin{displaymath}
-x_{k+j}=\dfrac{x_{t_j}+x_{t_j-1}}{2},t_j=1,t_j=k+1
+x_{k+j}=\dfrac{x_{t_j}+x_{t_j-1}}{2},\; t_j=1, \; t_j=k+1
 \end{displaymath}
 \begin{displaymath}
 \label{step5}
-{{x}^{k+1}}=\frac{{{x}_{{{t}_{j}}}}+{{x}_{{{t}_{j}}-1}}}{2}-\text{sign}({{z}_{{{t}_{j}}}}-{{z}_{{{t}_{j}}-1}})\frac{1}{2r}{{\left[ \frac{|{{z}_{{{t}_{j}}}}-{{z}_{{{t}_{j}}-1}}|}{\mu } \right]}^{N}}, 1<{{t}_{j}}<k+1
+{{x}^{k+1}}=\frac{{{x}_{{{t}_{j}}}}+{{x}_{{{t}_{j}}-1}}}{2}-\text{sign}({{z}_{{{t}_{j}}}}-{{z}_{{{t}_{j}}-1}})\frac{1}{2r}{{\left[ \frac{|{{z}_{{{t}_{j}}}}-{{z}_{{{t}_{j}}-1}}|}{\mu } \right]}^{N}}, 1<{{t}_{j}}<k+1.
 \end{displaymath}
 
-The algorithm stops working if the condition \(\Delta_{t_j}\leqslant \varepsilon\)  is satisfied for at least one number \(t_j,1\leqslant j\leqslant P\); here \(\varepsilon>0\)  is the specified accuracy. As an estimate of the globally optimal solution to the problem (\ref{task}), the values are selected 
+The algorithm stops working if the condition \(\Delta_{t_j}\leqslant \varepsilon\)  is satisfied for at least one number \(t_j,1\leqslant j\leqslant p\); here \(\varepsilon>0\)  is the specified accuracy. As an estimate of the globally optimal solution to the problem (\ref{task}), the values are selected 
 \begin{displaymath}
-f_{k}^{*}=\underset{1\le i\le k}{\mathop{\min }}\,f({{x}^{i}}),   x_{k}^{*}=\arg \quad \underset{1\le i\le k}{\mathop{\min }}\,f({{x}^{i}})
+f_{k}^{*}=\underset{1\le i\le k}{\mathop{\min }}\,f({{x}^{i}}),   x_{k}^{*}=\arg \quad \underset{1\le i\le k}{\mathop{\min }}\,f({{x}^{i}}).
 \end{displaymath}
 
-For the rationale in using this method of organizing parallel computing, see \cite{Ref11}. Modifications that account for the presence of inequality constraints in the problem, as well as information about the derivative of the objective function, are presented in \cite{Ref12} – \cite{Ref14}.
+For the rationale in using this method of organizing parallel computing see \cite{Strongin2000}. 
+%Modifications that account for the presence of inequality constraints in the problem, as well as information about the derivative of the objective function, are presented in \cite{Ref12} – \cite{Ref14}.
 
 \section{Dimensionality reduction schemes in global optimization problems}
 
@@ -178,60 +175,53 @@ For the rationale in using this method of organizing parallel computing, see \ci
 Reducing multidimensional problems to one-dimensional ones through the use of evolvents has important properties such as continuity and preserving uniform bounding of function differences with limited argument variation. However, some information about the proximity of points in multidimensional space is lost, since the point \(x\in [0,1]\) has only left and right neighbors, and the corresponding point \(y(x) \in R^N\) has neighbors in \(2^N\) directions. As a result, when using evolvents, the images \(y' , y''\) that are close in \(N\)-dimensional space can correspond to rather distant prototypes \(x' , x''\) on the interval \([0,1]\). This property leads to redundant calculations, because several limit points \(x' , x''\) of the test sequence generated by the method on the segment \([0,1]\), can correspond to a single limit point \(y\) in \(N\)-dimensional space.
 
 A possible way to overcome this disadvantage is to use a set of evolvents (multiple mappings)
-
 \begin{displaymath}
 \label{eq:142}
 Y_L(x)=\left\{y^0(x),\ y^1(x),...,\ y^L(x)\right\}
 \end{displaymath}
+instead of using a single Peano curve \(y(x)\) (see \cite{Strongin1992,Strongin2000}). For example, each Peano curve \(y^i(x)\) from \(Y_L(x)\) can be obtained as a result of some shift along the main diagonal of the hyperinterval \(D\), the original curve \(y(x)\). Another way is to rotate the evolvent around the origin. The set of evolvents that have been constructed allows us to obtain for any close images \(y', y''\), close preimages \(x', x''\) for some mapping \(y^i(x)\).
 
-instead of using a single Peano curve \(y(x)\) (see \cite{Strongin1992}, \cite{Strongin2000}). For example, each Peano curve \(y^i(x)\) from \(Y_L(x)\) can be obtained as a result of some shift along the main diagonal of the hyperinterval \(D\), the original curve \(y(x)\). Another way is to rotate the sweep around the coordinate. The set of evolvents that have been constructed allows us to obtain for any close images \(y', y''\), close prototypes \(x', x''\) for some mapping \(y^i(x)\).
-
-   Using a set of mappings leads to the formation of a corresponding set of one-dimensional multiextremal problems
-
+Using a set of mappings leads to the formation of a corresponding set of one-dimensional multiextremal problems
 \begin{displaymath}
 \label{6_problem_l}
-\min{\left\{\varphi(y^l(x)):x\in [0,1], \;  \right\}}, \ 0 \leq l \leq L.
+\min{\left\{\varphi(y^l(x)):x\in [0,1], \;  \right\}}, \ 0 \leqslant l \leqslant L.
 \end{displaymath}
-
 Each problem from this set can be solved independently, and any calculated value \(z= \varphi(y')\), \(y'=y^i(x')\) of the function \(\varphi(y)\) in the \(i\)-th problem can be interpreted as calculating the value \(z= \varphi(y')\), \(y'=y^s(x'')\) for any other \(s\)-th problem without repeated labor-intensive calculations of the function \(\varphi(y)\). Such informational unity makes it possible to solve the entire set of problems in a parallel fashion. This approach was discussed in detail in \cite{Barkalov2019}.
 
 
 \subsection{Recursive dimensionality reduction scheme}
 
-The recursive optimization scheme is based on the well-known relation \cite{Ref22}
+The recursive optimization scheme is based on the well-known relation
 \begin{equation}
 \label{nestedScheme}
-\min{\varphi(y):y\in D}=\min_{a_1\leqslant y_1\leqslant b_1}\min_{a_2\leqslant y_2\leqslant b_2}\dots\min_{a_1\leqslant y_N\leqslant b_N}\varphi(y)
+\min{\varphi(y):y\in D}=\min_{a_1\leqslant y_1\leqslant b_1}\min_{a_2\leqslant y_2\leqslant b_2}\dots\min_{a_1\leqslant y_N\leqslant b_N}\varphi(y),
 \end{equation}
 which allows one to replace the solution of the multidimensional problem (\ref{task}) with the solution of a family of one-dimensional subproblems recursively related to each other.
 Let's introduce a set of functions
 
 \begin{equation}
 \label{phiN}
-\varphi_N(y_1,\dots,y_N)=\varphi(y_1,\dots,y_N)
+\varphi_N(y_1,\dots,y_N)=\varphi(y_1,\dots,y_N),
 \end{equation}
 \begin{equation}
 \label{phiI_}
-\varphi_i(y_1,\dots,y_i)=\min_{a_{i+1}\leqslant y_{i+1} \leqslant b_{i+1}}\varphi_{i+1}(y_1,\dots,y_i,y_{i+1}),1\leqslant i\leqslant N-1
+\varphi_i(y_1,\dots,y_i)=\min_{a_{i+1}\leqslant y_{i+1} \leqslant b_{i+1}}\varphi_{i+1}(y_1,\dots,y_i,y_{i+1}),1\leqslant i\leqslant N-1.
 \end{equation}
 
-Then, in accordance with the relation (\ref{nestedScheme}) , the solution of the original problem (\ref{task}) is reduced to the solution of a one-dimensional problem
-
+Then, in accordance with the relation (\ref{nestedScheme}), the solution of the original problem (\ref{task}) is reduced to the solution of a one-dimensional problem
 \begin{equation}
 \label{phiFirst}
-\varphi_1(y_1^*)=\min\{\varphi_1(y_1),y_1\in [a,b]\}
+\varphi_1(y_1^*)=\min\{\varphi_1(y_1),y_1\in [a,b]\}.
 \end{equation}
 
 However, each calculation of the value of the one-dimensional function  \(\varphi_1(y_1)\) at some fixed point corresponds to the solution of a one-dimensional minimization problem 
-
 \begin{displaymath}
 \label{phi2}
-\varphi_2(y_1,y_2^*)=\min\{\varphi(y_1,y_2):y_2\in [a_2,b_2]\}
+\varphi_2(y_1,y_2^*)=\min\{\varphi(y_1,y_2):y_2\in [a_2,b_2]\}.
 \end{displaymath}
-
 And so on, until the calculation   according to (\ref{phiN}). 
 
-For the recursive scheme described above, a generalization (block recursive scheme) is proposed that combines the use of evolvents and a recursive scheme in order to efficiently parallelize computations.
+For the recursive scheme described above, a generalization (\textit{block recursive scheme}) is proposed that combines the use of evolvents and a recursive scheme in order to efficiently parallelize computations.
 
 Consider the vector $y$ as a vector of block variables
 \begin{displaymath}
@@ -240,54 +230,48 @@ y=(y_1,\dots,y_N)=(u_1,u_2,\dots,u_M),
 where the \(i\)-th block variable \(u_i\) is a vector of sequentially taken components of the vector \(y\), i.e. $u_1=(y_1,y_2,\dots,y_{N_1})$,$u_2=(y_{N_1+1},y_{N_1+2},\dots,y_{N_1+N_2})$,$\dots,u_M=(y_{N-N_M+1},y_{N-N_M+2},\dots,y_N)$, while \(N_1+N_2+\dots+N_M=N\).
 
 Using new variables, the main relation of the multistep scheme (\ref{nestedScheme}) can be rewritten as
-
 \begin{equation}
 \label{blockNested}
-\min_{y\in D} \varphi(y)=\min_{u_1\in D_1}\min_{u_2\in D_2}\dots\min_{u_M\in D_M}\varphi(y)
+\min_{y\in D} \varphi(y)=\min_{u_1\in D_1}\min_{u_2\in D_2}\dots\min_{u_M\in D_M}\varphi(y),
 \end{equation}
+where the subdomains  \(D_i,1\leqslant i\leqslant M\), are projections of the original search domain \(D\) onto the subspaces corresponding to the variables \(u_1,1\leqslant i\leqslant M\).
 
-where the subdomains  \(D_i,1\leqslant i\leqslant M\), are projections of the original search domain \(D\) onto the subspaces corresponding to the variables \(u_1,1\leqslant i\leqslant M\) .
-
-The formulas that determine the method for solving problem (\ref{task}) based on relations (\ref{blockNested}) generally coincide with the recursive scheme (\ref{phiN})-(\ref{phiFirst}). One need only replace the original variables  \(y_i,1\leqslant i\leqslant N\), with block variables  \(u_1,1\leqslant i\leqslant M\). 
-In this case, the fundamental difference from the original scheme is the fact that the block diagram has nested subproblems
-
+The formulas that determine the method for solving problem (\ref{task}) based on relations (\ref{blockNested}) generally coincide with the recursive scheme (\ref{phiN})--(\ref{phiFirst}). One need only replace the original variables  \(y_i,1\leqslant i\leqslant N\), with block variables  \(u_1,1\leqslant i\leqslant M\). 
+In this case, the fundamental difference from the original scheme is the fact that the block scheme has nested subproblems
 \begin{equation}
 \label{subTasks}
-\varphi_i(u_1,\dots,u_i)=\min_{u_{i+1}\in D_{i+1}}\varphi_{i+1}(u_1,\dots,u_i,u_{i+1}),1\leqslant i\leqslant M-1
+\varphi_i(u_1,\dots,u_i)=\min_{u_{i+1}\in D_{i+1}}\varphi_{i+1}(u_1,\dots,u_i,u_{i+1}),1\leqslant i\leqslant M-1,
 \end{equation}
-
 which are multidimensional, and to solve them, a method of reducing dimensionality based on Peano curves can be applied.
 
 \subsection{Adaptive dimensionality reduction scheme}
 
 The solution to the resulting set of subproblems (\ref{subTasks}) can be organized in various ways.
-
-The obvious method (elaborated in detail in \cite{Grishagin1997,Grishagin2001,Grishagin2015} for the nested optimization scheme and in \cite{Barkalov2014},\cite{Ref27} for the block nested optimization scheme) is based on solving subproblems in accordance with the recursive order of their generation. However, there is a significant loss of information about the target function.
+The obvious method (elaborated in detail in \cite{Grishagin2015} for the nested optimization scheme and in \cite{Barkalov2014} for the block nested optimization scheme) is based on solving subproblems in accordance with the recursive order of their generation. However, there is a significant loss of information about the target function.
 
 Another approach is an adaptive scheme in which all subproblems are solved simultaneously, which makes it possible to more fully take into account information about a multidimensional problem and thereby to speed up the process of solving it.
+In the case of one-dimensional subproblems, this approach was theoretically substantiated and tested in \cite{Grishagin2016,Grishagin2018}, and in the paper \cite{Barkalov2020} a generalization of the adaptive scheme for multidimensional subproblems was proposed.
 
-In the case of one-dimensional subproblems, this approach was theoretically substantiated and tested in \cite{Grishagin2016,Grishagin2016_1,Grishagin2018}, and in the article [] a generalization of the adaptive scheme for multidimensional subproblems was proposed.
-
-   The adaptive dimensionality reduction scheme changes the order in which subproblems are solved: they will be solved not one by one (in accordance with their hierarchy in the task tree), but simultaneously, i.e., there will be a number of subproblems that are in the process of being solved. Under the new scheme:
-   
-•	to calculate the value of the function of the \(i\)-th level from (\ref{subTasks}), a new level \(i+1\) problem is generated in which tests are carried out, after which a new generated problem is included in the set of existing problems to be solved;   
-   
-•	the iteration of the global search consists in choosing \(P\) (the most promising) problem from the set of existing problems in which tests are carried out; points for new tests are determined in accordance with the algorithm of subsection 1; 
-
-•	the minimum values of functions from (\ref{subTasks}) are their current estimates based on the accumulated search information. .
-
+   The adaptive dimensionality reduction scheme changes the order in which subproblems are solved: they will be solved not one by one (in accordance with their hierarchy in the task tree), but simultaneously, i.e., there will be a number of subproblems that are in the process of being solved. Under the new scheme:	
+	\begin{itemize}
+		\item to calculate the value of the function of the \(i\)-th level from (\ref{subTasks}), a new \(i+1\)-th level problem is generated in which trials are carried out, after which a new generated problem is included in the set of existing problems to be solved;
+		\item the iteration of the global search consists in choosing \(p\) (the most promising) problem from the set of existing problems in which trials are carried out; points for new trials are determined in accordance with the algorithm of subsection 1;
+		\item the minimum values of functions from (\ref{subTasks}) are their current estimates based on the accumulated search information.
+	\end{itemize}
+     
 A brief description of the main steps of a block adaptive dimensionality reduction scheme is as follows.
+Let the nested subproblems in the form (\ref{subTasks}) be solved using the global search algorithm described in Section 2. Then each subproblem (\ref{subTasks}) can be assigned a numerical value called the characteristic of this problem. As such, we can take the maximum characteristic \(R(t)\) of the intervals formed in this problem. In accordance with the rule for calculating characteristics, the higher the value of the characteristic, the more promising the subproblem is in the continued search for the global minimum of the original problem (\ref{task}). 
 
-Let the nested subproblems in the form (\ref{subTasks}) be solved using the global search algorithm described in subsection 1. Then each subproblem (\ref{subTasks}) can be assigned a numerical value called the characteristic of this problem. As such, we can take the maximum characteristic of the intervals formed in this problem – \(R(t)\). In accordance with the rule for calculating characteristics, the higher the value of the characteristic, the more promising the subproblem is in the continued search for the global minimum of the original problem (\ref{task}). Therefore, at each iteration, subproblems with the maximum characteristic are selected for conducting the next test. The test either leads to the calculation of the value of the objective function \(\varphi_1(y)\) (if the selected subproblem belonged to the level \(j=M\)), or generates new subproblems according to (\ref{subTasks}) for \(j \geqslant  M-1\). In the latter case, the newly generated problems are added to the current set of problems, their characteristics are calculated, and the process is repeated. The optimization process is completed when the root problem satisfies the condition for stopping the algorithm that solves this problem. Some results pointing in this direction are presented in \cite{Ref31}, \cite{Ref32}.
+Therefore, at each iteration, subproblems with the maximum characteristic are selected for conducting the next trial. The trial either leads to the calculation of the value of the objective function \(\varphi_1(y)\) (if the selected subproblem belonged to the level \(j=M\)), or generates new subproblems according to (\ref{subTasks}) for \(j \geqslant  M-1\). In the latter case, the newly generated problems are added to the current set of problems, their characteristics are calculated, and the process is repeated. The optimization process is completed when the root problem satisfies the condition for stopping the algorithm that solves this problem. Some results pointing in this direction are presented in \cite{Barkalov2020}.
 
 
 \section{GPU implementation}
 
 \subsection{General scheme}
 
-In relation to global optimization methods, an operation that can be effectively implemented on the GPU is the parallel calculation of many values of the objective function at once. Naturally, this requires implementing a procedure for calculating the value of a function on the GPU. Data transfers from the CPU to the GPU will be minimal: one need only transfer the coordinates of the test points to the GPU, and get back the function values at these points. Functions that determine the processing of test results in accordance with the algorithm, and require work with large amounts of accumulated search information, can be effectively implemented on the CPU.
+In relation to global optimization methods, an operation that can be effectively implemented on the GPU is the parallel calculation of many values of the objective function at once. Naturally, this requires implementing a procedure for calculating the value of a function on the GPU. Data transfers from the CPU to the GPU will be minimal: one need only transfer the coordinates of the trial points to the GPU, and get back the function values at these points. Functions that determine the processing of trial results in accordance with the algorithm, and require work with large amounts of accumulated search information, can be effectively implemented on the CPU.
 
-   The general scheme for organizing calculations using the GPU is shown in \ref{fig:GPU_Algorithm}. In accordance with this scheme, steps 1-4 of the parallel global search algorithm are performed on the CPU. The coordinates of the P test points calculated in step 4 of the algorithm are accumulated in the intermediate buffer and then transmitted to the GPU. On the GPU, the function values are calculated at these points, after which the test results (again through the intermediate buffer) are transferred to the CPU.
+   The general scheme for organizing calculations using the GPU is shown in \ref{fig:GPU_Algorithm}. In accordance with this scheme, steps 1--4 of the parallel global search algorithm are performed on the CPU. The coordinates of the $p$ trial points calculated in step 4 of the algorithm are accumulated in the intermediate buffer and then transmitted to the GPU. On the GPU, the function values are calculated at these points, after which the trial results (again through the intermediate buffer) are transferred to the CPU.
    
    \begin{figure}[h!]
     \centering
@@ -298,12 +282,16 @@ In relation to global optimization methods, an operation that can be effectively
 
 \subsection{Organization of parallel computing}
 
-To organize parallel calculations, we will use a set of evolvents and a block adaptive dimensionality reduction scheme. We take a small number of nesting levels, 2 to 3, in which the original large dimensionality problem is divided into 2-3 nested lower dimensional subproblems. We will use multiple sweeps only at the upper level of nesting, corresponding to the u1 variable block. This subproblem will be reduced to a set of one-dimensional problems that will be solved in parallel, each in a separate process. Test results at point x obtained for the problem solved by a specific processor are interpreted as the test results in the remaining problems (at the corresponding points \(u^1_1,… , u^s_1\) )
+To organize parallel calculations, we will use a set of evolvents and a block adaptive dimensionality reduction scheme. We take a small number of nesting levels, 2 to 3, in which the original large dimensionality problem is divided into 2-3 nested lower dimensional subproblems. We will use multiple sweeps only at the upper level of nesting, corresponding to the u1 variable block. This subproblem will be reduced to a set of one-dimensional problems that will be solved in parallel, each in a separate process. Trial results at point $x$ obtained for the problem solved by a specific processor are interpreted as the trial results in the remaining problems (at the corresponding points \(u^1_1,..., u^s_1\) ).
 Then, applying an adaptive scheme to solve the nested subproblems (\ref{subTasks}), we get a parallel algorithm with a wide degree of variability.
 
 \ref{fig:Parallel_Computing} shows the general scheme of organizing calculations using several cluster nodes and several GPUs. In accordance with this scheme, nested subproblems  ${{\varphi }_{i}}({{u}_{1}},...,{{u}_{i}})=\underset{{{u}_{i+1}}\in {{D}_{i+1}}}{\mathop{\min }}\,{{\varphi }_{i+1}}({{u}_{1}},...,{{u}_{i}},{{u}_{i+1}})$  with \(i=1,\ldots ,M-2\) are solved using only the CPU. The values of the optimized function are not calculated directly in these subproblems: the calculation the function value  ${{\varphi }_{i}}({{u}_{1}},...,{{u}_{i}})$ is a solution to the minimization problem at the next level.
 
-The subproblem of the last \((M - 1)\) level \({{\varphi }_{M-1}}({{u}_{1}},...,{{u}_{M-1}})=\underset{{{u}_{M}}\in {{D}_{M}}}{\mathop{\min }}\,{{\varphi }_{M}}({{u}_{1}},...,{{u}_{M}})\) differs from all the previous subproblems – it calculates the values of the optimized function, since ${{\varphi }_{M}}({{u}_{1}},...,{{u}_{M}})=\varphi ({{y}_{1}},...,{{y}_{N}})$. This subproblem transfers between the CPU and the GPU.
+The subproblem of the last \((M - 1)\)-th level 
+\[
+{{\varphi }_{M-1}}({{u}_{1}},...,{{u}_{M-1}})=\underset{{{u}_{M}}\in {{D}_{M}}}{\mathop{\min }}\,{{\varphi }_{M}}({{u}_{1}},...,{{u}_{M}})
+\]
+ differs from all the previous subproblems; it calculates the values of the objective function, since ${{\varphi }_{M}}({{u}_{1}},...,{{u}_{M}})=\varphi ({{y}_{1}},...,{{y}_{N}})$. This subproblem transfers between the CPU and the GPU.
 
    \begin{figure}[h!]
     \centering
@@ -317,14 +305,13 @@ The numerical experiments were carried out using the Lomonosov supercomputer (Lo
 
 Note that well-known test problems from the field of multidimensional global optimization are characterized by a short time span for calculating the values of the objective function. Therefore, in order to simulate the computational complexity inherent in applied optimization problems, the calculation of the objective function in all experiments was complicated by additional calculations that do not change the form of the function and the location of its minima (summing the segment of the Taylor series).
 
-In the study \cite{Gaviano2003}, \cite{Ref16}, a GKLS generator is described that allows one to generate multiextremal optimization problems with previously known properties: the number of local minima, the size of their regions of attraction, the global minimum point, the value of the function in it, etc.
+In the paper \cite{Gaviano2003} a GKLS generator is described that allows one to generate multiextremal optimization problems with previously known properties: the number of local minima, the size of their regions of attraction, the global minimum point, the value of the function in it, etc.
 
-Below are the results of a numerical comparison of three sequential algorithms -- DIRECT \cite{Jones2009}, DIRECT\textit{l} \cite{Gablonsky2001} and Global Search Algorithm (GSA); (results of the first two algorithms are given in the article \cite{Sergeyev2006}).  A numerical comparison was carried out on the Simple and Hard function classes of dimension 4 and 5 from \cite{Sergeyev2006}. The Global minimum $y*$ was considered found if the algorithm generated a test point $y^k$ in the $\delta$-neighborhood of the global minimum, i.e. $\left\| {{y}^{k}}-{{y}^{*}} \right\|\le \delta $.  Also, the size of the neighborhood was chosen (in accordance with \cite{Sergeyev2006}) as $\delta =\left\| b-a \right\|\sqrt[N]{\Delta }$, here $N$ is the dimension of the problem to be solved , a and b are the boundaries  of the search domain $D$, the parameter  $\Delta ={{10}^{-6}}$ for N=4 and $\Delta ={{10}^{-7}}$ for $N=5$. When using the AGP method for the Simple class, the parameter $r=4.5$ was selected, for the Hard class - $r=5.6$; the parameter for constructing the Peano curve was fixed, $m=10$. The maximum number of iterations allowed was $K_{max} = 10^6$.
+Below are the results of a numerical comparison of three sequential algorithms -- DIRECT \cite{Jones2009}, DIRECT\textit{l} \cite{Gablonsky2001} and Global Search Algorithm (GSA) from Section 2.  A numerical comparison was carried out on the Simple and Hard function classes of dimension 4 and 5 from \cite{Gaviano2003}. The global minimum $y*$ was considered found if the algorithm generated a trial point $y^k$ in the $\delta$-neighborhood of the global minimum, i.e. $\left\| {{y}^{k}}-{{y}^{*}} \right\| \leqslant \delta $.  Also, the size of the neighborhood was chosen (in accordance with \cite{Sergeyev2006}) as $\delta =\left\| b-a \right\|\sqrt[N]{\Delta }$, here $N$ is the dimension of the problem to be solved , a and b are the boundaries  of the search domain $D$, the parameter  $\Delta ={{10}^{-6}}$ for N=4 and $\Delta ={{10}^{-7}}$ for $N=5$. When using the GSA method for the Simple class, the parameter $r=4.5$ was selected, for the Hard class $r=5.6$; the parameter for constructing the Peano curve was fixed, $m=10$. The maximum number of iterations allowed was $K_{max} = 10^6$.
 
 
 \begin{table}
-	\caption{Average number of iterations $k_{av}$}
-	\label{table:average_iters}
+	\caption{Average number of iterations $k_{av}$}\label{table:average_iters}
 	\center
 	\begin{tabular}{ccccc}
 		\hline\noalign{\smallskip}
@@ -332,6 +319,7 @@ Below are the results of a numerical comparison of three sequential algorithms -
 		\noalign{\smallskip} \hline \noalign{\smallskip}
 			4 &	Simple& $>$47282(4) &	18983 &	11953 \\
 	      & Hard &	$>$95708(7) &	68754 &	25263 \\
+		\noalign{\smallskip}
 			5	& Simple &	$>$16057(1) &	16758 &	15920 \\
 				& Hard &	$>$217215(16) &	$>$269064(4) & $>$148342(4) \\
 		\noalign{\smallskip}\hline
@@ -345,14 +333,14 @@ Below are the results of a numerical comparison of three sequential algorithms -
 
 
 \begin{table}
-                \caption{Results on CPU}
+                \caption{Speedup on CPU}
                 \label{table:average_AS_CPU}
                 \center
                 \begin{tabular}{cccccccccccc}
-                               \hline\noalign{\smallskip}
-                & \multicolumn{5}{c}{ Acceleration of iterations} & & \multicolumn{5}{c}{ Time acceleration}\\
+                               %\hline\noalign{\smallskip}
+																	 & \multicolumn{5}{c}{ Iteration speedup} & & \multicolumn{5}{c}{ Time speedup}\\
                                \noalign{\smallskip} \cline{2-6} \cline{8-12}  \\
-                               $p$ & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} &  & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} \\
+                                   & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} &  & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} \\
                                \noalign{\smallskip} \cline{2-3} \cline{5-6}  \cline{8-9} \cline{11-12} \noalign{\smallskip}
                                & Simple & Hard & & Simple & Hard &  & Simple & Hard & & Simple & Hard  \\
                                \noalign{\smallskip} \hline \noalign{\smallskip}                               
@@ -363,17 +351,17 @@ Below are the results of a numerical comparison of three sequential algorithms -
 \end{table}
 
 
-   Let us now evaluate the acceleration achieved using parallel GSA using an adaptive dimensionality reduction scheme based on the number $P$ of cores used. Table \ref{table:average_AS_CPU} shows the acceleration by iterations and the time acceleration obtained when solving a series of problems on the CPU, compared to GSA.
+   Let us now evaluate the acceleration achieved using parallel GSA using an adaptive dimensionality reduction scheme based on the number $p$ of cores used. Table \ref{table:average_AS_CPU} shows the speedup obtained when solving a series of problems on the CPU, compared to GSA.
    
 \begin{table}
-                \caption{Results on CPU}
+                \caption{Speedup on CPU}
                 \label{table:average_MMAS_CPU}
                 \center
                 \begin{tabular}{cccccccccccc}
-                               \hline\noalign{\smallskip}
-                & \multicolumn{5}{c}{ Acceleration of iterations} & & \multicolumn{5}{c}{ Time acceleration}\\
+                               %\hline\noalign{\smallskip}
+																	 & \multicolumn{5}{c}{ Iteration speedup} & & \multicolumn{5}{c}{ Time speedup}\\
                                \noalign{\smallskip} \cline{2-6} \cline{8-12}  \\
-                               $p$ & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} &  & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} \\
+                                   & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} &  & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} \\
                                \noalign{\smallskip} \cline{2-3} \cline{5-6}  \cline{8-9} \cline{11-12} \noalign{\smallskip}
                                & Simple & Hard & & Simple & Hard &  & Simple & Hard & & Simple & Hard  \\
                                \noalign{\smallskip} \hline \noalign{\smallskip}                               
@@ -384,17 +372,17 @@ Below are the results of a numerical comparison of three sequential algorithms -
 \end{table}
 
    
-   Table \ref{table:average_MMAS_CPU} shows the acceleration in iterations and  the acceleration in time of the algorithm that combines multiple sweeps and an adaptive scheme for solving a series of problems on the CPU, compared to the sequential launch of the GSA. Two scans and, accordingly, two processes were used; each process used $P$ threads, and calculations were performed on a single cluster node.
+   Table \ref{table:average_MMAS_CPU} shows the speedup of the algorithm that combines multiple evolvents and an adaptive scheme for solving a series of problems on CPU, compared to the sequential launch of the GSA. Two evolvents and, accordingly, two processes were used; each process used $p$ threads, and calculations were performed on a single cluster node.
 
 \begin{table}
                 \caption{Results on GPU}
                 \label{table:average_AS_GPU}
                 \center
                 \begin{tabular}{cccccccccccc}
-                               \hline\noalign{\smallskip}
-                & \multicolumn{5}{c}{ Acceleration of iterations} & & \multicolumn{5}{c}{ Time acceleration}\\
+                               %\hline\noalign{\smallskip}
+																& \multicolumn{5}{c}{ Iteration speedup} & & \multicolumn{5}{c}{ Time speedup}\\
                                \noalign{\smallskip} \cline{2-6} \cline{8-12}  \\
-                               $p$ & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} &  & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} \\
+                               & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} &  & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} \\
                                \noalign{\smallskip} \cline{2-3} \cline{5-6}  \cline{8-9} \cline{11-12} \noalign{\smallskip}
                                & Simple & Hard & & Simple & Hard &  & Simple & Hard & & Simple & Hard  \\
                                \noalign{\smallskip} \hline \noalign{\smallskip}                               
@@ -410,14 +398,14 @@ Below are the results of a numerical comparison of three sequential algorithms -
 
 
 \begin{table}
-                \caption{Results on GPU}
+                \caption{Speedup on GPU}
                 \label{table:average_MMAS_GPU}
                 \center
                 \begin{tabular}{cccccccccccc}
-                               \hline\noalign{\smallskip}
-                & \multicolumn{5}{c}{ Acceleration of iterations} & & \multicolumn{5}{c}{ Time acceleration}\\
+                               %\hline\noalign{\smallskip}
+                & \multicolumn{5}{c}{ Iteration speedup} & & \multicolumn{5}{c}{ Time speedup}\\
                                \noalign{\smallskip} \cline{2-6} \cline{8-12}  \\
-                               $p$ & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} &  & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} \\
+                               & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} &  & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} \\
                                \noalign{\smallskip} \cline{2-3} \cline{5-6}  \cline{8-9} \cline{11-12} \noalign{\smallskip}
                                & Simple & Hard & & Simple & Hard &  & Simple & Hard & & Simple & Hard  \\
                                \noalign{\smallskip} \hline \noalign{\smallskip}                               
@@ -432,7 +420,7 @@ Below are the results of a numerical comparison of three sequential algorithms -
 
 
 
-Tables \ref{table:average_AS_GPU} show the acceleration obtained when solving a series of problems on the GPU using an adaptive scheme compared to a similar launch on the CPU using 4 threads. Tables \ref{table:average_MMAS_GPU} show the acceleration of the algorithm combining multiple sweeps and an adaptive circuit when solving a series of problems on the GPU, compared to an adaptive scheme on the CPU using 4 threads. Two sweeps and, accordingly, two processes were used; each process used $P$ threads, and calculations were performed on a single cluster node.
+Tables \ref{table:average_AS_GPU} show the speedup obtained when solving a series of problems on the GPU using an adaptive scheme compared to a similar launch on CPU using 4 threads. Tables \ref{table:average_MMAS_GPU} show the speedup of the algorithm combining multiple evolvents and an adaptive scheme when solving a series of problems on GPU, compared to an adaptive scheme on CPU using 4 threads. Two evolvents and, accordingly, two processes were used; each process used $p$ threads, and calculations were performed on a single cluster node.
 
 
 
@@ -440,13 +428,13 @@ Tables \ref{table:average_AS_GPU} show the acceleration obtained when solving a 
 
 \begin{table}
     \centering
-    \caption{Acceleration of iterations and time on the GPU}
+    \caption{Speedup on GPU}
     \label{table:GKLS6_average_MMAS_GPU}
     \begin{tabular}{|p{4cm}|c|c|c|}
     \hline
-      & P=2 & P=4 & P=8 \\ \hline
-    Acceleration of iterations&   30,79 & 92,68 & 596,97  \\ \hline
-    Time acceleration         &   1,86  & 1,49  & 2,45    \\ \hline
+      & p=2 & p=4 & p=8 \\ \hline
+    Iterations &   30,79 & 92,68 & 596,97  \\ \hline
+    Time  &   1,86  & 1,49  & 2,45    \\ \hline
 
     \end{tabular}
 \end{table}
