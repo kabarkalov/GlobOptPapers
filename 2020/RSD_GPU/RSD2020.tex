@@ -56,7 +56,7 @@
 	\email{ilya.lebedev@itmm.unn.ru}
 }
 	
-\maketitle              % typeset the title of the contribution
+%\maketitle              % typeset the title of the contribution
 
 \begin{abstract}
 
@@ -275,14 +275,14 @@ In relation to global optimization methods, an operation that can be effectively
    
    \begin{figure}[h!]
     \centering
-		\includegraphics[width=1.0\textwidth]{GPU_Algorithm.eps}
+		\includegraphics[width=0.9\textwidth]{GPU_Algorithm.pdf}
 		\caption{Scheme of information exchanges in the GPU algorithm}\label{fig:GPU_Algorithm}
 \end{figure}
 
 
 \subsection{Organization of parallel computing}
 
-To organize parallel calculations, we will use a set of evolvents and a block adaptive dimensionality reduction scheme. We take a small number of nesting levels, 2 to 3, in which the original large dimensionality problem is divided into 2-3 nested lower dimensional subproblems. We will use multiple sweeps only at the upper level of nesting, corresponding to the u1 variable block. This subproblem will be reduced to a set of one-dimensional problems that will be solved in parallel, each in a separate process. Trial results at point $x$ obtained for the problem solved by a specific processor are interpreted as the trial results in the remaining problems (at the corresponding points \(u^1_1,..., u^s_1\) ).
+To organize parallel calculations, we will use a set of evolvents and a block adaptive dimensionality reduction scheme. We take a small number of nesting levels, 2 to 3, in which the original large dimensionality problem is divided into 2-3 nested lower dimensional subproblems. We will use multiple evolvents only at the upper level of nesting, corresponding to the u1 variable block. This subproblem will be reduced to a set of one-dimensional problems that will be solved in parallel, each in a separate process. Trial results at point $x$ obtained for the problem solved by a specific processor are interpreted as the trial results in the remaining problems (at the corresponding points \(u^1_1,..., u^s_1\) ).
 Then, applying an adaptive scheme to solve the nested subproblems (\ref{subTasks}), we get a parallel algorithm with a wide degree of variability.
 
 \ref{fig:Parallel_Computing} shows the general scheme of organizing calculations using several cluster nodes and several GPUs. In accordance with this scheme, nested subproblems  ${{\varphi }_{i}}({{u}_{1}},...,{{u}_{i}})=\underset{{{u}_{i+1}}\in {{D}_{i+1}}}{\mathop{\min }}\,{{\varphi }_{i+1}}({{u}_{1}},...,{{u}_{i}},{{u}_{i+1}})$  with \(i=1,\ldots ,M-2\) are solved using only the CPU. The values of the optimized function are not calculated directly in these subproblems: the calculation the function value  ${{\varphi }_{i}}({{u}_{1}},...,{{u}_{i}})$ is a solution to the minimization problem at the next level.
@@ -295,7 +295,7 @@ The subproblem of the last \((M - 1)\)-th level
 
    \begin{figure}[h!]
     \centering
-		\includegraphics[width=1.0\textwidth]{Parallel_Computing.eps}
+		\includegraphics[width=0.7\textwidth]{Parallel_Computing.pdf}
 		\caption{Diagram of parallel computing on a cluster}\label{fig:Parallel_Computing}
 \end{figure}
 
@@ -423,20 +423,20 @@ Below are the results of a numerical comparison of three sequential algorithms -
 Tables \ref{table:average_AS_GPU} show the speedup obtained when solving a series of problems on the GPU using an adaptive scheme compared to a similar launch on CPU using 4 threads. Tables \ref{table:average_MMAS_GPU} show the speedup of the algorithm combining multiple evolvents and an adaptive scheme when solving a series of problems on GPU, compared to an adaptive scheme on CPU using 4 threads. Two evolvents and, accordingly, two processes were used; each process used $p$ threads, and calculations were performed on a single cluster node.
 
 
-
-
-
 \begin{table}
-    \centering
-    \caption{Speedup on GPU}
-    \label{table:GKLS6_average_MMAS_GPU}
-    \begin{tabular}{|p{4cm}|c|c|c|}
-    \hline
-      & p=2 & p=4 & p=8 \\ \hline
-    Iterations &   30,79 & 92,68 & 596,97  \\ \hline
-    Time  &   1,86  & 1,49  & 2,45    \\ \hline
+                \caption{Speedup on GPU}
+                \label{table:average_MMAS_GPU}
+                \center
+                \begin{tabular}{cccccccccccc}
+                               %\hline\noalign{\smallskip}
+                &  Iteration speedup &   Time speedup\\
 
-    \end{tabular}
+                               \noalign{\smallskip} \hline \noalign{\smallskip}                               
+                               $p=64$  &    11,32	 & 6,83	  \\
+                               $p=256$ &    38,96	 & 31,52  \\
+							   $p=1024$&    128,39	 & 83,46  \\
+                               \noalign{\smallskip}\hline
+                \end{tabular}
 \end{table}
 
 %Следующий эксперимент будет проведен на 6-ти мерных задачах GKLS. В таблице \ref{table:GKLS6_average_MMAS_GPU} приведено ускорение по времени и по итерациям полученное при решении серии задач на GPU с использованием алгоритма объединяющего множественные развертки и адаптивную схему по сравнению с адаптивной схемой на CPU использующей 4 потока. Эксперимент проводился на трех узлах кластера и спользовалось до 6144 нитей.
