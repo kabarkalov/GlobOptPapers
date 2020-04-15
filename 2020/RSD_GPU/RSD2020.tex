@@ -60,7 +60,7 @@
 
 \begin{abstract}
 
-Problems of multidimensional multiextremal optimization and numerical methods for their solution are considered. The general assumption is made about the function being optimized: it satisfies the Lipschitz condition with an a priori unknown constant. Many approaches to solving problems of this class are based on reducing the dimension of the problem; i.e., addressing a multidimensional problem by solving a family of problems with lower dimension. In this work, an adaptive dimensionality reduction scheme is investigated, and its implementation using graphic accelerators is proposed. Numerical experiments on several hundred test problems were carried out, and they confirmed acceleration in the developed GPU version of the algorithm.
+Problems of multidimensional multiextremal optimization and numerical methods for their solution are considered. The general assumption is made about the function being optimized: it satisfies the Lipschitz condition with an a priori unknown constant. Many approaches to solving problems of this class are based on reducing the dimension of the problem; i.e. addressing a multidimensional problem by solving a family of problems with lower dimension. In this work, an adaptive dimensionality reduction scheme is investigated, and its implementation using graphic accelerators is proposed. Numerical experiments on several hundred test problems were carried out, and they confirmed acceleration in the developed GPU version of the algorithm.
 
 
 \keywords{Global optimization $\cdot$ Multiextremal functions $\cdot$ Reduction of dimensionality $\cdot$ Peano space-filling curves $\cdot$ Recursive optimization $\cdot$ Graphics accelerators }
@@ -70,13 +70,13 @@ Problems of multidimensional multiextremal optimization and numerical methods fo
 
 A promising direction in the field of parallel global optimization (which, indeed, is true in many areas related to the software implementation of time-consuming algorithms) is the use of graphics processing units (GPUs). In the past decade, graphics accelerators have rapidly increased performance to meet the ever-growing demands of graphics application developers. Additionally, in the past few years some principles for developing graphics hardware have changed, and as a result it has become more programmable. Today, a graphics accelerator is a flexibly programmable, massive parallel processor with high performance, which is in demand for solving a range of computationally time-consuming problems \cite{Hwu2011}.
 
-However, the potential for graphics accelerators to solve global optimization problems has not yet been fully realized. Using the GPUs, they basically parallelize nature-inspired optimization algorithms, which are somehow based on the idea of random search (see, for example, \cite{Ferreiro2013,Garcia2014,Langdon2011}). By virtue of their stochastic nature, algorithms of this type guarantee convergence to the global minimum only in the sense of probability, which differentiates them unfavorably from deterministic methods.
+However, the potential for graphics accelerators to solve global optimization problems has not yet been fully realized. Using  GPUs, they basically parallelize nature-inspired optimization algorithms, which are somehow based on the idea of random search (see, for example, \cite{Ferreiro2013,Garcia2014,Langdon2011}). By virtue of their stochastic nature, algorithms of this type guarantee convergence to the global minimum only in the sense of probability, which differentiates them unfavorably from deterministic methods.
 
-With regard to many deterministic algorithms of Lipschitzian global optimization with guaranteed convergence, parallel variants have been proposed \cite{Evtushenko2009,He2008,Paulavicius2011}. However, these versions of algorithms are parallelized on the CPU using shared and/or distributed memory; presently, no GPU implementations have been made. For example, \cite{Paulavicius2011} describes parallelization of an algorithm based on the ideas of the branch and boundary method using MPI and OpenMP.
+With regard to many deterministic algorithms of Lipschitzian global optimization with guaranteed convergence, parallel variants have been proposed \cite{Evtushenko2009,He2008,Paulavicius2011}. However, these versions of algorithms are parallelized on CPU using shared and/or distributed memory; presently, no GPU implementations have been made. For example, \cite{Paulavicius2011} describes parallelization of an algorithm based on the ideas of the branch and boundary method using MPI and OpenMP.
 
-Within the framework of this research, we consider the problems of capturing the optimum, which are characterized by a lengthy period for calculating the values of objective function in comparison with the time needed for processing them. For example, objective function can be specified using systems of linear algebraic equations, systems of ordinary differential equations, etc. Currently, graphics accelerators can be used to solve problems of this type. Moreover, an accelerator can solve several such problems at once \cite{Kindratenko2014}; i.e., using the GPU, one can calculate multiple function values simultaneously.
+Within the framework of this research, we consider the problems of capturing the optimum, which are characterized by a lengthy period for calculating the values of objective function in comparison with the time needed for processing them. For example, objective function can be specified using systems of linear algebraic equations, systems of ordinary differential equations, etc. Currently, graphics accelerators can be used to solve problems of this type. Moreover, an accelerator can solve several such problems at once \cite{Kindratenko2014}; i.e., using GPU, one can calculate multiple function values simultaneously.
 
-Thus, calculating the optimization criterion can be implemented on the GPU, and the role of the optimization algorithm (running on the CPU) consists in the effective selection of points for conducting parallel trials. This scheme of working with the accelerator is fully consistent with the work of the parallel global search algorithm developed at the Lobachevsky State University of Nizhni Novgorod and presented in a series of publications \cite{Barkalov2014,Barkalov2020,Barkalov2019,Grishagin2016,Grishagin2015,Grishagin2018,globalizerSystem}.
+Thus, calculating the optimization criterion can be implemented on GPU, and the role of the optimization algorithm (running on CPU) consists in the effective selection of points for conducting parallel trials. This scheme of working with the accelerator is fully consistent with the work of the parallel global search algorithm developed at the Lobachevsky State University of Nizhni Novgorod and presented in a series of publications \cite{Barkalov2014,Barkalov2020,Barkalov2019,Grishagin2016,Grishagin2015,Grishagin2018,globalizerSystem}.
 
 
 \section{Multidimensional parallel global search algorithm}
@@ -251,7 +251,7 @@ The obvious method (elaborated in detail in \cite{Grishagin2015} for the nested 
 Another approach is an adaptive scheme in which all subproblems are solved simultaneously, which makes it possible to more fully take into account information about a multidimensional problem and thereby to speed up the process of solving it.
 In the case of one-dimensional subproblems, this approach was theoretically substantiated and tested in \cite{Grishagin2016,Grishagin2018}, and in the paper \cite{Barkalov2020} a generalization of the adaptive scheme for multidimensional subproblems was proposed.
 
-   The adaptive dimensionality reduction scheme changes the order in which subproblems are solved: they will be solved not one by one (in accordance with their hierarchy in the task tree), but simultaneously, i.e., there will be a number of subproblems that are in the process of being solved. Under the new scheme:	
+The adaptive dimensionality reduction scheme changes the order in which subproblems are solved: they will be solved not one by one (in accordance with their hierarchy in the task tree), but simultaneously, i.e., there will be a number of subproblems that are in the process of being solved. Under the new scheme:	
 	\begin{itemize}
 		\item to calculate the value of the function of the \(i\)-th level from (\ref{subTasks}), a new \(i+1\)-th level problem is generated in which trials are carried out, after which a new generated problem is included in the set of existing problems to be solved;
 		\item the iteration of the global search consists in choosing \(p\) (the most promising) problem from the set of existing problems in which trials are carried out; points for new trials are determined in accordance with the algorithm of subsection 1;
@@ -268,9 +268,9 @@ Therefore, at each iteration, subproblems with the maximum characteristic are se
 
 \subsection{General scheme}
 
-In relation to global optimization methods, an operation that can be efficiently implemented on GPU is the parallel calculation of many values of the objective function at once. Naturally, this requires implementing a procedure for calculating the value of a function on GPU. Data transfers from CPU to GPU will be minimal: one need only transfer the coordinates of the trial points to the GPU, and get back the function values at these points. Functions that determine the processing of trial results in accordance with the algorithm, and require work with large amounts of accumulated search information, can be effectively implemented on CPU.
+In relation to global optimization methods, an operation that can be efficiently implemented on GPU is the parallel calculation of many values of the objective function at once. Naturally, this requires implementing a procedure for calculating the value of a function on GPU. Data transfers from CPU to GPU will be minimal: one need only transfer the coordinates of the trial points to GPU, and get back the function values at these points. Functions that determine the processing of trial results in accordance with the algorithm, and require work with large amounts of accumulated search information, can be effectively implemented on CPU.
 
-   The general scheme for organizing calculations using GPU is shown in Fig. \ref{fig:GPU_Algorithm}. In accordance with this scheme, steps 1--4 of the parallel global search algorithm are performed on CPU. The coordinates of the $p$ trial points calculated in step 4 of the algorithm are accumulated in the intermediate buffer and then transmitted to GPU. On GPU the function values are calculated at these points, after which the trial results (again through the intermediate buffer) are transferred to CPU.
+The general scheme for organizing calculations using GPU is shown in Fig. \ref{fig:GPU_Algorithm}. In accordance with this scheme, steps 1--4 of the parallel global search algorithm are performed on CPU. The coordinates of the $p$ trial points calculated in step 4 of the algorithm are accumulated in the intermediate buffer and then transmitted to GPU. On GPU the function values are calculated at these points, after which the trial results (again through the intermediate buffer) are transferred to CPU.
    
    \begin{figure}[h!]
     \centering
@@ -284,7 +284,7 @@ In relation to global optimization methods, an operation that can be efficiently
 To organize parallel calculations, we will use a set of evolvents and a block adaptive dimensionality reduction scheme. We take a small number of nesting levels, 2 to 3, in which the original large dimensionality problem is divided into 2-3 nested lower dimensional subproblems. We will use multiple evolvents only at the upper level of nesting, corresponding to the u1 variable block. This subproblem will be reduced to a set of one-dimensional problems that will be solved in parallel, each in a separate process. Trial results at point $x$ obtained for the problem solved by a specific processor are interpreted as the trial results in the remaining problems (at the corresponding points \(u^1_1,..., u^s_1\) ).
 Then, applying an adaptive scheme to solve the nested subproblems (\ref{subTasks}), we get a parallel algorithm with a wide degree of variability.
 
-\ref{fig:Parallel_Computing} shows the general scheme of organizing calculations using several cluster nodes and several GPUs. In accordance with this scheme, nested subproblems  ${{\varphi }_{i}}({{u}_{1}},...,{{u}_{i}})=\underset{{{u}_{i+1}}\in {{D}_{i+1}}}{\mathop{\min }}\,{{\varphi }_{i+1}}({{u}_{1}},...,{{u}_{i}},{{u}_{i+1}})$  with \(i=1,\ldots ,M-2\) are solved using only the CPU. The values of the optimized function are not calculated directly in these subproblems: the calculation the function value  ${{\varphi }_{i}}({{u}_{1}},...,{{u}_{i}})$ is a solution to the minimization problem at the next level.
+\ref{fig:Parallel_Computing} shows the general scheme of organizing calculations using several cluster nodes and several GPUs. In accordance with this scheme, nested subproblems  ${{\varphi }_{i}}({{u}_{1}},...,{{u}_{i}})=\underset{{{u}_{i+1}}\in {{D}_{i+1}}}{\mathop{\min }}\,{{\varphi }_{i+1}}({{u}_{1}},...,{{u}_{i}},{{u}_{i+1}})$  with \(i=1,\ldots ,M-2\) are solved using CPU only. The values of the optimized function are not calculated directly in these subproblems: the calculation the function value  ${{\varphi }_{i}}({{u}_{1}},...,{{u}_{i}})$ is a solution to the minimization problem at the next level.
 
 The subproblem of the last \((M - 1)\)-th level 
 \[
@@ -300,9 +300,9 @@ The subproblem of the last \((M - 1)\)-th level
 
 \section{Numerical experiments}
 
-The numerical experiments were carried out using the Lomonosov supercomputer (Lomonosov Moscow State University). Each supercomputer node included two quad-core processors, Intel Xeon X5570 2.93GHz and 12 Gb RAM. When building the Globalizer system for running on the Lomonosov supercomputer, the GCC 4.3.0 compiler, CUDA 6.5 and Intel MPI 2017 were used.
+The numerical experiments were carried out using the Lomonosov supercomputer (Lomonosov Moscow State University). Each supercomputer node included two quad-core processors Intel Xeon X5570, two NVIDIA Tesla X2070 and 12 Gb RAM. When building the Globalizer system for running on the Lomonosov supercomputer, the GCC 4.3.0 compiler, CUDA 6.5 and Intel MPI 2017 were used.
 
-Note that well-known test problems from the field of multidimensional global optimization are characterized by a short time span for calculating the values of the objective function. Therefore, in order to simulate the computational complexity inherent in applied optimization problems, the calculation of the objective function in all experiments was complicated by additional calculations that do not change the form of the function and the location of its minima (summing the segment of the Taylor series).
+Note that well-known test problems from the field of multidimensional global optimization are characterized by a short time span for calculating the values of the objective function. Therefore, in order to simulate the computational complexity inherent in applied optimization problems \cite{Modorskii2016}, the calculation of the objective function in all experiments was complicated by additional calculations that do not change the form of the function and the location of its minima (summing the segment of the Taylor series).
 
 In the paper \cite{Gaviano2003} a GKLS generator is described that allows one to generate multiextremal optimization problems with previously known properties: the number of local minima, the size of their regions of attraction, the global minimum point, the value of the function in it, etc.
 
@@ -326,9 +326,9 @@ Below are the results of a numerical comparison of three sequential algorithms -
 \end{table}
 
 
-   Table \ref{table:average_iters} shows the average number of iterations, $k_{av}$, that the method performed when solving a series of problems from these classes. The symbol \(">"\) reflects a situation where not all problems of the class were solved by any method whatsoever. This means that the algorithm was halted because the maximum allowed number of $K_{max}$ iterations was reached. In this case, the value $K_{max} = 10^6$ was used to calculate the average value of the number of iterations, $k_{av}$, which corresponds to the lower estimate of this average value. The number of unsolved problems is indicated in parentheses.
+Table \ref{table:average_iters} shows the average number of iterations, $k_{av}$, that the method performed when solving a series of problems from these classes. The symbol \(">"\) reflects a situation where not all problems of the class were solved by any method whatsoever. This means that the algorithm was halted because the maximum allowed number of $K_{max}$ iterations was reached. In this case, the value $K_{max} = 10^6$ was used to calculate the average value of the number of iterations, $k_{av}$, which corresponds to the lower estimate of this average value. The number of unsolved problems is indicated in parentheses.
    
-  As can be seen from Table \ref{table:average_iters}, the sequential GSA surpasses the DIRECT and DIRECT\textit{l} methods in all classes of problems in terms of the average number of iterations. At the same time, in the 5-Hard class, none of the methods solved all the problems: DIRECT failed to solve 16 problems, DIRECTl and GSA -- 4 problems each.
+As can be seen from Table \ref{table:average_iters}, the sequential GSA surpasses the DIRECT and DIRECT\textit{l} methods in all classes of problems in terms of the average number of iterations. At the same time, in the 5-Hard class, none of the methods solved all the problems: DIRECT failed to solve 16 problems, DIRECTl and GSA -- 4 problems each.
 
 
 %\begin{table}
@@ -351,7 +351,7 @@ Below are the results of a numerical comparison of three sequential algorithms -
 
 
 Let us now evaluate the acceleration achieved using parallel GSA using an adaptive dimensionality reduction scheme based on the number $p$ of cores used.
-Table \ref{table:average_MMAS_CPU} shows the speedup of the algorithm that combines multiple evolvents and an adaptive scheme for solving a series of problems on CPU, compared to the sequential launch of the GSA. Two evolvents and, accordingly, two processes were used; each process used $p$ threads, and calculations were performed on a single cluster node.
+Table \ref{table:average_MMAS_CPU} shows the speedup of the algorithm that combines multiple evolvents and an adaptive scheme for solving a series of problems on CPU, compared to the sequential launch of the GSA method. Two evolvents and, accordingly, two processes were used; each process used $p$ threads, and calculations were performed on a single cluster node.
 % Table \ref{table:average_AS_CPU} shows the speedup obtained when solving a series of problems on the CPU, compared to GSA.
    
 \begin{table}
@@ -376,7 +376,7 @@ Table \ref{table:average_MMAS_CPU} shows the speedup of the algorithm that combi
    
 
 \begin{table}
-                \caption{Results on GPU}
+                \caption{Speedup on one GPU}
                 \label{table:average_AS_GPU}
                 \center
                 \begin{tabular}{lccccccccccc}
@@ -399,7 +399,7 @@ Table \ref{table:average_MMAS_CPU} shows the speedup of the algorithm that combi
 
 
 \begin{table}
-                \caption{Speedup on GPU}
+                \caption{Speedup on two GPUs}
                 \label{table:average_MMAS_GPU}
                 \center
                 \begin{tabular}{lccccccccccc}
@@ -418,32 +418,36 @@ Table \ref{table:average_MMAS_CPU} shows the speedup of the algorithm that combi
 \end{table}
 
 
-Table \ref{table:average_AS_GPU} shows the speedup obtained when solving a series of problems on the GPU using an adaptive scheme compared to a similar launch on CPU using 4 threads. Table \ref{table:average_MMAS_GPU} shows the speedup of the algorithm combining multiple evolvents and an adaptive scheme when solving a series of problems on GPU, compared to an adaptive scheme on CPU using 4 threads. Two evolvents and, accordingly, two processes were used; each process used $p$ threads, and calculations were performed on a single cluster node.
+Table \ref{table:average_AS_GPU} shows the speedup obtained when solving a series of problems on one GPU using an adaptive scheme compared to a similar launch on CPU using 4 threads. Table \ref{table:average_MMAS_GPU} shows the speedup of the algorithm combining multiple evolvents and an adaptive scheme when solving a series of problems on two GPUs compared to an adaptive scheme on CPU using 4 threads. Two evolvents and, accordingly, two processes were used; each process used $p$ threads on each GPU; all computations were performed on a single cluster node.
 
 
 \begin{table}
-                \caption{Speedup on GPU}
+                \caption{Speedup on six GPUs}
                 \label{table:GKLS6_average_MMAS_GPU}
                 \center
-                \begin{tabular}{lcc}
+                \begin{tabular}{lccc}
                                %\hline\noalign{\smallskip}
-                &  Iteration speedup &   Time speedup\\
-
+                &  Iteration speedup & &   Time speedup \\
                                \noalign{\smallskip} \hline \noalign{\smallskip}                               
-                               $p=64$  &    11,32	 & 6,83	  \\
-                               $p=256$ &    38,96	 & 31,52  \\
-							   $p=1024$&    128,39	 & 83,46  \\
+                               $p=64$  &    11,32	 & & 6,83	  \\
+                               $p=256$ &    38,96	 & & 31,52  \\
+															 $p=1024$&    128,39	 & & 83,46  \\
                                \noalign{\smallskip}\hline
                 \end{tabular}
 \end{table}
 
-%Следующий эксперимент будет проведен на 6-ти мерных задачах GKLS. В таблице \ref{table:GKLS6_average_MMAS_GPU} приведено ускорение по времени и по итерациям полученное при решении серии задач на GPU с использованием алгоритма объединяющего множественные развертки и адаптивную схему по сравнению с адаптивной схемой на CPU использующей 4 потока. Эксперимент проводился на трех узлах кластера и спользовалось до 6144 нитей.
+%Table \ref{table:average_AS_GPU} shows the speedup obtained when solving a series of problems on one GPU using an adaptive scheme compared to a similar launch on CPU using 4 threads. Table \ref{table:average_MMAS_GPU} shows the speedup of the algorithm combining multiple evolvents and an adaptive scheme when solving a series of problems on two GPUs compared to an adaptive scheme on CPU using 4 threads. Two evolvents and, accordingly, two processes were used; each process used $p$ threads on each GPU; all computations were performed on a single cluster node.
+
+The last series of experiments has been carried out on 100 six-dimensional problems from the GKLS Simple class. 
+Table \ref{table:GKLS6_average_MMAS_GPU} shows the speedup of the algorithm combining multiple evolvents and the adaptive scheme when solving the problems on 3 cluster nodes (using 2 GPUs per node, 6144 GPU threads in all) compared to the adaptive scheme on CPU using 4 threads.
+
+%Заключительный эксперимент был проведен на 6-ти мерных задачах класса GKLS Simple. В таблице \ref{table:GKLS6_average_MMAS_GPU} приведено ускорение по времени и по итерациям полученное при решении серии задач на GPU с использованием алгоритма объединяющего множественные развертки и адаптивную схему по сравнению с адаптивной схемой на CPU использующей 4 потока. Эксперимент проводился на трех узлах кластера, шесть разверток = шесть проецессов, каждый процесс - p нитей. Максимальное число нитей 6144.
 
 \section{Conclusion}
 
 In summary, we observe that the use of graphics processors to solve global optimization problems shows noteworthy promise, because high performance in modern supercomputers is achieved (mainly) through the use of accelerators.
 
-In this paper, we consider a parallel algorithm for solving multidimensional multiextremal optimization problems and its implementation on the GPU. In order to experimentally confirm the theoretical properties of the parallel algorithm under consideration, computational experiments were carried out on a series of several hundred test problems of different dimensions. The parallel algorithm demonstrates good acceleration, both in the GPU and CPU versions.
+In this paper, we consider a parallel algorithm for solving multidimensional multiextremal optimization problems and its implementation on GPU. In order to experimentally confirm the theoretical properties of the parallel algorithm under consideration, computational experiments were carried out on a series of several hundred test problems of different dimensions. The parallel algorithm demonstrates good speedup, both in the GPU and CPU versions.
 
 
 %
