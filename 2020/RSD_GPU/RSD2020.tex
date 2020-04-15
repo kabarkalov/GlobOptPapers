@@ -41,8 +41,8 @@
 %                                     also used for the TOC unless
 %                                     \toctitle is used
 %
-\author{Konstantin Barkalov\letter%\orcidID{0000-0001-5273-2471} 
-\and Ilya Lebedev%\orcidID{0000-0002-8736-0652}
+\author{Konstantin Barkalov%\orcidID{0000-0001-5273-2471} 
+\and Ilya Lebedev\letter%\orcidID{0000-0002-8736-0652}
 }
 
 %
@@ -110,25 +110,25 @@ An important property is that the relative differences of the function remain li
 where the H{\"o}lder constant \(H\) is related to the Lipschitz constant \(L\) by the ratio $ H=2L\sqrt{N+3}$. 
 Therefore, without limiting generality, we can consider minimizing the one-dimensional function \(f(x)=\varphi(y(x)), x\in[0,1]\), which satisfies the H{\"o}lder condition.
 
-The considered algorithm for solving this problem involves constructing a sequence of points \(x_k\), in which the values of objective function \(z_k = f(x_k)\) are calculated. We will call the process of computing the value of a function at a single point a trial. Assume that we have \(p\geqslant 1\) computational elements at our disposal and \(p\) trials which are performed simultaneously (synchronously) within a single iteration of the method. Let \(k(n)\) denote the total number of trials performed, after \(n\) parallel iterations.
+The algorithm for solving this problem (Global Search Algorithm, GSA) involves constructing a sequence of points \(x_k\), in which the values of objective function \(z_k = f(x_k)\) are calculated. We will call the process of computing the value of a function at a single point a trial. Assume that we have \(p\geqslant 1\) computational elements at our disposal and \(p\) trials which are performed simultaneously (synchronously) within a single iteration of the method. Let \(k(n)\) denote the total number of trials performed after \(n\) parallel iterations.
 
-In the first iteration of the method, the trial is carried out at an arbitrary internal point \(x^1\) of the interval \([0,1]\). Let \(n>1\) iterations of the method be performed, during which trials were carried out at \(k = k(n)\) points \(x^i, 1\leqslant i\leqslant k\). Then the trial points  \(x^{k+1},\dotsc,x^{k+p}\) of the next \((n+1)\)-th iteration are determined in accordance with the following rules.
+At the first iteration of the method, the trial is carried out at an arbitrary internal point \(x^1\) of the interval \([0,1]\). Let \(n>1\) iterations of the method be performed, during which trials were carried out at \(k = k(n)\) points \(x^i, 1\leqslant i\leqslant k\). Then the trial points  \(x^{k+1},\dotsc,x^{k+p}\) of the next \((n+1)\)-th iteration are determined in accordance with the following rules.
 
 Step 1. Renumber the points of the set \(X_k=\{x^1,\dotsc,x^k\}\cup\{0\}\cup\{1\}\), which includes the boundary points of the interval \([0,1]\), as well as the points of the previous trials, with the lower indices in the order of their increasing coordinate values, i.e.
 \begin{displaymath}
 0=x_0<x_1<\dotsc<x_{k+1}=1.
 \end{displaymath}
 
-Step 2. Assuming \(z_i=f(y(x_i)),1\leqslant i\leqslant k\) calculate the values
+Step 2. Assuming \(z_i=f(y(x_i)),1\leqslant i\leqslant k\), calculate the values
 \begin{displaymath}
 \label{step2}
-\mu=\max_{1\leqslant i\leqslant k}\dfrac{|z_i-z_{i-1}|}{\Delta_i},
+\mu=\max_{1\leqslant i\leqslant k}\dfrac{|z_i-z_{i-1}|}{\Delta_i}, \;
 \begin{matrix}
     M = 
     \left\{
     \begin{matrix}
-    r\mu,\mu>0 \\
-    1,\mu=0
+    r\mu,\mu>0, \\
+    1,\mu=0,
     \end{matrix} \right.
     \end{matrix}
 \end{displaymath}
@@ -162,7 +162,7 @@ x_{k+j}=\dfrac{x_{t_j}+x_{t_j-1}}{2},\; t_j=1, \; t_j=k+1
 
 The algorithm stops working if the condition \(\Delta_{t_j}\leqslant \varepsilon\)  is satisfied for at least one number \(t_j,1\leqslant j\leqslant p\); here \(\varepsilon>0\)  is the specified accuracy. As an estimate of the globally optimal solution to the problem (\ref{task}), the values are selected 
 \begin{displaymath}
-f_{k}^{*}=\underset{1\le i\le k}{\mathop{\min }}\,f({{x}^{i}}),   x_{k}^{*}=\arg \quad \underset{1\le i\le k}{\mathop{\min }}\,f({{x}^{i}}).
+f_{k}^{*}=\underset{1\le i\le k}{\mathop{\min }}\,f({{x}^{i}}),   x_{k}^{*}=\arg \; \underset{1\le i\le k}{\mathop{\min }}\,f({{x}^{i}}).
 \end{displaymath}
 For the rationale in using this method of organizing parallel computing see \cite{Strongin2000}. 
 %Modifications that account for the presence of inequality constraints in the problem, as well as information about the derivative of the objective function, are presented in \cite{Ref12} – \cite{Ref14}.
@@ -171,14 +171,14 @@ For the rationale in using this method of organizing parallel computing see \cit
 
 \subsection{Dimensionality reduction using multiple mappings}
 
-Reducing multidimensional problems to one-dimensional ones through the use of evolvents has important properties such as continuity and preserving uniform bounding of function differences with limited argument variation. However, some information about the proximity of points in multidimensional space is lost, since the point \(x\in [0,1]\) has only left and right neighbors, and the corresponding point \(y(x) \in R^N\) has neighbors in \(2^N\) directions. As a result, when using evolvents, the images \(y' , y''\) that are close in \(N\)-dimensional space can correspond to rather distant prototypes \(x' , x''\) on the interval \([0,1]\). This property leads to redundant calculations, because several limit points \(x' , x''\) of the test sequence generated by the method on the segment \([0,1]\), can correspond to a single limit point \(y\) in \(N\)-dimensional space.
+Reducing multidimensional problems to one-dimensional ones through the use of evolvents has important properties such as continuity and preserving uniform bounding of function differences with limited argument variation. However, some information about the proximity of points in multidimensional space is lost, since the point \(x\in [0,1]\) has only left and right neighbors, and the corresponding point \(y(x) \in R^N\) has neighbors in \(2^N\) directions. As a result, when using evolvents, the images \(y' , y''\) that are close in \(N\)-dimensional space can correspond to rather distant preimages \(x' , x''\) on the interval \([0,1]\). This property leads to redundant calculations, because several limit points \(x' , x''\) of the test sequence generated by the method on the segment \([0,1]\), can correspond to a single limit point \(y\) in \(N\)-dimensional space.
 
 A possible way to overcome this disadvantage is to use a set of evolvents (multiple mappings)
 \begin{displaymath}
 \label{eq:142}
 Y_L(x)=\left\{y^0(x),\ y^1(x),...,\ y^L(x)\right\}
 \end{displaymath}
-instead of using a single Peano curve \(y(x)\) (see \cite{Strongin1992,Strongin2000}). For example, each Peano curve \(y^i(x)\) from \(Y_L(x)\) can be obtained as a result of some shift along the main diagonal of the hyperinterval \(D\), the original curve \(y(x)\). Another way is to rotate the evolvent around the origin. The set of evolvents that have been constructed allows us to obtain for any close images \(y', y''\), close preimages \(x', x''\) for some mapping \(y^i(x)\).
+instead of using a single Peano curve \(y(x)\) (see \cite{Strongin1992,Strongin2000}). For example, each Peano curve \(y^i(x)\) from \(Y_L(x)\) can be obtained as a result of some shifting \(y(x)\) along the main diagonal of the hyperinterval \(D\). Another way is to rotate the evolvent \(y(x)\) around the origin. The set of evolvents that have been constructed allows us to obtain for any close images \(y', y''\) close preimages \(x', x''\) for some mapping \(y^i(x)\).
 
 Using a set of mappings leads to the formation of a corresponding set of one-dimensional multiextremal problems
 \begin{displaymath}
@@ -268,9 +268,9 @@ Therefore, at each iteration, subproblems with the maximum characteristic are se
 
 \subsection{General scheme}
 
-In relation to global optimization methods, an operation that can be effectively implemented on the GPU is the parallel calculation of many values of the objective function at once. Naturally, this requires implementing a procedure for calculating the value of a function on the GPU. Data transfers from the CPU to the GPU will be minimal: one need only transfer the coordinates of the trial points to the GPU, and get back the function values at these points. Functions that determine the processing of trial results in accordance with the algorithm, and require work with large amounts of accumulated search information, can be effectively implemented on the CPU.
+In relation to global optimization methods, an operation that can be efficiently implemented on GPU is the parallel calculation of many values of the objective function at once. Naturally, this requires implementing a procedure for calculating the value of a function on GPU. Data transfers from CPU to GPU will be minimal: one need only transfer the coordinates of the trial points to the GPU, and get back the function values at these points. Functions that determine the processing of trial results in accordance with the algorithm, and require work with large amounts of accumulated search information, can be effectively implemented on CPU.
 
-   The general scheme for organizing calculations using the GPU is shown in \ref{fig:GPU_Algorithm}. In accordance with this scheme, steps 1--4 of the parallel global search algorithm are performed on the CPU. The coordinates of the $p$ trial points calculated in step 4 of the algorithm are accumulated in the intermediate buffer and then transmitted to the GPU. On the GPU, the function values are calculated at these points, after which the trial results (again through the intermediate buffer) are transferred to the CPU.
+   The general scheme for organizing calculations using GPU is shown in Fig. \ref{fig:GPU_Algorithm}. In accordance with this scheme, steps 1--4 of the parallel global search algorithm are performed on CPU. The coordinates of the $p$ trial points calculated in step 4 of the algorithm are accumulated in the intermediate buffer and then transmitted to GPU. On GPU the function values are calculated at these points, after which the trial results (again through the intermediate buffer) are transferred to CPU.
    
    \begin{figure}[h!]
     \centering
@@ -290,7 +290,7 @@ The subproblem of the last \((M - 1)\)-th level
 \[
 {{\varphi }_{M-1}}({{u}_{1}},...,{{u}_{M-1}})=\underset{{{u}_{M}}\in {{D}_{M}}}{\mathop{\min }}\,{{\varphi }_{M}}({{u}_{1}},...,{{u}_{M}})
 \]
- differs from all the previous subproblems; it calculates the values of the objective function, since ${{\varphi }_{M}}({{u}_{1}},...,{{u}_{M}})=\varphi ({{y}_{1}},...,{{y}_{N}})$. This subproblem transfers between the CPU and the GPU.
+ differs from all the previous subproblems; it calculates the values of the objective function, since ${{\varphi }_{M}}({{u}_{1}},...,{{u}_{M}})=\varphi ({{y}_{1}},...,{{y}_{N}})$. This subproblem transfers between CPU and GPU.
 
    \begin{figure}[h!]
     \centering
@@ -331,26 +331,28 @@ Below are the results of a numerical comparison of three sequential algorithms -
   As can be seen from Table \ref{table:average_iters}, the sequential GSA surpasses the DIRECT and DIRECT\textit{l} methods in all classes of problems in terms of the average number of iterations. At the same time, in the 5-Hard class, none of the methods solved all the problems: DIRECT failed to solve 16 problems, DIRECTl and GSA -- 4 problems each.
 
 
-\begin{table}
-                \caption{Speedup on CPU}
-                \label{table:average_AS_CPU}
-                \center
-                \begin{tabular}{lccccccccccc}
-                               %\hline\noalign{\smallskip}
-																	 & \multicolumn{5}{c}{ Iteration speedup} & & \multicolumn{5}{c}{ Time speedup}\\
-                               \noalign{\smallskip} \cline{2-6} \cline{8-12}  \\
-                                   & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} &  & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} \\
-                               \noalign{\smallskip} \cline{2-3} \cline{5-6}  \cline{8-9} \cline{11-12} \noalign{\smallskip}
-                               & Simple & Hard & & Simple & Hard &  & Simple & Hard & & Simple & Hard  \\
-                               \noalign{\smallskip} \hline \noalign{\smallskip}                               
-                               $p=2$&   3,49 & 2,35 &   & 0,86 & 2,03 &   & 1,71 & 1,17 &   & 0,95 & 0,4 \\
-                               $p=4$&   8,22 & 7,65 &   & 6,74 & 8,56 &   & 2,01 & 1,9  &   & 1,85 & 1,53 \\
-                               \noalign{\smallskip}\hline
-                \end{tabular}
-\end{table}
+%\begin{table}
+                %\caption{Speedup on CPU}
+                %\label{table:average_AS_CPU}
+                %\center
+                %\begin{tabular}{lccccccccccc}
+                               %%\hline\noalign{\smallskip}
+																	 %& \multicolumn{5}{c}{ Iteration speedup} & & \multicolumn{5}{c}{ Time speedup}\\
+                               %\noalign{\smallskip} \cline{2-6} \cline{8-12}  \\
+                                   %& \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} &  & \multicolumn{2}{c}{ $N=4$ } & & \multicolumn{2}{c}{$N=5$} \\
+                               %\noalign{\smallskip} \cline{2-3} \cline{5-6}  \cline{8-9} \cline{11-12} \noalign{\smallskip}
+                               %& Simple & Hard & & Simple & Hard &  & Simple & Hard & & Simple & Hard  \\
+                               %\noalign{\smallskip} \hline \noalign{\smallskip}                               
+                               %$p=2$&   3,49 & 2,35 &   & 0,86 & 2,03 &   & 1,71 & 1,17 &   & 0,95 & 0,4 \\
+                               %$p=4$&   8,22 & 7,65 &   & 6,74 & 8,56 &   & 2,01 & 1,9  &   & 1,85 & 1,53 \\
+                               %\noalign{\smallskip}\hline
+                %\end{tabular}
+%\end{table}
 
 
-   Let us now evaluate the acceleration achieved using parallel GSA using an adaptive dimensionality reduction scheme based on the number $p$ of cores used. Table \ref{table:average_AS_CPU} shows the speedup obtained when solving a series of problems on the CPU, compared to GSA.
+Let us now evaluate the acceleration achieved using parallel GSA using an adaptive dimensionality reduction scheme based on the number $p$ of cores used.
+Table \ref{table:average_MMAS_CPU} shows the speedup of the algorithm that combines multiple evolvents and an adaptive scheme for solving a series of problems on CPU, compared to the sequential launch of the GSA. Two evolvents and, accordingly, two processes were used; each process used $p$ threads, and calculations were performed on a single cluster node.
+% Table \ref{table:average_AS_CPU} shows the speedup obtained when solving a series of problems on the CPU, compared to GSA.
    
 \begin{table}
                 \caption{Speedup on CPU}
@@ -371,7 +373,7 @@ Below are the results of a numerical comparison of three sequential algorithms -
 \end{table}
 
    
-   Table \ref{table:average_MMAS_CPU} shows the speedup of the algorithm that combines multiple evolvents and an adaptive scheme for solving a series of problems on CPU, compared to the sequential launch of the GSA. Two evolvents and, accordingly, two processes were used; each process used $p$ threads, and calculations were performed on a single cluster node.
+   
 
 \begin{table}
                 \caption{Results on GPU}
@@ -416,15 +418,12 @@ Below are the results of a numerical comparison of three sequential algorithms -
 \end{table}
 
 
-
-
-
-Tables \ref{table:average_AS_GPU} show the speedup obtained when solving a series of problems on the GPU using an adaptive scheme compared to a similar launch on CPU using 4 threads. Tables \ref{table:average_MMAS_GPU} show the speedup of the algorithm combining multiple evolvents and an adaptive scheme when solving a series of problems on GPU, compared to an adaptive scheme on CPU using 4 threads. Two evolvents and, accordingly, two processes were used; each process used $p$ threads, and calculations were performed on a single cluster node.
+Table \ref{table:average_AS_GPU} shows the speedup obtained when solving a series of problems on the GPU using an adaptive scheme compared to a similar launch on CPU using 4 threads. Table \ref{table:average_MMAS_GPU} shows the speedup of the algorithm combining multiple evolvents and an adaptive scheme when solving a series of problems on GPU, compared to an adaptive scheme on CPU using 4 threads. Two evolvents and, accordingly, two processes were used; each process used $p$ threads, and calculations were performed on a single cluster node.
 
 
 \begin{table}
                 \caption{Speedup on GPU}
-                \label{table:average_MMAS_GPU}
+                \label{table:GKLS6_average_MMAS_GPU}
                 \center
                 \begin{tabular}{lcc}
                                %\hline\noalign{\smallskip}
