@@ -66,12 +66,14 @@
       \begin{displaymath}
         \begin{array}{cr}\\
           \varphi(y^*)=\min\{\varphi(y):y\in D\}, \\
-          D=\{y\in \mathbb{R}^N:a_i\leq y_i\leq{b_i}, \\ 1\leq{i}\leq{N},\:g_j(y)\leqslant 0, 1\leqslant j\leqslant m\}
+          D=\{y\in \mathbb{R}^N:a_i\leqslant y_i\leqslant{b_i}, \\ 1\leqslant{i}\leqslant{N},\:g_j(y)\leqslant 0, 1\leqslant j\leqslant m\}
         \end{array}
       \end{displaymath}
       \(\varphi(y),\:g_j(y)\) -- многоэкстремальные функции, удовлятворяющие условию Липшица:
       \begin{displaymath}
-        |f(y_1)-f(y_2)|\leq L\Vert y_1-y_2\Vert,y_1,y_2\in D,
+        \begin{array}{cr}\\
+          |f(y_1)-f(y_2)|\leqslant L\Vert y_1-y_2\Vert,\\y_1,y_2\in \mathbb{R}^N:a_i\leqslant y_i\leqslant{b_i},
+        \end{array}
       \end{displaymath}
       где \(L>0\) константа Липшица и \(||\cdot||\) обозначает \(l_2\) норму в пространстве \(\mathbb{R}^N\).
     \end{column}
@@ -101,14 +103,14 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Редукция размерноти}
+  \frametitle{Редукция размерности}
   \begin{center}
   Кривая Пеано \(y(x)\) позволяет уменьшить размерность многомерного пространства до 1:
   \begin{gather}
-    \lbrace y\in \mathbb{R}^N:-2^{-1}\leqslant y_i\leqslant 2^{-1},1\leqslant i\leqslant N\rbrace=\{y(x):0\leqslant x\leqslant 1\} \nonumber \\
+    D_e=\lbrace y\in \mathbb{R}^N:-2^{-1}\leqslant y_i\leqslant 2^{-1},1\leqslant i\leqslant N\rbrace=\{y(x):0\leqslant x\leqslant 1\} \nonumber \\
     \min\{\varphi(y): y\in D\}=\min\{\varphi(y(x)): x\in [0,1]\} \nonumber
   \end{gather}
-  \(y(x)\) является негладкой кривой, отображающей отрезок \([0,1]\) на гиперкуб \(D\).
+  \(y(x)\) является негладкой кривой, отображающей отрезок \([0,1]\) на гиперкуб \(D_e\).
   \begin{figure}[ht]
     \includegraphics[width=.35\textwidth]{peano3d.png}
     \includegraphics[width=.35\textwidth]{peano2d.png}
@@ -191,7 +193,7 @@
   \end{displaymath}
   После использования свёртки Гермейера для скаляризации задача примет вид:
   \begin{displaymath}
-    \varphi(y,\lambda_1,\lambda_2)=\max\{\lambda_1 f_1(y), \lambda_2 f_2(y):\lambda_1,\lambda_2\in[0,1],\: \lambda_1+\lambda_2=1\}
+    \varphi(y^*(\lambda_1,\lambda_2))=\min_{y\in D}\max\{\lambda_1 f_1(y), \lambda_2 f_2(y)\};\lambda_1,\lambda_2\in[0,1],\: \lambda_1+\lambda_2=1
 \end{displaymath}
 Для численного построения множества Парето выберем
 100 наборов коэффициентов \((\lambda_1,\lambda_2)\) таких, что
@@ -203,7 +205,7 @@
   \vspace*{-1.0cm}
   \begin{displaymath}
     \begin{array}{cr}\\
-      SP(S)=\sqrt{\frac{1}{|S|-1} \sum_{i=1}^{|S|} (\overline{d}-d_i)},\:\overline{d}=mean\{d_i\}, \\
+      SP(S)=\sqrt{\frac{1}{|S|-1} \sum_{i=1}^{|S|} (\overline{d}-d_i)^2},\:\overline{d}=mean\{d_i\}, \\
       d_i=\min_{s_i,s_j\in S:s_i\ne s_j}||F(s_i)-F(s_j)||_1,\: F=(f_1,f_2)
     \end{array}
   \end{displaymath}
@@ -249,7 +251,7 @@
     для распареллеливания процесса проведения испытаний на общей памяти.
 
     Все вычислительные
-    эксперименты проведены на машине со следующей конфигурацией: Intel Core i7-7800X (6 cores), 64GB RAM, Unubtu 16.04 ОS, GCC 5.5 compiler.
+    эксперименты проведены на машине со следующей конфигурацией: Intel Core i7-7800X (6 cores) CPU, 64GB RAM, Unubtu 16.04 ОS, GCC 5.5 compiler.
   \end{center}
 \end{frame}
 
@@ -277,19 +279,19 @@
       Класс задач & \textit{p} & Количество итераций & Время, с & \(S_i\) & \(S_t\)   \\
       %s\noalign{\smallskip} \cline{4-5} \cline{7-8}  \noalign{\smallskip}
       \hline
-      GKLS \& \(F_{GR}\) based \
+      GKLS \& \(F_{GR}\)-based \
         & 1 & 51434 & 90.20 & -    & - \\
         & 2 & 25698 & 56.96 & 2.00 & 1.58 \\
         & 4 & 13015 & 36.67 & 3.95 & 2.46 \\
         & 6 & 8332  & 26.85 & 6.17 & 3.36 \\
       \hline
-      GKLS based 2d \
+      GKLS-based 2d \
         & 1 & 59066 & 97.53 & -    & - \\
         & 2 & 29060 & 60.56 & 2.04 & 1.61 \\
         & 4 & 14266 & 38.92 & 4.14 & 2.51 \\
         & 6 & 9436  & 29.53 & 6.26 & 3.30 \\
       \hline
-      GKLS based 3d \
+      GKLS-based 3d \
         & 1 & 782544 & 1117.55 & -    & - \\
         & 2 & 397565 & 752.92  & 1.97 & 1.48 \\
         & 4 & 208073 & 526.67  & 3.76 & 2.12 \\
