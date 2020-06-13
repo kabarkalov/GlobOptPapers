@@ -30,8 +30,8 @@
 
 \begin{document}
 %
-\title{Parallel global optimization algorithm for obtaining uniform convergence when
-simultaneously solving a set of global optimization problems\thanks{This study was supported
+\title{Parallel global optimization algorithm with uniform convergence
+for solving a set of constrained global optimization problems\thanks{This study was supported
 by the Russian Science Foundation, project No.\,16-11-10150.}}
 %
 %\titlerunning{Abbreviated paper title}
@@ -46,7 +46,7 @@ Konstantin Barkalov
 % First names are abbreviated in the running head.
 % If there are more than two authors, 'et al.' is used.
 %
-\institute{Lobachevsky State University of Nizhny Novgorod, Nizhny Novgorod, Russia
+\institute{Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia
 \email{sovrasov.vladislav@itmm.unn.ru},
 \email{konstantin.barkalov@itmm.unn.ru}
 }
@@ -54,8 +54,8 @@ Konstantin Barkalov
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-In the present work, an extension of global optimization algorithm solving a number of problems
-simultaneously onto a case of problems with non-linear constraints is considered. The property
+In the present work, an extension of global optimization algorithm for solving a set of problems
+simultaneously onto a case of problems with non-convex constraints is considered. The property
 of uniform convergence inherent to the algorithm allows distributing the computation resources
 in the optimal way since the errors of numerical solutions decrease with approximately equal
 rates in all problems in the course of the execution of the algorithm. The algorithm assigns a
@@ -64,15 +64,15 @@ problems in parallel at every iteration. Upon stop of the method at arbitrary ti
 solutions of similar quality would be obtained in all problems of the series being solved. A series
 of several problems arises if the global optimization problem has a discrete parameter or, for
 example, in solving a multicriteria optimization problem using criteria convolution. The
-considered algorithm employs mappings like Peano space filling curve for the reduction of the
+considered algorithm employs Peano-type space-filling curves for the reduction of the
 multidimensional optimization problems to the one-dimensional ones.  The efficiency of the
 implemented algorithm was tested using the sets of artificially generated global optimization
 problems as well as in solving a series of problems obtained as a result of scalarization of a
 multicriteria optimization  problem. Also, the numerical experiments confirmed the uniform
-convergence of the method.
+convergence of the proposed method.
 
-\keywords{Global optimization \and Uniform convergence \and Derivative-free optimization
-\and Parallel computations.}
+\keywords{Global optimization \and Non-convex constraints \and Uniform convergence \and Derivative-free optimization
+\and Parallel computing.}
 \end{abstract}
 %
 %
@@ -80,13 +80,13 @@ convergence of the method.
 
 \section{Introduction}
 \label{sec-intro}
-Nonlinear global optimization of the non-convex functions is considered traditionally to be one
-of the most difficult problems of mathematical programming.
+Global optimization problems with non-convex constraints are considered traditionally to be one
+of the most difficult optimization problems.
  The finding of the global minimum of a function of several variables appears to be more
 difficult often than a local optimization in a thousand-dimensional space.
-For the latter, application of the simplest gradient descent method may appear to be enough
-whereas in order to \textit{guarantee} the finding of the global optimum, the optimization
-methods have to accumulate the information on the behavior of the objective function in the
+For the latter, application of the simplest gradient descent method may appear to be enough,
+whereas to \textit{guarantee} the finding of the global optimum the optimization
+methods have to accumulate the information on the behaviour of the objective function in the
 whole search domain \cite{Jones2009,Paulavicius2011,Evtushenko2013,Strongin2000}.
 The solving of a series of such problems at limited computational resources is even more
 difficult problem: besides the search of the global extremum, it is necessary to distribute the
@@ -100,15 +100,15 @@ in the problems from the beginning of the list the optimum may be estimated even
 precision.
 
 In the present work, a generalization of parallel global optimization method for simultaneous
-solving of a set of problems developed earlier in Lobachevskii University of Nizhnii Novgorod
-\cite{BarkalovStrongin2018} onto the case of nonlinear constraints is considered. To account
-for the constraints, the index scheme \cite{Strongin2000} is applied allowing working with
-partially computable objective functions and featured by efficiency comparable to other
+solving of a set of problems developed earlier in Lobachevsky State University of Nizhni Novgorod
+\cite{BarkalovStrongin2018} onto the case of non-convex constraints is considered. To account
+for the constraints, the index scheme \cite{Strongin2000,Pugliese} is applied allowing working with
+partially defined objective function and constraints and featured by efficiency comparable to other
 approaches \cite{BarkalovLebedev2017}. The convergence of the algorithm to the global
-optimal solutions in all problems was proved theoretically, the efficiency of the implemented
+optimizers in all problems was proved theoretically, the efficiency of the implemented
 algorithm was demonstrated by solving sets of problems generated by a special mechanism
 generating the sets of problems of predefined dimensionality with predefined number of
-nonlinear constraints \cite{GergelBarkalov2019}.
+non-convex constraints \cite{GergelBarkalov2019}.
 Besides the problems generated artificially, the considered method was tested also on a set of
 problems arising when solving a multicriteria optimization problem with nonlinear constraints by
 criteria convolution method \cite{Ehrgott2005}.
@@ -126,59 +126,59 @@ considered method are outlined.
 
 \section{Global optimization problem statement}
 \label{sec:problem}
-Within the frames of the present work, we will consider the following global optimization
-problem statement: to find the global minimum of an \(N\)-dimensional function \(\varphi(y)\) in
-a hyperinterval
-\(D=\{y\in \mathbf{R}^N:a_i\leqslant x_i\leqslant{b_i}, 1\leqslant{i}\leqslant{N}\}\).
+In this work we consider the following 
+problem: to find the global minimum of an \(N\)-dimensional function \(\varphi(y)\) in
+a hyperinterval $D$
+\begin{equation}
+\label{eq:task}
+\varphi(y^*)=\min\{\varphi(y):y\in D\},
+\end{equation}
+\begin{displaymath}
+D=\{y\in \mathbf{R}^N:a_i\leqslant x_i\leqslant{b_i}, 1\leqslant{i}\leqslant{N}\}.
+\end{displaymath}
 In order to construct an estimate of the global minimum based on a finite number of
 computations of the function values, the rate of variation of \(\varphi(y)\) in \(D\) is required to
 be limited.
-As a rule, the Lipschitz condition Is accepted as such a limitation.
-\begin{equation}
-\label{eq:task}
-\varphi(y^*)=\min\{\varphi(y):y\in D\}
-\end{equation}
+As a rule, the Lipschitz condition 
 \begin{displaymath}
 \label{lip}
-|\varphi(y_1)-\varphi(y_2)|\leqslant L\Vert y_1-y_2\Vert,y_1,y_2\in D,0<L<\infty
+|\varphi(y_1)-\varphi(y_2)|\leqslant L\Vert y_1-y_2\Vert,y_1,y_2\in D,0<L<\infty,
 \end{displaymath}
+is accepted as such a limitation.
 
 There are various methods solving the considered multidimensional problem directly
-\cite{SergeyevKvasov2017, Jones2009} as well as efficient methods of solving the one-
-dimensional problems \cite{Norkin1992, Strongin2000}.
+\cite{SergeyevKvasov2017, Jones2009} as well as efficient methods for solving the univariate problems \cite{Norkin1992, Strongin2000}.
 In the present work, a one-dimensional method is considered, which is applied together with the
 dimensionality reduction scheme.
-The use of evolvents or space-filling curves is a classical scheme of reduction of the
-dimensionality of the initial problem for the global optimization algorithms
-\cite{Sergeyev2013}.
+The use of space-filling curve (or \textit{evolvent}) $y(x)$, where
 \begin{equation}
 \label{cube}
 \lbrace y\in \mathbf{R}^N:-2^{-1}\leqslant y_i\leqslant 2^{-1},1\leqslant i\leqslant
-N\rbrace=\{y(x):0\leqslant x\leqslant 1\}
+N\rbrace=\{y(x):0\leqslant x\leqslant 1\},
 \end{equation}
-
-A mapping of the kind (\ref{cube}) allows reducing a problem in the multidimensional space to
-solving a one-dimensional one at the expense of worsening its properties. In particular, the one-
-dimensional function \(\varphi(y(x))\) is not a Lipschitz but a H\"{o}lder one:
+ is a classical scheme of reduction of the
+dimensionality of the initial problem for the global optimization algorithms
+\cite{Sergeyev2013}.
+A mapping of the type (\ref{cube}) allows reducing a multidimensional problem to a univariate one at the expense of worsening its properties. In particular, the 
+one-dimensional function \(\varphi(y(x))\) is not lipschitzian but h\"{o}lderian one:
 \begin{displaymath}
 \label{holder}
-|\varphi(y(x_1))-\varphi(y(x_2))|\leqslant H{|x_1-x_2|}^{\frac{1}{N}},x_1,x_2\in[0;1],
+|\varphi(y(x_1))-\varphi(y(x_2))|\leqslant H{|x_1-x_2|}^{\frac{1}{N}}, \; x_1,x_2\in[0,1],
 \end{displaymath}
 where the H\"{o}lder constant \(H\) is related to the Lipschitz one \(L\) by the relation
 \begin{displaymath}
   H=2L\sqrt{N+3}.
 \end{displaymath}
 
-The domain \(D\) can also be defined by the constraint functions that complicates the problem
-essentially.
-The statement of the global optimization problem in this case will take the following form:
+The feasible domain \(G\) can also be defined by the constraints that essentially complicate the problem.
+The problem statement in this case will take the following form:
 \begin{equation}
   \label{eq:constrained_problem}
-  \varphi(y^*)=\min\{\varphi(y):y\in G=D \cap \{y: g_j(y)\leqslant 0, 1\leqslant j\leqslant m\}\}
+  \varphi(y^*)=\min\{\varphi(y):y\in G=D \cap \{y: g_j(y)\leqslant 0, 1\leqslant j\leqslant m\}\}.
 \end{equation}
 
 Let us denote \(g_{m+1}(y)=\varphi(y)\). Hereafter, we will assume all functions
-\(g_k(y),1\leqslant k \leqslant m+1\)
+\(g_k(y),1\leqslant k \leqslant m+1\),
 to satisfy the Lipschitz condition in some hyperinterval including \(D\).
 
 Further, let us consider solving a series of \(q\) problems of the kind
@@ -194,44 +194,45 @@ Further, let us consider solving a series of \(q\) problems of the kind
 
 Taking into account the dimensionality reduction scheme (\ref{cube}), let us assume when
 describing the method that it is required to find the global minimum of the function \(\varphi(x),
-x\in[0;1]\) satisfying the H\"{o}lder condition with the constraints \(g_j(x)\) also satisfying this
-condition in the interval \([0;1]\).
+x\in[0,1]\), satisfying the H\"{o}lder condition with the constraints \(g_j(x)\) also satisfying this
+condition in the interval \([0,1]\).
 
 The index algorithm of global search (IAGS) for solving the one-dimensional problems
-(\ref{eq:constrained_problem}) considered here implies the constructing of a sequence of points
+%(\ref{eq:constrained_problem}) 
+considered here implies the constructing of a sequence of points
 \(x_k\), which the values of the minimized function or of the constraints \(z_k = g_s(x_k)\) are
 computed in.
 To account for the latter, the index scheme \cite{Strongin2000} was used.
-Let \(Q_0=[0;1]\). The constraint having the index \(j\) is satisfied in all points of the domain
+Let \(Q_0=[0,1]\). The constraint having the index \(j\) is satisfied in all points of the domain
 \begin{displaymath}
-  Q_j=\left\{x\in [0;1]:g_j(x)\leq 0\right\},
+  Q_j=\left\{x\in [0,1]:g_j(x)\leq 0\right\},
 \end{displaymath}
 which is called feasible for this constraint.
-At that, the feasible domain \(D\) of the initial problem is defined by the equality:
+At that, the feasible domain \(D\) of the initial problem is defined by the equality
  \(D=\cap _{j=0}^{m}Q_{j}\).
-A trial in the point \(x\in [0;1]\) consists in a sequence computing of the values
+A trial in the point \(x\in [0,1]\) consists in a sequence computing of the values
 \(g_{1}(x),...,g_{\nu }(x)\)
 where the values of the indices \(\nu\) are defined by the conditions:
 \(x\in Q_{j},0\leqslant j<\nu ,x\notin Q_{\nu }\).
-The finding of the first violation of any constraint terminates the trial in the point \(x\).
-In the case when the point \(x\) is feasible i. e. \(x\in D\), the trial includes the computing of all
+The finding of the first violation of any constraint terminates the trial at the point \(x\).
+In the case when the point \(x\) is feasible, i.e. \(x\in D\), the trial includes the computing of all
 functions of the problem.
 At that, the value of the index is accepted to be equal to the magnitude \(\nu =m+1\).
 The pair \(\nu =\nu (x), z=g_{\nu }(x)\) where the index \(\nu\) falls into the borders \(1\leqslant
-\nu \leqslant m+1\) is called the result of the trial in the point \(x\).
+\nu \leqslant m+1\) is called the result of the trial at the point \(x\).
 
 Such an approach to conducting the trials allows reducing the initial problem with functional
 constraints to an unconstrained problem of minimization of a discontinuous function:
 
 \begin{displaymath}
   \begin{array}{lr}
-    \psi (x^{*})=\min_{x\in [0;1]}\psi (x), \\
-    \psi (x)={\begin{cases}g_{\nu }(x)/H_{\nu }&\nu <M\\(g_{M}(x)-g_{M}^{*})/H_{M}&\nu
+    \psi (x^{*})=\min_{x\in [0,1]}\psi (x), \\
+    \psi (x)={\begin{cases}g_{\nu }(x)/H_{\nu },&\nu <M\\(g_{M}(x)-g_{M}^{*})/H_{M},&\nu
 =M\end{cases}}
   \end{array}
 \end{displaymath}
 
-Here \(M=\max_{}^{}\left\{\nu (x):x\in [0;1]\right\}\) and \(g_{M}^{*}=\min
+Here \(M=\max_{}^{}\left\{\nu (x):x\in [0,1]\right\}\) and \(g_{M}^{*}=\min
 _{}^{}\left\{g_{M}(x):x\in \cap _{i=0}^{M-1}Q_{i}\right\}\).
 Because of the definition of the number \(M\), the problem of finding \(g_{M}^{*}\) always
 has a solution. If \(M=m+1\), then \(g_{M}^{*}=\varphi(x^{*})\).
@@ -246,7 +247,7 @@ A set of triples \(\{(x_k,\nu_k,z_k)\}, 1\leqslant k\leqslant n\) constitutes th
 accumulated by the method upon executing \(n\) steps.
 
 At the first iteration of the method, the trial is performed in the arbitrary internal point \(x_1\) of
-the interval \([0;1]\).
+the interval \([0,1]\).
 The indices of the points 0 and 1 are considered to be zero ones, the values \(z\) in these points
 are undefined.
 Let \(k\geqslant 1\) iterations of the method have been performed, in the course of which the
@@ -255,7 +256,7 @@ Then, the points \(x^{k+1}\) of the search trials of the next \((k+1)^{\rm th}\)
 defined according to the rules:
 
 Step 1. Renumber the points of the set \(X_k=\{x^1,\dotsc,x^k\}\cup\{0\}\cup\{1\}\), which
-includes the boundary points of the interval \([0;1]\) as well as the points of preceding trials by
+includes the boundary points of the interval \([0,1]\) as well as the points of preceding trials by
 the lower indices in the order of increasing coordinate values i. e.
 \begin{equation}
   \label{eq:points}
@@ -312,7 +313,7 @@ t=\argmax_{1\leqslant i \leqslant k+1}R(i)
 
 Step 7. Perform the next trial in the middle of the interval \((x_{t-1};x_{t})\) if the indices of its
 end points are not the same: \(x^{k+1}={\frac {1}{2}}(x_{t}+x_{t-1})\).
-Otherwise, perform the trial in the point
+Otherwise, perform the trial at the point
 \begin{displaymath}
   x^{k+1}={\frac {1}{2}}(x_{t}+x_{t-1})-\operatorname {sgn}(z_{t}-z_{t-1}){\frac {|z_{t}-
 z_{t-1}|^{n}}{2r_{\nu }\mu _{\nu }^{n}}},\nu =\nu (x_{t})=\nu (x_{t-1}),
