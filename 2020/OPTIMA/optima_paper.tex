@@ -34,7 +34,7 @@
 for solving a set of constrained global optimization problems\thanks{This study was supported
 by the Russian Science Foundation, project No.\,16-11-10150.}}
 %
-%\titlerunning{Abbreviated paper title}
+\titlerunning{Parallel global optimization algorithm with uniform convergence}
 % If the paper title is too long for the running head, you can set
 % an abbreviated paper title here
 %
@@ -170,11 +170,11 @@ where the H\"{o}lder constant \(H\) is related to the Lipschitz one \(L\) by the
   H=2L\sqrt{N+3}.
 \end{displaymath}
 
-The feasible domain \(G\) can also be defined by the constraints that essentially complicate the problem.
+The feasible domain can also be defined by the constraints that essentially complicate the problem.
 The problem statement in this case will take the following form:
 \begin{equation}
   \label{eq:constrained_problem}
-  \varphi(y^*)=\min\{\varphi(y):y\in G=D \cap \{y: g_j(y)\leqslant 0, 1\leqslant j\leqslant m\}\}.
+  \varphi(y^*)=\min\{\varphi(y):y\in D \cap \{y: g_j(y)\leqslant 0, 1\leqslant j\leqslant m\}\}.
 \end{equation}
 
 Let us denote \(g_{m+1}(y)=\varphi(y)\). Hereafter, we will assume all functions
@@ -185,8 +185,8 @@ Further, let us consider solving a series of \(q\) problems of the kind
 (\ref{eq:constrained_problem}):
 \begin{equation}
   \label{eq:many_problems}
-  \min\left\{\varphi_1(y), y\in G_1 \right\}, \min\left\{\varphi_2(y), y\in G_2\right\},...,
-\min\left\{\varphi_q(y), y\in G_q\right\}.
+  \min\left\{\varphi_1(y), y\in D_1 \right\}, \min\left\{\varphi_2(y), y\in D_2\right\},...,
+\min\left\{\varphi_q(y), y\in D_q\right\}.
 \end{equation}
 
 \section{Description of the global optimization method}
@@ -227,23 +227,21 @@ constraints to an unconstrained problem of minimization of a discontinuous funct
 \begin{displaymath}
   \begin{array}{lr}
     \psi (x^{*})=\min_{x\in [0,1]}\psi (x), \\
-    \psi (x)={\begin{cases}g_{\nu }(x)/H_{\nu },&\nu <M\\(g_{M}(x)-g_{M}^{*})/H_{M},&\nu
-=M\end{cases}}
+    \psi (x)={\begin{cases}g_{\nu }(x)/H_{\nu },&\nu <M,\\(g_{M}(x)-g_{M}^{*})/H_{M},&\nu
+=M.\end{cases}}
   \end{array}
 \end{displaymath}
-
 Here \(M=\max_{}^{}\left\{\nu (x):x\in [0,1]\right\}\) and \(g_{M}^{*}=\min
 _{}^{}\left\{g_{M}(x):x\in \cap _{i=0}^{M-1}Q_{i}\right\}\).
 Because of the definition of the number \(M\), the problem of finding \(g_{M}^{*}\) always
 has a solution. If \(M=m+1\), then \(g_{M}^{*}=\varphi(x^{*})\).
-The arcs of the functions \(\psi (x)\) are the H\"{o}lder ones within the sets
+The function \(\psi (x)\) satisfies the H\"{o}lder condition within the sets
 \(\cap _{i=0}^{j}Q_{i},0\leq j\leq M-1\)
-with the constant 1, and \(\psi (x)\) itself can have the breaks of the first kind at the boundaries
+with the constant 1, and \(\psi (x)\) can have jump discontinuities at the boundaries
 of these sets.
 Despite the values of the H\"{o}lder constants \(H_k\) and the value \(g_{M}^{*}\) are not
 known in advance, these ones can be estimated in the course of solving the problem.
-
-A set of triples \(\{(x_k,\nu_k,z_k)\}, 1\leqslant k\leqslant n\) constitutes the search information
+A set of triples \(\{(x_k,\nu_k,z_k)\}, 1\leqslant k\leqslant n\), constitutes the search information
 accumulated by the method upon executing \(n\) steps.
 
 At the first iteration of the method, the trial is performed in the arbitrary internal point \(x_1\) of
@@ -257,27 +255,27 @@ defined according to the rules:
 
 Step 1. Renumber the points of the set \(X_k=\{x^1,\dotsc,x^k\}\cup\{0\}\cup\{1\}\), which
 includes the boundary points of the interval \([0,1]\) as well as the points of preceding trials by
-the lower indices in the order of increasing coordinate values i. e.
+the lower indices in the order of increasing coordinate values, i.e.
 \begin{equation}
   \label{eq:points}
-  0=x_0<x_1<\dotsc<x_{k+1}=1
+  0=x_0<x_1<\dotsc<x_{k+1}=1,
 \end{equation}
 and juxtapose the values \(z_{i}=g_{\nu }(x_{i}),\nu =\nu (x_{i}),i={\overline {1,k}}\) to these
 ones.
 
-Step 2. For each integer number \(\nu ,1\leqslant \nu \leqslant m+1\) determine the corresponding
+Step 2. For each integer number \(\nu ,1\leqslant \nu \leqslant m+1\), determine the corresponding
 set \(I_{\nu }\) of the lower indices of the points, which the values of the functions \(g_{\nu
 }(x)\) are computed in:
 \begin{displaymath}
   I_{\nu }=\{i:\nu (x_{i})=\nu ,1\leqslant i\leqslant k\},1\leq \nu \leqslant m+1,
 \end{displaymath}
-determine the maximum value of the index \(M=\max\{\nu (x_{i}),1\leq i\leq k\}\).
+and determine the maximum value of the index \(M=\max\{\nu (x_{i}),1\leq i\leq k\}\).
 
 Step 3. Compute current estimate for the unknown H\"{o}lder constant:
 \begin{equation}
   \label{step2}
-  \mu _{\nu }=\max\{\frac{|g_{\nu }(x_{i})-g_{\nu }(x_{j})|}{(x_{i}-
-x_{j})^{\frac{1}{N}}}:i,j\in I_{\nu },i>j\}.
+  \mu _{\nu }=\max \left\{ \frac{|g_{\nu }(x_{i})-g_{\nu }(x_{j})|}{(x_{i}-
+x_{j})^{\frac{1}{N}}}:i,j\in I_{\nu },i>j \right\}.
 \end{equation}
 If the set \(I_{\nu }\) contains less than two elements or if the value \(\mu _{\nu }\) appears to
 be equal to zero, then accept \(\mu _{\nu }=1\).
@@ -285,33 +283,33 @@ be equal to zero, then accept \(\mu _{\nu }=1\).
 Step 4. For all nonempty sets \(I_{\nu },\nu ={\overline {1,M}}\) compute the estimates
 \begin{equation}
   \label{eq:step_4}
-  z_{\nu }^{*}={\begin{cases}\min\{g_{\nu }(x_{i}):x_{i}\in I_{\nu }\}&\nu =M\\-\varepsilon
-_{\nu }&\nu <M\end{cases}},
+  z_{\nu }^{*}={\begin{cases}\min\{g_{\nu }(x_{i}):x_{i}\in I_{\nu }\},&\nu =M,\\-\varepsilon
+_{\nu },&\nu <M,\end{cases}}
 \end{equation}
 where the vector with the non-negative coordinates \(\varepsilon _{R}=(\varepsilon
 _{1},..,\varepsilon _{m})\) is called the vector of reserves.
 
-Step 5. For each interval \((x_{i-1};x_{i}),1\leqslant i\leqslant k\) compute the characteristic
+Step 5. For each interval \((x_{i-1},x_{i}),1\leqslant i\leqslant k\) compute the characteristic
 \begin{equation}
   \label{step3_1}
   R(i)={\begin{cases}\Delta _{i}+{\frac {(z_{i}-z_{i-1})^{2}}{(r_{\nu }\mu _{\nu
-})^{2}\Delta _{i}}}-2{\frac {z_{i}+z_{i-1}-2z_{\nu }^{*}}{r_{\nu }\mu _{\nu }}}&\nu =\nu
-(x_{i})=\nu (x_{i-1})\\2\Delta _{i}-4{\frac {z_{i-1}-z_{\nu }^{*}}{r_{\nu }\mu _{\nu
-}}}&\nu =\nu (x_{i-1})>\nu (x_{i})\\2\Delta _{i}-4{\frac {z_{i}-z_{\nu }^{*}}{r_{\nu }\mu
-_{\nu }}}&\nu =\nu (x_{i})>\nu (x_{i-1})\end{cases}}
+})^{2}\Delta _{i}}}-2{\frac {z_{i}+z_{i-1}-2z_{\nu }^{*}}{r_{\nu }\mu _{\nu }}},&\nu =\nu
+(x_{i})=\nu (x_{i-1}),\\2\Delta _{i}-4{\frac {z_{i-1}-z_{\nu }^{*}}{r_{\nu }\mu _{\nu
+}}},&\nu =\nu (x_{i-1})>\nu (x_{i}),\\2\Delta _{i}-4{\frac {z_{i}-z_{\nu }^{*}}{r_{\nu }\mu
+_{\nu }}},&\nu =\nu (x_{i})>\nu (x_{i-1}),\end{cases}}
 \end{equation}
 where \(\Delta_{i}=(x_{i}-x_{i-1})^{\frac{1}{N}}\).
-The magnitudes \(r_{\nu }>1,\nu ={\overline {1,m}}\) are the parameters of the algorithm.
+The values \(r_{\nu }>1,\nu ={\overline {1,m}}\) are the parameters of the algorithm.
 The products \(r_{\nu}\mu_{\nu}\) used in computing the characteristics as the estimates of the
 unknown H\"{o}lder constants depend on these ones.
 
 Step 6. Select the maximum characteristic:
 \begin{equation}
 \label{step4}
-t=\argmax_{1\leqslant i \leqslant k+1}R(i)
+t=\arg \max_{1\leqslant i \leqslant k+1}R(i).
 \end{equation}
 
-Step 7. Perform the next trial in the middle of the interval \((x_{t-1};x_{t})\) if the indices of its
+Step 7. Perform the next trial in the middle of the interval \((x_{t-1},x_{t})\) if the indices of its
 end points are not the same: \(x^{k+1}={\frac {1}{2}}(x_{t}+x_{t-1})\).
 Otherwise, perform the trial at the point
 \begin{displaymath}
@@ -322,12 +320,12 @@ and then increment \(k\) by 1.
 
 The algorithm stops if the condition \(\Delta_{t}\leqslant \varepsilon\) is satisfied where
 \(\varepsilon>0\) is a predefined precision.
-The value
+The values
 \begin{equation}
-\varphi_k^*=\min_{1\leqslant i \leqslant k}\varphi(x_i), x_k^*=\argmin_{1\leqslant i \leqslant
+\varphi_k^*=\min_{1\leqslant i \leqslant k}\varphi(x_i), \; x_k^*=\arg \min_{1\leqslant i \leqslant
 k}\varphi(x_i)
 \end{equation}
-is accepted as the estimate of the global optimal solution.
+are accepted as the estimates of the global solution.
 
 Next, following the approach described in \cite{BarkalovStrongin2018}, we will use \(q\) copies
 of IAGS working synchronously to solve the problem series (\ref{eq:many_problems}).
@@ -367,15 +365,15 @@ The conditions of convergence of the described in Section \ref{sec:method} metho
   Assume that the following conditions are true:
   \begin{enumerate}
     \item The problem (\ref{eq:constrained_problem}) has a solution.
-    \item Functions \(g_j(y)\leqslant 0, 1\leqslant j\leqslant m + 1\) are Lipschitzian on \(D\) with
+    \item Functions \(g_j(y)\leqslant 0, 1\leqslant j\leqslant m + 1\), are Lipschitzian with
 respective constants \(L_i\) over the domain \(D\) (here \(g_{m+1}(y)=\varphi(y)\)).
-    \item Beginning with some step (i. e. if \(k\) from (\ref{eq:points}) is sufficiently large),
-    the values \(\mu_\nu\) from \ref{step2} satisfy the inequalities
+    \item Beginning with some step (i.e. if \(k\) from (\ref{eq:points}) is sufficiently large),
+    the values \(\mu_\nu\) from (\ref{step2}) satisfy the inequalities
     \begin{equation}
       r_\nu\mu_\nu > 2^{3-1/N}L_\nu \sqrt{N+3},\: 1\leqslant \nu \leqslant m + 1.
     \end{equation}
   \end{enumerate}
-  Then any limit point \(y\) of the sequence \(\{y_k\} = \{y(x_k)\}\) generated
+  Then any limit point \(\overline{y}\) of the sequence \(\{y_k\} = \{y(x_k)\}\) generated
   by the index method while solving the problerm
   (\ref{eq:constrained_problem}) is admissible and satisfies the conditions
 \begin{equation}
@@ -387,15 +385,15 @@ respective constants \(L_i\) over the domain \(D\) (here \(g_{m+1}(y)=\varphi(y)
 
 \begin{remark}
   \label{rem:r1}
-  From the relationship between the Holder and Lipschitz constants and from the condition (\ref{eq:conv_cond}) it follows
+  From the relationship between the H\"{o}lder and Lipschitz constants and from the condition (\ref{eq:conv_cond}) it follows
   that the parameters \(r_\nu\) from (\ref{step3_1}) should satisfy the condition
   \begin{equation}
     r_\nu > 2^{2 - 1/N}.
   \end{equation}
 \end{remark}
 
-\begin{theorem} (On convergence condiotions) Let the conditions of the Theorem \ref{th:single_conv}
-  are satisfied for all of \(q\) problems from the set \ref{eq:many_problems} separately.
+\begin{theorem} (On convergence conditions) Let the conditions of the Theorem \ref{th:single_conv}
+  are satisfied for all of \(q\) problems from the set (\ref{eq:many_problems}) separately.
   Then solving all of the \(q\) problems by the algorithm from Section \ref{sec:method} will
   generate \(q\) infinite sequences, for the limit points of which the Theorem \ref{th:single_conv}
   will be also true.
@@ -426,10 +424,10 @@ respective constants \(L_i\) over the domain \(D\) (here \(g_{m+1}(y)=\varphi(y)
   When the considered two problems are solved simultaneously, the algorithm selects
   an interval for the next trial according to the condition:
   \begin{equation}
-    R(t) = \max\{R_\varphi(i),R_\psi(j)\}
+    R(t) = \max\{R_\varphi(i),R_\psi(j)\}.
   \end{equation}
 
-  Let the algorithm is solving tho problems and the iterations conunter is \(l = k + s, l=0,1,2,\dots\).
+  Let the algorithm is solving two problems and the iterations counter is \(l = k + s, l=0,1,2,\dots\).
   Then, since for all of the problems Theorem \ref{th:single_conv} is true, at least one of the sequences
   \(\{v^k\}\) and \(\{u^s\}\) will be infinite (let it be \(\{v^k\}\)). If we prove that both the
   sequences are infinite, this would lead us to convergence in both the considered problems.
@@ -454,7 +452,7 @@ respective constants \(L_i\) over the domain \(D\) (here \(g_{m+1}(y)=\varphi(y)
   Therefore using the first branch form rule (\ref{step3_1}) we have inequality
   \begin{equation}
     \label{eq:th1}
-    R_\varphi(i)\leqslant\Delta_i(1 + \frac{1}{r_\nu^2}) - \frac{2(z_i+z_{i-1}-2z^*_\nu)}{r_\nu\mu_{\varphi,\nu}}
+    R_\varphi(i)\leqslant\Delta_i(1 + \frac{1}{r_\nu^2}) - \frac{2(z_i+z_{i-1}-2z^*_\nu)}{r_\nu\mu_{\varphi,\nu}}.
   \end{equation}
   Because \(\overline{v}\) is the limit point of the sequence \(\{v^k\}\) and \(\varphi(y(\overline{v}))\leqslant z^*_{\nu}, \nu=m+1\) or
   \(z^*_\nu=0, \nu<m+1\) and \(z_{i-1},z_i\to 0\) at \(k\to\infty\):
@@ -536,10 +534,10 @@ In combination with GCGen, two sets of 100 problems each of the dimensionalities
 were generated.
 Each problem had two constraints.
 Also, in order to demonstrate the properties of the method to be preserved at essentially
-different properties of the problems, a mixed class consisting of 50 problems with two-
-dimensional GKLS functions and 50 problems with \(F_{GR}\) ones was generated.
+different properties of the problems, a mixed class consisting of 50 problems with 
+two-dimensional GKLS functions and 50 problems with \(F_{GR}\) ones was generated.
 Examples of contour plots of the considered problems are presented in Fig. \ref{fig:isolines}.
-The feasible area is highlighted by color.
+The feasible domain is highlighted by color.
 
 \begin{figure}[ht]
     \centering
@@ -552,16 +550,16 @@ The feasible area is highlighted by color.
 \end{figure}
 
 A test problem was considered to be solved if the optimization method executes the next trial
-\(y^k\) in the \(\delta\)-proximity of the global minimum \(y^*\) i. e.
-\(\left\|y^k-y^*\right\|\leqslant \delta = 0.01\left\|b-a\right\|\)
-Where \(a\) and \(b\) are the left and right boundaries of the hypercube from (\ref{eq:task}).
+\(y^k\) in the \(\delta\)-vicinity of the global minimizer \(y^*\), i.e.
+\(\left\|y^k-y^*\right\|\leqslant \delta = 0.01\left\|b-a\right\|\), 
+where \(a\) and \(b\) are the left and right boundaries of the hypercube from (\ref{eq:task}).
 If this relation is not fulfilled upon reaching the limit of number of iterations, the problem was
 considered to be not solved.
 
 When evaluating the quality of the method and its implementation, besides the speedup due to
 the parallelization and the work time,
 Was taken into account as well.
-The mean maximum distance (in terms of \(l_{\inf}\)-norm) form the current estimate of the
+The mean maximum distance (in terms of \(l_{\infty}\)-norm) form the current estimate of the
 optimum to its actual position computed on the set of problems (\ref{eq:many_problems}):
 \(D_{avg}\) and \(D_{max}\).
 The dynamics of these magnitudes in the course of the optimization shows how uniformly the
@@ -575,7 +573,7 @@ Intel Core i7-7800X, 64GB RAM, Ubuntu 16.04 OS, GCC 5.5 compiler.
 \subsection{Result of solving the generated problems}
 
 The results of solving the test problems by the sequential and parallel versions of the modified
-IAGS for solving the sets of problems are presented in Table \ref{tab:speedup}.
+IAGS for solving the sets of problems are presented in Table~\ref{tab:speedup}.
 For all two-dimensional classes of problems, the parameter \(r=4.7\).
 In the case of the three-dimensional problems, \(r=4.7,\: \varepsilon_\nu=0.1\).
 In all experiments, an additional computational load was introduced into the objective function
@@ -646,7 +644,7 @@ In order to demonstrate the efficiency of the approach to the balancing of the l
 consider an example, in which a set of problems of the kind (\ref{eq:many_problems}) is
 generated as a result of scalarization of a multicriteria optimization problem with constrains.
 
-Let us consider a test problem proposed in \cite{BinhKorn1999}:
+Let us consider a test problem from \cite{BinhKorn1999}:
 \begin{equation}
   \label{eq:mco_probem}
   \begin{array}{l}
@@ -656,13 +654,13 @@ Let us consider a test problem proposed in \cite{BinhKorn1999}:
         f_2(y) = (y_1-5)^2 + (y_2-5)^2 \\
       \end{array}
       \right .
-      y_1\in [-1;2],y_2\in [-2;1]
+      , y_1\in [-1,2],y_2\in [-2,1],
       \\s.t.
       \\
       \left \{
       \begin{array}{l}
-        g_1(y) = (y_1 - 5)^2 + y_2^2 - 25 \leqslant 0 \\
-        g_2(y) = -(y_1 - 8)^2 - (y_2 + 3)^2 + 7.7 \leqslant 0\\
+        g_1(y) = (y_1 - 5)^2 + y_2^2 - 25 \leqslant 0, \\
+        g_2(y) = -(y_1 - 8)^2 - (y_2 + 3)^2 + 7.7 \leqslant 0.\\
       \end{array}
       \right .
   \end{array}
@@ -679,7 +677,7 @@ Trying all possible convolution coefficients, one can find the whole set of Pare
 solutions in the problem (\ref{eq:mco_probem}).
 For the numerical construction of the Pareto set, let us select 100 sets of coefficients
 \((\lambda_1,\lambda_2)\) so that
-\(\lambda_1^i=i h,\: \lambda_2^i=1-\lambda_1^i,\: h=10^{-2},i=\overline{1, 100}\).
+\(\lambda_1^i=i h,\: \lambda_2^i=1-\lambda_1^i,\: h=10^{-2},\: i=\overline{1, 100}\).
 
 As the limitation for the computational resources, a limit of 2500 trials was selected.
 The set of auxiliary scalar problems was solved by two methods:
@@ -711,19 +709,22 @@ match the solution presented in \cite{BinhKorn1999} and means the lack of resour
 solving some auxiliary problems.
 To evaluate the quality of solution, the index \(Spacing(SP)\) \cite{RiquelmeLucken2015}
 featuring the density of the points approximating the Pareto set was computed also.
-\begin{displaymath}
+\begin{equation*}
+\begin {array}{l}
   SP(S)=\sqrt{\frac{1}{|S|-1} \sum_{i=1}^{|S|} (\overline{d}-d_i)^2},
-  \:\overline{d}=mean\{d_i\},\:d_i=\min_{s_i,s_j\in S:s_i\ne s_j}||F(s_i)-F(s_j)||_1,\: F=(f_1,f_2)
-\end{displaymath}
+  \; \overline{d}=mean\{d_i\},
+	\\d_i=\min_{s_i,s_j\in S:s_i\ne s_j}||F(s_i)-F(s_j)||_1,\; F=(f_1,f_2).
+	\end{array}
+\end{equation*}
 In the case of separate solving of the problem \(SP_{single}=0.984\) whereas when solving of
 the problems by the method with the balancing of the load \(SP_{multi}=0.749\) that evidences
 a better quality of the approximation of the solution.
 
 \section{Conclusion}
 
-In the course of present work, the support of the nonlinear constraints was implemented in the
+In the course of present work, the support of the non-convex constraints was implemented in the
 algorithm solving a set of the global optimization problems.
-Also, the essential conditions of convergence for the developed method were obtained.
+Also, the sufficient conditions of convergence for the developed method were obtained.
 The numerical experiments demonstrating the advantages of the considered approach over
 solving the problems separately were carried out.
 The efficiency of solving a set of problems together was demonstrated by the example of
@@ -731,7 +732,7 @@ solving a multicriteria problem with nonlinear constraints.
 
 In the course of further work, it is planned to improve current implementation of the algorithm
 by reducing the costs of supporting the search information for the set of problems and, this way,
-improving the indices of speedup in time due to the parallelization.
+improving the indices of time speedup due to the parallelization.
 Also, it is planned to implement a version of considered algorithm working in the distributed
 memory according to the scheme described in \cite{BarkalovLebedev2017_2}.
 
