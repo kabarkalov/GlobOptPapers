@@ -40,7 +40,7 @@
 %
 \begin{document}
 
-\title{A Computationally Efficient Approach for Solving Lexicographic Multicriteria Optimization Problems\thanks{This research was supported by the Russian Science Foundation, project No 16-11-10150. %``Novel efficient methods and software tools for time-consuming decision making problems using supercomputers of superior performance''.
+\title{Computationally Efficient Approach for Solving Lexicographic Multicriteria Optimization Problems\thanks{This research was supported by the Russian Science Foundation, project No 16-11-10150. %``Novel efficient methods and software tools for time-consuming decision making problems using supercomputers of superior performance''.
 }
 }
 
@@ -78,77 +78,82 @@ Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia \\
 \maketitle
 
 \begin{abstract}
-This paper proposes a computationally efficient approach for solving complex lexicographic multicriteria optimization problems in which efficiency criteria can be multiextremal and computing the values of criteria can be time-consuming. It is also assumed that in the course of calculations, how problems are formulated may change and consequently, solving dynamically defined sets of multicriteria optimization problems may become necessary. The proposed approach is based on reducing multidimensional problems to one-dimensional global optimization problems, utilizing efficient global search algorithms, and reusing the search information obtained in the process of calculations. Results of computational experiments demonstrate that the proposed approach can significantly reduce the computational complexity of solving multicriteria optimization problems.
-\keywords{Multicriteria optimization \and Lexicographic ordering \and Global optimization \and Dimensionality reduction \and Search information \and Computational complexity}
+In this paper, we propose a computationally efficient approach for solving complex multicriteria lexicographic optimization problems, which can be complicated by the multiextremal nature of the efficiency criteria and extensive volume of computations required to calculate the criteria values. The formulation of problems is assumed to be the subject to change as well, which, in turn, may require solving dynamically defined sets of multicriteria optimization problems. The proposed approach is based on reducing multidimensional problems to one-dimensional global optimization problems, utilizing efficient global search algorithms, and reusing the search information obtained in the process of calculations. The results of numerical experiments confirm that the proposed approach demonstrates high computational efficiency of solving multicriteria global optimization problems.
+\keywords{Multicriteria optimization \and Lexicographic ordering \and Global optimization \and Dimensional reduction \and Search information \and Computational complexity}
 \end{abstract}
 
 \section{Introduction}
 \label{sec:1}
 
-Multicriteria optimization (MCO) problems are among the most common statements used to address decision-making problems and are widely found in applications. Multicriteria optimization is an area of vigorous scientific research, and during this time a large number of efficient methods of multicriteria optimization have been proposed and many practical problems have been solved (see, e.g., monographs \cite{c1,c2,c3,c4}) and reviews of scientific and practical results in this field \cite{c6,c7,c8,c9}.
+Multicriteria optimization (MCO) problems are among the most general statements used to address decision-making problems. These statements are commonly used in various applications. Multicriteria optimization is a dynamic area of scientific research. So far, researchers proposed a large number of efficient methods of multicriteria optimization and found solutions to many practical problems (see, e.g., monographs \cite{c1,c2,c3,c4,c5} and reviews \cite{c6,c7,c8,c9}).
 
-A key feature of MCO problems is the absence, in most cases, of a single decision which would best fulfill all efficiency criteria, due to possible inconsistencies. As a result, solving MCO problems usually requires finding several compromise (efficient and non-dominated) decisions that cannot be improved without damaging the effectiveness of some efficiency criteria in the MCO problem.
+A key aspect of MCO problems is the absence, in most cases, of a single decision, which would best satisfy all the efficiency criteria, since these criteria can be contradictory. As a result, solving MCO problems usually requires finding several compromise decisions (efficient and non-dominated) that cannot be improved without worsening the effectiveness of other efficiency criteria in the MCO problem.
 
-Among the approaches which have been developed for solving MCO problems, \textit{lexicographic optimization} methods can be singled out, when some ordering of criteria by importance is implemented and optimization is carried out based on their ordering \cite{c3}. \textit{Iterative methods} represent another approach \cite{c6,c10}, when the decision maker is actively involved in the process of selecting decisions. An actively appropriated approach consists in developing and applying evolutionary algorithms based on the simulation of certain natural phenomena to solve MCO problems \cite{c10,c11,c12,c13}. Among the widely used endeavors in solving MCO problems is the \textit{scalarization} approach, which applies methods involving the convolution of criteria to a single scalar criterion (see, e.g. \cite{c2,c14}).
+Finding the whole set of efficient decisions may require a lot of computations and is often deemed redundant for the decision-maker. As a result, approaches that allow obtaining only particular limited sets of effective decisions are used in practice more often.
 
-This work is devoted to solving lexicographic multicriteria optimization (MCOlex) problems that arise when designing complex technical objects and systems. In such applications, efficiency criteria may have a complex \textit{multiextremal} form, and calculating criteria values may require \textit{large amounts of computations}. In such conditions, finding even one efficient decision requires significant calculations, while determining several (or a whole set) of efficient decisions becomes an issue of \textit{great computational complexity}.
+Among these approaches is the scalarization approach, which is based on methods involving the convolution of criteria to a single scalar criterion (see, e.g. \cite{c2,c14}). Another approach relies on the iterative methods \cite{c6,c10} -- the decision-maker is actively involved in the process of selecting decisions. Another popular approach is to develop and apply evolutionary algorithms based on the simulation of certain natural phenomena to solve MCO problems \cite{c10,c11,c12,c13}. Another promising method is the application of new axiomatic of numerical infinities for the solution of the MCO problems \cite{c57,c58,c59}.
 
-The properties listed above highlight a key feature of the MCOlex problems   high computational complexity. One promising attempt to solve such problems is using the model-based approach, when, after a small number of calculations determining the values of time-consuming criteria and, fast-computable approximating functions are constructed \cite{c15,c16}. This approach is quite efficient; however, it is difficult to construct good approximations given the multiextremal behavior of efficiency criteria.
+A note worthy approach to solving MCO problems is lexicographic optimization methods. Such methods involve ranking the criteria by the degree of their importance and using the obtained ranking for subsequent optimization \cite{c3}. When criteria are ranked by importance, an MCO problem can be solved via consecutive optimization of criteria in the order of their importance: the most important criterion is optimized first, followed by the optimization of the second criterion based on the analysis of the set of decisions, in which the first criterion reaches the best value. This sequence is simple and clear and allows using many effective scalar optimization algorithms. Such a multistage sequence can be reduced to solving one scalar optimization problem by linear convolution of criteria \cite{c38}. At the same time, this approach excessively reduces the number of calculated efficient decisions, which limits the number of options for the decision-maker. The $\varepsilon$-constraint scalarization approach can be used to expand the set of effective decisions that can be considered by the decision-maker. In this case, only the most important criterion is used for optimization, while the maximum permissible value is set for other criteria (i.e., all other criteria are transformed into MCO problem constraints) \cite{c39,c40}. Some researchers \cite{c41} describe the extended version of the $\varepsilon$-constraint method, in which violation of restrictions is allowed if it leads to a noticeable improvement of values by certain criteria of an MCO problem. Application of this approach is rather complex because the maximum allowable values (the concessions) of criteria must be set initially before calculations begin, which often causes substantial difficulties. A proposed solution \cite{c42} of this issue is to combine the initial solution sequence for lexicographical optimization problems, when concessions can be set in the process of calculations after each subsequent optimization stage (although such a scheme again requires the solution of the series of scalar optimization problems). The approach proposed in \cite{c43} allows even greater freedom in formulating problems of searching for effective decisions, when the order of criteria importance can also change dynamically. It is necessary to note that the presence of variability in problem statement for the search of effective decisions is very important as requirements to optimality of selected decisions can be varied by the decision-maker in the course of calculations. Such variability is also provided in other approaches to solving MCO problems by various methods of criteria scalarization -- see, for example, \cite{c31,c44}. In \cite{c1} a combined approach is proposed to the application of scalarization criteria and additional constraints of the $\varepsilon$-constraint method.
 
-This paper proposes a solution to the time-consuming class of MCOlex problems by using an approach based on the following main points. First of all, the problem is reduced to solving a sequence of global optimization problems with non-convex constraints (GCO) \cite{c2,c14}. Then, efficient global search algorithms developed in the framework of the information-statistical theory of multiextremal optimization are applied for solving the GCO problems \cite{c17,c18}. And finally, the search information obtained in the process of solving the MCOlex problem is fully utilized. In general, the developed approach allows us to significantly reduce the amount of executed computations, up to just a few iterations when searching for new efficient decisions.
+This work focuses on solving lexicographic multicriteria optimization (MCOlex) problems that arise when designing complex technical objects and systems. In such applications, efficiency criteria may have a complicated multiextremal form; and calculating criteria values may require a large amount of computations. In such conditions, finding even one efficient decision requires a significant volume of calculations, while determining several  of efficient decisions becomes an issue of great computational complexity.
 
-The further structure of the paper is as follows. Section \ref{sec:2} presents a new class of optimization problems -- multistage lexicographic multicriteria optimization (MMCOlex) problems -- whose solution is reduced to solving a sequence of global optimization problems with non-convex constraints. Section \ref{sec:3} presents the basics of the approach that has been developed: reducing multidimensional MCOlex problems to one-dimensional global optimization problems, applying efficient global search algorithms developed in the framework of the information-statistical theory of multiextremal optimization, and reusing the search information obtained in the process of calculations. Section \ref{sec:4} contains the results of numerical experiments. The paper concludes by discussing the results that were obtained and suggests some main directions for further research.
+The properties listed above highlight a key feature of the MCOlex problems, namely, high computational complexity. One promising attempt to solve such problems is using the model-based approach, when calculation of a small number of time-consuming criteria values is followed by constructing the fast-computable approximating functions \cite{c15,c16}.This approach is quite efficient; however, it is difficult to construct adequate approximations given the multiextremal behavior of efficiency criteria.
+
+In this paper, we propose a solution to the time-consuming class of MCOlex problems based on the following main points. First, the problem is reduced to solving a sequence of global optimization problems with nonlinear constraints (GCO) \cite{c2,c14}. Then, the efficient global search algorithms developed in the framework of the information-statistical theory of multiextremal optimization are applied for solving the GCO problems \cite{c17,c18}. Finally, all the search information obtained in the process of solving the MCOlex problem is intensively reused. In general, the developed approach leads to a significant reduction of the amount of executed computations -- up to just a few iterations -- when searching for new efficient decisions.
+
+The further structure of the paper is as follows. Section \ref{sec:2} presents a new class of optimization problems–multistage lexicographic multicriteria optimization (MMCOlex) problems, the solution of which is reduced to solving a sequence of global optimization problems with nonlinear constraints. Section \ref{sec:3} considers the basics of the developed approach: reducing multidimensional MCOlex problems to one-dimensional global optimization problems, applying efficient global search algorithms developed in the framework of the information-statistical theory of multiextremal optimization, and reusing the search information obtained in the process of calculations. Section \ref{sec:4} provides a theoretical analysis of the effectiveness of reusing the search information for solving MMCOlex problems. Section \ref{sec:5} contains the results of numerical experiments. Discussion of the results and suggestions for further research conclude the paper.
+
 
 \section{Problem statement}
 \label{sec:2}
 
-The multicriteria (or vector) optimization (MCO) problem can be defined as follows:
+The multicriteria (or vector) optimization (MCO) problem can be formulated as:
 \begin{equation}\label{eq:1}
 f(y) = (f_1(y), f_2(y), \dots , f_s(y)) \to min, \; y \in D,
 \end{equation}
-where $f(y) = (f_1(y), f_2(y), \dots , f_s(y))$ is the vector efficiency criterion, $y = (y_1, y_2, \dots , y_N)$ is the vector of variable parameters, and $N$ is the dimension of the multicriteria optimization problem to be solved. The search domain $D$ defines the set of possible parameter values and is usually an $N$-dimensional hypercube
+where $f(y) = (f1(y),f2(y),\dots,fs(y))$  is the vector efficiency criterion, $y = (y_1,y_2,\dots,y_N)$ is the vector of variable parameters, and $N$ is the dimension of the multicriteria optimization problem to be solved. The search domain $D$ defines the set of possible parameter values and commonly has a shape of an $N$-dimensional hypercube
 \begin{equation}\label{eq:2}
-D  = \{ y\in R^N: a_i \leq y_i \leq b_i, \; 1 \leq i \leq N \}
+D  = \{ y\in R^N: a_i \leq y_i \leq b_i, 1 \leq i \leq N \}
 \end{equation}
 for the given boundary vectors $a$ and $b$.
 
-Without a loss of generality, it is assumed that the values of the efficiency criteria are not negative and their decrease corresponds to an increase in the effectiveness of the considered decisions $y \in D$. Problem (\ref{eq:1}) is considered in relation to the most difficult decision-making problems in which the efficiency criteria $f_i(y)$, $1 \leq i \leq s$, can be significantly multiextremal, and the procedures for calculating the values of efficiency criteria at points of the search domain $y \in D$ can be computationally expensive. It is also assumed that the criteria $f_i(y)$, $1 \leq i \leq s$, satisfy the Lipschitz condition
-\begin{equation}\label{eq:2l}
-|f_i (y')-f_i (y'')| \leq L_i \|y'-y''\|, \; y',y''\in D,\; 1 \leq i \leq s,
-\end{equation}
-where $L_i$ is the Lipschitz constants for the function $f_i(y)$, $1 \leq i \leq s$, and $\|*\|$ denotes the Euclidean norm in $R^N$. Fulfillment of the Lipschitz condition means that for small variations of the decision $y \in D$, corresponding changes in the values of the criteria $f_i(y)$, $1 \leq i \leq s$, are limited.
-
-In problem (\ref{eq:1}), the efficiency criteria are usually contradictory and there is no decision $y \in D$, that would provide the best (smallest) values for all criteria at the same time, i.e.
+Without loss of generality, the values of the efficiency criteria are assumed to be non-negative, and their decrease corresponds to an increase in the effectiveness of the considered decisions $y \in D$. Problem (\ref{eq:1}) is considered in the context of the most complex decision-making problems, in which the efficiency criteria $f_i(y)$, $1 \leq i \leq s$, can be significantly multiextremal, and the procedures for calculating the values of the efficiency criteria at points of the search domain $y \in D$ can be computationally expensive. The criteria $f_i (y)$, $1 \leq i \leq s$ are also assumed to satisfy the Lipschitz condition
 \begin{equation}\label{eq:3}
+|f_i (y')-f_i (y'')| \leq L_i \|y'-y''\|, y',y''\in D, 1 \leq i \leq s,
+\end{equation}
+where $L_i$ is the Lipschitz constant for the function $f_i(y)$, $1 \leq i \leq s$, and ${\|*\|}$ denotes the Euclidean norm in $R^N$. The Lipschitz condition can be considered satisfied if for any variations of the decision $y \in D$ corresponding changes in the values of the criteria $f_i(y)$, $1 \leq i \leq s$, are limited.
+
+In the problem (\ref{eq:1}), the efficiency criteria are usually contradictory and there is no decision $y \in D$ that would provide the best (smallest) values for all criteria at the same time, i.e.,
+\begin{equation}\label{eq:4}
 \nexists y^*\in D: f_i(y^*) = \min_{y \in D} {f_i (y)} , 1 \leq i \leq s.
 \end{equation}
-
-If the relation (\ref{eq:3}) is valid when solving the MCO problem, then decisions $\widetilde{y}^* \in D$ can be determined, at which the values of the criteria cannot be improved without deterioration of the values of some criteria $f_i(y)$, $1 \leq i \leq s$, that is
-\begin{equation}\label{eq:4}
-\nexists y'\in D: (f_i(y') \leq f_i(\widetilde{y}^*)), 1 \leq i \leq s, (\exists j : f_j(y') < f_j(\widetilde{y}^*)).
+If the relation (\ref{eq:4}) is valid in the solution of the MCO problem, then such decisions $\widetilde{y}^* \in D$ can be determined, at which the values of particular criteria cannot be improved without worsening the values of other criteria $f_i(y)$, $1 \leq i \leq s$,
+\begin{equation}\label{eq:5}
+\nexists y'\in D: (f_i(y') \leq f_i(\widetilde{y}^*), 1 \leq i \leq s), (\exists j: f_j(y') \leq f_j(\widetilde{y}^*)).
 \end{equation}
 
-Such non-improvable decisions are called Pareto \textit{efficient} or \textit{optimal}.
+Such unimprovable decisions are called Pareto efficient or optimal.
 
-The Pareto set $P(f,D)$ of all efficient decisions can be quite large, which makes it difficult for the decision maker to analyze. A possible way to reduce the number of efficient decisions under consideration is to assume that the effectiveness criteria are ordered in terms of importance, which is often the case in practical applications.
+The Pareto set $P(f,D)$ of all the efficient decisions can be quite large, which complicates its analysis by the decision-maker. A possible way to reduce the number of efficient decisions is to assume that the efficiency criteria are ordered by their importance, which is often the case in practical applications.
 
-Without a loss of generality, we will further assume that the criteria $f_i(y)$, $1 \leq i \leq s$, are ordered in importance according to their enumeration in (\ref{eq:1}). The ordering of the criteria determines the relative linear order in the search domain $D$, that is
-\begin{equation}\label{eq:4d}
+Without loss of generality, we will further assume that the criteria $f_i(y)$, $1 \leq i \leq s$, are ordered by their level of importance according to their enumeration in (\ref{eq:1}). Ranking of the criteria determines the relative linear order in the search domain $D$, that is
+\begin{equation}\label{eq:6}
 y' \prec y'' \Leftrightarrow \exists i, 1 \leq i \leq s: (f_i(y')<f_i(y'')) \wedge [ \forall j, 1 \leq j <i \Rightarrow (f_j(y')=f_j(y'')) ].
 \end{equation}
 
-As a result, problem (\ref{eq:1}) is reduced to the lexicographic multicriteria optimization problem (MCOlex)
-\begin{equation}\label{eq:5}
+As a result, the problem (\ref{eq:1}) is reduced to the lexicographic multicriteria optimization problem (MCOlex)
+\begin{equation}\label{eq:7}
 f(y) = (f_1(y), f_2(y), \dots , f_s(y)) \to min_{lex},  y \in D,
 \end{equation}
-the solution of which is carried out in stages: initially, the first (most important) criterion is optimized; next, if the solution is not the only one, then the second criterion is optimized on the set of solutions of the first stage, and so on.
-\begin{equation}\label{eq:6}
-D_0=D,\; D_1=Arg \min_{y \in D_0}{f_1(y)},\dots, D_i=Arg \min_{y \in D_{i-1}}{f_i(y)},1 \leq i \leq s,
+which is then solved in stages: initially, the first (most important) criterion is optimized; next, if the solution is found to be non-unique, the second criterion is optimized on the set of solutions of the first stage, and so on.
+\begin{equation}\label{eq:8}
+D_1=Arg \min_{y \in D}{f_1(y)},\dots, D_i=Arg \min_{y \in D_{i-1}}{f_i(y)},1 \leq i \leq s,D_0=D,
 \end{equation}
-where \textit{Arg} means the set of all decisions that achieve the minimum value of the optimized criterion. It should be noted that the sequence of steps in (\ref{eq:6}) may not be fully completed if at some stage $l$, $1 \leq l \leq s$, the set $D_l$ degenerates and contains only a single decision $y \in D$.
+where $Arg$ is the set of all decisions that achieve the minimum value of the optimized criterion. It should be noted that the sequence of steps in (\ref{eq:8}) may not be fully completed if at a certain stage $l$, $1 \leq l \leq s$, the set $D_l$ degenerates and contains only a single decision $y \in D$.
 
-The set of efficient decisions $P_{lex}(f,D)$ obtained as a result of (\ref{eq:6}) is a subset of the Pareto domain $P(f,D)$ and can contain from one to several decisions $\widetilde{y}^* \in D$ in the case that the minimum value of the last criterion $f_s(y)$ is achieved at several points in the search domain $D$. Such a sharp reduction in the set of the efficient decisions being considered may be undesirable. Expanding the set of $P_{lex}(f,D)$ decisions can be achieved through somewhat weakening the ``strict'' lexicographic order and by allowing, at each stage of the computational scheme (\ref{eq:6}), the choice of decisions in a certain neighborhood of the minimum values of the optimized criterion, that is
-\begin{equation}\label{eq:7}
+The set of efficient decisions $P_{lex}(f,D)$ obtained as a result of (\ref{eq:6}) is a subset of the Pareto set $P(f,D)$ and can contain from one to several decisions $\widetilde{y}^* \in D$ in the case that the minimum value of the last criterion $f_s(y)$ is achieved at several points in the search domain $D$. Such a sharp reduction in the set of efficient decisions can be undesirable. Expanding the set of $P_{lex}(f,D)$ decisions can be achieved by somewhat of a weakening of the ``strict'' lexicographic order and by allowing the decisions to be selected in a certain neighborhood of the minimum values of the optimized criterion at each stage of the computational scheme (\ref{eq:8})
+
+\begin{equation}\label{eq:9}
 \begin{matrix}
 f^*_1 =\min_{y \in D}{f_1(y)},  \\
 f^*_i =\min_{y \in D}{f_i(y)},  f_j(y) \leq f^*_j + \delta_j, 1 \leq j < i, 1 < i \leq s, \\
@@ -156,13 +161,18 @@ P_{lex}^\delta(f,\delta,D) = Arg \min_{y \in D}{f_s(y)},f_j(y) \leq f^*_j + \del
 \end{matrix}
 \end{equation}
 
-This approach is also widely known as the method of successive concessions (MSC) \cite{c3,c4,c5}. The choice of feasible concessions $\delta_i$, $1 \leq i < s$, in the computational scheme (\ref{eq:7}) allows one to obtain any efficient decision $\widetilde{y}^* \in P_{lex}(f,D)$ and take into account the peculiarities of the MCOlex problem being solved. At the same time, this approach makes it necessary, at each stage of scheme (\ref{eq:7}), to solve more complex global optimization problems with non-convex constraints.
+This approach is also widely known as the $\varepsilon$-constraint method (or the method of successive concessions) \cite{c39,c40,c41,c42}. The choice of feasible concessions $\delta_i$, $1 \leq i \leq s$ in the computational scheme (\ref{eq:9}) allows obtaining any efficient decision $\widetilde{y}^* \in P_{lex}(f,D)$ and takes into account the peculiarities of the MCOlex problem. At the same time, this approach makes it necessary, at each stage of the scheme (\ref{eq:9}), to solve more complex global optimization problems with nonlinear constraints.
 
-It should also be noted that during the calculation process, it may be necessary to change the selected values of the feasible concessions $\delta_i$, $1 \leq i < s$; the concessions may be quite rigid or, conversely, excessively large. In general, one may need to change the order of importance in efficiency criteria. Such assumptions necessitate a more general formulation of how to solve the MCOlex problem and to provide possible solutions to many problems of the form (\ref{eq:7})
-\begin{equation}\label{eq:8}
+It should also be noted that during the calculation process, it may be necessary to change the selected values of the feasible concessions $\delta_i$, $1 \leq i \leq s$, the concessions may be quite rigid or, conversely, excessively large. In general, the change in the order of efficiency criteria importance may be required. Such assumptions necessitate a more general formulation of how to solve the MCOlex problem and to provide possible solutions to many problems of the form (\ref{eq:9})
+\begin{equation}\label{eq:10}
 \mathbb{P}_t=\{ P_1,P_2,\dots,P_t\},
 \end{equation}
-which can be changed dynamically during calculations by adding new or deleting existing multicriteria optimization problems. In general, such an approach defines a new class of optimization problems: multistage lexicographic multicriteria optimization problems (MMCOlex).
+which can be changed dynamically during calculations by adding new or deleting existing multicriteria optimization problems. In general, this approach defines a new class of optimization problems: multistage lexicographic multicriteria optimization problems (MMCOlex).
+
+
+
+
+
 
 \section{The Approach: Key Ideas and Methods}
 \label{sec:3}
@@ -177,13 +187,13 @@ The extended formulation of lexicographic multicriteria optimization problems (\
 \subsection{Dimension reduction of multidimensional multicriteria optimization problems}
 
 The search for numerical estimates of globally optimal points involves the construction of grids covering the search domain $D$ (see, e.g., \cite{c17,c18,c19,c20,c21,c22,c23,c24,c25}). This key feature of global optimization problems leads to the ``curse of dimensionality'', where the computational complexity of constructing coverage increases exponentially as the dimensions of optimization problems are enlarged. Significantly reduced complexity can be achieved by using heterogeneous grids that are denser only in the vicinity of globally optimal points. Such heterogeneous coverage of the search domain $D$ can be constructed adaptively in the following manner: when choosing points for the next iterations, the global search is performed taking into account all the available search information (points of previous search iterations and values of the optimized function at these points), that is
-\begin{equation}\label{eq:9}
+\begin{equation}\label{eq:9q}
 y^{k+1}=G_k(\omega_k), \omega_k=\{(y^i,f^i=f(y^i)): 1 \leq i \leq k \},
 \end{equation}
 where $k$ is the number of the global search iterations being performed, $G_k$ is the decision rule of the applied global search algorithm, according to which the point $y^{k+1}$ of the next iteration is selected, and $\omega_k$ is the search information available at the $k$ step of the global search.
 
 Adaptive selection of points $y^{k+1} \in D$ at the iterations of the global search involves the analysis of volumetric multidimensional search information $\omega_k$, $k \gg 1$, which determines the high computational complexity of the decision rules $G_k$, $k=1,2,\dots$, of global search algorithms. This computational complexity can be significantly simplified by reducing the optimization problems to be solved using Peano \textit{space-filling curves} or \textit{evolvents} $y(x)$, that uniquely and continuously map the interval $[0,1]$ to an $N$-dimensional hypercube $D$ (see, e.g., \cite{c17,c18,c23}). As a result of this reduction, the initial multidimensional multicriteria optimization problem (\ref{eq:5}) is reduced to a one-dimensional problem:
-\begin{equation}\label{eq:10}
+\begin{equation}\label{eq:10q}
 f(y(x)) = (f_1(y(x)), f_2(y(x)), \dots , f_s(y(x)) \to min_{leq},  x \in [0,1].
 \end{equation}
 
@@ -191,7 +201,7 @@ It should be noted that the one-dimensional functions obtained as a result of th
 \begin{equation}\label{eq:11}
 |f_i (y(x'))-f_i (y(x''))| \leq H_i \|x'-x''\|, \; x',x''\in [0,1],\; 1 \leq i \leq s,
 \end{equation}
-where the constants $H_i$ are determined by the ratio $H_i=2L_i\sqrt{N+3}$, $1 \leq i \leq m$, $L_i$ are the Lipschitz constants from (\ref{eq:2l}), and $N$ is the dimension of the optimization problem (\ref{eq:1}).
+where the constants $H_i$ are determined by the ratio $H_i=2L_i\sqrt{N+3}$, $1 \leq i \leq m$, $L_i$ are the Lipschitz constants from (\ref{eq:3}), and $N$ is the dimension of the optimization problem (\ref{eq:1}).
 
 Using dimension reduction the search information $\omega_k$ can be converted from (\ref{eq:9}) to the form
 \begin{equation}\label{eq:12}
@@ -500,6 +510,31 @@ In conclusion, it must be noted that the approach described here is promising, a
 \bibitem{c35} Evtushenko, Yu.G., Posypkin, M.A.: A deterministic algorithm for global multi-objective optimization. Optimization Methods \& Software, 29(5), pp. 1005--1019 (2014)
 \bibitem{c36} {\v Z}ilinskas, A., {\v Z}ilinskas, J.: Adaptation of a one-step worst-case optimal univariate algorithm of bi-objective Lipschitz optimization to multidimensional problems. Commun Nonlinear Sci Numer Simulat, 21, pp. 89--98 (2015)
 \bibitem{c37} Gaviano, M., Kvasov, D.E, Lera, D., and Sergeyev, Ya.D.: Software for generation of classes of test functions with known local and global minima for global optimization. ACM Transactions on Mathematical Software 29(4). pp. 469--480 (2003)
+
+
+\bibitem{c38} Zarepisheh, M., Khorram, E.: On the transformation of lexicographic nonlinear multiobjective  programs to single objective programs. Math. Methods Oper. Res. 74. pp. 217--231 (2011)
+\bibitem{c39} Haimes, Y.Y., Lasdon, L., Wismer, D.: On a bicriterion formulation of the problem of integrated systems identification and system optimization. IEEE Trans. Syst. Man Cybern. 1. pp. 296--297 (1971)
+\bibitem{c40} Chankong, V., Haimes, Y.Y.: Multiobjective decision making: theory and methodology. North-Holland Series in System Science and Engineering. New York (NY): Elsevier. (1983)
+\bibitem{c41} Ehrgott, M., Ruzika, S.: Improved $\varepsilon$-constraint method for multiobjective programming. J. Optim. Theory Appl. 138. pp. 375--396 (2008)
+\bibitem{c42} Rastegar, N., Khorram, E.: Relaxation of constraints in lexicographic multiobjective programming problems. A Journal of Mathematical Programming and Operations Research, 64. pp. 2111--2129 (2015)
+\bibitem{c43} Castro-Gutierrez, J., Landa-Silva, D., Pérez, J.M.: Improved Dynamic Lexicographic Ordering for Multi-Objective Optimisation. In: Schaefer R., Cotta C., Kolodziej J., Rudolph G. (eds) Parallel Problem Solving from Nature, PPSN XI. PPSN 2010. Lecture Notes in Computer Science, 6239. pp 31-40 (2010) 
+\bibitem{c44} Charles Audet, Gilles Savard, and Walid Zghal: Multiobjective Optimization Through a Series of Single-Objective Formulations SIAM J. Optim.,19(1). pp. 188--210 (2008)
+\bibitem{c45} Sergeyev, Y.D., Kvasov, D.E.: Deterministic Global Optimization: An Introduction to the Diagonal Approach (SpringerBriefs in Optimization). Springer. (2017)
+\bibitem{c46} Carr, C.R., Howe, C.W.: Quantitative Decision Procedures in Management and Economic: Deterministic Theory and Applications. New York: McGraw–Hill (1964)
+\bibitem{c47} Dam, E.R., Husslage, B., Hertog, D.: One-dimensional Nested Maximin Designs. Journal of Global Optimization, 46(2). pp. 287--306 (2010)
+\bibitem{c48} Gergel, V., Kozinov, E.: Efficient multicriterial optimization based on intensive reuse of search information, J. Glob. Optim., 71(1). pp. 73--90 (2018). doi:10.1007/s10898-018-0624-3.
+\bibitem{c49} Mart\'l, L., Garc\'la, J., Berlanga, A., Molina, J.M.: A stopping criterion for multi-objective optimization evolutionary algorithms, Information Sciences 367, pp. 700--718 (2016)
+\bibitem{c50} Dilettoso, E., Rizzo, S.A., Salerno, N.: A weakly pareto compliant quality indicator. Mathematical and Computational Applications 22(1), 25 (2017)
+\bibitem{c51} Wu, J., Azarm, S.: Metrics for quality assessment of a multiobjective design optimization solution set, Journal of Mechanical Design 123(1). pp. 18--25 (2001)
+\bibitem{c52} Audet, C., Bigeon, J., Cartier, D., Digabel,  S. Le, Salomon, L.: Performance indicators in multiobjective optimization. G-2018-90, (2018)
+\bibitem{c53} Huband, S., Hingston, P., Barone, L., and While, L.: A Review of Multiobjective Test Problems and a Scalable Test Problem Toolkit. IEEE Transactionson Evolutionary Computation, 10(5). pp. 477--506 (2006)
+\bibitem{c54} Hansen, N., Auger, A., Finck, S., and Ros, R.: Real-Parameter Black-Box Optimization Benchmarking 2009: Experimental Setup. INRIA Research Report RR-6829, INRIA Saclay—Ile-de-France. updated February 2010 (2009)
+\bibitem{c55} Cust\'odio, A.L., Aguilar, J.F. Madeira, Ismael Vaz, Lu\'ls N. Vicente: Direct Multisearch for Multiobjective Optimization. IAM Journal on Optimization 21(3). pp. 1109-1140 (2011)
+\bibitem{c56} Dimo Brockhoff, Tea Tusar, Anne Auger, Nikolaus Hansen: Using Well-Understood Single-Objective Functions in Multiobjective Black-Box Optimization Test Suites. (2019) https://arxiv.org/abs/1604.00359 
+\bibitem{c57} Cococcioni, M., Cudazzo, A., Pappalardo, M., Sergeyev, Y.D.: Solving the Lexicographic Multi-Objective Mixed-Integer Linear Programming Problem using branch-and-bound and grossone methodology, Communications in Nonlinear Science and Numerical Simulation, 84. pp. 105177 (2020)
+\bibitem{c58} Cococcioni, M., Pappalardo, M., Sergeyev, Y.D.: Lexicographic multi-objective linear programming using grossone methodology: Theory and algorithm, Applied Mathematics and Computation, 318. pp. 298--311 (2018)
+\bibitem{c59} Lai, L. , Fiaschi, L. , Cococcioni, M.: Solving Mixed Pareto-Lexicographic Multi-Objective Optimization Problems: The Case of Priority Chains, Swarm and Evolutionary Computation, 55. pp. 100687 (2020) DOI: 10.1016/j.swevo.2020.100687
+
 
 \end{thebibliography}
 
