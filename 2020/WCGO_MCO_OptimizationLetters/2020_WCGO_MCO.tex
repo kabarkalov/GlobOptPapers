@@ -104,14 +104,14 @@ In this paper, we propose a solution to the time-consuming class of MCOlex probl
 The further structure of the paper is as follows. Section \ref{sec:2} presents a new class of optimization problems–multistage lexicographic multicriteria optimization (MMCOlex) problems, the solution of which is reduced to solving a sequence of global optimization problems with nonlinear constraints. Section \ref{sec:3} considers the basics of the developed approach: reducing multidimensional MCOlex problems to one-dimensional global optimization problems, applying efficient global search algorithms developed in the framework of the information-statistical theory of multiextremal optimization, and reusing the search information obtained in the process of calculations. Section \ref{sec:4} provides a theoretical analysis of the effectiveness of reusing the search information for solving MMCOlex problems. Section \ref{sec:5} contains the results of numerical experiments. Discussion of the results and suggestions for further research conclude the paper.
 
 
-\section{Problem statement}
+\section{Problem Statement}
 \label{sec:2}
 
 The multicriteria (or vector) optimization (MCO) problem can be formulated as:
 \begin{equation}\label{eq:1}
 f(y) = (f_1(y), f_2(y), \dots , f_s(y)) \to min, \; y \in D,
 \end{equation}
-where $f(y) = (f1(y),f2(y),\dots,fs(y))$  is the vector efficiency criterion, $y = (y_1,y_2,\dots,y_N)$ is the vector of variable parameters, and $N$ is the dimension of the multicriteria optimization problem to be solved. The search domain $D$ defines the set of possible parameter values and commonly has a shape of an $N$-dimensional hypercube
+where $f(y) = (f_1(y),f_2(y),\dots,f_s(y))$  is the vector efficiency criterion, $y = (y_1,y_2,\dots,y_N)$ is the vector of variable parameters, and $N$ is the dimension of the multicriteria optimization problem to be solved. The search domain $D$ defines the set of possible parameter values and commonly has a shape of an $N$-dimensional hypercube
 \begin{equation}\label{eq:2}
 D  = \{ y\in R^N: a_i \leq y_i \leq b_i, 1 \leq i \leq N \}
 \end{equation}
@@ -129,7 +129,7 @@ In the problem (\ref{eq:1}), the efficiency criteria are usually contradictory a
 \end{equation}
 If the relation (\ref{eq:4}) is valid in the solution of the MCO problem, then such decisions $\widetilde{y}^* \in D$ can be determined, at which the values of particular criteria cannot be improved without worsening the values of other criteria $f_i(y)$, $1 \leq i \leq s$,
 \begin{equation}\label{eq:5}
-\nexists y'\in D: (f_i(y') \leq f_i(\widetilde{y}^*), 1 \leq i \leq s), (\exists j: f_j(y') \leq f_j(\widetilde{y}^*)).
+\nexists y'\in D: (f_i(y') \leq f_i(\widetilde{y}^*), 1 \leq i \leq s), (\exists j: f_j(y') < f_j(\widetilde{y}^*)).
 \end{equation}
 
 Such unimprovable decisions are called Pareto efficient or optimal.
@@ -169,158 +169,153 @@ It should also be noted that during the calculation process, it may be necessary
 \end{equation}
 which can be changed dynamically during calculations by adding new or deleting existing multicriteria optimization problems. In general, this approach defines a new class of optimization problems: multistage lexicographic multicriteria optimization problems (MMCOlex).
 
-
-
-
-
-
-\section{The Approach: Key Ideas and Methods}
+\section{The Proposed Approach: Key Ideas and Methods}
 \label{sec:3}
 
-The extended formulation of lexicographic multicriteria optimization problems (\ref{eq:7})--(\ref{eq:8}) involves multiple solutions of multiextremal optimization problems with non-convex constraints. Problems of this type are computationally time-consuming and subject to the ``curse of dimensionality'': computational complexity increases exponentially with increasing dimensionality. The proposed approach for solving such problems is based on three key ideas:
+The extended formulation of lexicographic multicriteria optimization problems (\ref{eq:7})--(\ref{eq:8}) involves multiple solutions for global optimization (GO) problems with nonlinear constraints. Problems of this type are computationally time-consuming and subject to the ``curse of dimensionality'' -- computational complexity increases exponentially with increasing dimensionality.
+
+For many years, global optimization has been the subject of many scientific studies. The results of research have been published in a large number of monographs -- see, for example, \cite{c17,c18,c19,c20,c21,c22,c23,c24,c25}. Making a reasonable choice of the approach for solving GO problems from the entire set of already existing global search algorithms requires taking into account the following:
+
 \begin{itemize}
-  \item reduction of multidimensional problems of multiextremal optimization to problems of one-dimensional global search by using mappings based on Peano curves;
-  \item using the index method of global optimization, which allows solving optimization problems with constraints without using penalty functions;
-  \item repeated use of search information obtained in the process of computing, for solving multiple global optimization problems.
+	\item Since the estimate of the global minimum is an integral characteristic of the optimization problem (the value of the minimized function in the point of the global minimum should be compared with the values of the function in all other points of the search domain), the global search methods should provide at least some degree of coverage of the search domain,
+	\item Due to the ``curse of dimensionality'' reducing computational complexity requires the resulting coverage of the search domain to be heterogeneous (nonuniform), i.e. it must be dense only in the vicinity of globally optimal points,
+	\item Heterogeneous coverages can only be constructed if there are any a priori assumptions about the behavior of the minimized function -- on eof the most frequently used forms of such assumptions is the feasibility of the Lipschitz condition (\ref{eq:2}),
+	\item Construction of heterogeneous coverages of the search domain entails the analysis of a large volume of multidimensional data (points of performed iterations of the global search and values of the minimized function in these points), which significantly increases the complexity and computational cost of the global optimization methods. Such computational complexity in the global optimization is commonly decreased by the dimensionality reduction, for example, using a diagonal extension of one-dimensional algorithms \cite{c22,c45}, the nested optimization scheme \cite{c46,c47}, the Peano space-filling curves \cite{c17,c23},
+	\item When solving multiple problems of multistage lexicographic multicriteria optimization, global search methods can reduce the complexity of calculations by using search information obtained during the calculations.
 \end{itemize}
 
-\subsection{Dimension reduction of multidimensional multicriteria optimization problems}
+Given the requirements listed above, the proposed approach for solving MMCOlex problems is based on three key ideas:
 
-The search for numerical estimates of globally optimal points involves the construction of grids covering the search domain $D$ (see, e.g., \cite{c17,c18,c19,c20,c21,c22,c23,c24,c25}). This key feature of global optimization problems leads to the ``curse of dimensionality'', where the computational complexity of constructing coverage increases exponentially as the dimensions of optimization problems are enlarged. Significantly reduced complexity can be achieved by using heterogeneous grids that are denser only in the vicinity of globally optimal points. Such heterogeneous coverage of the search domain $D$ can be constructed adaptively in the following manner: when choosing points for the next iterations, the global search is performed taking into account all the available search information (points of previous search iterations and values of the optimized function at these points), that is
-\begin{equation}\label{eq:9q}
+\begin{itemize}
+	\item Reduction of multidimensional multiextremal optimization to problems of one-dimensional global search by the space-filling curves;
+	\item Using the global optimization methods that generate nonuniform coverages of the search domain;
+	\item Intensive search information obtained in the process of computations for solving multiple global optimization problems.
+\end{itemize}
+
+\subsection{Dimension Reduction of Multidimensional Multicriteria Optimization Problems}
+
+The nonuniform coverage of the search domain $D$ can be constructed adaptively in the following manner: when choosing points for the next optimization iterations, the global search is performed taking into account all the available search information (the points of previous search iterations and the values of the optimized function in these points), that is
+\begin{equation}\label{eq:11}
 y^{k+1}=G_k(\omega_k), \omega_k=\{(y^i,f^i=f(y^i)): 1 \leq i \leq k \},
 \end{equation}
-where $k$ is the number of the global search iterations being performed, $G_k$ is the decision rule of the applied global search algorithm, according to which the point $y^{k+1}$ of the next iteration is selected, and $\omega_k$ is the search information available at the $k$ step of the global search.
-
-Adaptive selection of points $y^{k+1} \in D$ at the iterations of the global search involves the analysis of volumetric multidimensional search information $\omega_k$, $k \gg 1$, which determines the high computational complexity of the decision rules $G_k$, $k=1,2,\dots$, of global search algorithms. This computational complexity can be significantly simplified by reducing the optimization problems to be solved using Peano \textit{space-filling curves} or \textit{evolvents} $y(x)$, that uniquely and continuously map the interval $[0,1]$ to an $N$-dimensional hypercube $D$ (see, e.g., \cite{c17,c18,c23}). As a result of this reduction, the initial multidimensional multicriteria optimization problem (\ref{eq:5}) is reduced to a one-dimensional problem:
-\begin{equation}\label{eq:10q}
-f(y(x)) = (f_1(y(x)), f_2(y(x)), \dots , f_s(y(x)) \to min_{leq},  x \in [0,1].
+where $k$ is the number of the global search iterations performed, $G_k$ is the decisive rule of the global search algorithm, according to which the point $y^{k+1}$ of the next iteration is selected, and $\omega_k$ is the search information available at the $k$ iteration of the global search. The computational complexity of the decisive rule can be significantly simplified by reducing the optimization problems by the Peano space-filling curves or evolvents $y(x)$ that uniquely and continuously map the interval [0,1] to an $N$-dimensional hypercube $D$ (see, e.g., \cite{c17,c18,c23}). As a result of this reduction, the initial multidimensional multicriteria optimization problem (\ref{eq:7}) is reduced to a one-dimensional problem:
+\begin{equation}\label{eq:12}
+f(y(x)) = (f_1(y(x)), f_2(y(x)), \dots, f_s(y(x))) \to min_{lex},  x \in [0,1].
 \end{equation}
 
 It should be noted that the one-dimensional functions obtained as a result of the reduction satisfy the uniform H\"older condition (see \cite{c17,c18}), that is
-\begin{equation}\label{eq:11}
-|f_i (y(x'))-f_i (y(x''))| \leq H_i \|x'-x''\|, \; x',x''\in [0,1],\; 1 \leq i \leq s,
+\begin{equation}\label{eq:13}
+|f_i (y(x'))-f_i (y(x''))| \leq H_i |x'-x''|^{1/N}, x',x''\in [0,1], 1 \leq i \leq s,
 \end{equation}
-where the constants $H_i$ are determined by the ratio $H_i=2L_i\sqrt{N+3}$, $1 \leq i \leq m$, $L_i$ are the Lipschitz constants from (\ref{eq:3}), and $N$ is the dimension of the optimization problem (\ref{eq:1}).
+where the constants $H_i$ are determined by the ratio $H_i=2L_i\sqrt{N+3}$,  $1 \leq i \leq m$, the values $L_i$ are the Lipschitz constants from (\ref{eq:2}), and $N$ is the dimension of the optimization problem (\ref{eq:1}).
 
-Using dimension reduction the search information $\omega_k$ can be converted from (\ref{eq:9}) to the form
-\begin{equation}\label{eq:12}
+Using dimension reduction, the search information $\omega_k$ can be converted from (\ref{eq:11}) to 
+\begin{equation}\label{eq:14}
 A_k=\{(x_i, y(x_i), f_i=f(y(x_i))): 1 \leq i \leq k \},
 \end{equation}
-in which, in addition to the reduced representation, the data is arranged in ascending order\footnote{Data ordering is reflected by using a subscript.} of points $x_i$, $1 \leq i \leq k$, that is
-\begin{equation}
+where, in addition to the reduced representation, the data is arranged in ascending order\footnote{Data ordering is reflected by using a subscript.} of points $x_i$, $1 \leq i \leq k$, that is
+\begin{equation} \label{eq:15}
 x_1 < x_2 < \dots < x_k	
 \end{equation}
-for a more efficient execution of global search algorithms.
+for more efficient execution of global search algorithms.
 
-Dimension reduction using Peano curves is widely used in the development of efficient global search algorithms in the framework of the information-statistical theory of multiextremal optimization \cite{c17,c18,c23,c26,c27}. Numerical methods for constructing approximations of Peano curves (\textit{evolvents}) with a given accuracy are considered in \cite{c17,c18}.
+Dimension reduction by the Peano curves is widely used in the development of efficient global search algorithms in the framework of the information-statistical theory of multiextremal optimization \cite{c17,c18,c23,c26,c27}. Numerical methods for constructing approximations of the Peano curves (evolvents) with a given accuracy are considered in \cite{c17,c18}.
 
-\subsection{An efficient method for solving global optimization problems with 
-non-convex constraints}
+\subsection{An Efficient Method for Solving Global Optimization Problems with Nonlinear Constraints}
 
-The problems solved in the framework of the computational scheme (\ref{eq:7}) are one-dimensional global optimization problems with non-convex constraints
-\begin{equation}\label{eq:13}
-\min{\{\varphi(x):g_i(x)\leq 0, \; 1 \leq i \leq m,\; x\in \Delta=[0,1]\}}
-\end{equation}
-(the notation $g_{m+1}(x) = \varphi(x)$ will also be used later).
-
-The presence of non-convex constraints significantly complicates the complexity of solving global optimization problems; the resulting solutions must belong to a feasible domain
-\begin{equation}\label{eq:14}
-\Delta_g  = \{ x\in \Delta=[0,1]:g_i(x)\leq 0,   1 \leq i \leq m \}.
-\end{equation}
-
-To reduce the complexity of solving optimization problems with constraints, simpler cases are often highlighted; for example, problems with linear or quadratic constraints are selected. Various methods of approximating complex constraints with the aid of simpler forms (linear, convex, etc.) are widely used. However, the penalty function method is most commonly used, when calculating in an unfeasible region $\Delta \setminus \Delta_g$, some ``penalty'' is added to the values of the minimized function. But the penalty function method often involves repeatedly solving the optimization problem to determine a sufficient value of the penalty coefficient. More complete information on methods for solving optimization problems with constraints can be obtained, for example, in monographs \cite{c18,c26,c27,c28,c29}.
-
-The proposed approach is based on the original method of separate accounting for constraints developed in the framework of the information-statistical theory of multiextremal optimization \cite{c18}. The key idea of the approach consists in constructing a certain integral objective function without constraints, the solution of which also provides a solution to the initial constrained optimization problem (\ref{eq:13}); a more detailed presentation of this method is given below.
-
-We apply a sequential scheme to obtain the constraint values $g_i(y(x))$, $1 \leq i \leq m$, and the objective function $\varphi(x)$, according to which the constraint values are calculated strictly in the order of their numbers, and the calculations immediately stop when the first violated constraint is detected (the partial computability scheme). The number of constraints in which the values were calculated will be indicated below as the index $\nu=\nu(x)$, that is
-\begin{equation}\label{eq:15}
-\nu(x) : g_\nu(x)>0,\; g_j(x)\leq 0,\; 1 \leq j\leq \nu - 1,\; 1\leq \nu = \nu(x) \leq m
-\end{equation}
- (when all the constraints are satisfied, $\nu=m+1$ is assumed). Introducing the index concept allows us to determine the integrated function for the problem (\ref{eq:13}) (see Fig. \ref{fig:1})
+The problems solved in the framework of the computational scheme (\ref{eq:9}) are one-dimensional global optimization problems with nonlinear constraints
 \begin{equation}\label{eq:16}
+\min{\{\varphi(x):g_i(x)\leq 0, 1 \leq i \leq m, x\in \Delta=[0,1]\}}
+\end{equation}
+(the expression $g_{m+1}(x) = \varphi(x)$ will also be used later).
+
+The presence of nonlinear constraints significantly increasesthe complexity of global optimization problems; the resulting solutions must belong to a feasible domain
+\begin{equation}\label{eq:17}
+\Delta_g  = \{ x\in \Delta=[0,1]:g_i(x)\leq 0, 1 \leq i \leq m \}.
+\end{equation}
+
+To reduce the complexity of solving optimization problems with constraints, simpler cases are often highlighted; for example, problems with linear or quadratic constraints are selected. Various methods of approximating complex constraints with the aid of simpler forms (linear, convex, etc.) are widely used. However, the most commonly used method is the penalty function method -- when calculating in an unfeasible region $\Delta \setminus \Delta_g$, certain ``penalties'' are added to the values of the minimized function. However, the penalty function method often involves the repeated solution of the optimization problem to determine a sufficient value of the penalty coefficient. More complete information on methods for solving optimization problems with constraints is presented, for example, in monographs \cite{c28,c29}.
+
+The proposed approach is based on the original method of separate accounting for constraints developed in the framework of the information-statistical theory of multiextremal optimization \cite{c18}. The key idea of the approach is to construct an integral objective function without constraints, the solution of which also provides a solution to the initial constrained optimization problem (\ref{eq:16}); a more detailed presentation of this method is given below.
+
+To provide uniform calculations, a sequential scheme is applied to obtain values the constraints $g_i(y(x)) \leq 0$, $1 \leq i \leq m$, and the minimized function $\varphi(x)$. According to this scheme, the constraint values are calculated strictly in their order, and the calculations immediately stop when the first violated constraint is detected (the partial computability scheme). The number of constraints, in which the values were calculated, will be referred below as the index $\nu=\nu(x)$, that is
+\begin{equation}\label{eq:18}
+\nu(x) : g_\nu(x)>0, g_j(x)\leq 0, 1 \leq j \leq \nu - 1, 1 \leq \nu = \nu(x) \leq m
+\end{equation}
+(when all the constraints are satisfied, $\nu=m+1$ is assumed). Introducing the index allows determining the integrated function for the problem (\ref{eq:16}) (see Fig. \ref{fig:1})
+\begin{equation}\label{eq:19}
 F(x)=g_\nu(x), \nu=\nu(x),
 \end{equation}
-defined and computable everywhere in $[0,1]$. Its value at the point $x\in [0,1]$ is either the value of the left side of the constraint violated at this point (the case when $\nu \leq m$), or the value of the minimized function (the case when $\nu = m + 1$). The process of calculating the value of $F(x)$, $x\in [0,1]$, is completed either as a result of establishing the inequality $g_j(x)>0$, or as a result of reaching the value $\nu(x)=m+1$ (below, this procedure is called a \textit{trial}).
+defined and computable everywhere in $[0,1]$. Its value at the point $x\in [0,1]$ is either the value of the left side of the constraint violated at this point (the case when $\nu \leq m$), or the value of the minimized function (the case when $\nu = m + 1$). The process of calculating the value of $F(x)$, $x\in [0,1]$, is completed either as a result of establishing the inequality $g_j(x)>0$, or as a result of reaching the value $\nu(x)=m+1$ (further in the paper, this procedure will be referred to as trial).
 
 \begin{figure}
   \centering
   \includegraphics[width=\linewidth]{fig1}
-  \caption{An integrated function for the problem (\ref{eq:13}) using a sequential constraint calculation scheme: a) the function $F(x)$ from (\ref{eq:16}), b) the function $\Phi(x)$ from (\ref{eq:17})}
+  \caption{An example of the integrated function for the problem (\ref{eq:16}) using a sequential constraint calculation scheme: a) the function $F(x)$ from (\ref{eq:19}), b) the function $\Phi(x)$ from (\ref{eq:20})}
   \label{fig:1}
 \end{figure}
 
-The function $F(x)$ consists of separate fragments of the constraints $g_i(x)$, $1 \leq i \leq m$, and the objective function $\varphi(x)$. For the homogeneity of the components, the function $F(x)$ is then converted to the form 
-\begin{equation}\label{eq:17}
+The function $F(x)$ consists of separate fragments of the constraints ${g_i(x) \leq 0}$, $1 \leq i \leq m$, and the minimized function $\varphi(x)$. For the homogeneity of the components, the function $F(x)$ is converted to the form 
+\begin{equation}\label{eq:20}
 \Phi (x) = 
  \begin{cases}
    g_\nu(x) / H_\nu, & \nu < M, \\
    (g_M(x)-z^*_M) / H_M, & \nu = M,
  \end{cases}
 \end{equation}
-where $M$ is the constraint number for which there are no feasible points (the maximum value of the index is $\nu(x)$), $z^*_M$ is the value of the minimum constraint violation $g_M(x)$\footnote{If $M=m+1$, then $z_M^*$ is the minimum value of the function $\varphi(x)$.}, and $H_\nu$, $1\leq \nu \leq M$, are the H\"older constants from (\ref{eq:11}). As a rule, these values are a priori unknown, but when performing calculations, instead of these values, their adaptive estimates obtained in the process of calculations can be applied. For this, the search information $A_k$ from (\ref{eq:12}) should be expanded with data
-\begin{equation}\label{eq:18}
-A_k=\{(x_i, z_i, \nu_i, y(x_i), f_i=f( y(x_i))): 1 \leq i \leq k \},
+where $M$ is the constraint number, for which there are no feasible points (the maximum value of the index $\nu(x)$), $z^*_M$ is the value of the minimum constraint violation $g_M(x)$\footnote{If $M=m+1$, then $z_M^*$ is the minimum value of the function $\varphi(x)$.}, and $H_\nu$, $1\leq \nu \leq M$, are the H\"older constants from (\ref{eq:13}). As a rule, these values are a priori unknown, but when performing calculations, instead of these values, their adaptive estimates can be applied. For this, the search information $A_k$ from (\ref{eq:14}) should be expanded with data
+\begin{equation}\label{eq:21}
+A_k=\{(x_i, z_i, \nu_i, y(x_i), f_i=f(y(x_i))): 1 \leq i \leq k \},
 \end{equation}
-where $z_i= \Phi(x_i)$, $1 \leq i \leq k$. Then estimates of the required values can be determined as follows
-\begin{equation}\label{eq:19}
-M^k= \max{\{\nu=\nu(x_i), 1\leq i \leq k \}},
+where $z_i= \Phi(x_i)$, $1 \leq i \leq k$. Then the estimates of the required values can be determined as follows
+\begin{equation}\label{eq:22}
+M^k = \max{\{\nu=\nu(x_i), 1\leq i \leq k \}},
 \end{equation}
 
-\begin{equation}\label{eq:20}
+\begin{equation}\label{eq:23}
 z^k_\nu = 
  \begin{cases}
-   0, & \nu < M, \\
-   \min{\{g_\nu(x_i):\nu=\nu(x_i), 1\leq i \leq k \}}, & \nu = M,
+   0, & \nu < M^k, \\
+   \min{\{g_\nu(x_i):\nu=\nu(x_i), 1\leq i \leq k \}}, & \nu = M^k,
  \end{cases}
 \end{equation}
 
-\begin{equation}\label{eq:21}
-h^k_l=\max{\{|z_i-z_j|/\sqrt[N]{x_i-x_j},\; \nu_i=\nu_j=l,\; i>j, \;1\leq l\leq M^k\}}.
+\begin{equation}\label{eq:24}
+h^k_l=\max{\{|z_i-z_j|/\sqrt[N]{x_i-x_j}, \nu_i=\nu_j=l, i>j, 1\leq l\leq M^k\}}.
 \end{equation}
 
-If $h_l^k$ in (\ref{eq:21}) turns out to be indefinite or equal to zero, then $h_l^k=1$ is taken. For the initial values of these quantities, $M^0 = H_l^0=1$, $z_l^0=0$, $1 \leq i \leq m+1$, can be taken.
+If $h_l^k$ in (\ref{eq:24}) turns out to be indefinite or equal to zero, then $h_l^k=1$ is taken. For the initial values of these parameters, $M^0 = H_l^0 = 1$, $z_l^0 = 0$, $1 \leq i \leq m+1$, can be taken.
 
-The general computational scheme of the \textit{global search algorithm} for multiextremal optimization problems with non-convex constraints \footnote{This method is also known as the index method.} (AGCS) is as follows \cite{c18}.
+In the framework of the proposed approach to minimize the function $\Phi(x)$, the global search algorithm for multiextremal optimization problems with nonlinear constraints\footnote{This method is also known as the index method -- see \cite{c18}.} (AGCS) is applied. The general computational scheme of this method can be presented as follows \cite{c18}.
 
-The first trial is carried out at an arbitrary internal point $x^1\in (0,1)$. The calculation results are constantly added to the set $A_k$ from (\ref{eq:12}); in addition, into $A_k$ are also added the points $x_0=0$ and $x_{k+1}=1$ (the values $z_0$ and $z_{k+1}$ are not defined and not used) for the convenience of subsequent formulations. The choice of the point $x^{k+1}$, $k\geq 1$, of any next trial is determined by the following rules.
+The first trial is carried out at an arbitrary internal point $x^1\in(0,1)$. The choice of the point $x^{k+1}$, $k \geq 1$ of any next trial is determined by the following rules
 
-\textit{Rule 1.} For each interval $(x_{i-1},x_i)$, $1 \leq i \leq k+1$, in the set $A_k$ calculate the characteristic $R(i)$, where
-\begin{equation}\label{eq:22}
-\begin{matrix}
-R(i) = 
- \begin{cases}
-   \rho_i + \frac{(z_i-z_{i-1})^2}{r^2_\nu h^2_\nu \rho_i} - 2 \frac{z_i+z_{i-1}-2z^*_\nu}{r_\nu h_\nu}, & \nu=\nu(x_{i-1})=\nu(x_i), \\
-   2 \rho_i - 4\frac{z_i-z^*_\nu}{r_\nu h_\nu}, & \nu=\nu(x_{i-1})<\nu(x_i), \\
-2 \rho_i - 4\frac{z_{i-1}-z^*_\nu}{r_\nu h_\nu}, & \nu=\nu(x_{i-1})>\nu(x_i), 
- \end{cases} \\
-\rho_j = \sqrt[N]{x_i-x_{i-1}}, 1\leq j\leq k+1.
-\end{matrix}
+\textit{Rule 1.} For each interval $(x_{i-1},x_i)$, $1 < i \leq k$, in the set $A_k$ calculate the characteristic
+
+\begin{equation}\label{eq:25}
+R(i)=\mathcal{R} (i,A_k),
 \end{equation}
-
-The constants $r_\nu>1$, $1\leq \nu \leq m+1$, are the parameters of the algorithm. The products $r_\nu h_\nu$ are used as an estimate of the H\"older constants $H_\nu$, $1\leq \nu \leq m+1$ from (\ref{eq:11}).
+where the expression $\mathcal{R}(i,A_k)$ is set by AGCS.
 
 \textit{Rule 2.} Determine the interval $(x_{t-1},x_t)$ that corresponds to the maximum characteristic
-\begin{equation}\label{eq:23}
-R(t) = \max{\{R(i):1 \leq i \leq k+1\}}.
+\begin{equation}\label{eq:26}
+R(t) = \max{\{R(i):1 < i \leq k\}}.
 \end{equation}
 
 \textit{Rule 3.} Execute a new trial at the point $x^{k+1} \in (x_{t-1},x_t)$, determined in accordance with the expression
-\begin{equation}\label{eq:24}
-x^{k+1} = 
- \begin{cases}
-   \frac{x_t+x_{t-1}}{2}, & \nu(x_{t-1}) \neq \nu(x_t), \\
-   \frac{x_t+x_{t-1}}{2} + sign(z_t - z_{t-1}) \frac{1}{2r_\nu}[ \frac{|z_t - z_{t-1}|}{h_\nu}^N ], & \nu = \nu(x_{t-1}) = \nu(x_t).
- \end{cases}
+\begin{equation}\label{eq:27}
+x^{k+1} = \mathcal{X}(x_{t-1},x_t)
 \end{equation}
+where the expression $\mathcal{X}(x_{t-1},x_t)$ is also set by AGCS.
 
-Iterations of the algorithm are terminated if the stop condition is satisfied
-\begin{equation}\label{eq:25}
+Iterations of the algorithm are terminated if the stop criterion is satisfied
+
+\begin{equation}\label{eq:28}
 \rho_t\leq \varepsilon,
 \end{equation}
-where $t$ from (\ref{eq:23}) and $\varepsilon > 0$ is the given accuracy.
+where $t$ from (\ref{eq:26}), $\rho_t = \sqrt[N]{x_t-x_{t-1}}$ and $\varepsilon > 0$ is the given accuracy.
 
-Results of using the AGCS algorithm to solve the test problem from Fig.~\ref{fig:1} with the parameters $r_1=r_2=r_3=2$ and $\varepsilon=10^{-5}$ are shown in Fig. \ref{fig:2}.  The coordinates of the trial points performed by the algorithm in the process of solving the problem are marked in Fig. \ref{fig:1} by three rows of vertical strokes. The strokes in the upper row correspond to points with a unit index, the second row to points whose indices equal to 2; the points marked with strokes in the bottom row belong to the feasible domain. The coordinates of trials performed at close points are marked with a dark rectangle. In total, the value of the first constraint was computed 147 times, the value of the second constraint -- 84 times, and the value of the minimized function was calculated only 35 times.
+Results of the application of the AGCS algorithm to solve the test problem from Fig.~\ref{fig:1} with the accuracy $\varepsilon=10^{-5}$ are shown in Fig.~\ref{fig:2}. The coordinates of the trial points performed by the algorithm in the process of solving the problem are marked in Fig.~\ref{fig:2} by three rows of vertical strokes. The strokes in the upper row correspond to points with a unit index, the second row to points, the indices of which equal to $\nu=2$; the points marked with strokes in the bottom row belong to the feasible domain. The coordinates of trials performed at close points are marked with a dark rectangle. In total, the value of the first constraint was computed 147 times, the value of the second constraint -- 84 times, and the value of the minimized function was calculated only 35 times.
 
 \begin{figure}
   \centering
@@ -332,138 +327,306 @@ Results of using the AGCS algorithm to solve the test problem from Fig.~\ref{fig
 Various modifications of this algorithm and the corresponding theory of convergence are presented in \cite{c18}. For instance, the following theorem is valid.
 
 \begin{theorem}
-If the AGCS algorithm is used to solve problem (\ref{eq:13}), and the following conditions are satisfied:
+If the AGCS algorithm is used to solve the problem (\ref{eq:16}), and the following conditions are satisfied:
 \begin{enumerate}
-	\item the functions $g_j$, $1 \leq j \leq m+1$,  satisfy the H\"older condition of (\ref{eq:11}) with the constants $H_j$, $1 \leq j \leq m+1$,
-	\item for the quantities $h_\nu$ from (\ref{eq:21}), starting from a certain step, the inequalities are valid
-\begin{equation*}
-r_\nu h_\nu>2H_\nu, 1\leq \nu \leq m+1,
-\end{equation*}
+	\item the functions $g_j$, $1 \leq j \leq m+1$, $[0,1]$ satisfy the H\"older condition of (\ref{eq:13}) with the constants $H_j$, $1 \leq j \leq m+1$,
+	\item for the values $h_\nu$ from (\ref{eq:24}), starting from a certain step, the inequalities are valid\footnote{The values $r_{\nu} > 1$, $1 \leq \nu \leq m+1$,are the AGCS reliability parameters used for computing the interval characteristics in (\ref{eq:25}).}
+\begin{equation} \label{eq:29}
+r_\nu h_\nu > 2H_\nu, r_\nu > 1, 1 \leq \nu \leq m+1,
+\end{equation}
 \end{enumerate}
-then the set of limit points of the sequence $\{x^k\}$, generated by the algorithm coincides with the set of global minimum points of the problem (\ref{eq:13}) with $\varepsilon=0$ in the stop condition (\ref{eq:25}).
+then the set of limit points of the sequence $\{x^k\}$ generated by the algorithm coincides with the set of global minimum points of the problem (\ref{eq:16}) with $\varepsilon=0$ in the stopping criterion (\ref{eq:28}).
 \end{theorem}
 
-\subsection{Acceleration of computations based on the re-use of search information}
+\subsection{Acceleration of Computations Based on the Reuse of Search Information}
 
-As noted earlier, the MCOlex problem at each stage of the successive concessions method (\ref{eq:7}) is a global optimization problem with non-convex constraints (\ref{eq:13}). Generally, the solution to such problems must start at the beginning, and multiple solutions of such global optimization problems may require extensive calculations. However, the presence of search information $A_k$ from (\ref{eq:18}) allows us to bring the results of previous calculations to the values of any next solved optimization problem in the scheme (\ref{eq:7}) without any time-consuming calculations of the values of the criteria $f_i (y)$, $1 \leq j \leq s$,  of the initial problem (\ref{eq:1}) \cite{c30,c31}. This re-use of search information, to find the next efficient decision, reduces the amount of computations needed to solve each next optimization problem to just a few iterations; see Section \ref{sec:4} for the results of computational experiments.
+As noted earlier, the MCOlex problem at each stage (\ref{eq:9}) of the $\varepsilon$-constraint method is a global optimization problem with nonlinear constraints (\ref{eq:16}). Generally, the solution to such problems should start from the very beginning; and multiple solutions to such global optimization problems may require extensive calculations. However, the presence of search information $A_k$ from (\ref{eq:21}) allows bringing the results of previous calculations to the values of any next solved optimization problem in the scheme (\ref{eq:9}) without any time-consuming calculations of the values of the criteria $f_i (y)$, $1 \leq j \leq s$, of the problem (\ref{eq:1}) \cite{c30,c31}. This reuse of search information to find the next efficient decision reduces the number of computations needed to solve each next optimization problem to just a few iterations -- see Section \ref{sec:5} for the results of computational experiments.
 
-Moreover, using search information $A_k$ allows to reduce the multistage solution of the MCO problem in accordance with the scheme (\ref{eq:7}) to the solution of the only global optimization problem in the last stage of the scheme (\ref{eq:7}), namely 
-\begin{equation}\label{eq:26}
-P_{\delta lex} (f,\delta,D)=Arg \min_{y\in D}{f_s(y)}, f_j(y)\leq f_j^*+\delta_j, 1 \leq j < s,
+Moreover, using the search information $A_k$ allows reducing the multistage solution of the MCO problem in accordance with the scheme (\ref{eq:9}) to the solution of the only global optimization problem in the last stage of the scheme (\ref{eq:9}), namely
+\begin{equation}\label{eq:30}
+P_{\delta lex} (f,\delta,D)=Arg \min_{y \in D} {f_s(y)}, f_j(y)\leq f_j^* + \delta_j, 1 \leq j < s,
 \end{equation}
-where for the unknown a priori values $f_j^*$, $1 \leq j < s$, can be used the estimates $z_j^k$, $1 \leq j < s$, from (\ref{eq:20}) obtained from the search information $A_k$,  and for the constants $\delta_j$, $1 \leq j<s$, we can use the values normalized to the range of the constraints' values, that is
-\begin{equation}\label{eq:27}
+where for the unknown a priori values $f_j^*$, $1 \leq j < s$, the estimates $z_j^k$, ${1 \leq j < s}$, from (\ref{eq:23}) obtained from the search information $A_k$ can be used, and for the concessions $\delta_j$, $1 \leq j < s$, the normalized values can be applied, that is
+\begin{equation}\label{eq:31}
 	\begin{matrix}
-	\delta_j=z_j^k+\theta_j (g_j^k-z_j^k ),\; 0\leq \theta_j\leq 1, \; 1 \leq j < s,\\
-	g_j^k= \max{\{ g_j (x_i ) : \nu(x_i)=j,\; 1\leq i\leq k \}}.
+	\delta_j = z_j^k + \theta_j (g_j^k-z_j^k ), 0 \leq \theta_j \leq 1, 1 \leq j < s,\\
+	g_j^k = \max{\{ g_j (x_i ) : \nu(x_i)=j, 1 \leq i \leq k \}}.
 	\end{matrix}
 \end{equation}
 
-The applicability of such a one-step scheme (\ref{eq:26})--(\ref{eq:27}) instead of the scheme (\ref{eq:7}) is computationally evaluated in Section \ref{sec:4}.
+In particular, a similar one-step scheme (\ref{eq:30})--(\ref{eq:31}) can be applied through the use of AGCS.
 
-With a complete scheme for calculating criteria values, i.e. when at the iteration points $x_i$, $1 \leq i \leq k$,  the values of all criteria $f_j (x_i)$, $1 \leq j \leq s$, $1 \leq i \leq k$, are calculated, the effect of using the search information $A_k$ can be even more significant. In this case, the search information can also be used when changing the values of the concessions $\delta_j$, $1 \leq j < s$, and thus, the solution of the next problem from the $\mathbb{P}_t$ family (\ref{eq:8}) can be carried out repeatedly using the results of all previously performed calculations. Results of computational experiments (see Section \ref{sec:4}), demonstrate that the volume of computations performed, based on reusing search information, is reduced by a factor of no less than 6.
+With a complete scheme for calculating criteria values, i.e. when at the iteration points $x_i$, $1 \leq i \leq k$ the values of all criteria $f_j(x_i)$, $1 \leq j \leq s$, $1 \leq i \leq k$, are calculated, the effect of using the search information $A_k$ can be even more significant. In this case, the search information can also be used when changing the values of the concessions $\delta_j$, $1 \leq j < s$ and thus, the solution of the next problem from the $\mathbb{P}_t$ family (\ref{eq:10}) can be carried out repeatedly using the results of all previously performed calculations. The results of computational experiments (see Section \ref{sec:5}), demonstrate that the volume of computations performed, based on reusing search information, can significantly decrease.
 
-The AGCS algorithm, supplemented by the ability to use search information to solve multiple MCOlex  problems, will be referred to below as the global search algorithm for multistage solutions of a set of multiextremal optimization problems with non-convex constraints (MAGCS).
+The AGCS algorithm, supplemented by the ability to use search information to solve multiple MCOlex problems, will be referred to below as the global search algorithm for multistage solutions of a set of multiextremal optimization problems with nonlinear constraints (MAGCS).
 
-\section{Results of computational experiments}
+\section{Evaluation of the Effectiveness of Search Information Reuse}
 \label{sec:4}
 
-The computational experiments were carried out on the Lobachevsky supercomputer at Nizhny Novgorod State University (the operating system CentOS 6.4, the management system SLURM). A supercomputer node has 2 Intel Sandy Bridge E5-2660 2.2 GHz, 64 Gb RAM processors. Each CPU is 8-core; that is, there are 16 CPU cores available on the node. The Intel C++ 14.0.2 compiler was used to obtain an executable program code. The numerical experiments were performed using the Globalizer system \cite{c32}.
+Evaluation of the effectiveness of multiple uses of search information is based on the key properties of the AGCS algorithm. When searching for the global minimum, this algorithm constructs a grid of search trial points covering the search domains. In addition, this algorithm is stable, i.e., in minor variations of the minimized function, the value of change in the evaluation of the global minimum is limited.
 
-The global optimization algorithms used within the framework of the proposed approach have proven to be efficient in the process of conducting test computational experiments and have been widely used in solving practical optimization problems (see, e.g., \cite{c33,c34}). The results of computational experiments in solving multicriteria optimization problems are given below.
+To reduce the complexity of theoretical analysis, all further studies have been performed for the one-dimensional version of the AGCS algorithm; due to the use of dimensional reduction, the results obtained will also be applicable when solving multidimensional optimization problems.
 
-In the first series of computational experiments, the developed MAGCS algorithm was compared with several multicriteria optimization algorithms. To make a comparison, we used the test two-criteria problem proposed in \cite{c35}:
-\begin{equation}\label{eq:28}
+The initial theoretical analysis of global search properties when using search information was performed in \cite{c48}. The obtained theoretical statements can be reformulated as applied to lexicographic multicriteria optimization problems. 
+
+
+\begin{theorem}
+Let the next solved optimization problem $\psi(x)$ of the computational scheme (\ref{eq:9}) differ from the previously solved problem $\phi(x)$ by some limited value $\delta$, i.e.
+\begin{equation}\label{eq:32}
+|\psi(x)-\phi(x)| \leq \delta, x \in [0,1]
+\end{equation}
+and let the stopping criterion of (\ref{eq:28}) for the specified accuracy of global search $\varepsilon>0$ be fulfilled when minimizing the function $\phi(x)$. Then 
+\begin{equation}\label{eq:33}
+|\psi(x^*)-\phi(x_k^*)| \leq \Delta = \frac{\alpha L \varepsilon}{2} + \delta,
+\end{equation}
+if starting from a certain iteration $k_0>0$ the condition is fulfilled for the estimation of the Lipschitz constant $m$ and some $\alpha > 1$
+\begin{equation}\label{eq:34}
+m \geq L (1+ \sqrt{\frac{\alpha + 4 \beta (1 + \beta)}{\alpha - 1}}),
+\end{equation}
+where
+\begin{equation}\label{eq:35}
+m=\max{r_l h_l^k}, 1 \leq l \leq M^k, k>k_0,
+\end{equation}
+\begin{equation}\label{eq:36}
+L=\max{L_i}, 1 \leq i \leq s, L_i \text{from} (\ref{eq:3}),
+\end{equation}
+\begin{equation}\label{eq:37}
+\Psi(x^*)=\min{\psi(x)},x \in [0,1],
+\end{equation}
+\begin{equation}\label{eq:38}
+x_k^* = arg \min{\phi(x_k)}, 1 \leq i \leq k, 
+\end{equation}
+(the points $x_k$, $1 \leq i \leq k$, in (\ref{eq:38}) are taken from search information $A_k$ from (\ref{eq:21}) obtained by minimizing the function $\phi(x)$, and $h_l^k$, $M^k$, $r_l$ are the values of (\ref{eq:22}), (\ref{eq:24}) and (\ref{eq:29}), respectively).
+\end{theorem}
+
+This statement means that if the error $\Delta$ from (\ref{eq:33}) of determination of the minimum value of $\psi(x^*)$ is acceptable, then the minimization of the function $\psi(x)$ does not require any additional iterations of the global search -- the evaluation of the minimum value of $\psi(x^*)$ can be obtained in accordance with (\ref{eq:33}), using values $x_k$, ${1 \leq i \leq k}$, located in the search information $A_k$ from (\ref{eq:21}), obtained by minimizing the function $\phi(x)$.
+
+\begin{theorem}
+Let the optimization problem $\phi(x)$ of the computational scheme (\ref{eq:9}) be solved before the stopping criterion in (\ref{eq:28}) is fulfilled for the specified accuracy of the global search $\varepsilon > 0$ and the density of trials for the interval $[a,b] \subset [0,1]$ is reached
+\begin{equation}\label{eq:39}
+p_{ab}=\frac{n_{ab}}{b-a}
+\end{equation}
+where $n_{ab}$ is the number of trial points in the interval $[a,b]$ during the minimization of the function $\phi(x)$. Then, when solving the next optimization problem $\psi(x)$ using the search information $A_k$ from (\ref{eq:21}) obtained by minimizing the function $\phi(x)$, the number of trials in the same interval $[a,b]$ instead of the maximum value
+\begin{equation}\label{eq:40}
+(3m/2\Delta)(b-a), m \text{from} (\ref{eq:35}),
+\end{equation}
+will be limited by the value
+\begin{equation}\label{eq:41}
+n_{ab}' \leq (3m/2\Delta - p_{ab})(b-a)
+\end{equation}
+if the condition is met
+\begin{equation}\label{eq:42}
+\psi(x) \geq \psi(x^*)+\Delta, x \in [a,b].
+\end{equation}
+\end{theorem}
+
+Considering the estimate (\ref{eq:41}) of the maximum number of trials in the search domain subintervals $[0,1]$, the following statement may be formulated.
+
+\begin{theorem}
+If the number of trials in the interval $[a,b]\subset[0,1]$ exceeds the maximum estimate (\ref{eq:41}) when solving the optimization problem $\psi(x)$ of the computational scheme (\ref{eq:9}), then when solving the next optimization problem $\psi(x)$ using the search information $A_k$ from (\ref{eq:21}) obtained by minimizing the function $\phi(x)$, additional trials in the interval $[a,b]$ will not be performed while the condition (\ref{eq:42}) is fulfilled.
+\end{theorem}
+
+The theoretical statements formulated above allow estimating the positive effect of multiple uses of search information obtained in the process of calculations. If the new problem is sufficiently close to the already solved problems, the evaluation of the global search can be obtained based on the available search information without performing additional iterations of the global search (Theorem 2). In the extreme case, when solving a sufficient number of information-connected optimization problems, each new problem can be close to one of the previously solved problems, making the already available search information sufficient for solving this new problem. In other cases, when a new optimization problem is quite different from the previously solved problems, the use of search information, previously obtained in the course of calculations, allows reducing the number of trials performed in the subintervals of the search domain $[0,1]$ up to the complete absence of additional trials in these subintervals (Theorems 3-4).
+
+\section{Results of Computational Experiments}
+\label{sec:5}
+
+The computational experiments were carried out on the Lobachevsky supercomputer at the Lobachevsky State University of Nizhny Novgorod (the CentOS 6.4 operating system and the SLURM workload manager). A supercomputer node has 2 Intel Sandy Bridge E5-2660 2.2 GHz, 64 Gb RAM processors. Each CPU is 8-core, which means 16 CPU cores are available on the node. The Intel C ++ 14.0.2 compiler was used to obtain an executable program code. The numerical experiments were performed using the Globalizer system \cite{c32}.
+
+Evaluating the efficiency of multicriteria optimization methods is not quite a trivial question. While the efficiency of scalar optimization methods can be evaluated by the indicators of solution accuracy and the number of optimization iterations performed (the number of the calculated function values), solving MCO problems can lead to finding several efficient decisions or even approximating the whole Pareto set. There are many different approaches to this issue -- for example, efficiency indicators can be determined by the mutual domination rate \cite{c49}, the degree of approximation \cite{c50}, the overall Pareto spread \cite{c51}, etc. Authors of \cite{c52} propose an even wider set of 57 efficiency indicators in solving MCO problems. Unfortunately, it should be noted that no single approach has yet been adopted to evaluate the efficiency of the MCO methods. 
+
+In this article we assessed the efficiency of the MCO methods using two widely used indicators \cite{c35,c36}:
+\begin{itemize}
+	\item The hypervolume index (HV). This indicator evaluates the approximation of the Pareto set in terms of completeness; a higher value corresponds to a more complete coverage of the Pareto set.
+	\item The distribution uniformity index (DU). This indicator evaluates the uniformity of Pareto set coverage; a lower value corresponds to a more uniform coverage of the Pareto set.
+\end{itemize}
+
+In addition, since the solution of the MCO problem is reduced to the solution of multiple scalar optimization problems, the efficiency will be evaluated by ``classical'' indicators: the solution accuracy and the number of the calculated function values. The latter indicator is even more important because due to the initial assumption about the time-consuming calculations of efficiency criteria values of the MCO problem, this indicator evaluates the computational complexity of solving the MCO problem.
+
+Another important issue of the efficiency evaluation consists in the choice of benchmarks, which will be used to measure the efficiency of the methods applied. Unfortunately, there is no unified approach to this issue either. In many studies, the efficiency of the developed methods is demonstrated by the example of a limited set of test optimization problems. Researchers repeatedly attempt to resolve this issue by forming quite a wide set of test optimization problems, which can be used to evaluate the efficiency of the MCO methods. For instance, in \cite{c53} authors propose a flexible toolkit for constructing well-designed MCO problems. In \cite{c54} a set of 24 test optimization functions is given, which are widely used for evaluating the MCO methods. In \cite{c55} a set of 100 test problems is considered. In \cite{c56} an approach is proposed, in which a set of efficiency parameters of the MCO problems is formed from the well-known scalar optimization functions. This allows forming an almost endless set of MCO problems. At the same time, the set of the MCO test problems, in which the efficiency criteria would be multiextremal functions, is rather limited. Also, the proposed sets usually consist of single examples of the MCO problems, which makes it difficult to obtain any reliable estimates of the method efficiency. 
+
+In this paper, the efficiency of the proposed methods is evaluated by executing extensive numerical experiments for solving the wide sets of the MCO problems. The test problems are produced by the GKLS generator \cite{c37} that can construct an almost endless number of the MCO problems using a random mechanism. This generator can produce multiextremal functions with predetermined characteristics (the dimensionality, the number of local minima, the size of their attraction domains, the point of global minimum, and the value of the functions, etc.). Fig. \ref{fig:3} shows an example of the two criteria generated using GKLS.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\linewidth]{fig3}
+  \caption{Contour plots of two criteria obtained by the GKLS generator}
+  \label{fig:3}
+\end{figure}
+
+As we have previously noted, the proposed global optimization algorithms were developed in the framework of the information-statistical theory of multiextremal optimization. These methods have proven to be efficient in numerical experiments and have been widely used for solving practical global optimization problems (see, e.g., \cite{c17,c18,c23,c26,c27,c33,c34}). The results of numerical experiments in solving multicriteria optimization problems are given below.
+
+In the first series of computational experiments, the MAGCS algorithm was compared with several multicriteria optimization algorithms for solving the two-criteria problem proposed in \cite{c35}:
+\begin{equation}\label{eq:43}
 f_1 (y)=(y_1-1) y_2^2+1,f_2 (y)=y_2, 0\leq y_1,y_2 \leq 1.
 \end{equation}
 
+In this experiment, five multicriteria optimization algorithms were compared: the Monte-Carlo (MC) method, the genetic algorithm SEMO from the PISA library \cite{c9,c36}, the Non-uniform coverage (NUC) method \cite{c35}, the bi-objective Lipschitz optimization (BLO) method \cite{c36}, and the MAGCS algorithm. The results of the solution (\ref{eq:29}) for all these methods (except for MAGCS) were obtained in \cite{c36}.
 
-Solving the MCO problem was understood to mean constructing a numerical approximation of the Pareto domain. To assess the quality of the approximation, the completeness and uniformity of the Pareto domain coverage were compared, using the following two indicators \cite{c35,c36}:
-\begin{itemize}
-	\item 	The hypervolume index (HV). This indicator characterizes the approximation of the Pareto domain in terms of completeness; a higher value corresponds to a more complete coverage of the Pareto domain.
-	\item The distribution uniformity index (DU). This indicator characterizes the uniformity of Pareto domain coverage; a lower value corresponds to a more uniform coverage of the Pareto domain.
-\end{itemize}
-	
-In the framework of this experiment, five multicriteria optimization algorithms were compared: the Monte-Carlo (MC) method, the genetic algorithm SEMO from the PISA library \cite{c9,c36}, the Non-uniform coverage (NUC) method \cite{c35}, the bi-objective Lipschitz optimization (BLO) method \cite{c36}, and the MAGCS algorithm proposed in this paper. The results of solving problem (\ref{eq:28}) for all these methods (except for MAGCS) were obtained in \cite{c36}.
+For MAGCS, 50 subproblems (\ref{eq:30}) were solved for different values $\theta=\theta_1$ from (\ref{eq:31}), uniformly distributed in the interval $[0,1]$. The accuracy $\varepsilon=0.05$ from (\ref{eq:28}) and the reliability parameters $r_1=r_2=3.0$ from (\ref{eq:29}) were used. The results of the executed experiments are presented in Table \ref{tab:1}.
 
-For MAGCS, 50 problems (\ref{eq:26}) were solved for different values $\theta_j$, $1 \leq j<s$, uniformly distributed in the interval [0,1]. The accuracy from (\ref{eq:25}) $\varepsilon=0.05$ and the reliability from (\ref{eq:22}) $r=3.0$ were used. The results of the executed experiments are presented in Table \ref{tab:1}.
 
 \begin{table}[ht]
 \centering
-\caption{The numerical results of solving the multicriteria optimization problems from (\ref{eq:28})}
+\caption{The numerical results of solving the multicriteria optimization problems from (\ref{eq:43})}
 \label{tab:1}
 \begin{tabular}{cccccc}
 \hline
 Method                                                                                     & MC    & SEMO  & NUC   & BLO   & \textbf{MAGCS} \\ \hline
 Number of executed iterations                                                              & 500   & 500   & 515   & 498   & \textbf{273}   \\
-\begin{tabular}[c]{@{}c@{}}Number of points in \\ Pareto domain approximation\end{tabular} & 67    & 104   & 29    & 68    & \textbf{80}    \\
+\begin{tabular}[c]{@{}c@{}}Number of points in \\ the Pareto set approximation\end{tabular} & 67    & 104   & 29    & 68    & \textbf{80}    \\
 HV index                                                                                   & 0.300 & 0.312 & 0.306 & 0.308 & \textbf{0.314} \\
 DU index                                                                                   & 1.277 & 1.116 & 0.210 & 0.175 & \textbf{0.096} \\ \hline
 \end{tabular}
 \end{table}
 
-The results from the executed experiments demonstrate that the MAGCS algorithm has a significant advantage in comparison with the considered multicriteria optimization methods, even when solving relatively simple MCO problems.
+The results of the executed experiments demonstrate that the MAGCS algorithm has a significant advantage in comparison with the considered multicriteria optimization methods, even when solving relatively simple MCO problems.
 
-In the second series of computational experiments, two-criteria two-dimensional MCO problems were solved. Multiextremal functions obtained using the GKLS generator \cite{c37} served as the criteria for the problem. During the experiments, 100 multicriteria problems of this class were solved. In each problem, Pareto-optimal decisions were searched for 50 different values of $\theta_j$, $1\leq j < s$, uniformly distributed in the interval [0,1]; (that is, 5,000 global optimization problems were solved). The results obtained were averaged over the number of MCO problems solved.
+All the subsequent numerical experiments focused on the solution of 100 two-criteria MCO problems, the efficiency criteria of which were set by the GKLS generator. For each MCO problem from the generated set, from 10 to 100 subproblems (\ref{eq:30}) were solved for different values $\theta=\theta_1$ from (\ref{eq:31}), uniformly distributed in the interval $[0,1]$. The obtained results of numerical experiments were averaged by the number of solved MCO problems. 
 
-In the computational experiments, calculations are terminated when the required accuracy was achieved. When the process was terminated, the solution was evaluated for correctness. As a means of control, we compared the solution points found by MAGCS and the points calculated from the Pareto boundary, taking into account the selected values of $\theta_j$, $1 \leq j < s$. The method parameters were set as follows: the accuracy $\varepsilon = 0.02$ and the reliability $r_1=r_2=5.6$. Results of the computational experiments are presented in Table 2.
-
-In Table 2, the first and fifth columns indicate the average number of iterations executed by the MAGCS algorithm for solving the MCOlex problems. The second and sixth columns contain the percentage of completed problems. The third, fourth, seventh and eighth columns show the values of HV and DU indicators. The last column gives values showing the reduction in the number of global search iterations that were executed when solving the MCOlex problems, by reusing search information.
+The solution of MCO problems was carried out before the stopping criterion of (\ref{eq:28}) was fulfilled, and the MCO problems were considered solved correctly if the distance of the decisons to the Pareto domain did not exceed the given accuracy $\varepsilon$ from (\ref{eq:28}).
+ 
+In the second series of experiments, the two-criteria two-dimensional MCO problems were solved. The solution was carried out with the method accuracy $\varepsilon = 0.025$ and the reliability parameters $r_1 = r_2 = 5.6$. The results of computational experiments are presented in Table \ref{tab:2}.
 
 
 \begin{table}[ht]
 \centering
-\caption{Results of the series of experiments to solve two-dimensional two-criteria MCO problems}
+\caption{Results of the numerical experiments to solve two-criteria two-dimensional MCO problems}
 \label{tab:2}
-\resizebox{\columnwidth}{!}{
-\begin{tabular}{ccccccccccc}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{cccccccccccc}
 \hline
-\multicolumn{10}{c}{Search information}                                    & Reduction \\ \cline{1-9}
-\multicolumn{4}{c}{not used}         & & \multicolumn{4}{c}{used}             &  & in \\ \cline{1-4} \cline{6-9}
-Method     & Problem & Avg   & Avg   & & Method     & Problem & Avg   & Avg   &  & iteration    \\
-iter.      & solved  & HV    & DU    & & iter.      & solved  & HV    & DU    &  & number       \\ \cline{1-4} \cline{6-9} \cline{11-11}
-41 710.1   & 98.0\%  & 33.43 & 0.173 & & 2 407.41   & 99.3\%  & 33.34 & 0.224 &  & 17.3         \\ \hline
+    & \multicolumn{10}{c}{Solving   MCO problems}                                                             &     \\ \cline{2-11}
+SP  & \multicolumn{5}{c}{without   using search information} & \multicolumn{5}{c}{using   search information} & RI  \\ \cline{2-11}
+    & PI          & SPI      & SPS       & HV       & DU     & PI        & SPI    & SPS      & HV     & DU    &     \\ \hline
+10  & 8 340,1     & 834,0    & 71,3\%    & 30,34    & 0,35   & 981,7     & 98,2   & 81,9\%   & 30,10  & 0,54  & 1,0 \\
+20  & 16 756,5    & 837,8    & 78,0\%    & 30,56    & 0,31   & 1 208,0   & 60,4   & 86,8\%   & 30,25  & 0,42  & 1,6 \\
+30  & 25 209,4    & 840,3    & 80,7\%    & 30,60    & 0,32   & 1 319,2   & 44,0   & 89,7\%   & 30,33  & 0,45  & 2,2 \\
+40  & 33 625,7    & 840,6    & 81,7\%    & 30,65    & 0,31   & 1 403,0   & 35,1   & 92,4\%   & 30,40  & 0,40  & 2,8 \\
+50  & 41 994,7    & 839,9    & 82,8\%    & 30,68    & 0,31   & 1 452,8   & 29,1   & 93,5\%   & 30,46  & 0,41  & 3,4 \\
+60  & 50 428,8    & 840,5    & 83,5\%    & 30,72    & 0,29   & 1 506,6   & 25,1   & 93,8\%   & 30,46  & 0,37  & 3,9 \\
+70  & 58 923,3    & 841,8    & 84,5\%    & 30,75    & 0,29   & 1 556,9   & 22,2   & 95,1\%   & 30,52  & 0,37  & 4,4 \\
+80  & 67 318,8    & 841,5    & 84,8\%    & 30,76    & 0,30   & 1 588,5   & 19,9   & 95,3\%   & 30,51  & 0,38  & 4,9 \\
+90  & 75 684,0    & 840,9    & 85,0\%    & 30,76    & 0,25   & 1 624,7   & 18,1   & 95,5\%   & 30,57  & 0,37  & 5,4 \\
+100 & 84 164,2    & 841,6    & 84,6\%    & 30,78    & 0,26   & 1 644,3   & 16,4   & 95,9\%   & 30,58  & 0,32  & 6,0 \\ \hline
 \end{tabular}
 }
 \end{table}
 
+The first column (SP) in the Table \ref{tab:2} contains the total number of MCO subproblems to be solved. The PI columns show the average number of iterations for solving one MCO problem. The SPI columns represent the average number of iterations for solve a single MCO subproblem. The SPS columns contain a fraction of MCO subproblems solved with the required accuracy. The HV and DU columns show the hypervolume (HV) and the distribution uniformity (DU) indices of the calculated approximation of the Pareto set, respectively. The last column (RI) shows the degree of the reduction in the number of global search iterations performed when solving subproblems (\ref{eq:30}) by reusing the search information.
 
-Results obtained from these experiments show that the re-use of search information can reduce the amount of calculations by 17.3 times without expending additional computational resources, and according to the average HV and DU indicators, the quality of the Pareto domain remains on average at the same level.
+The results presented in Table \ref{tab:2} demonstrate that the use of search information allows to obtain an estimate of the Pareto domain after a substantially smaller total number of iterations of the global search (the PI columns). It should also be noted that as the number of solved subproblems increases, the MCO allows to build estimates of the Pareto region with better HV and DU indices.
 
-In the third series of computational experiments, the two-criteria four-dimensional MCO problems were solved. As in the second series of computational experiments, 100 multicriteria problems were solved. In each problem, the Pareto-optimal decisions were calculated for 50 different values of $\theta_j$, $1 \leq j <s$, uniformly distributed in the interval $[0,1]$. The criteria of the MCO problems being solved were determined using the GKLS generator \cite{c37}. The method parameters were set as follows: the accuracy $\varepsilon = 0.025$ and the reliability $r_1=r_2=5.6$. The results of computational experiments are presented in Table 3.
+For a better visual representation, Figure \ref{fig:4} shows the average number of iterations performed to solve a single MCO subproblem with and without search information. The presented graphs convincingly demonstrate a significant reduction in the number of global search iterations when solving the MCO subproblems using search information.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=1\linewidth]{fig4}
+  \caption{Average number of iterations required to solve one MCO subproblem depending on the total number of subproblems solved}
+  \label{fig:4}
+\end{figure}
+
+Fig. \ref{fig:5} shows the reduction in the number of global search iterations when solving MCO subproblems using search information. The graphs presented show that when the number of solved MCO subproblems grows linearly, the number of iterations required to solve one subproblem is reduced almost linearly as well.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=1\linewidth]{fig5}
+  \caption{Reduction of the number of iterations performed to solve one MCO subproblem depending on the total number of subproblems solved}
+  \label{fig:5}
+\end{figure}
+
+It should be noted that the number of iterations of the global search is also reduced in the course of sequential solution of subtasks of the same MCO task.
+
+It should be noted that the number of global search iterations is also reduced in the course of sequential solution of the subproblems of the same MCO problem. Table \ref{tab:3} illustrates this trend showing the average number of iterations required to find a solution to one MCO subproblem, with subdividing the sequence of solved subproblems in groups of 10 MCO subproblems. The first row (SP) contains the MCO subproblem numbers belonging to the individual subproblem groups. The PI rows show the total number of iterations of the global search performed for all previous problems. The rows labeled as ``PI new'' show the number of iterations performed to solve the next group of MCO subproblems with the numbers of the problems given in each column heading. The last row labeled as ``FPI new'' shows the proportion of new iterations of global search performed to solve the next group of MCO subproblems.
+
+\begin{table}[ht]
+\centering
+\caption{Average number of iterations to solve two-criteria two-dimensional MCO problems}
+\label{tab:3}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{ccccccccccc}
+\hline
+SP       & 1-10   & 11-20  & 21-30  & 31-40  & 41-50  & 51-60  & 61-70  & 71-80  & 81-90  & 91-100 \\ \hline
+\multicolumn{11}{c}{Solving MCO problems without using search information}                         \\ \hline
+PI       & 8868   & 17007  & 26228  & 34320  & 44117  & 53776  & 63292  & 71816  & 78824  & 84164  \\
+PI new   & 8868   & 8139   & 9221   & 8092   & 9796   & 9660   & 9515   & 8525   & 7007   & 5341   \\ \hline
+\multicolumn{11}{c}{Solving MCO problems with using search information}                            \\ \hline
+PI       & 993,1  & 1230,3 & 1309,6 & 1393,2 & 1409,5 & 1430,9 & 1466,1 & 1538,2 & 1624,9 & 1644,3 \\
+PI new   & 993,1  & 237,1  & 79,3   & 83,6   & 16,3   & 21,4   & 35,2   & 72,1   & 86,7   & 19,4   \\ \hline
+\multicolumn{11}{c}{Proportion of new iterations   for the solution of a new group of subproblems} \\ \hline
+FPI new  & -      & 23,9\% & 6,4\%  & 6,4\%  & 1,2\%  & 1,5\%  & 2,5\%  & 4,9\%  & 5,6\%  & 1,2\%  \\ \hline
+\end{tabular}
+}
+\end{table}
+
+Fig. \ref{fig:6} shows the values of the achieved reduction in the number of additional iterations required to solve the next set of subproblems (the last row of Table \ref{tab:3}). The above data demonstrates that solving the next group of MCO subproblems requires about $6\%$ of new global search iterations in addition to the available search information.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=1\linewidth]{fig6}
+  \caption{Proportion of new global search iterations for solving the next group of MCO subproblems}
+  \label{fig:6}
+\end{figure}
+
+The third set of computational experiments was designed to demonstrate the scalability of the proposed approach by solving more complex two-criteria four-dimensional MCO problems under the same conditions as in the previous series of calculations. The results of the experiments are presented in Tables \ref{tab:4}--\ref{tab:5} and in Fig. \ref{fig:4}--\ref{fig:6}. These data demonstrate that the experiments carried out to solve more complex MCO problems confirm the conclusions made earlier -- for example, solving the next group of MCO subproblems requires, in addition to the available search information, from $0.5\%$ to $14.2\%$ more global search iterations (Table \ref{tab:5}, last row).
 
 
 \begin{table}[ht]
 \centering
-\caption{Results of the series of experiments to solve two-criteria four-dimensional MCO}
-\label{tab:3}
-\resizebox{\columnwidth}{!}{
-\begin{tabular}{ccccccccccc}
+\caption{Results of the numerical experiments to solve two-criteria four-dimensional MCO problems}
+\label{tab:4}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{cccccccccccc}
 \hline
-\multicolumn{10}{c}{Search information}                                        & Reduction   \\ \cline{1-9}
-\multicolumn{4}{c}{not used}       & & \multicolumn{4}{c}{used}                & &  in       \\ \cline{1-4} \cline{6-9}
-Method      & Problem & Avg   & Avg   & & Method     & Problem & Avg   & Avg   & & iteration \\
-iter.       & solved  & HV    & DU    & & iter.      & solved  & HV    & DU    & & number    \\ \cline{1-4} \cline{6-9} \cline{11-11}
-4 536 377.9 & 83.0\%  & 30.67 & 0.335 & & 709 014.9  & 94.5\%  & 30.46 & 0.405 & & 6.4       \\ \hline
+    & \multicolumn{10}{c}{Solving MCO problems}                                                                &     \\ \cline{2-11}
+SP  & \multicolumn{5}{c}{without using search information} & \multicolumn{5}{c}{With using search information} & RI  \\ \cline{2-11}
+    & PI$\times 10^3$& SPI$\times 10^3$& SP       & HV      & DU     & PI$\times 10^3$& SPI$\times 10^3$& SP       & HV      & DU    &     \\ \hline
+10  & 1 088,7    & 108,8     & 71,3\%   & 30,34   & 0,35   & 340,4    & 34,0      & 81,9\%   & 30,10   & 0,54  & 1,0 \\
+20  & 2 245,6    & 112,2     & 78,0\%   & 30,56   & 0,31   & 518,3    & 25,9      & 86,8\%   & 30,25   & 0,42  & 1,3 \\
+30  & 3 407,8    & 113,5     & 80,7\%   & 30,60   & 0,32   & 607,9    & 20,2      & 89,7\%   & 30,33   & 0,45  & 1,7 \\
+40  & 4 525,3    & 113,1     & 81,7\%   & 30,65   & 0,31   & 669,6    & 16,7      & 92,4\%   & 30,40   & 0,40  & 2,0 \\
+50  & 5 677,0    & 113,5     & 82,8\%   & 30,68   & 0,31   & 717,2    & 14,3      & 93,5\%   & 30,46   & 0,41  & 2,4 \\
+60  & 6 854,4    & 114,2     & 83,5\%   & 30,72   & 0,29   & 750,3    & 12,5      & 93,8\%   & 30,46   & 0,37  & 2,7 \\
+70  & 7 965,3    & 113,7     & 84,5\%   & 30,75   & 0,29   & 782,3    & 11,1      & 95,1\%   & 30,52   & 0,37  & 3,0 \\
+80  & 9 134,8    & 114,1     & 84,8\%   & 30,76   & 0,30   & 807,4    & 10,0      & 95,3\%   & 30,51   & 0,38  & 3,4 \\
+90  & 10 280,2   & 114,2     & 85,0\%   & 30,76   & 0,25   & 822,7    & 9,1       & 95,5\%   & 30,57   & 0,37  & 3,7 \\
+100 & 11 401,9   & 114,0     & 84,6\%   & 30,78   & 0,26   & 836,3    & 8,3       & 95,9\%   & 30,58   & 0,32  & 4,1 \\ \hline
 \end{tabular}
 }
 \end{table}
 
-
-Results from the executed experiments show that with increased dimensions of MCO problems to be solved and a corresponding increase in the volume of calculations, the efficiency of the MAGCS algorithm remains at a high level;  its use has efficiently reduced the number of the executed iterations by 6.4 times.
-
+\begin{table}[ht]
+\centering
+\caption{Results of the numerical experiments to solve two-criteria four-dimensional MCO problems}
+\label{tab:5}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{ccccccccccc}
+\hline
+SP          & 1-10   & 11-20  & 21-30  & 31-40  & 41-50  & 51-60  & 61-70  & 71-80  & 81-90   & 91-100  \\ \hline
+\multicolumn{11}{c}{Solving MCO problems without using   search information}                            \\ \hline
+PI$\times 10^3$& 1167,1 & 2320,4 & 3403,4 & 4530,1 & 5543,4 & 6603,5 & 7968,0 & 9614,4 & 10832,6 & 11402,0 \\
+PI new$\times 10^3$& 1167,1 & 1153,3 & 1083,0 & 1126,7 & 1013,3 & 1060,1 & 1364,5 & 1646,4 & 1218,2  & 569,4   \\ \hline
+\multicolumn{11}{c}{Solving MCO problems with using   search information}                               \\ \hline
+PI$\times 10^3$& 399,5  & 556,1  & 635,1  & 686,1  & 690,3  & 714,4  & 769,4  & 837,3  & 886,7   & 890,7   \\
+PI new$\times 10^3$& 399,5  & 156,6  & 79,0   & 51,0   & 4,2    & 24,2   & 54,9   & 67,9   & 49,4    & 4,0     \\ \hline
+\multicolumn{11}{c}{Proportion   of new iterations required to solve the next group of subproblems}     \\ \hline
+FPI new  & -      & 39,2\% & 14,2\% & 8,0\%  & 0,6\%  & 3,5\%  & 7,7\%  & 8,8\%  & 5,9\%   & 0,5\%   \\ \hline
+\end{tabular}
+}
+\end{table}
 
 
 \section{Conclusion}
-\label{sec:5}
+\label{sec:6}
 
-This paper proposes a new approach for solving computationally expensive lexicographic multicriteria optimization problems (MCOlex), in which the efficiency criteria can be multiextremal, and calculating the criteria values may require a large amount of computation. A key feature of this class of problems is the ability, during the computation process, to alter the ordering of efficiency criteria in terms of importance, which in turn necessitates a multistage solution for MCOlex problems.
+In this paper a new approach is proposed for solving computationally expensive lexicographic multicriteria optimization problems (MCOlex), which can be complicated by the multiextremal nature of the efficiency criteria and extensive volume of computations required to calculate the criteria values. A key feature of this class of problems is the ability to alter the ranking of efficiency criteria in terms of importance during calculations, which in turn necessitates a multistage solution for MCOlex problems.
 
-Overcoming the enormous computational complexity of addressing the formulated new class of MCOlex problems is ensured by solving a sequence of global optimization problems with non-convex constraints using efficient information-statistical methods of global optimization by using an original index constraint accounting scheme instead of the commonly used penalty functions. A core element in this approach is the ability to use all the search information obtained in the computation process, utilizing the multistage solution of MCOlex problems. Starting to solve each new stage of the solution, this search information allows us to incorporate the previously calculated values of efficiency criteria into the values of the next scalar problem of multiextremal optimization. The search information retrieved becomes part of the current optimization state and through optimization methods, results in adaptive planning of the iterations to run the global search. 
+The computational complexity of addressing the formulated new class of MCOlex problems can be overcome by solving a sequence of global optimization problems with nonlinear constraints using efficient information-statistical methods of global optimization. A core element in this approach is the ability to use all the search information obtained in the course of solving the multistage MCOlex problems. With each new stage of the solution, this search information allows incorporating the previously calculated values of efficiency criteria into the values of the next scalar problem of multiextremal optimization. The search information retrieved becomes part of the current optimization state and, through optimization methods, results in adaptive planning of the iterations to run the global search. 
 
-Results of computational experiments demonstrate that this approach can significantly reduce the computational complexity of multistage MCOlex problem solving.
+The results of numerical experiments demonstrate that this approach can sufficiently reduce the computational complexity of multistage MCOlex problem-solving.
 
-In conclusion, it must be noted that the approach described here is promising, and requires further research. Importantly, it is necessary to continue carrying out computational experiments to solve multicriteria optimization problems with a larger number of efficiency criteria and for greater dimensions in the optimization problems to be solved. It is also necessary to evaluate the possibility of parallel computing using high-performance supercomputer systems.
+In conclusion, it can be noted that the approach described here is promising, and requires further study. It is necessary to continue numerical experiments to solve multicriteria optimization problems with a larger number of efficiency criteria and for greater dimensions in the optimization problems. It is also necessary to evaluate the possibility of parallel computing using high-performance supercomputer systems.
+
 
 
 % Non-BibTeX users please use
