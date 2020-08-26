@@ -174,7 +174,7 @@ The feasible domain can also be defined by the constraints that essentially comp
 The problem statement in this case will take the following form:
 \begin{equation}
   \label{eq:constrained_problem}
-  \varphi(y^*)=\min\{\varphi(y):y\in D \cap \{y: g_j(y)\leqslant 0, 1\leqslant j\leqslant m\}\}.
+  \varphi(y^*)=\min\{\varphi(y):y\in G\},\:G=D \cap \{y: g_j(y)\leqslant 0, 1\leqslant j\leqslant m\}.
 \end{equation}
 
 Let us denote \(g_{m+1}(y)=\varphi(y)\). Hereafter, we will assume all functions
@@ -185,8 +185,8 @@ Further, let us consider solving a series of \(q\) problems of the kind
 (\ref{eq:constrained_problem}):
 \begin{equation}
   \label{eq:many_problems}
-  \min\left\{\varphi_1(y), y\in D_1 \right\}, \min\left\{\varphi_2(y), y\in D_2\right\},...,
-\min\left\{\varphi_q(y), y\in D_q\right\}.
+  \min\left\{\varphi_1(y), y\in G_1 \right\}, \min\left\{\varphi_2(y), y\in G_2\right\},...,
+\min\left\{\varphi_q(y), y\in G_q\right\}.
 \end{equation}
 
 \section{Description of the global optimization method}
@@ -200,26 +200,32 @@ condition in the interval \([0,1]\).
 The index algorithm of global search (IAGS) for solving the one-dimensional problems
 %(\ref{eq:constrained_problem})
 considered here implies the constructing of a sequence of points
-\(x_k\), which the values of the minimized function or of the constraints \(z_k = g_s(x_k)\) are
-computed in.
-To account for the latter, the index scheme \cite{Strongin2000} was used.
-Let \(Q_0=[0,1]\). The constraint having the index \(j\) is satisfied in all points of the domain
+\(x_k\), which the values of index function \(z_k\) are computed in.
+On account of, the index scheme \cite{Strongin2000} was used.
+Let's assume that each function \(g_i(x), 1 \leqslant i \leqslant m + 1\), is defined and computable
+only in the corresponding subrange \(Q_i \in [a, b]\), where \(\varphi(x)\) is denoted as \(g_{m+1}(x)\) and
+\begin{equation}
+  \label{eq:q}
+  Q_1=[0,1],\: Q_{i+1}=\left\{x\in Q_i:g_{i}(x)\leqslant 0\right\},\:1 \leqslant i \leqslant m, \: Q_{m+2}=\emptyset
+\end{equation}
+In the view of the definition (\ref{eq:q}) the initial problem can be rewritten in the form
 \begin{displaymath}
-  Q_j=\left\{x\in [0,1]:g_j(x)\leq 0\right\},
+  \varphi(x^*)=\min\{g_{m+1}(x):x\in Q_{m+1}\}.
 \end{displaymath}
-which is called feasible for this constraint.
-At that, the feasible domain \(D\) of the initial problem is defined by the equality
- \(D=\cap _{j=0}^{m}Q_{j}\).
-A trial in the point \(x\in [0,1]\) consists in a sequence computing of the values
-\(g_{1}(x),...,g_{\nu }(x)\)
-where the values of the indices \(\nu\) are defined by the conditions:
-\(x\in Q_{j},0\leqslant j<\nu ,x\notin Q_{\nu }\).
-The first observed violation of any constraint terminates the trial at the point \(x\).
-In the case when the point \(x\) is feasible, i.e. \(x\in D\), the trial includes the computing of all
-functions of the problem.
-At that, the value of the index is accepted as \(\nu =m+1\).
-The pair \(\nu =\nu (x), z=g_{\nu }(x)\) where the index \(\nu\) falls into the borders \(1\leqslant
-\nu \leqslant m+1\) is called the result of the trial at the point \(x\).
+
+The index scheme assigns a number called index \(\nu(x)\) to the each point of the search sequence \(x_k\):
+\begin{equation}
+  \nu(x) = i:x\in Q_i, x\not\in Q_{i+1},\:1\leqslant i\leqslant m + 1.
+\end{equation}
+
+In order to obtain an index of the point \(x\) we have to perform a trial defined via the following steps:
+\begin{enumerate}
+  \item Consequently compute functions \(g_i(x),1 \leqslant i \leqslant m\) until for some \(i^*\) \(g_{i^*}(x)>0\) or until \(i=m+1\).
+  Set \(\nu(x)=i^*\) or \(\nu(x)=m+1\) if \(g_i(x) \leqslant 0, 1 \leqslant i \leqslant m\).
+  Therefore, \(\nu(x)\) is the number of the first violated constraint at the point \(x\) or \(m+1\) if
+  all constraints are satisfied at \(x\).
+  \item Return pair \(\nu(x), z=g_{\nu(x)}(x)\) as a result of trial.
+\end{enumerate}
 
 Such an approach to conducting the trials allows reducing the initial problem with functional
 constraints to an unconstrained problem of minimization of a discontinuous function:
@@ -231,13 +237,12 @@ constraints to an unconstrained problem of minimization of a discontinuous funct
   \end{array}
 \end{displaymath}
 Here \(M=\max_{}^{}\left\{\nu (x):x\in [0,1]\right\}\) and \(g_{M}^{*}=\min
-_{}^{}\left\{g_{M}(x):x\in \cap _{i=0}^{M-1}Q_{i}\right\}\).
+_{}^{}\left\{g_{M}(x):x\in Q_{M}\right\}\).
 Because of the definition of the number \(M\), the problem of finding \(g_{M}^{*}\) always
 has a solution. If \(M=m+1\), then \(g_{M}^{*}=\varphi(x^{*})\).
-The function \(\psi (x)\) satisfies the H\"{o}lder condition within the sets
-\(\cap _{i=0}^{j}Q_{i},0\leq j\leq M-1\)
-with the constant 1, and \(\psi (x)\) can have jump discontinuities at the boundaries
-of these sets.
+The function \(\psi (x)\) satisfies the H\"{o}lder condition on the set
+\(Q_1\) with the constant 1, and \(\psi (x)\) can have jump discontinuities at the boundaries
+of the sets \(Q_i,\:1\leqslant i \leqslant m+1\).
 Despite the values of the H\"{o}lder constants \(H_k\) and the value \(g_{M}^{*}\) are not
 known in advance, these ones can be estimated in the course of solving the problem.
 A set of triples \(\{(x_k,\nu_k,z_k)\}, 1\leqslant k\leqslant n\), constitutes the search information
@@ -259,8 +264,7 @@ the lower indices in the order of increasing coordinate values, i.e.
   \label{eq:points}
   0=x_0<x_1<\dotsc<x_{k+1}=1,
 \end{equation}
-and juxtapose the values \(z_{i}=g_{\nu }(x_{i}),\nu =\nu (x_{i}),i={\overline {1,k}}\) to these
-ones.
+and juxtapose to them the values \(z_{i}=g_{\nu }(x_{i}),\nu =\nu (x_{i}),i={\overline {1,k}}\) computed at these points.
 
 Step 2. For each integer number \(\nu ,1\leqslant \nu \leqslant m+1\), determine the corresponding
 set \(I_{\nu }\) of the lower indices of the points, which the values of the functions \(g_{\nu
@@ -333,7 +337,7 @@ If the maximum characteristic corresponds to the \(i^{\rm th}\) problem, then St
 performed in the \(i^{\rm th}\) copy of the method while the rest copies stay idle.
 This way, at every iteration the trial is performed in the most promising problem from the
 viewpoint of the characteristics (\ref{step3_1}) that allows distributing the resources of the
-method among the problems dynamically.
+method among the problems dynamically. Let's denote this method as MIAGS.
 
 The parallel modification of the method doesn't differ from the one considered in
 \cite{BarkalovStrongin2018} and consists in the selection of \(p\) intervals at Step 6 and the
@@ -350,10 +354,10 @@ The conditions of convergence of the described in Section \ref{sec:method} metho
   \label{th:single_conv}
   Assume that the following conditions are true:
   \begin{enumerate}
-    \item The problem (\ref{eq:constrained_problem}) has a solution.
+    \item \(D\ne\emptyset\), the problem (\ref{eq:constrained_problem}) has a solution.
     \item Functions \(g_j(y)\leqslant 0, 1\leqslant j\leqslant m + 1\), are Lipschitzian with
 respective constants \(L_i\) over the domain \(D\) (here \(g_{m+1}(y)=\varphi(y)\)).
-    \item Beginning with some step (i.e. if \(k\) from (\ref{eq:points}) is sufficiently large),
+    \item If \(k\) from (\ref{eq:points}) is sufficiently large,
     the values \(\mu_\nu\) from (\ref{step2}) satisfy the inequalities
     \begin{equation}
       r_\nu\mu_\nu > 2^{3-1/N}L_\nu \sqrt{N+3},\: 1\leqslant \nu \leqslant m + 1.
@@ -361,12 +365,11 @@ respective constants \(L_i\) over the domain \(D\) (here \(g_{m+1}(y)=\varphi(y)
   \end{enumerate}
   Then any limit point \(\overline{y}\) of the sequence \(\{y_k\} = \{y(x_k)\}\) generated
   by the index method while solving the problerm
-  (\ref{eq:constrained_problem}) is admissible and satisfies the conditions
+  (\ref{eq:constrained_problem}) is feasible and satisfies the conditions
 \begin{equation}
   \label{eq:conv_cond}
-  \varphi(\overline{y})=\{ \varphi(y^k): g_i(y^k)\leqslant 0,1\leqslant j\leqslant m, k=1,2,\dots\}=\varphi(y^*),
+  \varphi(\overline{y})=\inf\{ \varphi(y^k): g_i(y^k)\leqslant 0,1\leqslant i\leqslant m, k=1,2,\dots\}=\varphi(y^*).
 \end{equation}
-  where \(y^*\) is from (\ref{eq:constrained_problem}).
 \end{theorem}
 
 \begin{remark}
@@ -378,11 +381,13 @@ respective constants \(L_i\) over the domain \(D\) (here \(g_{m+1}(y)=\varphi(y)
   \end{equation}
 \end{remark}
 
-\begin{theorem} (On convergence conditions) Let the conditions of the Theorem \ref{th:single_conv}
-  are satisfied for all of \(q\) problems from the set (\ref{eq:many_problems}) separately.
-  Then solving all of the \(q\) problems by the algorithm from Section \ref{sec:method} will
-  generate \(q\) infinite sequences, for the limit points of which the Theorem \ref{th:single_conv}
-  will be also true.
+\begin{theorem} (On convergence conditions of MIAGS) Let for each problem \(i,\:1\leqslant i\leqslant q\) from (\ref{eq:many_problems})
+  the conditions 1-3 of the Theorem \ref{th:single_conv} are true, i.e. each problem can be solved by IAGS.
+  Then solving all of the \(q\) problems by MIAGS will
+  generate \(q\) infinite sequences \(\{y^k_i\},\:1\leqslant i\leqslant q\), such that
+  \begin{displaymath}
+    \varphi_i(\overline{y_i})=\inf\{ \varphi(y^k_i): g^i_j(y^k_i)\leqslant 0,1\leqslant j\leqslant m_i, k=1,2,\dots\}=\varphi_i(y^*_i).
+  \end{displaymath}
 \end{theorem}
 \begin{proof}
   Let us consider two random problems from the set (\ref{eq:many_problems})
@@ -518,12 +523,17 @@ each consisting of an objective function and two constraints generated by \(F_{G
 \cite{grishaginClass} generator or GKLS \cite{Gaviano2003} one Are distributed.
 GKLS \cite{Gaviano2003} allows obtaining the functions of predefined dimensionality and
 with predefined number of global optimums.
-In combination with GCGen, two sets of 100 problems each of the dimensionalities 2 and 3
-were generated.
-Each problem had two constraints.
-Also, in order to demonstrate the properties of the method to be preserved at essentially
-different properties of the problems, a mixed class consisting of 50 problems with
-two-dimensional GKLS functions and 50 problems with \(F_{GR}\) ones was generated.
+In combination with GCGen, the following sets of problems were generated:
+\begin{itemize}
+  \item 100 2-dimensional problems with two constraints;
+  \item 100 3-dimensional problems with two constraints
+  \item 20 4-dimensional problems with two constraints;
+  \item a mixed class consisting of 50 problems with
+  two-dimensional GKLS functions and 50 problems with \(F_{GR}\).
+  This set is generated in order to demonstrate the properties of the method to be preserved at essentially
+  different properties of the problems.
+\end{itemize}
+
 Examples of contour plots of the considered problems are presented in Fig. \ref{fig:isolines}.
 The feasible domain is highlighted by color.
 
@@ -560,18 +570,18 @@ Intel Core i7-7800X, 64GB RAM, Ubuntu 16.04 OS, GCC 5.5 compiler.
 
 \subsection{Result of solving the generated problems}
 
-The results of solving the test problems by the sequential and parallel versions of the modified
-IAGS for solving the sets of problems are presented in Table~\ref{tab:speedup}.
+The results of solving the test problems by the sequential and parallel versions of the
+MIAGS are presented in Table~\ref{tab:speedup}.
 For all two-dimensional classes of problems, the parameter \(r=4.7\).
-In the case of the three-dimensional problems, \(r=4.7\) and also to improve the convergence speed
+In the case of the three and four-dimensional problems, \(r=4.7\) and also to improve the convergence speed
 \(\varepsilon\)-reservation technique from \cite{Strongin2000} Chapter 8.3 with
 \(\varepsilon=0.1\) has been employed.
 In all experiments, an additional computational load was introduced into the objective function
 and constraints so that the time of a single call of a problem function was equal to
 approximately 1 ms.
 
-One can see from Table \ref{tab:speedup} that the speedup in the iterations \(S_i\) increased
-linearly with increasing number of threads \(p\) whereas the speedup in time \(S_t\) increased
+One can see from Table \ref{tab:speedup} that the speedup in the iterations \(S_i=\frac{iters(p=1)}{iters(p=i)}\) increased
+linearly with increasing number of threads \(p\) whereas the speedup in time \(S_t=\frac{time(p=1)}{time(p=i)}\) increased
 not so fast that points to a non-ideal implementation of the algorithm.
 One can increase the actual speedup, the upper limit for which is \(S_i\) by the optimization of
 the interaction between the copies of IAGS. It is planned to do in the course of future work.
@@ -612,12 +622,11 @@ the interaction between the copies of IAGS. It is planned to do in the course of
   \end{tabular}
 \end{table}
 
-In order to demonstrate the uniform convergence, all test problems have been solved by IAGS
-in the regime of solving separate problems as well.
+In order to demonstrate the uniform convergence of MIAGS, all test problems have been solved by IAGS as well.
 Fig. \ref{fig:devs_mixed} presents the plots of mean and maximum distances from the actual
 optima to the current estimates of these ones when solving a series of problems generated by
 two different generators separately (solid line) and together (dashed line).
-In spite of an essential differences in the structure of problems, the modified IAGS decreased
+In spite of an essential differences in the structure of problems, the MIAGS decreased
 the maximum deviations of the estimates from the optima as well as the mean ones much faster.
 It evidences the uniform convergence over the whole set of problems being solved all together.
 At that, in the case of the sequential solving of the problems, the magnitude \(D_{max}\) takes
@@ -680,7 +689,7 @@ The set of auxiliary scalar problems was solved by two methods:
 \begin{itemize}
   \item each problem was solved separately using IAGS with a preset limit of 25 trials. This way,
 the computational resources were distributed among the problems uniformly;
-  \item all problems are solved simultaneously using generalized IAGS with a preset limit of
+  \item all problems are solved simultaneously using MIAGS with a preset limit of
 2500 trials.
 \end{itemize}
 In both cases, the parameter \(r=4\).
@@ -689,7 +698,7 @@ In both cases, the parameter \(r=4\).
     \centering
     \subfloat[IAGS, separate solving of the problems]{
     \label{fig:mco_pareto_1} {\includegraphics[width=.5\textwidth]{pic/single_mco.pdf}}}
-    \subfloat[IAGS for the set of problems]{
+    \subfloat[MIAGS for the set of problems]{
     \label{fig:mco_pareto_2} {\includegraphics[width=.5\textwidth]{pic/multi_mco.pdf}}}
     \caption{Numerical estimates of Pareto set in the problem (\ref{eq:mco_probem}), obtained
 after 2500 trials}
