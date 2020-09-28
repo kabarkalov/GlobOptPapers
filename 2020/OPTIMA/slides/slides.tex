@@ -86,32 +86,32 @@ for solving a set of constrained global optimization problems}
 
 \begin{frame}
   \frametitle{Problem statement}
-  Далее будем интересоваться решением серии из \(q\) задач глобальной оптимизации с нелинейными ограничениями:
+  Let's consider a set of \(q\) global optimization problems with nonlinear constraints:
   \begin{displaymath}
     \min\left\{\varphi_1(y), y\in D_1 \right\}, \min\left\{\varphi_2(y), y\in D_2\right\},..., \min\left\{\varphi_q(y), y\in D_q\right\}.
   \end{displaymath}
-  Подобные серии задач могут возникнуть, например, в следующих случаях:
+  For an instance, such sets of problems can arise in the following cases:
   \begin{itemize}
-    \item задача глобальной оптимизации с дискретным параметром;
-    \item  решение задачи многокритериальной оптимизации методом свертки критериев.
+    \item continuous global optimization problem with a discrete parameter which takes a narrow range of values;
+    \item a set of problems, obtained after scalarization of a multi-objective problem.
   \end{itemize}
-\textbf{Возможные методы решения}:
+\textbf{Possible approaches}:
   \begin{itemize}
-    \item решать каждую задачу независимо;
-    \item разработать метод оптимизации, который решает все задачи из множества в совокупности, в каждый
-    момент времени приоретизируюя одну из них.
+    \item solve each problem independently;
+    \item develop an optimiaztion method, which solves all the problems "simultaneously", at each moment of time
+    prioritizing one of the problems.
   \end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{Dimension reduction}
   \begin{center}
-  Кривая Пеано \(y(x)\) позволяет уменьшить размерность многомерного пространства до 1:
+  Peano-type curve \(y(x)\) allows to reduce the dimension of the original problem:
   \begin{gather}
     D_e=\lbrace y\in \mathbb{R}^N:-2^{-1}\leqslant y_i\leqslant 2^{-1},1\leqslant i\leqslant N\rbrace=\{y(x):0\leqslant x\leqslant 1\} \nonumber \\
     \min\{\varphi(y): y\in D\}=\min\{\varphi(y(x)): x\in [0,1]\} \nonumber
   \end{gather}
-  \(y(x)\) является негладкой кривой, отображающей отрезок \([0,1]\) на гиперкуб \(D_e\).
+  \(y(x)\) is non-smooth function which continuously maps the segment \([0,1]\) to the hypercube \(D_e\).
   \begin{figure}[ht]
     \includegraphics[width=.35\textwidth]{peano3d.png}
     \includegraphics[width=.35\textwidth]{peano2d.png}
@@ -120,54 +120,57 @@ for solving a set of constrained global optimization problems}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Алгоритм глобальной оптимизации}
-  Метод оптимизации генерирует последовательность точек \(\{x_k:x_k\in[a,b]\}\) и состоит в выполнении следующих шагов:
+  \frametitle{Univariate Algorithm of Global Search}
+  Optimization method generates search sequence \(\{x_k:x_k\in[a,b]\}\) and consists of the following steps:
   \begin{enumerate}
     \setlength{\itemindent}{.1in}
-    \item[Шаг 1.] Упорядочить поисковую информацию (одномерные точки) по возрастанию.
-    \item[Шаг 2.] Для каждого интервала \((x_{i-1}, x_i)\) вычислить величину \(R(i)\), называемую характеристикой.
-    \item[Шаг 3.] Выбрать интервал \((x_{t-1}, x_{t})\) с наибольшей характеристикой и
-    провести испытание (вычислить органичения и целевую функцию) в точке \(x^{k+1}\), выбранной с помощью решающего правила \(d\):
+    \item[Step 1.] Sort the search information (one-dimensional points) in increasing order.
+    \item[Step 2.] For each interval \((x_{i-1}, x_i)\) compute quantity \(R(i)\), called characteristic.
+    \item[Step 3.] Choose an interval with the greatest characteristic, \((x_{t-1}, x_{t})\), and
+    make a trial (compute the constraints and objective) at the point \(x^{k+1}\), chosen according with decision rule \(d\):
     \begin{displaymath}
       x^{k+1}=d(t)\in (x_{t-1}, x_{t})
     \end{displaymath}
-    \item[Шаг 4.] Если \(x_{t}-x_{t-1}<\varepsilon\), остановить метод.
+    \item[Step 4.] If \(x_{t}-x_{t-1}<\varepsilon\) stop the method.
   \end{enumerate}
-  \textit{\footnotesize	{Детальное описание метода: Strongin R.G., Sergeyev Ya.D.: Global optimization with non-convex constraints. Sequential and parallel algorithms (2000), Chapter 7}}
+  \textit{\footnotesize	{Detailed description: Strongin R.G., Sergeyev Ya.D.: Global optimization with non-convex constraints. Sequential and parallel algorithms (2000), Chapter 7}}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Алгоритм, решающий множество задач}
-  Модификация метода для решения множества задач:
+  \frametitle{Algorithm for solving a set of problems}
+  The method relies on the previously introduces AGS and consists of the following steps:
   \begin{itemize}
-    \item Создать \(q\) копий характеристического АГО.
-    \item Использовать \(q\) синхронно работающих копий АГО с тем лишь отличием, что на шаге 3 при выборе
-    интервала с наилучшей характеристикой, выбор будет осуществляться из всех интервалов, которые
-    породили на данный момент \(q\) копий АГО.\
-    \item Если наибольшая характеристика соответствует
-    задаче \(i\), то выполняется шаг 3 в копии метода с номером \(i\), а остальные копии метода простаивают.
-    \item Для реализации параллельности в предыдущем пункте можно выбрать \(p\) характеристик и провести
-    испытания в \(p\) задачах одновременно.
+    \item Create \(q\) copies of AGS.
+    \item Run \(q\) synchronously working copies of AGS, but instead of performing Step 3, stop all
+    the methods and select an interval with the highest characteristic among intervals from all the methods.
+    \item If the interval with the highest characteristic belongs to problem i \(i\), execute Step 3 in the \(i^{th}\) copy of AGS.
+    Other copies skip Step 3.
+    \item To implement parallel processing, method picks \(p\) intervals at the previous two steps
+    and performs \(p\) trials simultaneously.
   \end{itemize}
-  Чтобы приведённая схема работала, требуется \textbf{сравнимость характеристик интервалов в разных задачах}.
+  The described method relies to \textbf{comparability of characteristics in different problems}.
 \end{frame}
 
 \begin{frame}
-  \frametitle{Индексная схема учёта ограничений}
-  Вместо исходной задачи рассмотрим следующую задачу без функциональных ограничений:
+  \frametitle{Index method of handling inequality constraints}
+  Instead of the original problems with functional constraints the index scheme considers the following unconstrained problem:
   \begin{displaymath}
     \begin{array}{lr}
       \psi (x^{*})=\min_{x\in [0;1]}\psi (x), \\
-      \psi (x)={\begin{cases}g_{\nu }(x)/H_{\nu }&\nu <M\\(g_{M}(x)-g_{M}^{*})/H_{M}&\nu =M\end{cases}}
+      \psi (x)={\begin{cases}g_{\nu }(x)/H_{\nu }&\nu <M\\(g_{M}(x)-g_{M}^{*})/H_{M}&\nu =M\end{cases}},
     \end{array}
   \end{displaymath}
-  где при \(\nu=m+1\;g_\nu(x)=\varphi(x)\).
+  where if \(\nu=m+1\;,g_\nu(x)=\varphi(x)\).
 
-  При использовании индексной схемы характеристики определяются следующим образом:
+  Characteristics are defined as follows:
   \begin{displaymath}
     R(i)={\begin{cases}\Delta _{i}+{\frac {(z_{i}-z_{i-1})^{2}}{(r_{\nu }\mu _{\nu })^{2}\Delta _{i}}}-2{\frac {z_{i}+z_{i-1}-2z_{\nu }^{*}}{r_{\nu }\mu _{\nu }}}&\nu =\nu (x_{i})=\nu (x_{i-1})\\2\Delta _{i}-4{\frac {z_{i-1}-z_{\nu }^{*}}{r_{\nu }\mu _{\nu }}}&\nu =\nu (x_{i-1})>\nu (x_{i})\\2\Delta _{i}-4{\frac {z_{i}-z_{\nu }^{*}}{r_{\nu }\mu _{\nu }}}&\nu =\nu (x_{i})>\nu (x_{i-1})\end{cases}}
   \end{displaymath}
-  где \(z_i=\psi(x_i)\). Можно показать, что при использовании таких характеристик метод будет выбирать интервалы из всех \(q\) задач, тем самым решая их все, а не только некоторое подмножество задач.
+  where \(z_i=\psi(x_i)\).
+\end{frame}
+
+\begin{frame}
+  \frametitle{Index method of handling inequality constraints}
 \end{frame}
 
 \begin{frame}
