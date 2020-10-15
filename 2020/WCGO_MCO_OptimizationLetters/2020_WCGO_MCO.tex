@@ -193,7 +193,7 @@ For many years, global optimization has been the subject of many scientific stud
 \begin{itemize}
 	\item Since the estimate of the global minimum is an integral characteristic of the optimization problem (the value of the minimized function at the point of the global minimum should be compared with the values of the function at all other points of the search domain), the global search methods should provide at least some degree of coverage of the search domain.
 	\item Due to the ``curse of dimensionality'' reducing computational complexity requires the resulting coverage of the search domain to be heterogeneous (nonuniform), i.e. it must be dense only in the vicinity of globally optimal points.
-	\item Heterogeneous coverages can only be constructed if there are any a priori assumptions about the behavior of the minimized function -- one of the most frequently used forms of such assumptions is the feasibility of the Lipschitz condition (\ref{eq:2}).
+	\item Heterogeneous coverages can only be constructed if there are any a priori assumptions about the behavior of the minimized function -- one of the most frequently used forms of such assumptions is the feasibility of the Lipschitz condition (\ref{eq:3}).
 	\item Construction of heterogeneous coverages of the search domain entails the analysis of a large volume of multidimensional data (points of performed iterations of the global search and values of the minimized function at these points), which significantly increases the complexity and computational cost of the global optimization methods. Such computational complexity in the global optimization is commonly decreased by the dimensionality reduction, for example, using a diagonal extension of one-dimensional algorithms \cite{c22,c45}, the nested optimization scheme \cite{c46,c47,Grishagin2016_1,Grishagin2019}, the Peano space-filling curves \cite{c17,c23}.
 	\item When solving multiple problems of multistage lexicographic multicriteria optimization, global search methods can reduce the complexity of calculations by using search information obtained during the calculations.
 \end{itemize}
@@ -220,7 +220,7 @@ It should be noted that the one-dimensional functions obtained as a result of th
 \begin{equation}\label{eq:13}
 |f_i (y(x'))-f_i (y(x''))| \leq H_i |x'-x''|^{1/N}, x',x''\in [0,1], 1 \leq i \leq s,
 \end{equation}
-where the constants $H_i$ are determined by the ratio $H_i=2L_i\sqrt{N+3}$,  $1 \leq i \leq m$, the values $L_i$ are the Lipschitz constants from (\ref{eq:2}), and $N$ is the dimension of the optimization problem (\ref{eq:1}).
+where the constants $H_i$ are determined by the ratio $H_i=2L_i\sqrt{N+3}$,  $1 \leq i \leq s$, the values $L_i$ are the Lipschitz constants from (\ref{eq:3}), and $N$ is the dimension of the optimization problem (\ref{eq:1}).
 
 Using dimension reduction, the search information $\omega_k$ can be converted from (\ref{eq:11}) to 
 \begin{equation}\label{eq:14}
@@ -228,7 +228,7 @@ A_k=\{(x_i, y(x_i), f_i=f(y(x_i))): 1 \leq i \leq k \},
 \end{equation}
 where, in addition to the reduced representation, the data is arranged in ascending order\footnote{Data ordering is reflected by using a subscript.} of points $x_i$, $1 \leq i \leq k$, that is
 \begin{equation} \label{eq:15}
-x_1 < x_2 < \dots < x_k	
+x_1 < x_2 < \dots < x_k,	
 \end{equation}
 for more efficient execution of global search algorithms.
 
@@ -251,16 +251,16 @@ To reduce the complexity of solving optimization problems with constraints, simp
 
 The proposed approach is based on the original method of separate accounting for constraints developed in the framework of the information-statistical theory of multiextremal optimization \cite{c18}. The key idea of the approach is to construct an integral objective function without constraints, the solution of which also provides a solution to the initial constrained optimization problem (\ref{eq:16}); a more detailed presentation of this method is given below.
 
-To provide uniform calculations, a sequential scheme is applied to obtain values the constraints $g_i(y(x)) \leq 0$, $1 \leq i \leq m$, and the minimized function $\varphi(x)$. According to this scheme, the constraint values are calculated strictly in their order, and the calculations immediately stop when the first violated constraint is detected (the partial computability scheme). The number of constraints, in which the values were calculated, will be referred below as the index $\nu=\nu(x)$, that is
+To provide uniform calculations, a sequential scheme is applied to obtain values the constraints $g_i(x) \leq 0$, $1 \leq i \leq m$, and the minimized function $\varphi(x)$. According to this scheme, the constraint values are calculated strictly in their order, and the calculations immediately stop when the first violated constraint is detected (the partial computability scheme). The number of constraints, in which the values were calculated, will be referred below as the index $\nu=\nu(x)$, that is
 \begin{equation}\label{eq:18}
-\nu(x) : g_\nu(x)>0, g_j(x)\leq 0, 1 \leq j \leq \nu - 1, 1 \leq \nu = \nu(x) \leq m
+\nu(x) : g_\nu(x)>0, g_j(x)\leq 0, 1 \leq j \leq \nu - 1, 1 \leq \nu = \nu(x) \leq m.
 \end{equation}
-(when all the constraints are satisfied, $\nu=m+1$ is assumed). Introducing the index allows determining the integrated function for the problem (\ref{eq:16}) (see Fig. \ref{fig:1},
-{\color{red}  the example was taken from \cite{Book2013}})
+When all the constraints are satisfied, $\nu=m+1$ is assumed. Introducing the index allows determining the integrated function for the problem (\ref{eq:16})
 \begin{equation}\label{eq:19}
-F(x)=g_\nu(x), \nu=\nu(x),
+F(x)=g_\nu(x), \; \nu=\nu(x),
 \end{equation}
-defined and computable everywhere in $[0,1]$. Its value at the point $x\in [0,1]$ is either the value of the left side of the constraint violated at this point (the case when $\nu \leq m$), or the value of the minimized function (the case when $\nu = m + 1$). The process of calculating the value of $F(x)$, $x\in [0,1]$, is completed either as a result of establishing the inequality $g_j(x)>0$, or as a result of reaching the value $\nu(x)=m+1$ (further in the paper, this procedure will be referred to as trial).
+defined and computable everywhere in $[0,1]$ (see Fig.~\ref{fig:1},
+{\color{red}  the example was taken from \cite{Book2013}}). Its value at the point $x\in [0,1]$ is either the value of the left side of the constraint violated at this point (the case when $\nu \leq m$), or the value of the minimized function (the case when $\nu = m + 1$). The process of calculating the value of $F(x)$, $x\in [0,1]$, is completed either as a result of establishing the inequality $g_j(x)>0$, or as a result of reaching the value $\nu(x)=m+1$ (further in the paper, this procedure will be referred to as trial).
 
 \begin{figure}
   \centering
