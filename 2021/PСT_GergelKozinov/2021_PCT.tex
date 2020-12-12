@@ -269,20 +269,78 @@ To assess the efficiency of the parallel algorithms, a large series of computati
 
 
 
+\section{Results of numerical experiments}\label{sec:5}
 
+Numerical experiments were performed on the supercomputers Lobachevsky (University of Nizhni Novgorod), Lomonosov (Moscow State University), MVS-10P (Joint Supercomputer Center of RAS) and supercomputers Endeavor. The numerical results were obtained by using the following computational nodes: 2 Intel Xeon Platinum 8260L, 2.4 GHz, 256 GB RAM (i.e. a total of 48 CPU cores were available on each node). The executable program code was built by using the Intel Parallel Studio XE 2019 software package. The numerical experiments were performed using the Globalizer system \cite{c41}.
 
+The multiextremal optimization algorithms used in the framework of the proposed approach have demonstrated their effectiveness in numerical experiments and have been widely used in solving practical global search problems -- see, for example, \cite{c20,c21,c22,c23}. Below, we present the results of numerical experiments obtained earlier that prove the effectiveness of this approach \cite{c21}. In the experiments, the following bi-criteria test problem proposed in \cite{c42} was solved:
+\begin{equation}\label{eq:27}
+f_1(y)=(y_1-1) y_2^2+1,f_2 (y)=y_2, 0 \leq y_1, y_2 \leq 1.
+\end{equation}
 
+The solution of the MCO problem consisted in constructing a numerical approximation of the Pareto set. To assess the quality of approximation, the completeness and uniformity of the Pareto set coverage was compared using the following two indicators \cite{c42,c43}:
+\begin{itemize}
+	\item The hypervolume index (HV). This indicator evaluates the approximation of the Pareto set in terms of completeness (a higher value corresponds to a more complete coverage of the Pareto domain).
+  \item The distribution uniformity index (DU). This indicator evaluates the uniformity of the Pareto domain coverage (a lower value corresponds to a more uniform coverage of the Pareto domain).
+\end{itemize}
 
+Five multicriteria optimization algorithms were compared in this experiment: the Monte-Carlo (MC) method \cite{c42}, the genetic algorithm SEMO from the PISA library \cite{c42}, the Non-uniform coverage (NUC) method \cite{c42}, the bi-objective Lipschitz optimization (BLO) method \cite{c43}, and the AMMIS method developed by the authors within the framework of the proposed approach. 
 
-\section{S5}\label{sec:5}
+For AMMIS, 50 global optimization problems with different sets of convolution coefficients were solved.  The accuracy of the method $\varepsilon=0.05$ and the reliability parameter $r=3.0$ from (\ref{eq:23}) were used when solving the series of problems. The results of the experiments are presented in full in Table \ref{tab:1}.
 
+\begin{table}[ht]
+\centering
+\caption{Comparison of the efficiency of multicriteria optimization algorithms}
+\label{tab:1}
+\begin{tabular}{cccccc}
+\hline
+Solution method     & MC    & SEMO  & NUC   & BLO   & \textbf{AMMIS} \\ \hline
+Number of method iterations  & 500   & 500   & 515   & 498   & \textbf{370}   \\
+\begin{tabular}[c]{@{}c@{}}Number of points found in the Pareto domain\end{tabular} & 67    & 104   & 29    & 68    & \textbf{100}    \\
+HV index  & 0.300 & 0.312 & 0.306 & 0.308 & \textbf{0.316} \\
+DU index  & 1.277 & 1.116 & 0.210 & 0.175 & \textbf{0.101} \\ \hline
+\end{tabular}
+\end{table}
 
+As revealed in the experiments, the AMMIS algorithm has a noticeable advantage over the multicriteria optimization methods considered here even when solving relatively simple MCO problems.
 
-\cite{c1,c2,c3,c4,c5,c6,c7,c8,c9,c10}
-\cite{c11,c12,c13,c14,c15,c16,c17,c18,c19,c20}
-\cite{c21,c22,c23,c24,c25,c26,c27,c28,c29,c30}
-\cite{c31,c32,c33,c34,c35,c36,c37,c38,c39,c40}
-\cite{c41,c42,c43,c44,c45}
+The results of computational experiments to solve 100 MCOmix problems of the set $\mathbb{F}_T$ from (10) are given below. Each problem in the set $\mathbb{F}_T$ contained two criteria. Each criterion was formed using the functions obtained by the GKLS generator \cite{c44}, where some parameters were discrete \cite{c45}. To generate MCOmix problems, 4 continuous parameters $y$ from (\ref{eq:2}) and 5 discrete parameters $u$ from (\ref{eq:3}) were used, each of them only having two values (i.e., $n=4$, $m=5$, $l=32$).
+ 
+To solve each MCOmix problem, 50 uniformly distributed values of convolution coefficients $\lambda \in \Lambda$ from (\ref{eq:8}) were used. To estimate the values of HV and DU efficiency indicators, an approximation of the Pareto domain was calculated for each MCOmix problem  using a uniform grid in the domain of variable values $D\times U$ from (\ref{eq:2})-(\ref{eq:3}). The PAMMIS algorithm was used for the following parameter values: accuracy $\varepsilon=0.05$ from (\ref{eq:26}) and reliability $r=5.6$ (the $r$ parameter is used in PAMMIS to construct estimates of the H{\"o}lder constant $H$ from (\ref{eq:16})). 
+
+Table \ref{tab:2} gives the results of numerical experiments, averaged by the number of MCOmix problems solved. The first column shows the number of cores used. The second column contains information on the average number of trials (computation of criteria values) performed during the global search. The third column shows the resulting speedup (reduction in the number of trials) when using parallel computations. The last two columns contain the values of HV and DU indicators.
+
+\begin{table}[ht]
+\centering
+\caption{Efficiency of the PAMMIS parallel algorithm in solving MCOmix problems}
+\label{tab:2}
+\begin{tabular}{cccccc}
+\hline
+Number of computing cores    & Number of iterations    & Speedup  & DU index&   & HV index  \\\hline
+\multicolumn{6}{c}{The   Pareto domain estimate obtained by exhaustive search}        \\\hline
+48                           & 1 706 667               & -        & 20,6 & & 29 784,9  \\\hline
+\multicolumn{6}{c}{The Pareto    domain  estimate obtained using the   PAMMIS method} \\\hline
+1                            & 86 261,6                & 1,0      & 13,8 & & 30 212,3  \\
+6                            & 15 406,2                & 5,6      & 14,4 & & 30 317,6  \\
+12                           & 6 726,1                 & 12,8     & 16,2 & & 30 248,3  \\
+18                           & 5 972,7                 & 14,4     & 14,3 & & 30 551,1  \\
+24                           & 3 657,4                 & 23,6     & 13,9 & & 30 092,3  \\
+30                           & 3 162,3                 & 27,3     & 14,9 & & 30 443,9  \\
+36                           & 2 888,7                 & 29,9     & 14,6 & & 30 528,7  \\
+42                           & 2 028,8                 & 42,5     & 15,6 & & 30 046,1  \\
+48                           & 1 767,6                 & 48,8     & 15,3 & & 30 255,5 \\ \hline
+\end{tabular}
+\end{table}
+
+The results of the computational experiments show that the PAMMIS algorithm is scalable as the  speedup of parallel computations increases almost linearly with the number of computing cores used. The obtained values of HV and DU indicators show that the Pareto set estimate using the PAMMIS algorithm is calculated with a greater accuracy and requires a significantly smaller number of trials compared to the results obtained using uniform grids in the domain of variable values $D \times U$.
+
+\section{Conclusion}
+
+In this paper, a new approach is proposed to solving computationally intensive optimization problems, where some variable parameters can only take on discrete values (MCOmix). It is also assumed that the optimality criteria may be multiextremal, and the computing of criterion values may involve a large amount of calculations. Due to the high computational complexity of this class of problems, parallel solution methods need to be developed, relying on the efficient use of high-performance computing systems.
+
+In the framework of the proposed approach, solution of mixed-integer optimization problems is reduced to solving a family of global search optimization problems that use only continuous parameters. All problems of the family are solved simultaneously in the time division mode, where the optimization problem for the next global search iteration is selected adaptively taking into account the search information obtained in the course of computations. The results of numerical experiments prove that  this approach can significantly reduce computational intensity when solving MCOmix problems in a multistage procedure.
+
+In conclusion, it may be noted that the proposed approach is quite promising and requires continued investigations. First of all, it is necessary to continue numerical experiments to solve multicriteria mixed optimization problems with a greater number of efficiency criteria and having a greater dimensionality. The possibility of organizing parallel computations using high-performance systems with distributed memory should be also evaluated.
 
 
 
