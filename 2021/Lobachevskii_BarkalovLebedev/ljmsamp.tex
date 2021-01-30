@@ -15,14 +15,17 @@ centertags]%
 {revtex4}
 \usepackage{ljm}
 
+
+
+
 \begin{document}
 
-\titlerunning{Short form of the title} % for running heads
+\titlerunning{Parallel global search algorithm with local tuning} % for running heads
 %\authorrunning{First-Author at al.} % for running heads
 \authorrunning{Barkalov, Lebedev} % for running heads
 
-\title{Title of the Article,\\
-Broken into Lines}
+\title{Parallel Global Search Algorithm with Local Tuning\\ 
+for Solving Mixed-Integer Global Optimization Problems}
 % Splitting into lines is performed by the command \\
 % The title is written in accordance with the rules of capitalization.
 
@@ -58,281 +61,374 @@ for \ljm. You shouldn't use formulas and citations in the abstract.
 
 \section{Introduction}
 
-To prepare your manuscript, use REV\TeX{} package. The latest version can be downloaded at the project homepage \cite{RTeXHome}.
-The process of processing an article using REV\TeX{} is described in detail in the package manuals \cite{RTeX}. Great help in resolving technical
-issues on \TeX{} can be found in books \cite{texbook,L,GG,KD}.
-Use the ``House Style Guide: Version 2.0'' \cite{hsg} for more help on how to format article.
+В работе рассматриваются global optimization problems и методы их решения. Задачи глобальной оптимизации обладают значительной вычислительной трудоемкостью, т.к. глобальный оптимум является интегральной характеристикой решаемой задачи и требует исследования всей области поиска. Как результат, поиск глобального оптимума сводится к построению некоторого покрытия (вообще говоря, неравномерного) в области параметров. Особый интерес представляют задачи, в которых часть параметров может принимать лишь целочисленные значения (mixed-integer global optimization problems), т.к. для них сложнее построить оценки оптимума по сравнению с непрерывными задачами.
 
-\section{First level Heading\protect\\
-broken into lines}
+Ситуация, когда некоторые из параметров характеризуются дискретностью (в частности, целочисленностью), является широко распространенной в прикладных оптимизационных задачах. При этом целочисленные параметры имеют, как правило, небольшое число значений и могут определять, например, марку используемого материала, вариант типовой компоновки деталей и т.п.
 
-There are three levels of Headings that are set by the commands
-\verb|\section|, \verb|\subsection|, and \verb|\subsubsection|
-(Chapter, subchapter, subsection). Split header into lines
-is done with the command \verb+\protect\\+.
-Second level heading as the title of article is written in accordance with the rules of capitalization \cite{cap}.
+Методам решения mixed-integer problems посвящена обширная литература (см., например, обзоры \cite{Burer,Boukouvala}). Известные детерминированные методы решения задач данного класса основаны, как правило, на подходах Branch-and-Bound \cite{Belotti} or Branch-and-Reduce \cite{Vigerske}. Также известен ряд метаэвристических и генетических алгоритмов, так или иначе основанных на идеях случайного поиска \cite{Deep,Schluter}.
 
-\subsection{Second Level Heading}
+%Ссылки на параллельные генетические алгоритмы - простота распараллеливания
+Вопросам распараллеливания генетических алгоритмов посвящены тысячи статей, т.к. данный класс алгоритмов допускает естественное распараллеливание. 
 
-References in the text are by using the commands
-\verb+\cite{#1}+ or \verb+\onlinecite{#1}+. Label \verb+#1+
-can have a name consisting of both letters and numbers. In
-the bibliography section this link also has a label \verb+#1+ and starts the command \verb+\bibitem{#1}+.
+%Распараллеливание детерминированных алгоритмов - сложная задача
 
-With the command \verb+\cite{texbook}+ get a reference \cite{texbook},
-if you need to refer to several sources:
-\cite{texbook,L}, the curly brackets indicate references
-separated by commas: \verb+\cite{texbook,L}+. When
-use the command \verb|\onlinecite{#1}| link will not be
-in brackets: see~\onlinecite{texbook}, p.~8.
-If there is a link to the sources with serial numbers,
-e.g. [1,2,3,6,7,8], then print automatically following links will take
-[1--3,6--8].
+Отметим ключевые моменты, специфичные для построения детерминированных параллельных алгоритмов решения задач глобальной оптимизации. Организовать распараллеливание процесса поиска можно несколькими способами.
+Во-первых, можно распараллеливать процесс проведения одного испытания, т.е. вычисления функций задачи в одной точке области поиска. Данный путь будет давать ускорение, но является специфичным для каждой конкретной решаемой задачи.
+Во-вторых, можно распараллелить реализацию вычислительных правил алгоритма, обеспечивающих выбор точки очередного испытания. В этом случае способ распараллеливания будет зависеть от конкретного класса алгоритмов и, кроме того, часто эти правила достаточно просты и распараллеливать их нецелесообразно.
+В-третьих, можно организовать параллельное выполнение нескольких испытаний на одной итерации поиска. Этот подход и будет использоваться в данной работе, т.к. он характеризуется эффективностью (распараллеливается именно та часть вычислительного процесса, в которой выполняется основной объем вычислений) и общностью (применим для широкого класса алгоритмов глобальной оптимизации).
 
-\section{Standalone formulae}
+В данной работе нами предложен новый parallel метод решения mixed-integer problems, основанный на information-statistical approach к решению задач глобальной оптимизации \cite{Strongin2000,Strongin2013}. 
 
-\subsection{Another second-level heading}
+В рамках данного подхода 
+\begin{itemize}
+	\item 
+	решение многомерных задач сводится  к решению эквивалентных им одномерных, cоответствующая редукция основана на использовании space-filling curves;
+	\item 
+	при решении constrained optimization problems каждое ограничение учитывается и обрабатывается отдельно, штрафные функции не используются;
+	\item
+	%локальное ускорение
+	\item 
+	распараллеливание процесса поиска осуществляется за счет одновременного вычисления на каждой итерации нескольких значений целевой функции в разных точках search domain.	
+\end{itemize}
 
-In \LaTeX, there are many ways to embed standalone formulas
-on the page and align them. By default, formulas always
-centered.
+Текст статьи, отражающей результаты проведенного исследования, построен следующим образом. 
+В Section 2 дано краткое описание описание схемы редукции размерности с использованием space-filling curves, а также описана индексная схема учета ограничений. Здесь же приведена формулировка параллельного индексного алгоритма для решения задач непрерывной глобальной оптимизации.
+В Section 3 изложен способ учета локальных свойств функций задачи, позволяющий ускорить сходимость алгоритма.
+В Section 4 предложен подход к обобщению параллельного индексного алгоритма с целью решения mixed-integer problems. Приведен способ, позволяющий свести решение mixed-integer problem к решению набора задач непрерывной оптимизации, которое может выполняться параллельно. 
+Section 5 содержит результаты численных экспериментов. Здесь производится сравнение последовательной версии алгоритма с известными аналогами, а также показана эффективность параллельной версии алгоритма с локальной настройкой при решении серии multiextremal mixed-integer problem.  
+Section 6 concludes the paper.
 
-\subsubsection{One-line formulas}
 
-Below are examples of one-line equations:
-\begin{eqnarray}
-\chi_+(p)\alt{\bf [}2|{\bf p}|(|{\bf p}|+p_z){\bf ]}^{-1/2}
-\left(
-\begin{array}{c}
-|{\bf p}|+p_z\\
-px+ip_y
-\end{array}\right)\;,
-\\
-\left\{%
-\openone234567890abc123\alpha\beta\gamma\delta1234556\alpha\beta
-\frac{1\sum^{a}_{b}}{A^2}%
-\right\}%
-\label{one}.
+
+\section{Parallel global optimization algorithm and dimensionality reduction}
+
+Рассмотрим задачу глобальной оптимизации вида
+\begin{eqnarray}\label{problem}
+&\varphi(y^\ast)=\min{\left\{\varphi(y):y\in D, \; g_i(y)\leq 0, \; 1 \leq i \leq m\right\}},\\
+&D=\left\{y\in R^N: a_j\leq y_j \leq b_j, 1\leq j \leq N \right\}.\label{D}
 \end{eqnarray}
-The second formula has the number~(\ref{one}), which is set by command
-\verb|\label{one}|. The first formula is assigned a number~(1), but
-it cannot be applied with the help of automatic links,
-as it has no label.
+Будем предполагать, что objective function $\varphi(y)$ (hereafter denoted by $g_{m+1}(y)$) and the left-hand sides $g_i(y), \; 1\leq i \leq m,$ of the constraints satisfy the Lipschitz condition 
+\[
+\left|g_i(y_1)-g_i(y_2)\right|\leq L_i\left\|y_1-y_2\right\|, \;1\leq i\leq m+1, \; y_1,y_2 \in D,\;
+\]
+with a priori unknown constants $L_i, \; 1 \leq i \leq m+1$. 
 
-If the formula number is not necessary, use the environment
-\verb+\[+, \verb+\]+, (or \$...\$) which obtained the following formula:
-\[g^+g^+ \rightarrow g^+g^+g^+g^+ \dots ~,~~q^+q^+\rightarrow
-q^+g^+g^+ \dots ~. \] % You also can use the dollar sign ($).
+%Также будем предполагать, что функции задачи $g_i(y)$ определены и вычислимы только в тех точках обалсти $y \in D$, в которых выполняются ограничения
+%\begin{equation}\label{g_k}
+%g_k(y) \leq 0, \; 1 \leq k < i.
+%\end{equation}
 
-\subsubsection{Multiline formulae}
+Используя отображения типа Peano-Hilbert curve $y(x)$, отображающие отрезок $[0,1]$ на $N$-dimensional domain (\ref{D}),
+можно свести многомерную задачу условной минимизации в области $D$ к одномерной задаче условной минимизации на отрезке $[0,1]$
+\begin{equation}\label{problem1}
+\varphi(y(x^\ast))=\min \left\{\varphi(y(x)): x \in [0,1], \; g_i(y(x))\leq 0, \; 1 \leq i \leq m\right\}.
+\end{equation}
 
-Multiline formulas are typed using the environment
-eqnarray:
-\begin{eqnarray}
-{\cal M}=&&ig_Z^2(4E_1E_2)^{1/2}(l_i^2)^{-1}
-\delta_{\sigma_1,-\sigma_2}
-(g_{\sigma_2}^e)^2\chi_{-\sigma_2}(p_2)\nonumber\\
-&&\times
-[\epsilon_jl_i\epsilon_i]_{\sigma_1}\chi_{\sigma_1}(p_1),
+Методы для построения чиcленных аппроксимаций Peano-Hilbert curve $y(x)$ (называемых \textit{evolvent}) рассмотрены в \cite{Strongin2013}. These evolvents are fractals generated by an iterative process, that fill in the hypercube $D$ with accuracy $2^{-M}$, where integer $M>0$ is the evolvent construction parameter. 
+Примеры разверток с разными значениями $M$  для размерности $N=3$ приведены на Fig.~\ref{evolvents}.
+
+\begin{figure}
+\begin{minipage}{0.49\linewidth}
+\center{\includegraphics[width=1.0\linewidth]{fig1b.JPG} \\ (a)}
+\end{minipage}
+\begin{minipage}{0.49\linewidth}
+\center{\includegraphics[width=1.0\linewidth]{fig1c.JPG} \\ (b)}
+\end{minipage}
+\caption{Evolvents in three dimensions with (a) $M=3$ and (b) $M=4$}
+\label{evolvents}
+\end{figure}
+
+Задачу (\ref{problem1}) мы будем рассматривать в предположении, что функции $g_i(y(x))$ определены и вычислимы лишь на соответствующих множествах 
+\[
+Q_1=[0,1], \; Q_{i+1}=\left\{x \in Q_i : g_i(y(x)) \leq 0 \right\}, \; 1 \leq i \leq m.
+\]
+
+Эти условия позволяют ввести классификацию точек $x \in [0,1]$ в соответствии с числом $\nu (x)$ ограничений, вычисленных в этой точке. The \textit{index} $\nu(x)$ также можно определить с помощью условий
+\begin{equation}\label{nu}
+g_i(y(x)) \leq 0, \; 1 \leq i < \nu, \; g_\nu(y(x))>0,
+\end{equation}
+где последнее неравенство исключается из рассмотрения, если $\nu=m+1$.
+
+Указанная схема редукции размерности сопоставляет многомерной задаче с липшицевой минимизируемой функцией и липшицевыми ограничениями одномерную задачу, в которой соответствующие функции удовлетворяют uniform H{\"o}lder condition (see \cite{Strongin2013}), i.e.,
+\[
+\left|g_i(y(x_1))-g_i (y(x_2))\right| \leq H_i \left|x_1-x_2 \right|^{1/N}, \; x_1,x_2\in [0,1], \; 
+1\leq i \leq m+1,
+\]
+где $N$ есть размерность исходной многомерной задачи, а H{\"o}lder coefficients $H_i$ связаны с Lipschitz constants $L_i$ исходной задачи соотношениями $H_i \leq 2L_i \sqrt{N+3}$.
+
+Таким образом, \textit{a trial} в точке $x^k \in [0,1]$, выполненное на $k$-й итерации алгоритма, будет состоять из следующих действий:
+\begin{itemize}
+	\item определить \textit{image} $y^k=y(x^k)$ в соотвествии с отображением $y(x)$;
+	\item вычислить значения $g_1(y^k),..., g_\nu(y^k),$ where $\nu = \nu(x^k)$ is from (\ref{nu}). 
+\end{itemize}
+Пару значений 
+\begin{equation} \label{trial_result}
+ \{ \nu=\nu(x^k), \; z^k=g_\nu(y(x^k)) \} 
+\end{equation}
+порождаемую испытанием в точке $x^k \in [0,1]$, будем называть \textit{trial outcome}.
+
+%эффективный алгоритм
+%исходная информация - параллельность
+Пусть в нашем распоряжении имеется $p$ вычислительных элементов (ядер или процессоров), которые будут использоваться для параллельного проведения $p$ испытаний одновременно. На первой итерации метода $p$ испытаний проводятся параллельно в произвольных различных точках $x^i\in(0,1)$, $1\leq i \leq p$.
+
+Пусть выполнено $n\geq 1$  итераций метода, в процессе которых были проведены испытания в $k=np$ точках $x^i, 1\leq i \leq k$. Тогда точки $x^{k+1},...,x^{k+p}$  поисковых испытаний $(n+1)$-ой итерации определяются в соответствии со следующими правилами.
+
+%Проверить перевод!
+\begin{enumerate}
+\item 
+Перенумеровать точки $x^1,...,x^k$ предшествующих испытаний нижними индексами в порядке увеличения значений координаты
+\begin{equation}\label{Eq:17}
+0=x_0<x_1<...<x_i<...<x_k<x_{k+1}=1,
+\end{equation}
+и сопоставить им значения $z_i=g_\nu(y(x_i))$, $\nu=\nu(x_i)$, $1 \leq i \leq k$, из (\ref{trial_result}), вычисленные в этих точках; точки $x_0=0$ and $x_{k+1}=1$ введены дополнительно; значения $z_0$ и $z_{k+1}$ не заданы.
+\item
+Провести классификацию номеров  $i,1\leq i \leq k$, точек испытаний из  (\ref{Eq:17}) по числу ограничений задачи, выполняющихся в этих точках, путем построения множеств
+\begin{equation}\label{Eq:18}
+I_\nu = \left\{i: 1 \leq i \leq k,\ \nu = \nu(x_i)\right\},\ 1 \leq \nu \leq m+1,
+\end{equation}
+содержащих номера всех точек  $x_i,1\leq i \leq k$, имеющих индексы, равные одному и тому же значению $\nu$. Граничные точки $x_0=0$ and $x_{k+1}=1$ интерпретируются как имеющие нулевые индексы, и им сопоставляется дополнительное множество $I_0={0,k+1}$. 
+
+Определить максимальное значение индекса
+\begin{equation}\label{Eq:19}
+V=\max \left\{\nu = \nu(x_i), \ 1\leq i \leq k\right\}.
+\end{equation}
+\item
+For all values of $\nu, \ 1\leq \nu \leq m+1$, calculate the values  
+\begin{equation}\label{Eq:20}
+\mu_\nu = \max \left\{ \frac{\left|z_i-z_j\right|}{\left(x_i-x_j\right)^{1/N}} : i,j \in I_\nu, j<i\right\}.
+\end{equation}
+Если множество  $I_\nu$ содержит менее двух элементов или если $\mu_\nu$ from (\ref{Eq:20}) оказывается равным нулю, то использовать значение $\mu_\nu=1$.
+\item
+Для всех непустых множеств  $I_\nu$, $1 \leq \nu \leq m+1$, вычислить значения
+\begin{equation}\label{Eq:21}
+  z^\ast_\nu =  
+   \begin{cases}
+    -\epsilon_\nu,  \nu < V, \\
+    \min{\left\{g_\nu(x_i):i\in I_\nu\right\}}, \nu = V,
+   \end{cases}
+\end{equation}
+где $V$ является максимальным значением индекса, а вектор
+\begin{equation}\label{Eq:22}
+\epsilon _R=\left(\epsilon_1,...,\epsilon_m\right),
+\end{equation}
+с положительными компонентами (называемый также \textit{reserve vector}) является параметром алгоритма.
+\item
+Для каждого интервала  $(x_{i-1},x_i)$,$1 \leq i \leq k+1$, вычислить \textit{характеристику} $R(i)$: 
+\begin{eqnarray}\label{R}
+&R(i)=\Delta_i+ \frac{(z_i-z_{i-1})^2}{(r_\nu\mu_\nu)^2\Delta_i}-2\frac{z_i+z_{i-1}-2z^\ast_\nu}{r_\nu\mu_\nu},\;\; \nu=\nu(x_{i-1})=\nu(x_i),\nonumber \\
+&R(i)= 2\Delta_i-4\frac{z_i-z^\ast_\nu}{r_\nu\mu_\nu},\;\; \nu(x_{i-1})<\nu(x_i)=\nu,\\
+&R(i)= 2\Delta_i-4\frac{z_{i-1}-z^\ast_\nu}{r_\nu\mu_\nu},\;\; \nu = \nu(x_{i-1})>\nu(x_i).\nonumber
 \end{eqnarray}
-\begin{eqnarray}
-\sum \vert M^{\rm viol}_g \vert ^2&=&g^{2n-4}_S(Q^2)~N^{n-2}
-(N^2-1)\nonumber \\
- & &\times \left( \sum_{i<j}\right)
-\sum_{\rm perm}
-\frac{1}{S_{12}}
-\frac{1}{S_{12}}
-\sum_\tau c^f_\tau~.
-\end{eqnarray}
-If the formula number is not necessary, then at the end of the row in front of the sign
-\verb|\\| you need to put the command \verb|\nonumber|. Never
-use one line command \verb|\nonumber| and
-\verb|\label{#1}|, as this may cause error in automatic
-the numbering of references.
-
-If you want to gain a few formulas without number,
-use the eqnarray environment* (the asterisk means the abolition
-numbering):
+где $\Delta_i=(x_i-x_{i-1})^{1/N}$, а значения $r_\nu>1, 1\leq\nu\leq m+1$, являются параметрами алгоритма.
+\item
+Упорядочить характеристики $R(i)$, $1\leq i \leq k+1$, по убыванию  	
+\begin{equation}\label{Eq:23}
+R(t_1)\geq R(t_2)\geq ... \geq R(t_{k})\geq R(t_{k+1})
+\end{equation}
+и выбрать $p$ интервалов с номерами $t_j, 1\leq j \leq p$, которым соответствуют наибольшие характеристики.
+\item
+Провести параллельно $p$ новых испытаний в точках $x^{k+j}, 1 \leq j \leq p$, вычисленных по формулам
 \begin{eqnarray*}
-\sum \vert M^{\rm viol}_g \vert ^2&=&g^{2n-4}_S(Q^2)~N^{n-2}
-(N^2-1)\\
-& &\times \left( \sum_{i<j}\right)
-\left(
-\sum_{\rm perm}\frac{1}{S_{12}S_{23}S_{n1}}
-\right)
-\frac{1}{S_{12}}~.
-\end{eqnarray*}
-To add numbers to the formula manually, use the command
-\verb+\tag{#1}+, where \verb+#1+~--- the desired equation number.
-Here how is the formula with the number of~(\ref{eq:mynum}):
-\begin{equation}
-g^+g^+ \rightarrow g^+g^+g^+g^+ \dots ~,~~q^+q^+\rightarrow
-q^+g^+g^+ \dots ~. \tag{2.6$'$}\label{eq:mynum}
-\end{equation}
+& x^{k+j}=\frac{x_{t_j}+x_{t_j-1}}{2}, \; \nu(x_{t_j-1})\neq \nu(x_{t_j}), \\
+& x^{k+j}=\frac{x_{t_j}+x_{t_j-1}}{2}- \frac{\mathrm{sign}(z_{t_j}-z_{t_j-1})}{2r_\nu}\left[\frac{\left|z_{t_j}-z_{t_j-1}\right|}{\mu_\nu}\right]^N, \; \nu(x_{t_j-1})=\nu(x_{t_j})=\nu. \\
+\end{eqnarray*} 
 
-When you enable single-line and multi-line formulas are surrounded by
-subequations, each formula `numbered" with a letter,
-as shown in equations~(\ref{mlett:1}) and (\ref{mlett:2}):
-\begin{subequations}
-\label{generallabel}
-\begin{equation}
-\left\{
-abc123456abcdef\alpha\beta\gamma\delta1234556\alpha\beta
-\frac{1\sum^{a}_{b}}{A^2}
-\right\},\label{mlett:1}
-\end{equation}
-\begin{eqnarray}
-{\cal M}=&&ig_Z^2(4E_1E_2)^{1/2}(l_i^2)^{-1}
-(g_{\sigma_2}^e)^2\chi_{-\sigma_2}(p_2)\nonumber\\
-&&\times
-[\epsilon_i]_{\sigma_1}\chi_{\sigma_1}(p_1).\label{mlett:2}
+\end{enumerate}
+
+Алгоритм прекращает работу, если по крайней мере для одного из номеров $t_j, 1\leq j \leq p$ выполняется условие $\Delta_{t_j}\leq \epsilon$; здесь $\epsilon>0$ есть заданная точность решения задачи.
+
+A detailed description of the algorithm convergence theory is presented in \cite{Strongin2000,Strongin2013}.
+
+%комментарий по поводу r и eps-резервов
+
+%комментарий про различные схемы распараллеливания - со ссылками на наши работы
+
+
+\section{Local tuning for global optimization algorithm}
+
+Одно из важных свойств рассматривамых задач заключается в том, что во многих случаях поведение функций в задаче многоэкстремальной оптимизации является неоднородным в разных подобластях поиска. В некоторых подобластях значения функций могут изменяться достаточно быстро (что будет соответствовать большим значениям константы Липшица в таких подобластях), в других подобластях значения могут изменяться более плавно. Как результат, построение единых оценок характеристик оптимизируемых функций для всей области поиска может не полностью соответствовать ее поведению в конкретной подобласти. 
+
+Среди возможных подходов, учитывающих неоднородность поведения оптимизируемых функций в разных подобластях области поиска, можно выделить направление, связанное с адаптивным прогнозированием положения экстремума на основе накопленной поисковой информации в предположении слабой многоэкстремальности задачи.
+
+%Априорная информация, имеющаяся при решении прикладных многоэкстремальных задач, помимо факта ограниченности разделенных разностей функций задачи может содержать дополнительные характеристики экстремума, использование которых ускоряет процесс поиска. К числу таких характеристик можно отнести некоторый априорный прогноз расположения оптимальной точки (основанный, например, на наличии прототипа оптимизируемого объекта). 
+%Если же такой априорный прогноз отсутствует, 
+
+А именно, можно построить адаптивные правила прогнозирования, основанные на предположении о том, что местонахождение глобального оптимума более вероятно в окрестностях тех точек из ряда $x_i, 1 \leq i \leq k,$ которым соответствуют малые значения нормированных разностей $(z_i-z_\nu^*)/\mu_\nu$
+где $z_i$ из (\ref{trial_result}), $\mu_\nu$ из (\ref{Eq:20}), а $z_\nu^*$ из (\ref{Eq:21}) .
+
+Принятая нами гипотеза правдоподобна либо в случае, когда число осуществленных итераций достаточно велико (т.к. алгоритм при выполнении условий сходимости порождает последовательность испытаний, плотную лишь в точках глобального минимума), либо в случае, когда задача является унимодальной (т.е. когда поиск в окрестности лучшего текущего приближения позволяет достичь улучшения, и такие последовательные улучшения ведут к решению). Первый случай соответствует заключительной фазе поиска, и тогда использование адаптивного прогноза можно интерпретировать как способ ускорения уточнения решения. Второй случай фактически включает в себя предположения о слабой многоэкстремальности задачи.
+
+Конкретным примером новых формул для вычисления характеристик $R'(i)$, включающих в себя адаптивый прогноз расположения оптимума, являются выражения
+\begin{eqnarray}\label{lR}
+& R'(i) = \frac{R(i)}{\sqrt{(z_i-z_\nu^*)(z_{i-1}-z_\nu^*)}/\mu_\nu+1.5^{-q}}, \; \nu(x_{i-1})=\nu(x_{i}),\nonumber\\
+& R'(i) = \frac{R(i)}{(z_i-z_\nu^*)/\mu_\nu+1.5^{-q}}, \; \nu(x_{i-1})<\nu(x_{i}),\\
+& R'(i) = \frac{R(i)}{(z_{i-1}-z_\nu^*)/\mu_\nu+1.5^{-q}}, \; \nu(x_{i-1})>\nu(x_{i}),\nonumber
 \end{eqnarray}
-\end{subequations}
-If you put the label right after the \verb+\begin{subequations}+,
-it can be used further as a reference to all the equations in this
-environment. For example, you can refer to
-equation~(\ref{generallabel}) this example.
+где $R(i)$ из (\ref{R}) , а целочисленный параметр $q$ характеризует «степень локальности» алгоритма. При $q=1$ поиск имеет «глобальный», а при $q>>1$ -- «локальный» характер. 
+%Формулы (\ref{localR}) следует использовать в правилах алгоритма на шаге вместо 
 
-To set multi-line formulas you can use the environment
-multline, gather and align. The multline environment is good to use
-for a set of standalone long formulas that do not fit on
-one line:
-\begin{multline}
-\int_{a_1}^{a_2} f(x)\,dx+\int_{a_2}^{a_3} f(x)\,dx
-+\dots+\int_{a_{n-1}}^{a_n} f(x)\,dx\\
-+\int_{a_1}^{a_2} g(x)\,dx+\int_{a_2}^{a_3} g(x)\,dx
-+\dots+\int_{a_{n-1}}^{a_n} g(x)\,dx\\
-+\int_{a_1}^{a_2} h(x)\,dx+\int_{a_2}^{a_3} h(x)\,dx
-+\dots+\int_{a_{n-1}}^{a_n} h(x)\,dx\\
-=\int_{a_1}^{a_n} f(x)+g(x)+h(x)\,dx.
-\end{multline}
-This formula is automatically numbered, if the formula number is not
-need, you have to use the environment multline*.
+Управление параметром $q$, входящим в (\ref{lR}), позволяет учитывать различные предположения о характере экстремума. Например, одной из стратегий является чередование с заданной частотой больших и малых значений $q$, что соответствует смеси локального и глобального поиска, которую можно интерпретировать как сочетание процедуры локального уточнения текущего решения и процедуры глобального обновления этого решения. При этом в течение первых итераций рекомендуется использовать значение $q=1$, т.к. накопленная на них поисковая информация обеспечит адекватность формул (\ref{lR}) при последующем локальном уточнении.
 
-Environment gather centers included in the formula:
-\begin{gather}
-\int_{a_1}^{a_2} f(x)\,dx+\int_{a_2}^{a_3} f(x)\,dx
-+\dots+\int_{a_{n-1}}^{a_n} f(x)\,dx\\
-+\int_{a_1}^{a_2} g(x)\,dx+\int_{a_2}^{a_3} g(x)\,dx
-+\dots+\int_{a_{n-1}}^{a_n} g(x)\,dx\notag\\
-+\int_{a_1}^{a_2} h(x)\,dx+\int_{a_2}^{a_3} h(x)\,dx
-+\dots+\int_{a_{n-1}}^{a_n} h(x)\,dx\\
-=\int_{a_1}^{a_n} f(x)+g(x)+h(x)\,dx.
-\end{gather}
-Each line is automatically numbered, if the line number
-it is not necessary, before \verb+\\+ in this line, you need to put the command
-\verb+\notag+. When you use the environment gather* formula
-will not be numbered.
+%Отметим, что на скорость сходимости алгоритмов глобальной оптимизации существенно влияет константа Липшица,
+%поэтому столь важным является вопрос ее корректной оценки. Заниженная оценка истинной константы Липшица L может привести к потере глобального решения. В то же время завышенная оценка константы L, не соответствующая истинному поведению функции, влечет за собой медленную сходимость алгоритма к точке глобального минимума.
+%Использование только глобальной информации о поведении целевой функции в ходе ее минимизации может значительно замедлить сходимость алгоритма к точке глобального минимума, т.к. могут существовать зоны области поиска, которые находятся далеко от точки глобального минимума, но локальные константы Липшица в которых существенно меньше глобальной.
+%
+%В работах [47, 140, 156] был предложен метод локальной настройки, преодолевающий указанные сложности и позволяющий адап-
+%тивно оценивать локальные константы Липшица на всей области поиска. Балансирование локальной и глобальной информации в про-
+%цессе поиска глобального минимума позволяет существенно ускорить работу алгоритма глобальной оптимизации.
+%
+%
+%Суть предложенного в подхода состоит в следующем. В алгоритме глобального поиска предлагается использовать не единую для всей области поиска оценку константы Липшица, а строить ее оценки для каждого поискового интервала в отдельности. Поскольку получение таких оценок может происходить с достаточно большими погрешностями, то при нахождении локальных (интервальных) оценок должна учитываться и общая (глобальная) оценка константы Липшица.
+%
+%Приведем алгоритмическое описание предлагаемого подхода.
+%Предположим, что параллельный алгоритм глобального поиска выполнил $k\geq$ итераций поиска и получены точки испытаний из (ссылка).
+%
+%Оценка константы Липшица   интервала (xi1,xi), 1<i<k, вычисляется в соот-ветствии со следующими выражениями:
 
-The align environment allows you to align formulas on your
-discretion:
-\begin{align}
-\int_{a_1}^{a_2} f(x)\,dx &+\int_{a_2}^{a_3} f(x)\,dx
-+\dots+\int_{a_{n-1}}^{a_n} f(x)\,dx\notag\\
-&+\int_{a_1}^{a_2} g(x)\,dx +\int_{a_2}^{a_3} g(x)\,dx
-+\dots+\int_{a_{n-1}}^{a_n} g(x)\,dx\\
-&+\int_{a_1}^{a_2} h(x)\,dx+\int_{a_2}^{a_3} h(x)\,dx
-+\dots+\int_{a_{n-1}}^{a_n} h(x)\,dx\notag\\
-&=\int_{a_1}^{a_n} f(x)+g(x)+h(x)\,dx.
-\end{align}
-Read more about working with these environments can be found in the book
-\cite{GG}.
 
-\section{Variables}
-For the writing of definitions, theorems, lemmas and their proofs use the following variables. If necessary, you can add your variables in the sample.
+\section{Parallel algorithm for mixed-integer problems}
 
-\begin{definition}\label{D:1}
-Define ...
-\end{definition}
+Рассмотрим теперь случай, когда аргумент функций задачи содержит две компоненты: вектор $y$, принадлежащий гиперинтервалу $D$, и вектор $u$, имеющий конечный (и при этом не очень большой) набор возможных значений, т.е. 
+\begin{eqnarray}\label{problem_i}
+& \min{\left\{ g_{m+1}(y,u):y\in D, \; g_i(y,u)\leq 0, \; 1 \leq i \leq m\right\}},\\
+& D=\left\{a_j\leq y_j \leq b_j, \; 1\leq j \leq N \right\}.\nonumber
+\end{eqnarray}
 
-\begin{lemma}\label{L:1}
-If ...
-\end{lemma}
+Такие конечные наборы могут характеризовать, например, вариант материала, из которого создается объект, геометрические размеры или другие величины, которые могут принадлежать стандартному дискретному множеству, и т.п.
 
-\begin{theorem}\label{Th:1}
-Let ...
-\end{theorem}
-\begin{proof}
-Consider...
-\end{proof}
+Занумеруем целыми числами $s, 1\leq s \leq S,$ все возможные значения вектора $u$, т.е. сопоставим каждому рассматриваемому значению $s$ вектор $u_s$. 
+Тогда рассматриваемая задача может быть записана в виде 
+\begin{eqnarray}\label{problem_is}
+& \min_{s\in\{1,...,S\}}\left(\min{\left\{ g_{m+1}(y,u_s):y\in D, \; g_i(y,u_s)\leq 0, \; 1 \leq i \leq m\right\}}\right),\\
+& D=\left\{ a_j\leq y_j \leq b_j, \; 1 \leq j\leq N \right\}.\nonumber 
+\end{eqnarray}
 
-\section{Figures and tables}
-REV\TeX~4 will automatically number sections, equations, tables, and
-drawings. Figure captions are made after the image and the signature
-tables~--- before a table, as shown in the examples at the end. In
-tables footnotes \footnote{Footnotes in tables, you can try
-to do this manually.} not working.
+Используя схему редукции размерности с помощью Hilbert curve $y(x), x\in [0,1]$ можно сопоставить каждой задаче минимизации по $y$ одномерную задачу минимизации
+\[
+ \min{\left\{ g_{m+1}(y(x),u_s):x \in [0,1], \; g_i(y(x),u_s)\leq 0, \; 1 \leq i \leq m\right\}}, s\in\{1,...,S\}.
+\]
 
-Graphics and diagrams should be monochrome in black-and-white color and saved in EPS format.
-%You can include a picture in the article using the figure environment:
-%\begin{figure}[h]
-%\setcaptionmargin{5mm}
-%%\onelinecaptionsfalse % if the caption is multiline
-%\onelinecaptionstrue  % if the caption is one-line
-%\includegraphics[width=0.85\textwidth]{deform.eps}
-%\captionstyle{normal}\caption{Please write your figure caption here.}\label{fig:1}
+Рассмотрим теперь соответствие 
+\[
+Y(x)=y(x-E(x)), \; x\in[0,S],
+\]
+отображающее любую точку интервала [0,S] на область $D$ (обозначение $E(x)$ соответствует целой части числа $x$) и определим функции 
+\[
+f_i(x) = g_i(Y(x),u_{E(x)+1}), x\in[0,S],
+\]
+имеющие, вообще говоря, разрывы первого рода в целочисленных точках $x_k = i, 1\leq i \leq S-1$.
+Значение  $z_k = g_\nu(y(x_k))$ из (\ref{trial_result}) в этих точках будем считать неопределенным, а значения индекса -- равным 0, т.е. $\nu(x_k) = 0$ .
+
+Используя введенные обозначения можно переформулировать исходную задачу как
+\begin{equation}\label{problem_is1}
+\min \left\{f_{m+1}(x): x \in [0,S], \; f_i(x) \leq 0, \; 1 \leq i \leq m\right\}.
+\end{equation}
+
+Для иллюстрации на Fig. \ref{fig:1}  изображены графики функций, соответствующих задаче с одним непрерывным и одним бинарным параметром.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{fig1.jpg}
+    \caption{Mixed-integer global optimization problem}
+    \label{fig:1}
+\end{figure}
+
+Применяя к решению задачи (\ref{problem_is1}) параллельный индексный алгоритм с локальной настройкой, мы найдем решение задачи (\ref{problem_i}). При этом основная часть испытаний будет проведена в той подзадаче, решение которой соответствует решению исходной задачи (\ref{problem_i}). В остальных подзадачах будет проведена лишь незначительная часть испытаний, т.к. решения данных подзадач являются локально-оптимальными по отношению к решению $s$-й подзадачи. Сказанное подтверждается Fig. \ref{fig:1}, где штрихами обозначены точки испытаний, выполненных при решении данной задачи.
+
+Таким образом, мы сформировали Mixed-Integer Global Search Algorithm (MIGSA), основанный на сведении задачи mixed-integer non-convex optimization problem к одновременно решаемому набору непрерывных задач.
+Можно доказать, что условия сходимости данного алгоритма будут следовать из условий сходимости его прототипа (GSA).
+
+Предложенная схема решения mixed-integer global optimization problems основана на параллельном индексном методе для решения задач непрерывной оптимизации и не является ориентированной на конкретное вычислительное устройство. Одной из ключевых операций здесь является параллельное проведение нескольких испытаний в различных точках области поиска (см. шаг 7 алгоритма), которое может быть реализовано как на CPU (с использованием OpenMP и/или MPI), так и на GPU (с использованием CUDA).
+
+%здесь - сослаться на распараллеливание с использованием блочной многошаговой схемы.
+
+
+\section{Results of experiments}
+
+Первая серия экспериментов была проведена с использованием последовательной версии предложенного алгоритма с целью его сравнения с известными методами аналогичного назначения.
+
+Предложенный в данной работе алгоритм MIGSA сравнивался с genetic algorithm for solving mixed-integer optimization problems, реализованным в Matlab Global Optimization Toolbox. В Table \ref{tab:1} приведено число испытаний, потребовавшееся для решения известных тестовых mixed-integer problems данными методами. Для обоих методов была использована одинаковая точность поиска решения $10^{-2}$. Все вычислительные эксперименты были проведены на компьютере с процессором Intel Core i5-7300 2.5 GHz и 8 Gb RAM. Результаты экспериментов показывают превосходство метода MIGSA как по числу итераций, так и по времени работы.
+
+\begin{table}
+	\caption{Сравнение эффективности методов MIGSA и GA}
+	\label{tab:1}
+	\center
+	\begin{tabular}{|c|c|c|c|c|}
+		\hline
+		%\noalign{\smallskip}		
+	\multirow{2}{*}{Test problem}	 & \multicolumn{2}{c|}{ GA } &  \multicolumn{2}{c|}{MIGSA} \\
+		%\noalign{\smallskip} 
+		\cline{2-3} \cline{4-5} 
+		%\noalign{\smallskip}
+		 & $k$ & $t$ &  $k$ & $t$  \\
+		%\noalign{\smallskip} 
+		\hline 
+		%\noalign{\smallskip}
+		 Problem 2 \cite{Floudas}&	481 &	0.0601 & 	417 &	0.04 \\
+		 Problem 6 \cite{Floudas}&	641 &	0.0510 & 	118 &	0.001 \\
+		 Problem 1 \cite{Deep}   &	481 &	0.1378 & 	66 &	0.0007 \\
+		 Problem 2 \cite{Deep}   &	481 &	0.0473 & 	57 &	0.0006 \\
+		 Problem 7 \cite{Deep}   &	841 &	0.0736 &  372	 &	0.017 \\
+		%\noalign{\smallskip}
+		\hline
+	\end{tabular}
+\end{table}	
+
+
+
+%Последующие серии экспериментов были выполнены для оценки ускорения параллельной версии предложенного алгоритма MIPIA с использованием как CPU, так и GPU. В данных экспериментах решалась серия из 100 тестовых mixed-integer problems, сгенерированных случайных образом.  
+
+Известным генератором тестовых задач непрерывной многоэкстремальной оптимизации является GKLS-генератор \cite{Gaviano}. Он позволяет генерировать тестовые функции заданной размерности с заданными свойствами: известным числом локальных минимумов, известной областью притяжения глобального решения, и т.д.  
+%This generator of multiextremal functions is often used for the investigations of the global optimization algorithms \cite{Paulavicius2014,SergeyevKvasov2015,Lebedev2015,Gergel2015}. 
+
+In Fig.~\ref{example} (a) and (b), the contour plots of two-dimensional GKLS functions are presented. Figures also shows the points of the trials performed by the method until the required accuracy $\epsilon=10^{-2}$ was achieved.
+
+%\begin{figure}
+%\begin{minipage}{0.5\linewidth}
+%\center{\includegraphics[width=1.0\linewidth]{GKLS-4.png} \\ (a)}
+%\end{minipage}
+%\hfill
+%\begin{minipage}{0.5\linewidth}
+%\center{\includegraphics[width=1.0\linewidth]{GKLS-6.png} \\ (b)}
+%\end{minipage}
+%\caption{Solving a two-dimensional problem using the index algorithm}
+%\label{example}
 %\end{figure}
 
-\begin{table}[!h]
-\setcaptionmargin{0mm}
-\onelinecaptionsfalse
-\captionstyle{flushleft}
-\caption{ For the insertion of tables, the table environment is used,
- the signatures to the tables are made in the same way as the captions
- for the figures. This is an example of a table whose multi-line name
- is decorated with the \textbf{caption2} package.}
-\bigskip
-\begin{tabular}{|c|c|c|c|c|c|c|c|}
-\hline
- &$r_c$ (\AA)&$r_0$ (\AA)&$\kappa r_0$&
- &$r_c$ (\AA) &$r_0$ (\AA)&$\kappa r_0$\\
-\hline
-Cu& 0.800 & 14.10 & 2.550 &Sn
-& 0.680 & 1.870 & 3.700 \\
-Ag& 0.990 & 15.90 & 2.710 &Pb
-& 0.450 & 1.930 & 3.760 \\
-Au& 1.150 & 15.90 & 2.710 &Ca
-& 0.750 & 2.170 & 3.560 \\
-Mg& 0.490 & 17.60 & 3.200 &Sr
-& 0.900 & 2.370 & 3.720 \\
-Zn& 0.300 & 15.20 & 2.970 &Li
-& 0.380 & 1.730 & 2.830 \\
-Cd& 0.530 & 17.10 & 3.160 &Na
-& 0.760 & 2.110 & 3.120 \\
-Hg& 0.550 & 17.80 & 3.220 &K &  1.120 & 2.620 & 3.480 \\
-Al& 0.230 & 15.80 & 3.240 &Rb & 1.330 & 2.800 & 3.590 \\
-Ga& 0.310 & 16.70 & 3.330 &Cs & 1.420 & 3.030 & 3.740 \\
-In& 0.460 & 18.40 & 3.500 &Ba & 0.960 & 2.460 & 3.780 \\
-Tl& 0.480 & 18.90 & 3.550 & & & & \\[1mm]
-\hline
-\end{tabular}
-\end{table}
+В проведенных экспериментах GKLS-генератор использовался как основа для построения mixed-integer problems. Правила, позволяющие генерировать тестовые задачи подобного вида, заключаются в следующем.
 
-\begin{table}[!htb]
-\setcaptionmargin{0mm}
-\onelinecaptionstrue
-\captionstyle{flushleft}
-\caption{The name of this table is --- one-line.}
-\bigskip
-\begin{tabular}{|c|c|c|c|c|c|c|}
-  \hline
-    & 1 & 2 & 3 & 4 & 5 & 6\\
-  \hline
-  1 & 1 & 2 & 3 & 4 & 5 & 6\\
-  2 & 2 & 4 & 6 & 8 & 10 & 12\\
-  3 & 3 & 6 & 9 & 12 & 15 & 18\\[1mm]
-  \hline
-\end{tabular}
-\end{table}
+\begin{enumerate}
+	\item С помощью генератора GKLS порождается непрерывная многоэкстремальная функция $\psi(y), \; y\in D, \; D = \left\{ a_j\leq y_j\leq b_j, 1\leq j \leq N \right\}$. Глобальный минимум данной функции достигается в известной точке $y'=(y'_1,...,y'_N)$ и равен $\psi'=\psi(y')=-1$.
+	\item Генерируется convex mixed-integer function 
+	\[
+			\mu(y,u) = 2 \left[ \sum_{j=1}^N \left( \frac{y_j - y'_j}{b_j-a_j} \right)^2 + \sum_{j=1}^M \left( \frac{u_j - b_j}{b_j-a_j} \right)^2 \right],
+	\]
+	где 
+	\begin{eqnarray*}
+	& y\in D = \left\{ a_j\leq y_j\leq b_j, 1\leq j \leq N \right\} \subset R^N, \\
+	& u\in U = \left\{ u_j \in  \left\{a_j, ..., b_j \right\}, 1\leq j \leq M \right\};
+	\end{eqnarray*}
+	т.е. данная функция имеет $N$ непрерывных и $M$ дискретных параметров и достигает минимального значения в точке $(y',b)$.
+	\item Вычисляется коэффициент 
+	\[
+	C = 4 - \min_{y,u} \left\{ \mu(y,u) \right\}, \; y\in D, u \in U.
+	\]
+	Минимум вогнутой функции $-\mu(y,u)$ достигается в одной из угловых точек области поиска, поэтому при размерности задачи порядка 10 его вычисление может быть выполнено методом перебора.
+	\item Формируется многоэкстремальная mixed-integer function 
+	\[
+	\varphi(y,u) = \left(\psi(y) + \sum_{j=1}^M{u_j}\right)\left(C - \mu(y,u)\right).
+	\]
+	По построению $\varphi(y,u)$  будет принимать минимальное значение в точке $(y',b)$.
+	
+\end{enumerate}
 
-\section{Bibliography}
-The following rules apply for references to books:
 
-\begin{itemize}
-  \item Authors initials go before the surname with a space between the initials. Use and between the last two authors. All authors listed in the original reference should be cited.
-  \item The title of the book is written in italics. If the book is originally published in Russian, only the English translation of the title is cited and after citation the original language may be indicated in square brackets, e.g.: [in Russian].
-  \item Examples of bibliographic references can be found at the end of this page % (i.e. article \cite{ex}, PhD thesis \cite{maguire-76}).
-\end{itemize}
+In the problems generated in our experiments, there were 5 discrete and 6 continuous parameters 
+	\begin{eqnarray*}
+	& y\in D = \left\{ -1 \leq y_j\leq 1, 1\leq j \leq 6 \right\} \subset R^6, \\
+	& u\in U = \left\{ u_j \in  \left\{-1, -1/3, 0, 1/3, 1 \right\}, 1\leq j \leq 5 \right\}.
+	\end{eqnarray*}
+
+
 
 
 \begin{acknowledgments}
@@ -347,14 +443,40 @@ This work was supported by the Ministry of Science and Higher Education of the R
 
 \begin{thebibliography}{99}
 
+\bibitem{Burer}
+S.~Burer and A.~N.~Letchford, \textit{Non-convex mixed-integer nonlinear programming: A survey}, Surveys in Operations Research and Management Science \textbf{17}, 97--106 (2012).
+
+\bibitem{Boukouvala}
+F.~Boukouvala, R.~Misener and C.~A.~Floudas, \textit{Global optimization advances in Mixed-Integer Nonlinear Programming, MINLP, and Constrained Derivative-Free Optimization, CDFO}, European J. Oper. Res. \textbf{252}, 701--727 (2016).
+
+\bibitem{Belotti}
+P.~Belotti, J.~Lee, L.~Liberti, F.~Margot and A.~W\"achter, \textit{Branching and bounds tightening techniques for non-convex MINLP}, Optim. Method. Softw. \textbf{24}(4-5), 597--634 (2009).
+
+\bibitem{Vigerske}
+S.~Vigerske and A.~Gleixner, \textit{SCIP: global optimization of mixed-integer nonlinear programs in a branch-and-cut framework}, Optim. Method. Softw. \textbf{33}(3), 563--593 (2018).
+
+\bibitem{Deep}
+K.~Deep, K.~P.~Singh, M.~L.~Kansal and C.~Mohan, \textit{A real coded genetic algorithm for solving integer and mixed integer optimization problems}, Appl. Math. Comput. \textbf{212}(2), 505--518 (2009).
+
+\bibitem{Schluter}
+M.~Schl\"uter, J.~A.~Egea and J.~R.~Banga, \textit{Extended ant colony optimization for non-convex mixed integer nonlinear programming}, Computers and Operations Research \textbf{36}(7), 2217--2229 (2009).
+	
+\bibitem{Strongin2000}
+R.~G.~Strongin and Y.~D.~Sergeyev, \textit{Global optimization with non-convex constraints. Sequential and parallel algorithms} (Kluwer Academic Publishers, Dordrecht, 2000, 2nd ed. 2013, 3rd ed. 2014).
+
+\bibitem{Strongin2013}
+R.~G.~Strongin, V.~P.~Gergel, V.~A.~Grishagin and K.~A.~Barkalov, \textit{Parallel computations for global optimization problems} (Moscow State University, Moscow, 2013) [In Russian].
+
+\bibitem{Floudas}
+C.~A.~Floudas and M.~P.~Pardalos,  \textit{Handbook of Test Problems in Local and Global Optimization}. (Springer, 1999).  %; DOI: 10.1007/978-1-4757-3040-1
+
+
 %\bibitem{Floudas}
 %C.~A.~Floudas and M.~P.~Pardalos, \textit{Recent advances in global optimization} (Princeton University Press, 2016).
 %
 %\bibitem{Locatelli}
 %M.~Locatelli and F.~Schoen, \textit{Global optimization: theory, algorithms and applications} (SIAM, 2013).
 %
-%\bibitem{Strongin1}
-%R.~G.~Strongin and Y.~D.~Sergeyev, \textit{Global optimization with non-convex constraints. Sequential and parallel algorithms} (Kluwer Academic Publishers, Dordrecht, 2000, 2nd ed. 2013, 3rd ed. 2014).
 %
 %\bibitem{Pardalos}
 %P.~M.~Pardalos, A.~A.~Zhigljavsky and J.~\v{Z}ilinskas \textit{Advances in stochastic and deterministic global optimization} (Springer, 2016).
@@ -370,9 +492,6 @@ This work was supported by the Ministry of Science and Higher Education of the R
 %
 %\bibitem{Luque}
 %G.~Luque and E.~Alba, \textit{Parallel genetic algorithms. Theory and real world applications} (Springer-Verlag, Berlin, 2011).
-%
-%\bibitem{Strongin2}
-%R.~G.~Strongin, V.~P.~Gergel, V.~A.~Grishagin and K.~A.~Barkalov, \textit{Parallel computations for global optimization problems} (Moscow State University, Moscow, 2013) [In Russian].
 %
 %\bibitem{Sergeyev2}
 %Ya.~D.~Sergeyev, R.~G.~Strongin, D.~Lera, \textit{Introduction to Global Optimization Exploiting Space-Filling Curves} (Springer Briefs in Optimization, Springer, 2013).
