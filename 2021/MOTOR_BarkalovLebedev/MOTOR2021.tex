@@ -13,8 +13,8 @@
 % \renewcommand\UrlFont{\color{blue}\rmfamily}
 
 %Пакеты для отображения русского шрифта
-\usepackage[utf8]{inputenc}
-\usepackage[russian]{babel}
+%\usepackage[utf8]{inputenc}
+%\usepackage[russian]{babel}
 %Пакеты для гиперссылок
 \usepackage{url}
 \usepackage{hyperref}
@@ -24,105 +24,379 @@
 
 \begin{document}
 %
-\title{Global search algorithm with local tuning for solving mixed-integer global optimization problems
+\title{An Approach for Simultaneous Finding of Multiple Effective Decisions in Multi-objective Optimization Problems
 %with non-convex constraints 
-\thanks{This study was supported by the .}}
+\thanks{This work was supported by the Ministry of Science and Higher Education of the Russian Federation, project no.0729-2020-0055, and by the Research and Education Mathematical Center, project no. 075-02-2020-1483/1.}}
 %
-%\titlerunning{Abbreviated paper title}
+\titlerunning{Finding of Multiple Effective Decisions in MOO Problems}
 % If the paper title is too long for the running head, you can set
 % an abbreviated paper title here
 %
 \author{Konstantin Barkalov\orcidID{0000-0001-5273-2471} \and
-Ilya Lebedev\orcidID{0000-0002-8736-0652}
+Victor Gergel\orcidID{0000-0002-4013-2329} \and
+Vladimir Grishagin \and
+Evgeniy Kozinov\orcidID{0000-0001-6776-0096} 
 }
 %
-\authorrunning{K. Barkalov, I. Lebedev}
+\authorrunning{K. Barkalov, V. Gergel, V. Grishagin, E. Kozinov}
 % First names are abbreviated in the running head.
 % If there are more than two authors, 'et al.' is used.
 %
 \institute{Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia 
-\email{\{konstantin.barkalov,ilya.lebedev\}@itmm.unn.ru}}
+\email{\{konstantin.barkalov,evgeny.kozinov\}@itmm.unn.ru,\{gergel,vagris\}@unn.ru}
+}
 %
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-The abstract should briefly summarize the contents of the paper in
-150--250 words.
+This paper considers computationally intensive multicriteria optimization problems which require computing multiple Pareto-optimal decisions. It is also assumed that efficiency criteria may be multiextremal, and the cost of calculating function values may be quite high. The proposed approach is based on the reduction of multicriteria optimization problems to one-dimensional global optimization problems that can be solved using effective statistical information algorithms of global search. One key innovation of the developed approach consists in the possibility of solving several global optimization problems simultaneously, which allows multiple Pareto-optimal decisions to be obtained. Besides, such approach provides for reuse of the computed search information, which considerably reduces computational effort for solving multicriteria optimization problems. Computational experiments confirm the potential of the proposed approach.
 
-\keywords{First keyword  \and Second keyword \and Another keyword.}
+\keywords{Multi-objective optimization \and Multiple global optimization \and Dimensionality reduction \and Optimization method \and Search information \and Computational complexity.}
 \end{abstract}
 %
 %
 %
-\section{First Section}
-\subsection{A Subsection Sample}
-Что-то по русски
-Please note that the first paragraph of a section or subsection is
-not indented. The first paragraph that follows a table, figure,
-equation etc. does not need an indent, either.
-
-Subsequent paragraphs, however, are indented.
-
-\subsubsection{Sample Heading (Third Level)} Only two levels of
-headings should be numbered. Lower level headings remain unnumbered;
-they are formatted as run-in headings.
-
-\paragraph{Sample Heading (Fourth Level)}
-The contribution should contain no more than four levels of
-headings. Table~\ref{tab1} gives a summary of all heading levels.
-
-\begin{table}
-\caption{Table captions should be placed above the
-tables.}\label{tab1}
-\begin{tabular}{|l|l|l|}
-\hline
-Heading level &  Example & Font size and style\\
-\hline
-Title (centered) &  {\Large\bfseries Lecture Notes} & 14 point, bold\\
-1st-level heading &  {\large\bfseries 1 Introduction} & 12 point, bold\\
-2nd-level heading & {\bfseries 2.1 Printing Area} & 10 point, bold\\
-3rd-level heading & {\bfseries Run-in Heading in Bold.} Text follows & 10 point, bold\\
-4th-level heading & {\itshape Lowest Level Heading.} Text follows & 10 point, italic\\
-\hline
-\end{tabular}
-\end{table}
+\section{Introduction} \label{sec:01}
 
 
-\noindent Displayed equations are centered and set on a separate
-line.
+Choosing the best options (decision making) in situations with many different alternatives is a problem that occurs in almost every domain of human activity. In the simplest cases, decision making problems can be viewed as optimization problems of various kinds such as convex programming, discrete optimization, nonlinear programming, etc. In more complex situations, the objective functions that determine the effectiveness of decisions can be multiextremal, and decision making will require solving global optimization problems. In the most general case, however, the effectiveness of decisions may be determined by several objective criteria, which necessitates solving multi-objective optimization (MOO) problems. Thus, MOO problems are the most common decision making settings that one has to solve in many scientific and technical applications. A large number of approaches and methods have been developed to solve such problems and they have been used to solve many decision making problems in various fields of practical applications -- see e.g. \cite{c1,c2,c3,c4,c5,c6,c7,c8,c9}.
+
+Having several objective functions in MOO problems that determine the effectiveness of the decisions to be made results in most cases in situations where no option can be found in the whole set of alternatives that would be the best one with respect to all efficiency criteria at the same time. In such situations, the solution of MOO problems usually consists in finding non-dominated (or efficient) decisions in which values cannot be improved simultaneously across all objective functions. The set of all efficient decisions is usually referred to as the Pareto set.
+
+Finding the whole Pareto set when solving MOO problems can be computationally intensive (especially when objective functions are multiextremal). Moreover, having the whole Pareto set may be redundant for the decision maker (DM) due to the complexity of analyzing a large number of possible alternatives. As a result, when solving MOO problems in practice, it may be sufficient to find one or several efficient decisions taking into account the DM's perceptions of the required optimality of the options to be chosen.
+
+One of the approaches most commonly used in the search for efficient solutions is scalarization of the vector efficiency criterion, when a MOO problem is reduced to solving one or several scalar (in the general case, global) optimization problems in which the objective function is the only function. The family of optimization problems generated in such approach is further referred to as multiple global optimization problem (MGO). Within this approach, we can distinguish lexicographic optimization methods where objective functions are ordered by importance, thus  allowing the optimization of the functions to be carried out sequentially as their importance decreases [10]. Possible scalarization methods also include various methods of the efficiency criteria convolution such as the weighted sum method, the compromise programming method, the reference point method, the weighted min-max method, etc. -- see, for example, \cite{c2,c11,c12}. 
+
+One common property of methods based on scalarization of the vector efficiency criterion is the existence of some scalarization coefficients that can be varied to obtain different solutions from the Pareto set. Thus, the scalarization coefficients may be interpreted as measures of the importance of the efficiency criteria determined by DM according to his/her perception of the required optimality of the decisions to be made. As a result, the general scheme for solving the MOO problem can be represented as a sequence of steps; at each step, DM sets the necessary scalarization coefficients, then the resulting scalar optimization problem is solved, after that DM analyzes the efficient decision found and, if necessary, the above steps are repeated.
+
+The general scheme discussed above can be extended by the possibility of selecting not one but several different scalarization coefficient options at each step. With this possibility, the task of coefficient assignment becomes less complex for DM. Solving several generated scalar optimization problems simultaneously allows one to get efficient decision estimates at the very early stages of computations thus making it possible to change dynamically (in the process of computations) the set of problems being solved: to stop solving obviously unproductive (from DM's point of view) ones or to add new optimization problems.
+
+It is also important to note that by solving simultaneously a large number of scalar optimization problems thus generated it is possible to significantly decrease computational complexity of each separate problem. This effect is achived due to the fact that all such scalar problems  are based on the same MOO problem and, consequently, all computed values of the efficiency criteria of the MOO problem can be reduced to values of any scalar problem being solved simultaneously without any time consuming calculations. In such cases, all the search information obtained in solving any single scalar problem can be used for solving all other scalar problems of the same group. 
+
+The structure of the paper is as follows. In Section \ref{sec:02}, we give the statement of the multicriteria optimization problem. Section \ref{sec:03} presents a scheme for reduction of multicriteria optimization problems to one-dimensional global optimization problems as well as some methods for solving such problems. Section \ref{sec:04} considers the proposed approach for simultaneous solution of several global optimization problems yielding several Pareto-optimal decisions at a time. Section \ref{sec:05} contains the results of numerical experiments confirming the effectiveness of the proposed approach. In conclusion, the results obtained are discussed and possible main lines of action for further research are outlined.
+
+
+\section{Problem statement} \label{sec:02}
+
+In the most general form, the multi-objective optimization (MOO) problem can be formulated as follows
 \begin{equation}
-x + y = z
+\label{eq:01}
+f(y) = (f_1(y), f_2(y), \dots, f_s(y)) \to \min,  y\in D,
 \end{equation}
-Please try to avoid rasterized images for line-art diagrams and schemas. Whenever possible, use vector graphics instead (see Fig.~\ref{fig1}).
+where $f(y) = (f_1(y), f_2(y), \dots, f_s(y))$ are objective functions (efficiency criteria), $y = (y_1, y_2, \dots , y_N)$ is the vector of varied parameters, and a $N$ is the dimensionality of the multi-objective optimization problem to be solved. The set of possible parameter values (search domain) $D$ is usually an $N$-dimensional hypercube
+\begin{equation}
+\label{eq:02}
+D  = \{ y\in R^N: a_i \leq y_i \leq b_i, 1 \leq i \leq N \}
+\end{equation}
+for given boundary vectors $a$ and $b$.
 
-%\begin{figure}
-%\includegraphics[width=\textwidth]{fig1.eps}
-%\caption{A figure caption is always placed below the illustration.
-%Please note that short captions are centered, while long ones are
-%justified by the macro package automatically.} \label{fig1}
-%\end{figure}
+Without loss of generality, it is assumed that objective functions should be minimized to improve the decision efficiency $y \in D$. It is also assumed that $f_i(y)$, $1 \leq i \leq s$, are multiextremal and have the form of time-consuming ``black-box'' computational procedures. It is also assumed that the objective functions. It is also assumed that the objective functions $f_i(y)$, $1 \leq i \leq s$, satisfy the Lipschitz condition 
+\begin{equation}
+\label{eq:03}
+|f_i(y') - f_i(y'')| \leq L_i\|y' - y''\|, y', y'' \in D, 1 \leq i \leq s,
+\end{equation}
+where $L_i$, $1 \leq i \leq s$, are the Lipschitz constants and $\|*\|$ denotes the Euclidean norm in $R^N$.  Condition (\ref{eq:03}) means that for small variations of the parameter $y \in D$, the corresponding changes in the values of the functions $f_i(y)$, $1 \leq i \leq s$, are bounded. 
 
-\begin{theorem}
-This is a sample theorem. The run-in heading is set in bold, while
-the following text appears in italics. Definitions, lemmas,
-propositions, and corollaries are styled the same way.
-\end{theorem}
-%
-% the environments 'definition', 'lemma', 'proposition', 'corollary',
-% 'remark', and 'example' are defined in the LLNCS documentclass as well.
-%
-\begin{proof}
-Proofs, examples, and remarks have the initial word in italics,
-while the following text appears in normal font.
-\end{proof}
-\cite{Strongin2000}.
+\section{Reducing the Problem of Multi-objective Optimization to the Problems of One-dimensional Global Optimization} \label{sec:03}
+
+As mentioned earlier, in the framework of the proposed approach the solution of MOO problems is reduced to solving one or several scalar global optimization problems in which a single efficiency criterion is generated using some scalarization methods of multiple objective functions. Below, we consider a general scheme for such reduction of the MOO problem and present a method for solving the generated global optimization problems.
+
+\textbf{1. Scalarization of multiple objective functions.} In the most general form, the global optimization problem generated by the scalarization of multiple objective functions of the MOO problem can be represented in the form
+\begin{equation}
+\label{eq:04}
+\min {\varphi(y)} = F(\lambda, y), y \in D,
+\end{equation}
+where $F$ is a scalar multiextremal function generated as a result of scalarization of objective functions $f_i$, $1 \leq i \leq s$, $\lambda$ is the vector of parameters of the applied convolution of functions, and $D$ is the search domain from (\ref{eq:01}). In the proposed approach, we use for scalarization the compromise programming method \cite{c2,c11}, where solution of the MOO problem consists in finding the efficient decision corresponding most closely to the optimality measures of the specified reference decision $y^0 \in D$. In this case, a possible variant of convolution of objective functions $f_i$, $1 \leq i \leq s$, can have the form  
+\begin{equation}
+\label{eq:05}
+\min F(\lambda,y)=1/s \sum_{i=1}^s {\lambda_i (f_i (y)-f_i (y^0 ))^2}, y \in D,
+\end{equation}
+where $F(\lambda,y)$ is the standard deviation of the values of the objective functions $f_i$, $1 \leq i \leq s$, for the decision $y \in D$ and for the specified reference decision $y^0 \in D$, while the coefficients $0 \leq \lambda_i \leq 1$, $1 \leq i < s$, are measures of the significance of the approximation accuracy for each variable $y_i$, $1 \leq i \leq N$, separately  without loss of generality, we can assume that the area of possible values of the coefficients $\lambda$ is a set 
+\begin{equation}
+\label{eq:06}
+\lambda=(\lambda_1,\lambda_2, \dots, \lambda_s)\in \Lambda \subset R^s: \sum_{i=1}^{s}\lambda_i=1, \lambda_i \geq 0, 1 \leq i \leq s.
+\end{equation}
+
+The reference decision $y^0 \in D$ in (\ref{eq:05}) can be known \textit{a priori} or determined on the basis of some known prototype. In many cases, an abstract ideal decision $y^0 \in D$ is used as the reference decision $y^*\in D$ in which the objective functions $f_i$, $1 \leq i \leq s$, assume minimal possible values, i.e.
+\begin{equation}
+\label{eq:07}
+f_i^* =f_i (y^*)=\min_{y \in D} f_i (y), 1 \leq i \leq s.
+\end{equation}
+
+Note that by virtue of (\ref{eq:03}) the scalar function $F(\lambda,y)$ from (\ref{eq:05}) also satisfies the Lipschitz condition with some constant $L$, i.e.
+\begin{equation}
+\label{eq:08}
+|F(\lambda, y') - F(\lambda, y'')| \leq L\|y' - y''\|.
+\end{equation}
+
+\textbf{2. Dimensionality reduction.} As already mentioned, problem (\ref{eq:04}) is a multidimensional global optimization problem. Problems of this kind are computationally complex and are known to be subject to the ``curse of dimensionality'' -- computational complexity increases exponentially with increasing dimensionality of the optimization problem being solved \cite{c13,c14,c15,c16,c17,c18,c19,c20}. Nevertheless, the computational complexity of global optimization algorithms can be significantly reduced by dimensionality reduction based on the use of a Peano space-filling curve (or evolvent) $y(x)$ that uniquely and continuously maps the segment $[0,1]$ on an $N$-dimensional hypercube $D$ -- see, for example, \cite{c15,c21}. As a result of such reduction, multidimensional global optimization problems (\ref{eq:04}) are reduced to one-dimensional problems
+\begin{equation}
+\label{eq:09}
+\min \varphi (y(x))= \min \varphi(y), x \in [0,1], y \in D.
+\end{equation}
+
+The resulting one-dimensional functions $\varphi(y(x))$ satisfy the uniform H{\" o}lder condition, i.e.
+\begin{equation}
+\label{eq:10}
+|\varphi (y(x'))- \varphi (y(x''))| \leq H |x'-x''|^{1/N},
+\end{equation}
+
+where the constant $H$ is defined by the relation $H=2L\sqrt{N+3}$, $L$ is the Lipschitz constant from (\ref{eq:08}), and $N$ is the dimensionality of the optimization problem (\ref{eq:01}). 
+
+As a result of dimensionality reduction, the computational scheme for solving problem (\ref{eq:09}) consists of the following (see Fig. \ref{fig:1}):
+
+\begin{itemize}
+	\item The optimization algorithm minimizes the reduced one-dimensional function $\varphi(y(x))$ from (\ref{eq:09}),
+	\item After determining the point $x \in [0,1]$ of the next iteration of the one-dimensional global search, the multi-dimensional image $y \in D$ is computed for the mapping $y(x)$,
+	\item At the multi-dimensional point $y \in D$, the value of the original multi-dimensional function $\varphi(y)$ is computed from (\ref{eq:04}),
+	\item The computed value $z = \varphi(y)$ is then used as the value of the reduced one-dimensional function $\varphi(y(x))$ at  the point $x\in[0,1]$.
+\end{itemize}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\linewidth]{fig1}
+  \caption{General scheme for solving the problem (\ref{eq:09})}
+  \label{fig:1}
+\end{figure}
+
+\textbf{3. Solving the one-dimensional reduced optimization problem.} Using the dimensionality reduction results in one more additional advantage of the proposed approach: many well-known one-dimensional global search algorithms (possibly, after some additional generalisation) can be used to solve the initial multidimensional MOO problem from (\ref{eq:01}) -- see e.g. \cite{c22,c23,c24,c25,c26,c27,c28,c29}. At the same time, it should be noted that most works where dimensionality reduction is a key feature for solving multiextremal problems like (\ref{eq:04}) rely on the statistical information theory of global search \cite{c15}. This theory has provided the a basis for developing a large number of effective methods for multi-extremal optimization -- see, e.g., \cite{c28,c29,c30,c31,c32,c33,c34,c35,c36,c37}.
+
+Within the framework of statistical information theory, a general computational scheme of global optimization algorithms was proposed which in brief is as follows \cite{c15,c30,c35}.
+
+Let $k$, $k \geq 2$, global search iterations aimed to minimize the function $\varphi(y(x))$ from (\ref{eq:09}) were completed. Then, to perform adaptive choice of the points of next iterations, the optimization algorithm estimates the possibility that the global minimum is located  in the intervals, into which the initial segment $[0,1]$ is divided by the points of earlier global search  iterations
+\begin{equation}
+\label{eq:11}
+x_1<x_2< \dots <x_k.
+\end{equation}
+
+This estimate is determined by means of characteristics of intervals $R(i)$, $1 \leq i<k$, whose values should be proportional to the degree of possibility that the global minimum is located  in these intervals. The type of these characteristics depends on the global optimization algorithm used -- thus, for example, for an algorithm which constructs a uniform dense grid in the global search area, the characteristic is simply the interval length 
+\begin{equation}
+\label{eq:12}
+R(i)=(x_i-x_{i-1}), 1 \leq i<k.
+\end{equation}
+
+
+For the algorithms proposed in \cite{c22,c23}, when dimensionality reduction is applied, the characteristic is an estimate of the minimum possible value of the function $\varphi(y(x))$ to be minimized on the interval $(x_{i-1},x_i )$, $1 \leq i < k$, i.e.
+\begin{equation}
+\label{eq:13}
+R(i) = 0.5 H \varrho_i - 0.5 (z_{i-1} + z_i ), \varrho_i = (x_i-x_{i-1} ) ^ {1⁄N}, 1 \leq i < k,
+\end{equation}
+where $H$ is the H{\" o}lder constant from (\ref{eq:10}) for the reduced global optimization problem being solved (\ref{eq:09}), $z_i = \varphi(y(z_i))$, $1 \leq i < k$ and $N$ is the dimensionality of the problem from (\ref{eq:01})).  For the global search algorithm (GSA) \cite{c15,c24} developed in the framework of the statistical information approach, the characteristic is
+\begin{equation}
+\label{eq:14}
+R(i)=m\varrho_i+\frac{z_i-z_{i-1}^2}{m\varrho_i}-2(z_{i-1}+z_i ),\varrho_i=(x_i-x_{i-1})^{1/N}, 1 \leq i < k,
+\end{equation}
+where $m$ is a numerical estimate of the H{\" o}lder constant derived from available search information
+\begin{equation}
+\label{eq:15}
+m= r M, M = \max |z_i-z_{i-1} | ⁄ \varrho_i, 1 \leq i<k
+\end{equation}
+ ($r>1$ is a parameter of the GSA algorithm).
+
+The presence of interval characteristics makes it possible to present the procedure of global search iteration as the following sequence of steps \cite{c15}.
+
+\textit{Step 1.} Calculate characteristics of the  intervals $R(i)$, $1 \leq i < k$, and determine the interval with the maximum characteristic
+\begin{equation}
+\label{eq:16}
+R(t) = \max R(i), 1\leq i < k.
+\end{equation}
+
+\textit{Step 2.} Select the next iteration point in the interval with the maximum characteristic
+\begin{equation}
+\label{eq:17}
+x^{k+1}=X(x_{t-1}, x_t),
+\end{equation}
+calculate the value $z^{k+1}$ of the function to be minimized at this point (the procedure for calculating the function value will be further referred to as a trial).
+
+\textit{Step 3.} Check the stopping condition
+\begin{equation}
+\label{eq:18}
+\varrho_t \leq \varepsilon,
+\end{equation}
+where $\varrho_t = (x_t-x_{t-1})^{1⁄N}$, $t$ from (\ref{eq:16}) and $\varepsilon > 0$ is the specified accuracy of the solution. If the stopping condition (\ref{eq:18}) is reached, then the solving of the optimization problem is stopped, otherwise $k=k+1$ is assumed and the next global search iteration begins.
+
+After completing the calculations, the lowest computed value of the function being minimized can be taken as the global minimum estimate
+\begin{equation}
+\label{eq:19}
+z_k^* = \min z_i, 1 \leq i<k.
+\end{equation}
+
+It should be noted again that the computational scheme discussed above is quite general. Many global search algorithms can be represented within this scheme, as evidenced, in particular, by examples (\ref{eq:12})-(\ref{eq:14}) and other characteristic algorithms -- see, for example, \cite{c28,c29,c30,c31,c32,c33,c34,c35,c36,c37}. 
+
+Convergence conditions for characteristic algorithms depend on the properties of interval characteristics used. One of sufficient conditions for convergence of algorithms is, for example, the requirement that the characteristic of the interval containing the global minimum point should take on the maximum value at step 1 of the characteristic scheme during the global search iterations. This condition is satisfied, for example, for the multidimensional generalized algorithms proposed in \cite{c22,c23} when the H{\"o}lder constant from (\ref{eq:10}) is specified exactly. For GSA, a sufficient condition for convergence is the relation \cite{c15}
+\begin{equation}
+\label{eq:20}
+m \geq 2^{3-1⁄N} L\sqrt{N+3},
+\end{equation}
+which must be fulfilled starting from some iteration $k>1$ of the global search ($L$ is the Lipschitz constant from (\ref{eq:08})). Moreover, if condition (\ref{eq:20}) is satisfied, only the points of the global minimum of the function $\varphi(y)$ from (\ref{eq:04}) will be the limit points of the trial sequence $\{y^k=y(x^k)\}$ generated by the GSA algorithm.
+
+\section{An Approach for Simultaneous Finding of Multiple Effective Solutions in Multi-objective Optimization Problems} \label{sec:04}
+
+\textbf{1. The need to solve multiple global optimization problems.} As mentioned earlier, in the process of solving the MOO problem, it may be necessary to find several different effective decisions due to possible changes in the optimality requirements. Obtaining different  effective decisions in the proposed approach is ensured by choosing different convolution coefficients (importance indicators) for the objective functions $f_i(y)$, $1 \leq i \leq s$, which results in obtaining different  scalar multi-extremal functions $F(\lambda, y)$ from (\ref{eq:04}). The resulting different functions $F(\lambda, y)$ for different values of the coefficients $\lambda \in \Lambda$ can be optimized sequentially. This deermines a multi-stage scheme for solving the MOO problem, when at each stage DM specifies the necessary scalarization coefficients, then the resulting scalar optimization problem is solved, after which DM analyzes the effective solution found. 
+
+The general scheme considered above can be extended by the option of selecting not one but several different scalarization coefficients at each stage. Having such an option makes it easier for DM  to specify importance coefficients $\lambda \in \Lambda$ of the objective functions $f_i(y)$, $1 \leq i \leq s$. By solving simultaneously several generated scalar optimization problems, one can  obtain the estimates of efficient decisions at the earliest stages of computing, which makes it possible to dynamically (in the process of computation) change the set of problems being solved -- to stop solving those that obviously have no prospect of success (from DM's point of view) or to add new optimization problems. 
+
+Such generalization of the process of solving a MOO problem means that at each current moment of calculations there is a set of functions being optimized simultaneously having the form (\ref{eq:04})
+\begin{equation}
+\label{eq:21}
+\Phi_p (y)=\{ F(\lambda_1,y), F(\lambda_2,y),\dots,F(\lambda_p,y)  \},  \lambda_i \in \Delta, 1 \leq i \leq p
+\end{equation}
+which can be changed dynamically in the course of the calculations by adding new or removing existing optimization functions $F(\lambda, y)$ from (\ref{eq:04}). 
+
+
+\textbf{2. Step-by-step solution of a set of global optimization problems.} As shown in Section \ref{sec:03}, the statistical information multiextremal optimization algorithms used in the proposed approach determine the points of consecutive iterations of the global search taking into account the search information
+\begin{equation}
+\label{eq:22}
+A_k=\{(x_i,z_i,f_i )^T:1 \leq i \leq k\},
+\end{equation}
+obtained in the calculations (see (\ref{eq:14})-(\ref{eq:17})). In (\ref{eq:22}) $x_i$, $1 \leq i \leq k$,  are the reduced points of performed global search iterations ordered in ascending order of coordinates,  $z_i$, $f_i$, $1 \leq i \leq k$, are values of the scalar function $F(\lambda, y)$, from (\ref{eq:04}) and objective functions $f_i(y)$, $1 \leq i \leq s$, from (\ref{eq:01}) of the current optimization problem to be solved at the points $x_i=y(x_i)$, $1 \leq i \leq k$. By using search information $A_k$ from (\ref{eq:22}) when choosing next search iterations it is possible to solve global optimization problems more efficiently and to provide convergence of algorithms only to the global minima of multiextremal functions being minimized.
+
+It is important to note that since the set $\Phi_t(y)$ of functions being optimized  simultaneously is generated from the same MOO problem from (\ref{eq:01}), the existence of the set $A_k$ from (\ref{eq:12}) allows us to adjust the results of all previously performed calculations of the values of the objective functions $f_i(y)$, $1 \leq i \leq s$, to the values of the next optimized function $F(\lambda, y)$ from (\ref{eq:04}) without repeating any time consuming calculations of values, i.e.
+\begin{equation}
+\label{eq:23}
+(x_i,f_i ) \to z_i=F(\lambda, y(x_i)) ,1 \leq i \leq k.
+\end{equation}
+
+Thus, all the search information $A_k$ from (\ref{eq:22}), recalculated according to (\ref{eq:23}), can be reused to continue solving the problems of the set $\Phi_t(y)$. Such a possibility provides a significant reduction in computations up to performing only a limited set of global search iterations (see the results of computational experiments in Section \ref{sec:03}).
+
+     This type of information connectivity of functions in the set $\Phi_t(y)$ from (\ref{eq:21}) makes it possible to generalize the computational scheme (\ref{eq:16})-(\ref{eq:18}) for solving a single global optimization problem for the case of optimizing the functions of the set $\Phi_t(y)$ from (\ref{eq:21}) by adding a preliminary step of the search information  transformation.
+
+\textit{Step 0.} Adjust the state of search information $A_k$ from (\ref{eq:22}) to the values of the function $F(\lambda, y)$ from the set $\Phi_t(y)$ according to rule (\ref{eq:23}).
+
+The GSA algorithm applied to optimize the functions of the set $\Phi_t(y)$ from (\ref{eq:21}) and using search information $A_k$ will be further referred to as the Multiple Global Search Algorithm (MGSA).
+
+\textbf{3. Simultaneous solution of a set of global optimization problems.} Information connectivity makes it possible to propose a more general scheme for simultaneous optimization of all the functions of the set $\Phi_t(y)$ from (\ref{eq:21}). In this case, search information $A_k$ from (\ref{eq:22}) will contain the computed values of all simultaneously optimized functions $F(\lambda_i, y)$, $1 \leq i \leq p$, i.e. 
+\begin{equation}
+\label{eq:24}
+A_k=\{(x_i,\overrightarrow{z_i},f_i )^T : 1 \leq i \leq k\}
+\end{equation}
+where the values of $\overrightarrow{z_i}$, $1 \leq i \leq k$, represent vectors 
+\begin{equation}
+\label{eq:25}
+\overrightarrow{z_i}=( z_i (1),z_i (2), \dots ,z_i (p)),z_i (j)=F(\lambda_j,y(x_i)), 1\leq i \leq k,1\leq j\leq p.
+\end{equation}
+
+Accordingly, for each interval $(x_{i-1},x_i)$, $1 \leq i < k$, into which the segment [0,1] is divided, the following set of characteristics will be calculated:
+\begin{equation}
+\label{eq:26}
+\overrightarrow{R}(i)=\{R_1(i), R_2(i), \dots, R_p(i)\},
+\end{equation}
+where
+\begin{equation}
+\label{eq:27}
+R_j(i)=m_j \varrho_i+\frac{(z_i(j)-z_{i-1}(j))^2}{m_j \varrho_i} - 2(z_{i-1}(j)+z_i(j)),1 \leq i < k,1 \leq j \leq k,
+\end{equation}
+\begin{equation}
+\label{eq:28}
+\varrho_i=(x_i-x_{i-1} )^{1/N}  ,1 \leq i<k,
+\end{equation}
+\begin{equation}
+\label{eq:29}
+m_j = r M_j, M_j=\frac{\max|z_i (j)-z_{i-1} (j)|}{\varrho_i} ,1\leq i < k, 1 \leq j \leq p.
+\end{equation}
+($m_j$, $1 \leq j \leq p$, is the estimate of the H{\"o}lder  constant in the condition (\ref{eq:10}) for the function $F(\lambda_j,y)$, $1 \leq j \leq p$, of the set $\Phi_t(y)$ from (\ref{eq:21})).
+
+The algorithm for simultaneous optimization of all functions of the set $\Phi_t(y)$ from (\ref{eq:21}) (further denoted as SGSA) can be represented as the following sequence of steps.
+
+\textit{Step 1.} Compute characteristics of the intervals $R_j (i)$, $1 \leq i < k$, $1 \leq i \leq p$, and determine the function $F(\lambda_j,y)$, $1 \leq j \leq p$, whose search information contains the interval with the maximum characteristic
+\begin{equation}
+\label{eq:30}
+R_q (t)=\max R_j (i), 1 \leq i < k, 1 \leq i \leq p.
+\end{equation}
+
+\textit{Step 2.} Select the point of the next iteration in the interval with the maximum characteristic
+\begin{equation}
+\label{eq:31}
+x^{k+1}=X(x_{t-1},x_t )
+\end{equation}
+and calculate the value $\overrightarrow{z}^{k+1}$ of all simultaneously optimized functions $F(\lambda_j,y)$, $1 \leq j \leq p$, at the point $x^{k+1}$ (when calculating the point  $x^{k+1}$ the values $z_i (q)$, $1 \leq i \leq k$, of the function $F(\lambda_q,y(x_i))$ whose number was determined at Step 1 should be used).
+
+\textit{Step 3.} Check the stopping condition according to (\ref{eq:18})
+\begin{equation}
+\label{eq:32}
+\varrho_t \leq \varepsilon
+\end{equation}
+
+When the functions $F(\lambda_j,y)$, $1 \leq j \leq p$, are optimized simultaneously, it should be kept in mind that the values of these functions at their global minima may differ.  To ensure convergence to global minima of all the functions being optimized simultaneously, the SGSA algorithm has to be supplemented by a preliminary step of homogenizing the functions $F(\lambda_j,y)$, $1 \leq j \leq p$.
+
+\textit{Step 0.} Convert $F(\lambda_j,y)$, $1 \leq j \leq p$, according to the rule
+\begin{equation}
+\label{eq:33}
+F'(\lambda_j,y)=(F(\lambda_j,y)-z_{min} (j))/H_j, 1 \leq j \leq p,
+\end{equation}
+where $z_{min}(j)$, $1 \leq j \leq p$, is the minimum value of the function $F(\lambda_j,y)$, $1 \leq j \leq p$, i.e. 
+\begin{equation}
+\label{eq:34_2}
+z_{min} (j)=\min_{y\in D}F(\lambda_j,y), 1 \leq j \leq p,
+\end{equation}
+and $H_j$, $1 \leq j \leq p$, is the H{\"o}lder constant estimate in the condition (\ref{eq:10}) for the function $F(\lambda_j,y)$, $1 \leq j \leq p$.
+
+In the case where the values of $z_{min} (j)$, $H_j$, $1 \leq j \leq p$, are not known a prori, these values can be replaced by estimates calculated on the basis of available search information $A_k$ from (\ref{eq:22}) according to expressions (\ref{eq:19}) and (\ref{eq:29}).
+
+
+
+
+
+
+
+\section{Section} \label{sec:05}
+
 %
 % ---- Bibliography ----
 %
 % BibTeX users should specify bibliography style 'splncs04'.
 % References will then be sorted and formatted in the correct style.
 %
- \bibliographystyle{splncs04}
- \bibliography{bibliography}
+\begin{thebibliography}{1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\doi}[1]{https://doi.org/#1}
+
+\bibitem{c1} Miettinen, K.: Nonlinear Multiobjective Optimization. Springer (1999).
+\bibitem{c2} Ehrgott, M.: Multicriteria Optimization. Springer (2nd ed., 2010).
+\bibitem{c3} Collette, Y., Siarry, P.:  Multiobjective Optimization: Principles and Case Studies (Decision Engineering). Springer (2011).
+\bibitem{c4} Marler, R. T., Arora, J. S.: Multi-Objective Optimization: Concepts and Methods for Engineering. VDM Verlag (2009).
+\bibitem{c5} Pardalos, P.M., {\v Z}ilinskas, A., {\v Z}ilinskas, J.: Non-Convex Multi-Objective Optimization. Springer (2017).
+\bibitem{c6} Marler, R. T., Arora, J. S. Survey of multi-objective optimization methods for engineering. Struct. Multidisciplinary Optimization \textbf{26}, 369--395 (2004).
+\bibitem{c7}  Figueira, J., Greco, S., Ehrgott, M., eds.: Multiple criteria decision analysis: State of the art surveys. New York (NY). Springer (2005).
+\bibitem{c8} Zavadskas, E. K., Turskis, Z., Kildien{\. e}, S.: State of art surveys of overviews on MCDM/MADM methods. Technological and Economic Development of Economy, \textbf{20}, 165--179 (2014).
+\bibitem{c9} Hillermeier, C., Jahn, J.: Multiobjective optimization: survey of methods and industrial applications. Surv. Math. Ind. \textbf{11}, 1--42 (2005).
+\bibitem{c10} Collette, Y., Siarry, P.: Multiobjective Optimization: Principles and Case Studies. Decision Engineering. Springer, Heidelberg (2011). \doi{10.1007/978-3-662-08883-8}
+\bibitem{c11} Eichfelder, G.: Scalarizations for adaptively solving multi-objective optimization problems. Comput. Optim. Appl. \textbf{44}, 249--273 (2009).
+\bibitem{c12} Figueira, J., Liefooghe, A., Talbi, E., Wierzbicki, A.: A parallel multiple reference point approach for multi-objective optimization. European Journal of Operational Research, \textbf{205}(2), 390--400 2010. \doi{10.1016/j.ejor.2009.12.027}
+\bibitem{c13} Zhigljavsky, A.A.: Theory of Global Random Search. Dordrecht: Kluwer Academic Publishers (1991).
+\bibitem{c14} Pint{\' e}r, J.D.: Global optimization in Action (continuous and Lipschitz optimization: algorithms, implementations and applications). Kluwer Academic Publishers, Dortrecht (1996).
+\bibitem{c15} Strongin, R., Sergeyev, Ya.: Global optimization with non-convex constraints. Sequential and parallel algorithms. Kluwer Academic Publishers, Dordrecht (2nd ed. 2013, 3rd ed. 2014).
+\bibitem{c16} Yang, X.-S.: Nature-inspired metaheuristic algorithms. Luniver Press, Frome (2008).
+\bibitem{c17} Locatelli, M., Schoen, F.: Global Optimization: Theory, Algorithms, and Applications. SIAM (2013).
+\bibitem{c18} Paulavi{\v c}ius, R., {\v Z}ilinskas, J.: Simplicial Global Optimization. Springer, New York (2014). 
+\bibitem{c19} Floudas, C.A., Pardalos, M.P.: Recent Advances in Global Optimization. Princeton University Press (2016).
+\bibitem{c20} Sergeyev, Y.D., Kvasov, D.E.: Deterministic Global Optimization: An Introduction to the Diagonal Approach. Springer, New York (2017). 
+\bibitem{c21} Sergeyev Y.D., Strongin R.G., Lera D.: Introduction to global optimization exploiting space-filling curves. Springer (2013).
+\bibitem{c22} Piyavskij, S.: An algorithm for finding the absolute extremum of a function, Computational Mathematics and Mathematical Physics \textbf{12}, 57--67 (1972).
+\bibitem{c23} Shubert, B.O.: A sequential method seeking the global maximum of a function. SIAM Journal on Numerical Analysis \textbf{9} , 379--388 (1972).
+\bibitem{c24} Strongin R.G.: Multiextremal Minimization. Autom. Remote Control. \textbf{7}, 1085--1088 (1970).
+\bibitem{c25} Galperin, E.A.: The cubic algorithm. Journal of Mathematical Analysis and Applications \textbf{112}, 635--640 (1985).
+\bibitem{c26} Breiman, L., Cutler, A.: A deterministic algorithm for global optimization, Mathematical Programming \textbf{58}, 179--199 (1993).
+\bibitem{c27} Baritompa, W.: Accelerations for a variety of global optimization methods. Journal of Global Optimization \textbf{4}, 37--45 (1994).
+\bibitem{c28} Gergel, V.P.: A method of using derivatives in the minimization of multiextremum functions. Computational Mathematics and Mathematical Physics, \textbf{36}(6), 729--742 (1996).
+\bibitem{c29} Sergeyev, Y.D.: Global one-dimensional optimization using smooth auxiliary functions. Mathematical Programming \textbf{81}, 127--146 (1998).
+\bibitem{c30} Sergeyev Ya.D., Grishagin V.A.: Sequential and parallel global optimization algorithms. Optimization Methods and Software, \textbf{3}, 111--124 (1994).
+\bibitem{c31} Sergeyev, Y.D.: An information global optimization algorithm with local tuning. SIAM J. Optim., \textbf{5}(4), 858--870 (1995).
+\bibitem{c32} Sergeyev, Y.D., Grishagin, V.A.: Parallel asynchronous global search and the nested optimization scheme. J. Comput. Anal. Appl., \textbf{3}(2), 123--145 (2001).
+\bibitem{c33} Lera D., Sergeyev Ya.D.: Deterministic global optimization using space-filling curves and multiple estimates of Lipschitz and Holder constants. Communications in Nonlinear Science and Numerical Simulation, \textbf{23}, 328--342 (2015).
+\bibitem{c34} Grishagin, V., Israfilov, R., Sergeyev, Y.: Comparative efficiency of dimensionality reduction schemes in global optimization. AIP Conference Proceedings, 1776 (2016).
+\bibitem{c35} Gergel, V.: An Unified Approach to Use of Coprocessors of Various Types for Solving Global Optimization Problems. 2nd International Conference on Mathematics and Computers in Sciences and in Industry, 13--18 (2015). \doi{10.1109/MCSI.2015.18}
+\bibitem{c36} Gergel, V.P., Kozinov, E.A.: Accelerating multicriterial optimization by the intensive exploitation of accumulated search data. AIP Conference Proceedings, \textbf{1776}, 090003 (2016). \doi{10.1063/1.4965367}
+\bibitem{c37} Gergel, V., Kozinov, E. Efficient multicriterial optimization based on intensive reuse of search information. Journal of Global Optimization, 2018, 71(1), 73--90.
+\bibitem{c38} Gergel, V., Barkalov, K., Sysoyev, A. Globalizer: A novel supercomputer software system for solving time-consuming global optimization problem. Numerical algebra, control and optimization, \textbf{8}(1), 47--62 (2018).
+\bibitem{c39} {\v Z}ilinskas, A., Zilinskas, J.: Adaptation of a one-step worst-case optimal univariate algorithm of bi-objective Lipschitz optimization to multidimensional problems. Commun Nonlinear Sci Numer Simulat, \textbf{21}(1-3), 89--98 (2015). \doi{10.1016/j.cnsns.2014.08.025}
+\bibitem{c40} Evtushenko. Y., Posypkin, M.: A deterministic algorithm for global multiobjective optimization, Optimization Methods \& Software, \textbf{29}(5), 1005--1019 (2014). \doi{10.1080/10556788.2013.854357}
+\bibitem{c41} Evtushenko, Y., Posypkin, M.: Method of non-uniform coverages to solve the multicriteria optimization problems with guaranteed accuracy. Autom. Remote Control, \textbf{75}(6), 1025--1040 (2014).
+\bibitem{c42} Bleuler, S., Laumanns, M., Thiele, L., Zitzler, E.: Pisa-a platform and programming language independent interface for search algorithms, Evolutionary Multi-Criterion Optimization. LNCS, \textbf{2632}, 494--508 (2003). \doi{10.1007/3-540-36970-8\_35}
+\bibitem{c43} Gaviano, M., Kvasov, D.E, Lera, D., and Sergeyev, Ya.D.: Software for generation of classes of test functions with known local and global minima for global optimization. ACM Transactions on Mathematical Software, \textbf{29}(4), 469--480 (2003).
+\end{thebibliography}
+
+
 %
 \end{document}
