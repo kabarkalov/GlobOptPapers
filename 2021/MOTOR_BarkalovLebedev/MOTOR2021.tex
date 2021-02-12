@@ -5,6 +5,7 @@
 \documentclass[runningheads]{llncs}
 %
 \usepackage{graphicx}
+\usepackage{multirow}
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
 %
@@ -334,12 +335,102 @@ and $H_j$, $1 \leq j \leq p$, is the H{\"o}lder constant estimate in the conditi
 In the case where the values of $z_{min} (j)$, $H_j$, $1 \leq j \leq p$, are not known a prori, these values can be replaced by estimates calculated on the basis of available search information $A_k$ from (\ref{eq:22}) according to expressions (\ref{eq:19}) and (\ref{eq:29}).
 
 
+\section{Results of numerical experiments} \label{sec:05}
+
+Numerical experiments were performed on the Lobachevsky supercomputer (University of Nizhny Novgorod), (operating system -- CentOS 6.4, control system -- SLURM). One supercomputer node has 2 Intel Sandy Bridge E5-2660 2.2 GHz processors, 64 Gb RAM. The CPU is 8-core (i.e. a total of 16 CPU cores are available on the node). The numerical experiments were performed using the Globalizer system \cite{c36}.
+
+      The first series of experiments was performed to compare the MGSA algorithm with a number of well-known multicriteria optimization algorithms by solving a bi-criteria test problem \cite{c40}:
+\begin{equation}
+\label{eq:35}
+f_1 (y)=(y_1-1) y_2^2+1,f_2 (y)=y_2, 0 \leq y_1, y_2 \leq 1.
+\end{equation}
+
+In the course of the experiments, a numerical approximation of the Pareto domain was carried out to solve the problem (\ref{eq:35}), and the quality of the approximation was evaluated using the hypervolume and distribution uniformity indices (HV) \cite{c37,c40}. The first of these indices characterizes the completeness of approximation (a larger value corresponds to a more complete coverage of the Pareto domain), while the second one shows the uniformity of coverage (a smaller value corresponds to a more uniform coverage of the Pareto domain).
+
+Five multicriteria optimization algorithms were compared in this experiment: the Monte-Carlo (MC) method, the genetic algorithm SEMO from the PISA library \cite{c42}, the non-uniform coverage (NUC) method \cite{c40}, the bi-objective Lipschitz optimization (BLO) method \cite{c39} and the MGSA algorithm proposed in this paper. For the first three algorithms, the numerical results were used from \cite{c41}. The results of the BLO method were presented in \cite{c39}.
+
+For MGSA 100 problems (\ref{eq:04}) with different values of convolution coefficients $\lambda$ uniformly distributed in $\Lambda$ were solved. The full results of the experiments performed are presented in Table \ref{tab:1}.
+
+\begin{table}[ht]
+\centering
+\caption{Comparison of the efficiency of multicriteria optimization algorithms}
+\label{tab:1}
+\begin{tabular}{cccccc}\hline
+\textbf{Solution method}                                                                  & \textbf{MC} & \textbf{SEMO} & \textbf{NUC} & \textbf{BLO} & \textbf{MGSA}  \\ \hline
+\begin{tabular}[c]{@{}c@{}}Number of \\ method iterations\end{tabular}                    & 500         & 500           & 515          & 498          & \textbf{338}   \\
+\begin{tabular}[c]{@{}c@{}}Number of \\ points found in \\ the Pareto domain\end{tabular} & 67          & 104           & 29           & 68           & \textbf{115}  \\
+HV index                                                                                  & 0.300       & 0.312         & 0.306        & 0.308        & \textbf{0.318} \\
+DU index                                                                                  & 1.277       & 1.116         & 0.210        & 0.175        & \textbf{0.107} \\ \hline
+\end{tabular}
+\end{table}
 
 
+As the experimental results show, the MGSA algorithm has a distinct advantage over the other multicriteria optimization methods considered, even for solving relatively simple MOO problems.
 
+   In the second series of numerical experiments, we solved bi-criteria two-dimensional MOO problems, i.e. with $N = 2$, $s = 2$. We used multiextremal functions obtained with the help of the GKLS generator \cite{c43} as objective functions of the problem. During the experiments, we solved 100 multicriteria problems of this class, for each of them the set $\Phi_p (y)$ from (\ref{eq:21}) comprised 5, 10 and 25 simultaneously optimized functions respectively (the convolution coefficients $\lambda \in \Lambda$ from (\ref{eq:06}) for the functions of the set $\Phi_p (y)$ being uniformly distributed in $\Lambda$). To check the accuracy of the solution of MOO problems, the computed estimates of the efficient solutions were checked to confirm they belonged to the Pareto domain. For the parameters of the MGSA algorithm, the following values were used: accuracy $\varepsilon=0.01$,  reliability $r=5.6$. The computational results were averaged over the number of MOO problems solved.
 
+The results of numerical experiments are presented in Table \ref{tab:2}.
 
-\section{Section} \label{sec:05}
+\begin{table}[ht]
+\centering
+\caption{Results of numerical experiments on solving two-dimensional bi-criteria MOO problems}
+\label{tab:2}
+\begin{tabular}{cccclccclccc}
+\hline
+\multirow{3}{*}{\begin{tabular}[c]{@{}c@{}}Number of \\ functions in\\ $\Phi_p (y)$\end{tabular}} & \multicolumn{11}{c}{Algorithms}                                                     \\ \cline{2-12} 
+                                                                                        & \multicolumn{3}{c}{GSA} &  & \multicolumn{3}{c}{MGSA} &  & \multicolumn{3}{c}{SGSA} \\
+                                                                                        & Iters   & HV    & DU    &  & Iters   & HV     & DU    &  & Iters   & HV     & DU    \\ \hline
+5                                                                                       & 3771,8  & 6,455 & 0,25  &  & 1823,4  & 6,481  & 0,208 &  & 2090,5  & 6,479  & 0,217 \\
+10                                                                                      & 7941,6  & 6,485 & 0,183 &  & 1955,5  & 6,486  & 0,205 &  & 2224,4  & 6,486  & 0,191 \\
+25                                                                                      & 20456,2 & 6,504 & 0,143 &  & 2135,8  & 6,490  & 0,209 &  & 2456,1  & 6,493  & 0,188 \\ \hline
+\end{tabular}
+\end{table}
+
+Table 2 shows in the first column the number of functions $\Phi_p (y)$ being optimized from (\ref{eq:21}).  The columns named Iters contain the average number of iterations performed by the MOO algorithm to solve the MOO problem. The columns named HV and DU contain the values of the HV and DU indicators. The results of the numerical experiments are divided with respect to the three algorithms used: GSA is described in Section \ref{sec:03}, MGSA is discussed in Section \ref{sec:03} (item 2), SGSA is presented in Section \ref{sec:04} (item 3). 
+
+The experimental results show that by reusing search information when optimizing 25 functions from the set $\Phi_p (y)$ the total computational volume can be reduced  by more than 9.5 times without resorting to any additional computational resources. At the same time, the MGSA algorithm performs the least number of iterations (the number of calculations of objective function values), while the SGSA algorithm provides a better approximation of the Pareto domain both in terms of approximation completeness and coverage uniformity. It is also noteworthy that the average number of iterations to optimize one function from the set $\Phi_p (y)$ decreases by more than 4 times as the number of functions in the set $\Phi_p (y)$ increases -- see Table \ref{tab:3}. 
+
+% Please add the following required packages to your document preamble:
+% \usepackage{multirow}
+\begin{table}[ht]
+\centering
+\caption{Average number of iterations required to optimize one function from the set $\Phi_p (y)$}
+\label{tab:3}
+\begin{tabular}{cccc}
+\hline
+\multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}Number of \\ functions in $\Phi_p (y)$\end{tabular}} & \multicolumn{3}{c}{Average number of   iterations} \\
+                                                                                        & GSA             & MGSA            & SGSA           \\ \hline
+5                                                                                       & 754,4           & 364,7           & 418,1          \\
+10                                                                                      & 794,2           & 195,6           & 222,4          \\
+25                                                                                      & 818,2           & 85,4            & 98,2           \\ \hline
+\end{tabular}
+\end{table}
+
+In the third series of numerical experiments, 10 bi-criteria five-dimensional MOO problems were solved, i.e. $N = 5$, $s = 2$, $m=2$. The objective functions of the MOO problems were determined, as before, using the GKLS generator \cite{c43}. When solving the problems, the accuracy $\varepsilon=0.05$ and the reliability of the method $r=5.6$ were used. The results of numerical experiments are presented in Table \ref{tab:4}.
+
+\begin{table}[ht]
+\centering
+\caption{The results of a series of experiments to solve five-dimensional bi-criteria MOO problems}
+\label{tab:4}
+\begin{tabular}{cccclccclccc}
+\hline
+\multirow{3}{*}{\begin{tabular}[c]{@{}c@{}}Number of \\ functions in\\ $\Phi_p (y)$\end{tabular}} & \multicolumn{11}{c}{Algorithms}                                                     \\ \cline{2-12} 
+                                                                                        & \multicolumn{3}{c}{GSA} &  & \multicolumn{3}{c}{MGSA} &  & \multicolumn{3}{c}{SGSA} \\
+                                                                                        & Iters   & HV    & DU    &  & Iters   & HV     & DU    &  & Iters   & HV     & DU    \\ \hline
+25                                                                                      & 1030039,6 & 2,440 & 0,543 & & 619755,6 & 2,441 & 0,681 & & 669743,8 & 2,364 & 0,668 \\ \hline
+\end{tabular}
+\end{table}
+
+The results of our experiments show that with increasing dimensionality of the MOO problems to be solved, the trend that has been identified continues: the amount of computation (the number of global search iterations) is reduced by more than 1.6 times due to reuse of search information, the MGSA algorithm performs the least number of iterations, and the SGSA algorithm provides the best approximation of the Pareto domain.
+
+\section*{Conclusion}
+
+This paper proposes an effective method for solving computationally intensive multicriteria optimization problems which require computing several Pareto-optimal decisions. It is also assumed that efficiency criteria may be multiextremal, and computation of function values may require a large amount of calculations. The proposed approach is based on the reduction of multicriteria optimization problems to one-dimensional global optimization problems that can be solved using effective statistical information algorithms of global search.  The novelty of the proposed approach consists in the possibility of solving several global optimization problems simultaneously, which allows multiple Pareto-optimal decisions to be obtained. Besides, such approach provides for reuse of the computed search information, which considerably reduces computational effort for solving multicriteria optimization problems. 
+
+The results of numerical experiments show that by using the developed approach it is possible to achieve a significant reduction of computational complexity when solving multicriteria optimization problems. 
+
+It should be noted in conclusion that the proposed approach is quite promising and requires further research in this area. First of all, it is necessary to continue numerical experiments on solving multicriteria optimization problems with a greater number of partial efficiency criteria and for higher dimensionality of optimization problems to be solved. The possibility of organizing parallel computations for high-performance systems should also be evaluated.
+
 
 %
 % ---- Bibliography ----
