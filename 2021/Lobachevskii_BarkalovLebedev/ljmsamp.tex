@@ -51,9 +51,9 @@ for Solving Mixed-Integer Global Optimization Problems}
 
 
 \begin{abstract} % You shouldn't use formulas and citations in the abstract.
-В работе рассматриваются mixed-integer global optimization problems. Обсуждается параллельный алгоритм для решения задач данного класса, основанный на information-statistical approach к решению задач непрерывной глобальной оптимизации. Для рассматриваемого параллельного алгоритма предложена схема локальной настройки, основанная на предположении слабой многоэкстремальности задачи. 
-Приведены результаты сравнения последовательной версии алгоритма с другими методами аналогичного назначения. 
-Эффективность распараллеливания алгоритма подтверждена решением серии mixed-integer global optimization problems на Lobachevsky supercomputer. 
+In this paper, we consider mixed-integer global optimization problems and propose a parallel algorithm for solving problems of this class based on information-statistical approach for solving continuous global optimization problems. Within this algorithm, we suggest using a local tuning scheme based on the assumption that the multiextremality of the discussed problem is weak. 
+We also compare the sequential version of the algorithm with other similar methods.
+The effectiveness of parallelizing the algorithm has been confirmed by solving a series of mixed-integer global optimization problems on the Lobachevsky supercomputer.
 \end{abstract}
 
 \subclass{90C26, 90C30} % Enter 2010 Mathematics Subject Classification.
@@ -66,63 +66,65 @@ for Solving Mixed-Integer Global Optimization Problems}
 
 \section{Introduction}
 
-В работе рассматриваются global optimization problems и параллельные методы их решения. Методы решения задач указанного класса  обладают значительной вычислительной трудоемкостью, т.к. глобальный оптимум является интегральной характеристикой решаемой задачи и требует исследования всей области поиска. Как результат, поиск глобального оптимума сводится к построению некоторого покрытия (как правило, неравномерного) в области изменения параметров. Особый интерес представляют задачи, в которых часть параметров может принимать лишь дискретные (например, целочисленные) значения (mixed-integer global optimization problems), т.к. для них сложнее построить оценки оптимума по сравнению с задачами, в которых все параметры являются непрерывными.
+Our research focuses on global optimization problems and parallel methods for their solution. Solving problems of this class requires substantial computational power since the global optimum as an integral characteristic of the problem requires the investigation of the entire search domain. Thus, the search for the global optimum is reduced to the construction of some coverage (as a rule, uneven) in the range of parameter change. This draws a particular interest to mixed-integer global optimization problems since it is more difficult to construct estimates of the optimum for such problems as compared to the continuous integer problems. 
 
-Ситуация, когда некоторые из параметров характеризуются дискретностью, является широко распространенной в прикладных оптимизационных задачах. При этом дискретные параметры имеют, как правило, небольшое число значений и могут определять, например, марку используемого материала, вариант типовой компоновки деталей и т.п. 
-Одновременно с этим целевая функция и ограничения обычно заданы не явно, а в виде некоторого алгоритма вычисления их значений в точках области поиска, т.е. представляют собой функции вида “black-box”. Процесс проверки ограничений и вычисления значения целевой функции в некоторой точке (называемый в дальнейшем trial) требует проведения численного моделирования и является трудоемкой операцией. 
+So, it is quite typical when some of the parameters in the applied optimization problems are discrete. In this case, discrete parameters have, as a rule, a small number of values and can determine, for example, the grade of the material used, or the variation of the standard arrangement of parts, etc.
+At the same time, the objective function and constraints are usually specified not explicitly, but in the form of some algorithm for calculating their values at the points of the search domain, i.e. they represent black-box functions. The process of checking the constraints and calculating the value of the objective function at a certain point (hereinafter referred to as trial) requires numerical simulation and is a time-consuming operation. 
 
-Методам решения mixed-integer problems посвящена обширная литература (см., например, обзоры \cite{Burer,Boukouvala}). Известные детерминированные методы решения задач данного класса основаны, как правило, на подходах Branch-and-Bound \cite{Belotti} or Branch-and-Reduce \cite{Vigerske}. Для решения таких задач могут применяться также nature-inspired algorithms \cite{Deep,Schluter}, которые так или иначе основаны на идеях случайного поиска.
+An extensive literature is devoted to methods for solving mixed-integer problems (see, for example, reviews \cite{Burer,Boukouvala}). Known deterministic methods for solving problems of this class are based, as a rule, on the Branch-and-Bound \cite{Belotti} or Branch-and-Reduce \cite{Vigerske}. . Such problems may also be solved by nature-inspired algorithms \cite{Deep,Schluter}, which in one way or another are based on a random search.
 
-Отметим ключевые моменты, специфичные для построения параллельных алгоритмов решения mixed-integer global optimization problems. Организовать распараллеливание процесса поиска можно несколькими способами.
-Во-первых, можно распараллеливать процесс проведения одного trial, т.е. вычисления функций задачи в одной точке области поиска. Данный путь будет давать ускорение, но является специфичным для каждой конкретной решаемой задачи.
-Во-вторых, можно распараллелить реализацию вычислительных правил алгоритма, обеспечивающих выбор точки очередного испытания. В этом случае способ распараллеливания будет зависеть от конкретного класса алгоритмов и, кроме того, часто эти правила достаточно просты и распараллеливать их нецелесообразно.
-В-третьих, можно организовать параллельное выполнение нескольких испытаний на одной итерации поиска. Этот подход и будет использоваться в данной работе, т.к. он характеризуется эффективностью (распараллеливается именно та часть вычислительного процесса, в которой выполняется основной объем вычислений) и общностью (применим для широкого класса алгоритмов глобальной оптимизации).
+Let us highlight the key points that are specific to the construction of parallel algorithms for solving mixed-integer global optimization problems. There are several ways to parallelize the search process.
+First, we can parallelize one trial, i.e. calculate functions of a problem at one point in the search domain. This approach will accelerate the calculations, but on the other hand, will have to be tailored for each particular problem.
+Second, we can parallelize the implementation of the computational rules of the algorithm that ensure the selection of a point for the next trial. In this case, the method of parallelization will depend on the specific class of algorithm. However, these rules are often quite simple, which makes their parallelization impractical.
+Third, it is possible to organize parallel execution of several trials during one search iteration. We will use this approach in this work due to its efficiency (it provides parallelization of the exact part of the computational process responsible for the bulk of the calculations) and generality (applicable to a wide class of global optimization algorithms).
 
-В данной работе нами предложен новый параллельный метод решения mixed-integer problems, основанный на information-statistical approach к решению задач глобальной оптимизации \cite{Strongin2000,Strongin2013}. 
+In this paper, we propose a new parallel method for solving mixed-integer problems based on an information-statistical approach to solving global optimization problems \cite{Strongin2000,Strongin2013}. 
 
-В рамках данного подхода 
+Within this approach 
 \begin{itemize}
 	\item 
-	решение многомерных задач сводится  к решению эквивалентных им одномерных, cоответствующая редукция основана на использовании space-filling curves;
+	solving multidimensional problems is reduced to solving equivalent one-dimensional problems, the corresponding reduction is based on the use of space-filling curves;
 	\item 
-	при решении constrained optimization problems каждое ограничение учитывается и обрабатывается отдельно, штрафные функции не используются;
+	when solving constrained optimization problems, each constraint is taken into account and processed separately, and penalty functions are not used;
 	\item
-	учитывается информация о неоднородном поведении функций задачи в разных подобластях областях области поиска, что позволяет ускорить процесс поиска решения за счет совмещения процедур локального уточнения текущего лучшего решения и его глобального обновления;
+	taking into account the information on the inhomogeneous behavior of the problem functions in different subdomains of the search domain makes it possible to speed up the process of finding a solution by combining the procedures for local refinement of the current best solution and its global update;
 	\item 
-	распараллеливание процесса поиска осуществляется за счет одновременного вычисления на каждой итерации нескольких значений целевой функции в разных точках search domain.	
+	parallelization of the search process is carried out by simultaneous calculation of several values of the objective function at different points of the search domain during each iteration.	
 \end{itemize}
 
-Текст статьи, отражающей результаты проведенного исследования, построен следующим образом. 
-В Section 2 дано краткое описание описание схемы редукции размерности с использованием space-filling curves, а также описана индексная схема учета ограничений. Здесь же приведена формулировка параллельного индексного алгоритма для решения задач непрерывной глобальной оптимизации.
-В Section 3 изложен способ учета локальных свойств функций задачи, позволяющий ускорить сходимость алгоритма.
+To provide a proper representation of the results of the study, we structured the text of the article as follows.
+Section 2 provides a brief description of the dimension reduction scheme using space-filling curves, as well as an index scheme for considering constraints. It also contains the formulation of a parallel index algorithm for solving continuous global optimization problems.
+Section 3 outlines a way to take into account the local properties of the problem functions to speed up the convergence of the algorithm.
+
 В Section 4 предложен подход к обобщению параллельного индексного алгоритма с целью решения mixed-integer problems. Приведен способ, позволяющий свести решение mixed-integer problem к решению информационно-связанного множества задач непрерывной оптимизации, которое может выполняться параллельно. 
-Section 5 содержит результаты численных экспериментов. Здесь производится сравнение последовательной версии алгоритма с известными аналогами, а также показана эффективность распараллеливания алгоритма с локальной настройкой при решении серии multiextremal mixed-integer problem на суперкомпьютере.  
+
+Section 5 contains the results of numerical experiments. There we compare the sequential version of the algorithm with known alternatives and also demonstrate the efficiency of parallelizing the algorithm with local tuning when solving the multiextremal mixed-integer problem series on a supercomputer. 
 Section 6 concludes the paper.
 
 \section{Parallel global optimization algorithm and dimensionality reduction}
 
-Рассмотрим задачу глобальной оптимизации с непрерывными параметрами вида
+Let us consider a global optimization problem with continuous parameters of the form
 \begin{eqnarray}\label{problem}
 &\varphi(y^\ast)=\min{\left\{\varphi(y):y\in D, \; g_i(y)\leq 0, \; 1 \leq i \leq m\right\}},\\
 &D=\left\{y\in R^N: a_j\leq y_j \leq b_j, 1\leq j \leq N \right\}.\label{D}
 \end{eqnarray}
-Будем предполагать, что objective function $\varphi(y)$ (hereafter denoted by $g_{m+1}(y)$) and the left-hand sides $g_i(y), \; 1\leq i \leq m,$ of the constraints satisfy the Lipschitz condition 
+We will assume that objective function $\varphi(y)$ (hereafter denoted by $g_{m+1}(y)$) and the left-hand sides $g_i(y), \; 1\leq i \leq m,$ of the constraints satisfy the Lipschitz condition 
 \[
 \left|g_i(y_1)-g_i(y_2)\right|\leq L_i\left\|y_1-y_2\right\|, \;1\leq i\leq m+1, \; y_1,y_2 \in D,\;
 \]
 with a priori unknown constants $L_i, \; 1 \leq i \leq m+1$. 
 
-Предположение о выполнении условия Липшица является типичным для многих подходов к построению параллельных алгоритмов глобальной оптмизации \cite{Evtushenko2009,Zilinskas2011}. При этом для решения многомерных задач оптимизации адаптируются алгоритмы решения одномерных задач, см., например, методы на основе разбиений области поиска \cite{Zilinskas2014,Sergeyev2017}.
+The assumption that the Lipschitz condition is satisfied is typical for many approaches to the construction of parallel algorithms for global optimization \cite{Evtushenko2009,Zilinskas2011}. In this case, the solution of a multidimensional optimization problem requires algorithms to be adjusted for solving one-dimensional problems, see, for example, methods based on partitions of the search domain \cite{Zilinskas2014,Sergeyev2017}.
 
-В данной работе мы будем использовать подход к сведению многомерных задач к одномерным на основе space-filling curves. 
-Используя отображения типа Peano-Hilbert curve $y(x)$, отображающие отрезок $[0,1]$ на $N$-dimensional domain (\ref{D}),
-можно свести многомерную задачу условной минимизации в области $D$ к одномерной задаче условной минимизации на отрезке $[0,1]$
+In this work, we will use an approach to reducing multidimensional problems to one-dimensional problems based on space-filling curves.
+Using mappings of the Peano-Hilbert curve $y(x)$ type, which project the segment $[0,1]$ onto the $N$-dimensional domain (\ref{D}),
+we can reduce the multidimensional conditional minimization problem in the domain $D$ to a one-dimensional conditional minimization problem in the segment $[0,1]$
 \begin{equation}\label{problem1}
 \varphi(y(x^\ast))=\min \left\{\varphi(y(x)): x \in [0,1], \; g_i(y(x))\leq 0, \; 1 \leq i \leq m\right\}.
 \end{equation}
 
-Методы для построения чиcленных аппроксимаций Peano-Hilbert curve $y(x)$ (называемых \textit{evolvent}) рассмотрены в \cite{Sergeyev2013}. These evolvents are fractals generated by an iterative process, that fill in the hypercube $D$ with accuracy $2^{-M}$, where integer $M>0$ is the evolvent construction parameter. 
-Примеры разверток с разными значениями $M$  для размерности $N=3$ приведены на Fig.~\ref{evolvents}.
+Methods for constructing numerical approximations of Peano-Hilbert curves $y(x)$ (called \textit{evolvents}) are discussed in \cite{Sergeyev2013}. These evolvents are fractals generated by an iterative process. They fill in the hypercube $D$ with accuracy $2^{-M}$, where integer $M>0$ is the evolvent construction parameter. 
+Examples of evolvents with different values of $M$  for the dimensionality $N=3$ are shown in Fig.~\ref{evolvents}.
 
 \begin{figure}
 \begin{minipage}{0.4\linewidth}
@@ -135,57 +137,57 @@ with a priori unknown constants $L_i, \; 1 \leq i \leq m+1$.
 \label{evolvents}
 \end{figure}
 
-Задачу (\ref{problem1}) мы будем рассматривать в предположении, что функции $g_i(y(x))$ определены и вычислимы лишь на соответствующих множествах 
+We shall consider the problem (\ref{problem1}) under the assumption that the functions $g_i(y(x))$ are defined and computable only on the corresponding sets
 \[
 Q_1=[0,1], \; Q_{i+1}=\left\{x \in Q_i : g_i(y(x)) \leq 0 \right\}, \; 1 \leq i \leq m.
 \]
 
-Эти условия позволяют ввести классификацию точек $x \in [0,1]$ в соответствии с числом $\nu (x)$ ограничений, вычисленных в этой точке. The \textit{index} $\nu(x)$ также можно определить с помощью условий
+These conditions allow for the classification of points $x \in [0,1]$ in accordance with the number of constraints $\nu(x)$  calculated at this point. The \textit{index} $\nu(x)$ can also be determined using conditions
+
 \begin{equation}\label{nu}
 g_i(y(x)) \leq 0, \; 1 \leq i < \nu, \; g_\nu(y(x))>0,
 \end{equation}
-где последнее неравенство исключается из рассмотрения, если $\nu=m+1$.
+where the last inequality is excluded from consideration if  $\nu=m+1$.
 
-Указанная схема редукции размерности сопоставляет многомерной задаче с липшицевой минимизируемой функцией и липшицевыми ограничениями одномерную задачу, в которой соответствующие функции удовлетворяют uniform H{\"o}lder condition (see \cite{Sergeyev2013}), i.e.,
+The indicated dimensionality reduction scheme associates a multidimensional problem with a Lipschitz objective function and Lipschitz constraints with a one-dimensional problem in which the corresponding functions satisfy the uniform  H{\"o}lder condition (see \cite{Sergeyev2013}), i.e.,
 \[
-\left|g_i(y(x_1))-g_i (y(x_2))\right| \leq H_i \left|x_1-x_2 \right|^{1/N}, \; x_1,x_2\in [0,1], \; 
-1\leq i \leq m+1,
+\left|g_i(y(x_1))-g_i (y(x_2))\right| \leq H_i \left|x_1-x_2 \right|^{1/N}, \; x_1,x_2\in [0,1], \; 1\leq i \leq m+1,
 \]
-где $N$ есть размерность исходной многомерной задачи, а H{\"o}lder coefficients $H_i$ связаны с Lipschitz constants $L_i$ исходной задачи соотношениями $H_i \leq 2L_i \sqrt{N+3}$.
+where $N$ is the dimensionality of the original multidimensional problem, and H{\"o}lder coefficients $H_i$ are related to Lipschitz constants $L_i$ of the original problem by the relation  $H_i \leq 2L_i \sqrt{N+3}$.
 
-Таким образом, \textit{a trial} в точке $x^k \in [0,1]$, выполненное на $k$-й итерации алгоритма, будет состоять из следующих действий:
+Thus, \textit{a trial} at a point $x^k \in [0,1]$ performed during the $k$-th iteration of the algorithm will feature the following steps:
 \begin{itemize}
-	\item определить \textit{image} $y^k=y(x^k)$ в соотвествии с отображением $y(x)$;
-	\item вычислить значения $g_1(y^k),..., g_\nu(y^k),$ where $\nu = \nu(x^k)$ is from (\ref{nu}). 
+	\item determine \textit{image} $y^k=y(x^k)$ in accordance with the mapping $y(x)$;
+	\item calculate values $g_1(y^k),..., g_\nu(y^k),$ where $\nu = \nu(x^k)$ is from (\ref{nu}). 
 \end{itemize}
-Пару значений 
+A value pair
 \begin{equation} \label{trial_result}
  \{ \nu=\nu(x^k), \; z^k=g_\nu(y(x^k)) \} 
 \end{equation}
-порождаемую испытанием в точке $x^k \in [0,1]$, будем называть \textit{trial outcome}.
+generated by the trial at a point $x^k \in [0,1]$, will be referred to as \textit{trial outcome}.
 
-Рассмотрим параллельный алгоритм для решения constrained global optimization problems, предложенный в работах \cite{Strongin2000,Strongin2013} и основанный на индексной схеме учета ограничений. 
+Let us consider a parallel algorithm for solving constrained global optimization problems proposed in  \cite{Strongin2000,Strongin2013} and based on an index scheme for the accounting of constraints.
 
-При описании параллельного алгоритма мы будем предполагать, что в нашем распоряжении имеется $p$ вычислительных элементов (узлов, процессоров или ядер), которые будут использоваться для параллельного проведения $p$ trials одновременно. 
+To describe a parallel algorithm, we will assume that we have $p$ computational elements (nodes, processors, or cores) at our disposal, which will be used for parallel execution of $p$ trials simultaneously. 
 
-На первой итерации метода $p$ trials проводятся параллельно в произвольных различных точках $x^i\in(0,1)$, $1\leq i \leq p$.
-Пусть выполнено $n\geq 1$  итераций метода, в процессе которых были проведены испытания в $k=np$ точках $x^i, 1\leq i \leq k$. Тогда точки $x^{k+1},...,x^{k+p}$ поисковых испытаний $(n+1)$-ой итерации определяются в соответствии со следующими правилами.
+During the first iteration of the method, $p$ trials trials are carried out in parallel at different arbitrary points $x^i\in(0,1)$, $1\leq i \leq p$.
+Let $n\geq 1$ iterations of the method be performed with trials at $k=np$ points $x^i, 1\leq i \leq k$. Then points $x^{k+1},...,x^{k+p}$ of the search trials during the $(n+1)$-th iteration are determined according to the following rules.
 
 \begin{enumerate}
 \item 
-Перенумеровать точки $x^1,...,x^k$ предшествующих испытаний нижними индексами в порядке увеличения значений координаты
+Renumber the points $x^1,...,x^k$ of the previous trials with subscripts in ascending order of coordinate values
 \begin{equation}\label{Eq:17}
 0=x_0<x_1<...<x_i<...<x_k<x_{k+1}=1,
 \end{equation}
-и сопоставить им значения $z_i=g_\nu(y(x_i))$, $\nu=\nu(x_i)$, $1 \leq i \leq k$, из (\ref{trial_result}), вычисленные в этих точках; точки $x_0=0$ and $x_{k+1}=1$ введены дополнительно; значения $z_0$ и $z_{k+1}$ не заданы.
+and assign $z_i=g_\nu(y(x_i))$, $\nu=\nu(x_i)$, $1 \leq i \leq k$; points $x_0=0$ and $x_{k+1}=1$ are introduced additionally, values $z_0$ и $z_{k+1}$ are not set.
 \item
-Провести классификацию номеров  $i,1\leq i \leq k$, точек испытаний из  (\ref{Eq:17}) по числу ограничений задачи, выполняющихся в этих точках, путем построения множеств
+Classify indexes  $i,1\leq i \leq k$, of the trial points from  (\ref{Eq:17}) by the number of constraints that are met at these points by constructing the sets
 \begin{equation}\label{Eq:18}
 I_\nu = \left\{i: 1 \leq i \leq k,\ \nu = \nu(x_i)\right\},\ 1 \leq \nu \leq m+1,
 \end{equation}
-содержащих номера всех точек  $x_i,1\leq i \leq k$, имеющих индексы, равные одному и тому же значению $\nu$. Граничные точки $x_0=0$ and $x_{k+1}=1$ интерпретируются как имеющие нулевые индексы, и им сопоставляется дополнительное множество $I_0={0,k+1}$. 
+containing the indices of all points $x_i,1\leq i \leq k$, with indices equal to the same value $\nu$. The boundary points $x_0=0$ and $x_{k+1}=1$ are interpreted as having zero indices, and an additional set $I_0={0,k+1}$ is assigned to them. 
 
-Определить максимальное значение индекса
+Determine the maximum value of indices
 \begin{equation}\label{Eq:19}
 V=\max \left\{\nu = \nu(x_i), \ 1\leq i \leq k\right\}.
 \end{equation}
@@ -194,9 +196,9 @@ For all values of $\nu, \ 1\leq \nu \leq m+1$, calculate the values
 \begin{equation}\label{Eq:20}
 \mu_\nu = \max \left\{ \frac{\left|z_i-z_j\right|}{\left(x_i-x_j\right)^{1/N}} : i,j \in I_\nu, j<i\right\}.
 \end{equation}
-Если множество  $I_\nu$ содержит менее двух элементов или если $\mu_\nu$ from (\ref{Eq:20}) оказывается равным нулю, то использовать значение $\mu_\nu=1$.
+If set $I_\nu$ contains less than two elements or if $\mu_\nu$ from (\ref{Eq:20}) is equal to zero, then use the value $\mu_\nu=1$.
 \item
-Для всех непустых множеств  $I_\nu$, $1 \leq \nu \leq m+1$, вычислить значения
+For all non-empty sets $I_\nu$, $1 \leq \nu \leq m+1$, calculate values
 \begin{equation}\label{Eq:21}
   z^\ast_\nu =  
    \begin{cases}
@@ -204,27 +206,27 @@ For all values of $\nu, \ 1\leq \nu \leq m+1$, calculate the values
     \min{\left\{g_\nu(x_i):i\in I_\nu\right\}}, \nu = V,
    \end{cases}
 \end{equation}
-где $V$ является максимальным значением индекса, а вектор
+where $V$ is the maximum index value and the vector
 \begin{equation}\label{Eq:22}
 \epsilon _R=\left(\epsilon_1,...,\epsilon_m\right),
 \end{equation}
-с положительными компонентами (называемый также \textit{reserve vector}) является параметром алгоритма.
+with positive components (also referred to as \textit{reserve vector}) is the algorithm parameter.
 \item
-Для каждого интервала  $(x_{i-1},x_i)$,$1 \leq i \leq k+1$, вычислить \textit{характеристику} $R(i)$: 
+For each interval $(x_{i-1},x_i)$,$1 \leq i \leq k+1$, calculate the \textit{characteristics} $R(i)$: 
 \begin{eqnarray}\label{R}
 &R(i)=\Delta_i+ \frac{(z_i-z_{i-1})^2}{(r_\nu\mu_\nu)^2\Delta_i}-2\frac{z_i+z_{i-1}-2z^\ast_\nu}{r_\nu\mu_\nu},\;\; \nu=\nu(x_{i-1})=\nu(x_i),\nonumber \\
 &R(i)= 2\Delta_i-4\frac{z_i-z^\ast_\nu}{r_\nu\mu_\nu},\;\; \nu(x_{i-1})<\nu(x_i)=\nu,\\
-&R(i)= 2\Delta_i-4\frac{z_{i-1}-z^\ast_\nu}{r_\nu\mu_\nu},\;\; \nu = \nu(x_{i-1})>\nu(x_i).\nonumber
+&R(i)= 2\Delta_i-4\frac{z_{i-1}-z^\ast_\nu}{r_\nu\mu_\nu},\;\; \nu = \nu(x_{i-1})>\nu(x_i),\nonumber
 \end{eqnarray}
-где $\Delta_i=(x_i-x_{i-1})^{1/N}$, а значения $r_\nu>1, 1\leq\nu\leq m+1$, являются параметрами алгоритма.
+where $\Delta_i=(x_i-x_{i-1})^{1/N}$, and values $r_\nu>1, 1\leq\nu\leq m+1$, are the algorithm parameters.
 \item
-Упорядочить характеристики $R(i)$, $1\leq i \leq k+1$, по убыванию  	
+Sort characteristics $R(i)$, $1\leq i \leq k+1$, in descending order 	
 \begin{equation}\label{Eq:23}
 R(t_1)\geq R(t_2)\geq ... \geq R(t_{k})\geq R(t_{k+1})
 \end{equation}
-и выбрать $p$ интервалов с номерами $t_j, 1\leq j \leq p$, которым соответствуют наибольшие характеристики.
+and select $p$ intervals with numbers $t_j, 1\leq j \leq p,$ corresponding to the largest characteristics.
 \item
-Провести параллельно $p$ новых испытаний в точках $x^{k+j}, 1 \leq j \leq p$, вычисленных по формулам
+Conduct $p$ new trials in parallel at points $x^{k+j}, 1 \leq j \leq p$, calculated by the formulas
 \begin{eqnarray*}
 & x^{k+j}=\frac{x_{t_j}+x_{t_j-1}}{2}, \; \nu(x_{t_j-1})\neq \nu(x_{t_j}), \\
 & x^{k+j}=\frac{x_{t_j}+x_{t_j-1}}{2}- \frac{\mathrm{sign}(z_{t_j}-z_{t_j-1})}{2r_\nu}\left[\frac{\left|z_{t_j}-z_{t_j-1}\right|}{\mu_\nu}\right]^N, \; \nu(x_{t_j-1})=\nu(x_{t_j})=\nu. \\
@@ -232,82 +234,83 @@ R(t_1)\geq R(t_2)\geq ... \geq R(t_{k})\geq R(t_{k+1})
 
 \end{enumerate}
 
-Алгоритм прекращает работу, если по крайней мере для одного из номеров $t_j, 1\leq j \leq p$ выполняется условие $\Delta_{t_j}\leq \epsilon$; здесь $\epsilon>0$ есть заданная точность решения задачи.
+The algorithm stops if the condition $\Delta_{t_j}\leq \epsilon$ is satisfied at least for one of the numbers $t_j, 1\leq j \leq p$; here $\epsilon>0$ is the target accuracy of the solution.
 
-Данный способ организации параллельных вычислений имеет следующее обоснование. Используемые в вычислительных правилах алгоритма характеристики интервалов (\ref{R}) могут рассматриваться как некоторые оценки вероятности обнаружения в данных интервалах точки глобального минимума. Неравенства (\ref{Eq:23}) упорядочивают интервалы по их характеристикам, и испытания проводятся параллельно в первых $p$ интервалах, имеющих наибольшие вероятности.
+This way of organizing parallel computing has the following rationale. The characteristics of intervals (\ref{R}) used in the computational rules of the algorithm can be considered as some estimates of the probability of detecting a global minimum point in these intervals. Inequalities (\ref{Eq:23}) order the intervals according to their characteristics, and trials are carried out in parallel in the first $p$ intervals with the highest probabilities.
 
 A detailed description of the algorithm convergence theory is presented in \cite{Strongin2000,Strongin2013}.
-Роль параметров алгоритма ($r_\nu>1$ and $\epsilon_\nu>0, 1\leq\nu\leq m+1$) обсуждается в \cite{Strongin2020}.
-Изложенный алгоритм может быть также использован для решения задач многокритериальной оптимизации \cite{Gergel2020}.
+The role of the algorithm parameters ($r_\nu>1$ and $\epsilon_\nu>0, 1\leq\nu\leq m+1$) is discussed in \cite{Strongin2020}.
+The described algorithm can also be used to solve multicriteria optimization problems \cite{Gergel2020}.
 
 \section{Local tuning for global optimization algorithm}
 
-Одно из важных свойств рассматривамых задач заключается в том, что во многих случаях поведение функций в задаче многоэкстремальной оптимизации является неоднородным в разных подобластях поиска. В некоторых подобластях значения функций могут изменяться достаточно быстро (что будет соответствовать большим значениям константы Липшица в таких подобластях), в других подобластях значения могут изменяться более плавно. Как результат, построение единых оценок характеристик функции для всей области поиска может не полностью соответствовать ее поведению в конкретной подобласти. 
+One of the important properties of the problems under consideration is that, in many cases, the behavior of functions in the multiextremal optimization problem is inhomogeneous in different search subdomains. In some subdomains, the values of functions can change quite quickly, which will correspond to large values of the Lipschitz constant in such subdomains. In other subdomains the values can change more smoothly. As a result, the uniform estimates of the characteristics of a function constructed for the entire search domain may not fully correspond to its behavior in a specific subdomain. 
 
-Детально проработанным направлением здесь является использование разных оценок константы Липшица для каждого поискового интервала в отдельности \cite{Sergeyev2003,Sergeyev2007}. Определенная сложность здесь состоит в том, что при построении локальных оценок константы Липшица неявно предполагается квадратичное поведение функции в малой окрестности исследуемой точки, что может негативно сказаться на работе метода вне этой окрестности. 
-Одновременно с этим при вычислении локальных (интервальных) оценок должна учитываться и общая (глобальная) оценка константы Липшица, что приводит к использованию сложных компромиссных схем оценивания константы \cite{Sergeyev2020}.
+In this case, there is a comprehensive approach, which consists in using different estimates of the Lipschitz constant for each search interval separately \cite{Sergeyev2003,Sergeyev2007}. 
+A certain difficulty here is that the construction of the local estimates for the Lipschitz constant implies that the function behaves quadratically in a small neighborhood of the point under study, which can negatively affect the operation of the method outside this neighborhood.
+At the same time, when calculating local (interval) estimates, the general (global) estimate of the Lipschitz constant should also be taken into account, which leads to the use of complex compromise schemes for estimating the constant \cite{Sergeyev2020}.
+There is a more convenient approach that takes into account the inhomogeneity of the behavior of the problem functions in different subdomains of the search domain -- adaptive prediction of the optimum position based on the accumulated search information under the assumption that the multiextremality of the problem is weak. The foundations of the approach are presented in \cite{Strongin2000}, some results of solving problems on parallel computing systems are given in  \cite{Barkalov2010}.
 
-Более удобным подходом, учитывающим неоднородность поведения функций задачи в разных подобластях области поиска,  является адаптивное прогнозирование положения оптимума на основе накопленной поисковой информации в предположении слабой многоэкстремальности задачи. Основы подхода изложены в \cite{Strongin2000}, некоторые результаты решения задач на параллельных вычислительных системах приведены в \cite{Barkalov2010}.
+In accordance with this approach, it is possible to construct adaptive forecasting rules based on the assumption that the location of the global optimum is more likely to lie in the vicinity of the points from the series $x_i, 1 \leq i \leq k,$ which correspond to small values of the normalized differences $\omega_i=(z_i-z_\nu^*)/\mu_\nu$, where $\mu_\nu$ is from (\ref{Eq:20}), and $z_\nu^*$ is from  (\ref{Eq:21}).
 
-В соответствии с данным подходом можно построить адаптивные правила прогнозирования, основанные на предположении о том, что местонахождение глобального оптимума более вероятно в окрестностях тех точек из ряда $x_i, 1 \leq i \leq k,$ которым соответствуют малые значения нормированных разностей $\omega_i=(z_i-z_\nu^*)/\mu_\nu$, где $\mu_\nu$ из (\ref{Eq:20}), а $z_\nu^*$ из (\ref{Eq:21}).
+This hypothesis is plausible either in the case when the number of performed iterations is large enough (since the algorithm, when the convergence conditions are satisfied, generates a sequence of trials that is dense only at the points of the global minimum), or in the case when the problem is unimodal (i.e. when the search in the vicinity of the best current approximation allows for improvement, and such successive improvements lead to a solution). The first case corresponds to the final phase of the search, and then the use of adaptive forecast can be interpreted as a way to speed up the refinement of the solution. While, the second case actually includes assumptions about the weak multiextremity of the problem.
 
-Принятая гипотеза правдоподобна либо в случае, когда число осуществленных итераций достаточно велико (т.к. алгоритм при выполнении условий сходимости порождает последовательность испытаний, плотную лишь в точках глобального минимума), либо в случае, когда задача является унимодальной (т.е. когда поиск в окрестности лучшего текущего приближения позволяет достичь улучшения, и такие последовательные улучшения ведут к решению). Первый случай соответствует заключительной фазе поиска, и тогда использование адаптивного прогноза можно интерпретировать как способ ускорения уточнения решения. Второй случай фактически включает в себя предположения о слабой многоэкстремальности задачи.
-
-Новые формулы для вычисления характеристик поисковых интервалов $R'(i)$, которые должны быть использованы на 5-м шаге алгоритма, могут быть представлены в виде 
+New formulas for calculating the characteristics of search intervals $R'(i)$, which should be used at the 5th step of the algorithm, can be written as
 \[
 R'(i) = h_i R(i),
 \]
-где $R(i)$ из (\ref{R}), а множитель $h_i$ вычисляется по правилам
+where $R(i)$ from (\ref{R}), and a coefficient $h_i$ is calculated  according to the rule
 \begin{eqnarray}\label{lR}
 & h_i = \left[\frac{\sqrt{(z_i-z_\nu^*)(z_{i-1}-z_\nu^*)}}{\mu_\nu}+10^{-q}\right]^{-1}, \; \nu(x_{i-1})=\nu(x_{i}),\nonumber\\
 & h_i = \left[\frac{z_i-z_\nu^*}{\mu_\nu}+10^{-q}\right]^{-1}, \; \nu(x_{i-1})<\nu(x_{i}),\\
 & h_i = \left[\frac{z_{i-1}-z_\nu^*}{\mu_\nu}+10^{-q}\right]^{-1}, \; \nu(x_{i-1})>\nu(x_{i}).\nonumber
 \end{eqnarray}
-Здесь целочисленный неотрицательный параметр $q$ характеризует «степень локальности» поиска: при $q=0$ поиск будет иметь ``глобальный'', а при $q>1$ -- ``локальный'' характер. 
-В самом деле, множитель $h_i$ будет принимать наибольшее значение равное $1.5^q$ лишь для тех интервалов, граничные точки которых соответствуют текущему минимуму, т.е. для которых выполняется равенство $\omega_i = 0$. Указанное значение множителя $h_i$ будет большим при больших значениях параметра $q$ (что увеличит значение характеристики данного интервала), и будет равно 1 при $q=0$ (что соответствует исходному значению характеристики). 
+Here, the non-negative integer parameter $q$ characterizes the ``degree of locality'' of the search: for $q=0$ the search will have a ``global'' nature, and for $q>1$ -- ``local''. 
+Indeed, the coefficient $h_i$ will have the largest value equal to $10^q$ only for those intervals the boundary points of which correspond to the current minimum, i.e. for which the equality $\omega_i = 0$ holds. The specified value of the coefficient $h_i$ will be higher for larger values of the parameter $q$ (which will increase the value of the characteristic of this interval), and will be equal to 1 for $q=0$ (which corresponds to the initial value of the characteristics). 
 
-Управление параметром $q$, входящим в (\ref{lR}), позволяет учитывать различные предположения о характере экстремума. Например, одной из стратегий управления является чередование с заданной частотой больших и малых значений $q$, что соответствует смеси локального и глобального поиска, которую можно интерпретировать как сочетание процедуры локального уточнения текущего решения и процедуры глобального обновления этого решения. При этом в течение первых итераций рекомендуется использовать значение $q=0$, т.к. накопленная на них поисковая информация обеспечит адекватность формул (\ref{lR}) при последующем локальном уточнении.
+Controlling the parameter $q$, included in (\ref{lR}), allows taking into account various assumptions about the nature of the extremum. For example, one of the control strategies is the alternation with a given frequency of large and small values of $q$, corresponding to a mixture of local and global search, which can be interpreted as a combination of local refinement of the current solution and global updating of this solution. In this case, during the first iterations, it is recommended to use the value $q=0$, since the search information accumulated during these iterations will ensure the adequacy of formulas (\ref{lR}) after the subsequent local refinement.
 
 
 \section{Parallel algorithm for mixed-integer problems}
 
-Рассмотрим теперь случай, когда аргумент функций задачи содержит две компоненты: вектор $y$, принадлежащий гиперинтервалу $D$, и вектор $u$, имеющий конечный (и при этом не очень большой) набор возможных значений, т.е. 
+Let us now consider the case when the argument of the problem functions contains two components: vector $y$, which belongs to the hyperinterval $D$, and vector $u$, which has a finite (and not very large) set of possible values, i.e.
 \begin{eqnarray}\label{problem_i}
 & \min{\left\{ g_{m+1}(y,u):y\in D, \; g_i(y,u)\leq 0, \; 1 \leq i \leq m\right\}},\\
 & D=\left\{a_j\leq y_j \leq b_j, \; 1\leq j \leq N \right\}.\nonumber
 \end{eqnarray}
 
-Такие конечные наборы могут характеризовать, например, вариант материала, из которого создается объект, геометрические размеры или другие величины, которые могут принадлежать стандартному дискретному множеству, и т.п.
+Such finite sets can characterize, for example, a variation of the material from which an object is created, geometric dimensions or other quantities that can belong to a standard discrete set, etc.
 
-Занумеруем целыми числами $s, 1\leq s \leq S,$ все возможные значения вектора $u$, т.е. сопоставим каждому рассматриваемому значению $s$ вектор $u_s$. 
-Тогда рассматриваемая задача может быть записана в виде 
+
+Let us assign integers  $s, 1\leq s \leq S,$ to all possible values of the vector $u$, i.e. associate each considered value $s$ with a vector $u_s$. 
+Then the problem can be written as
 \begin{eqnarray}\label{problem_is}
 & \min_{s\in\{1,...,S\}}\left(\min{\left\{ g_{m+1}(y,u_s):y\in D, \; g_i(y,u_s)\leq 0, \; 1 \leq i \leq m\right\}}\right),\\
 & D=\left\{ a_j\leq y_j \leq b_j, \; 1 \leq j\leq N \right\}.\nonumber 
 \end{eqnarray}
 
-Используя схему редукции размерности с помощью Hilbert curve $y(x), x\in [0,1]$ можно сопоставить каждой задаче минимизации по $y$ одномерную задачу минимизации
+Using the dimensionality reduction scheme by the Hilbert curve $y(x), x\in [0,1]$ we can associate each minimization problem in $y$ with a one-dimensional minimization problem
 \[
  \min{\left\{ g_{m+1}(y(x),u_s):x \in [0,1], \; g_i(y(x),u_s)\leq 0, \; 1 \leq i \leq m\right\}}, s\in\{1,...,S\}.
 \]
 
-Рассмотрим теперь отображение 
+Now let us consider the mapping
 \[
 Y(x)=y(x-E(x)), \; x\in[0,S],
 \]
-ставящее в соответствие точке из интервала [0,S] точку в области $D$ (обозначение $E(x)$ соответствует целой части числа $x$) и определим функции 
+Which assigns a point on the interval  [0,S] to a point in the domain $D$ ($E(x)$ corresponds to the integer part of the number $x$) and define the functions 
 \[
 f_i(x) = g_i(Y(x),u_{E(x)+1}), x\in[0,S],
 \]
-имеющие, вообще говоря, разрывы первого рода в целочисленных точках $x_k = i, 1\leq i \leq S-1$.
-Значение  $z_k = g_\nu(y(x_k))$ из (\ref{trial_result}) в этих точках будем считать неопределенным, а значения индекса -- равным 0, т.е. $\nu(x_k) = 0$ .
+which have discontinuities of the first kind at integer points $x_k = i, 1\leq i \leq S-1$.
+The value  $z_k = g_\nu(y(x_k))$ from (\ref{trial_result}) at these points will be considered undefined, and the values of the index -- equal to 0, i.e.  $\nu(x_k) = 0$ .
 
-Используя введенные обозначения можно переформулировать исходную задачу как
+Using the above assignments, we can reformulate the original problem as
 \begin{equation}\label{problem_is1}
 \min \left\{f_{m+1}(x): x \in [0,S], \; f_i(x) \leq 0, \; 1 \leq i \leq m\right\}.
 \end{equation}
 
-Для иллюстрации на Fig. \ref{fig:1}  изображены графики функций, соответствующих задаче с одним непрерывным и одним бинарным параметром.
+To illustrate this, Fig. \ref{fig:1} shows graphs of functions corresponding to a problem with one continuous and one binary parameter.
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.7\textwidth]{fig1.jpg}
@@ -315,23 +318,23 @@ f_i(x) = g_i(Y(x),u_{E(x)+1}), x\in[0,S],
     \label{fig:1}
 \end{figure}
 
-Применяя к решению задачи (\ref{problem_is1}) параллельный индексный алгоритм с локальной настройкой, мы найдем решение задачи (\ref{problem_i}). При этом основная часть испытаний будет проведена в той подзадаче, решение которой соответствует решению исходной задачи (\ref{problem_i}). В остальных подзадачах будет проведена лишь незначительная часть испытаний, т.к. решения данных подзадач являются локально-оптимальными по отношению к решению $s$-й подзадачи. Сказанное подтверждается Fig. \ref{fig:1}, где штрихами обозначены точки испытаний, выполненных при решении данной задачи.
+By applying a parallel index algorithm with local tuning to the solution of problem  (\ref{problem_is1}), ), we find a solution to the problem  (\ref{problem_i}). In this case, the main part of the trials will be carried out in the subproblem, the solution of which corresponds to the solution of the original problem (\ref{problem_i}). ). In the remaining subtasks, only an insignificant part of the trials will be carried out, since solutions of these subproblems are locally optimal for the solution of the xth subproblem. This is confirmed by Fig. \ref{fig:1}, where the dashed lines indicate the trial points performed during the solution of this problem.
 
-Таким образом, мы сформировали Parallel Mixed-integer Global search Algorithm with Local tuning (PMGAL), основанный на сведении задачи mixed-integer non-convex optimization problem к одновременно решаемому набору непрерывных задач.
+Thus, we have formed the Parallel Mixed-integer Global search Algorithm with Local tuning (PMGAL), based on the reduction of the mixed-integer non-convex optimization problem to a simultaneously solved set of continuous problems.
 
-Предложенная схема решения mixed-integer global optimization problems основана на параллельном индексном методе для решения задач непрерывной оптимизации и не является ориентированной на конкретное вычислительное устройство. Одной из ключевых операций здесь является параллельное проведение нескольких испытаний в различных точках области поиска (см. шаг 7 алгоритма), которое может быть реализовано как на CPU (с использованием OpenMP и/или MPI), так и на GPU (с использованием CUDA). 
-В данной работе для распараллеливания были задействованы только центральные процессоры. Распределение работ между узлами осуществлялось в соответствии с многоуровневой схемой декомпозиции параллельных вычислений, изложенной в \cite{Strongin2018,Barkalov2020}.
+The proposed scheme for solving mixed-integer global optimization problems is based on a parallel index method for solving continuous optimization problems and is not oriented to a specific computing device.  One of the key operations here is the parallel execution of several trials at different points of the search area (see step 7 of the algorithm), which can be implemented both on the CPU (using OpenMP and / or MPI) and on the GPU (using CUDA). 
+In this work, parallelization was done only on CPUs. The workload was distributed between the nodes in accordance with the multilevel parallel computation decomposition scheme described in \cite{Strongin2018,Barkalov2020}.
 
 \section{Results of experiments}
 
 %Переводить до конца, т.е. до acknowledgments
 
-Первая серия экспериментов была проведена с использованием последовательной версии алгоритма без использования local tuning с целью его сравнения с известными методами аналогичного назначения.
+The first series of experiments was carried out using a sequential version of the algorithm without using local tuning in order to compare it with other similar methods.
 
-Предложенный в данной работе алгоритм PMGAL (в его последовательном варианте) сравнивался с genetic algorithm for solving mixed-integer optimization problems, реализованным в Matlab Global Optimization Toolbox. В Table \ref{tab:1} приведено число trials, потребовавшееся для решения данными методами ряда тестовых mixed-integer problems, взятых из \cite{Deep,Floudas}. Для обоих методов была использована одинаковая точность поиска решения $10^{-2}$. Все вычислительные эксперименты были проведены на компьютере с процессором Intel Core i5-7300 2.5 GHz и 8 Gb RAM. Результаты экспериментов показывают превосходство метода PMGAL как по числу итераций, так и по времени работы.
+The PMGAL algorithm proposed in this work (in its sequential version) was compared with the genetic algorithm for solving mixed-integer optimization problems implemented in the Matlab Global Optimization Toolbox. Table \ref{tab:1} shows the number of trials it took for these methods to solve a number of mixed-integer trial problems taken from \cite{Deep,Floudas}. The same solution search accuracy $10^{-2}$ was used for both methods. All computational experiments were carried out on a computer with an Intel Core i5-7300 2.5 GHz processor and 8 Gb RAM. The experimental results show the superiority of the PMGAL method both in terms of the number of iterations and the running time.
 
 \begin{table}
-	\caption{Сравнение эффективности методов PMGAL и GA}
+	\caption{Comparison of the effectiveness of the PMGAL and GA methods}
 	\label{tab:1}
 	\center
 	\begin{tabular}{|c|c|c|c|c|}
@@ -350,10 +353,10 @@ f_i(x) = g_i(Y(x),u_{E(x)+1}), x\in[0,S],
 \end{table}	
 
 
-Следующий эксперимент был проведен для оценки влияния local tuning на ускорение сходимости алгоритма. В рамках данного эксперимента решалась серия задач, для построения которых использовался генератор GKLS \cite{Gaviano} для тестовых задач непрерывной многоэкстремальной оптимизации. Генератор GKLS позволяет порождать непрерывные тестовые функции заданной размерности с заданными свойствами: известным числом локальных минимумов, известной областью притяжения глобального решения, и т.д.  
+The next experiment was conducted to assess the effect of local tuning on accelerating the convergence of the algorithm. We used the GKLS generator \cite{Gaviano} to generate trial problems of continuous multiextremal optimization. GKLS allows generating continuous trial functions of a given dimensionality with specific properties: a known number of local minima, a known domain of attraction of the global solution, etc.  
 %This generator of multiextremal functions is often used for the investigations of the global optimization algorithms \cite{Paulavicius2014,SergeyevKvasov2015,Lebedev2015,Gergel2015}. 
 
-In Fig.~\ref{example} (a) and (b), the contour plots of two-dimensional GKLS functions are presented. Figures also shows the points of the trials performed by the global search until the required accuracy $\epsilon=10^{-2}$ was achieved.
+Fig.~\ref{example} (a) and (b) shows the contour plots of two-dimensional GKLS functions. These figures also shows the points of the trials performed by the global search until the required accuracy $\epsilon=10^{-2}$ was achieved.
 
 \begin{figure}
 \begin{minipage}{0.48\linewidth}
@@ -367,48 +370,48 @@ In Fig.~\ref{example} (a) and (b), the contour plots of two-dimensional GKLS fun
 \label{example}
 \end{figure}
 
-В проведенных экспериментах генератор GKLS использовался как основа для построения mixed-integer problems. Правила, позволяющие генерировать тестовые задачи подобного вида, заключаются в следующем.
+In our experiments, the GKLS generator was used as a basis for constructing mixed-integer problems. The rules for generating trial problems of this type were as follows.
 
 \begin{enumerate}
-	\item С помощью генератора порождается непрерывная многоэкстремальная функция $\psi(y), \; y\in D, \; D = \left\{ a_j\leq y_j\leq b_j, 1\leq j \leq N \right\}$. Глобальный минимум данной функции достигается в известной точке $y'=(y'_1,...,y'_N)$ и равен $\psi'=\psi(y')=-1$.
-	\item Генерируется convex mixed-integer function 
+	\item GKLS generates a continuous multiextremal function $\psi(y), \; y\in D, \; D = \left\{ a_j\leq y_j\leq b_j, 1\leq j \leq N \right\}$. The global minimum of this function is achieved at the known point $y'=(y'_1,...,y'_N)$ and is equal to $\psi'=\psi(y')=-1$.
+	\item GKLS generates a convex mixed-integer function
 	\[
 			\phi (y,u) = 2 \left[ \sum_{j=1}^N \left( \frac{y_j - y'_j}{b_j-a_j} \right)^2 + \sum_{j=1}^M \left( \frac{u_j - b_j}{b_j-a_j} \right)^2 \right],
 	\]
-	где 
+	where 
 	\begin{eqnarray*}
 	& y\in D = \left\{ a_j\leq y_j\leq b_j, 1\leq j \leq N \right\} \subset R^N, \\
 	& u\in U = \left\{ u_j \in  \left\{a_j, ..., b_j \right\}, 1\leq j \leq M \right\};
 	\end{eqnarray*}
-	т.е. данная функция имеет $N$ непрерывных и $M$ дискретных параметров и достигает минимального значения в точке $(y',b)$.
-	\item Вычисляется коэффициент 
+	i.e. this function has $N$ continuous and $M$ discrete parameters and reaches its minimum value at the point $(y',b)$.
+	\item The coefficient is calculated
 	\[
 	C = 4 - \max_{y,u} \left\{ \phi(y,u) \right\}, \; y\in D, u \in U.
 	\]
-	Максимум выпуклой функции $\phi(y,u)$ достигается в одной из угловых точек области поиска, поэтому при размерности задачи порядка 10 его вычисление может быть выполнено методом перебора.
-	\item Формируется многоэкстремальная mixed-integer function 
+	The maximum of the convex function $\phi(y,u)$ is achieved at one of the corner points of the search domain; therefore, when the dimensionality of the problem is around 10, its calculation can be performed by the enumeration method. 
+	\item  multi-extreme mixed-integer function is formed
 	\[
 	\varphi(y,u) = \left(\psi(y) - \sum_{j=1}^M{u_j}\right)\left(C - \phi(y,u)\right).
 	\]
-	По построению $\varphi(y,u)$  будет принимать минимальное значение в точке $(y',b)$.
+	After mapping $\varphi(y,u)$  will reach the minimum value at the point  $(y',b)$.
 	
 \end{enumerate}
 
 
-In the problems generated in our experiments, there were 5 discrete and 4 continuous parameters 
+The problems generated in our experiments had 5 discrete and 4 continuous parameters 
 	\begin{eqnarray*}
 	& y\in D = \left\{ -1 \leq y_j\leq 1, 1\leq j \leq 4 \right\} \subset R^4, \\
 	& u\in U = \left\{ u_j \in  \left\{-1, -1/3, 0, 1/3, 1 \right\}, 1\leq j \leq 5 \right\}.
 	\end{eqnarray*}
 
 
-Было сгенерировано и решено 100 9-и мерных mixed-integer problems данного типа. С целью имитации вычислительной трудоемкости, присущей прикладным задачам оптимизации, расчет функции во всех проводимых экспериментах был усложнен дополнительными вычислениями, не меняющими вид функции и расположение ее минимумов.
-The accuracy of the search was equal to $10^{-2}$. Computational experiments were carried out on Lobachevsky supercomputer. The node of supercomputer included two Intel Sandy Bridge E5-2660 2.2 GHz CPUs and 64 Gb RAM. 
+In total, we generated and solved 100 9-dimensional mixed-integer problems of this type. In order to simulate the computational complexity inherent in applied optimization problems, the calculation of the function in all the experiments was complicated by additional calculations that did not change the form of the function and the location of its minima.
+The accuracy of the search was equal to $10^{-2}$. Computational experiments were carried out on the Lobachevsky supercomputer. The node of supercomputer included two Intel Sandy Bridge E5-2660 2.2 GHz CPUs and 64 Gb RAM. 
 
-В Table \ref{tab:2} приведены результаты экспериментов, полученные для последовательной версии алгоритма PMGAL с использованием различных стратегий чередования локального и глобального поиска. Для локального поиска в формулах (\ref{lR}) использовался параметр $q=3$, для глобального -- $q=0$. В первом столбце таблицы отражена частота чередования указанных значений. Например, 1:1 соответствует чередованию локального и глобального поиска на каждой итерации, 1:2 соответствует одному шагу локального поиска и двум шагам глобального поиска, и т.д. Во втором столбце таблицы отражено среднее число итераций $K_{av}$ (тыс.), требуемое для решения задачи с заданной точностью.
+Table \ref{tab:2} summarizes the experimental results obtained for the sequential version of the PMGAL algorithm using different strategies for alternating local and global search. For local search in formulas  (\ref{lR}), we used the parameter $q=3$, for global -- $q=0$. The first column of the table shows the frequency of alternation of the indicated values. For example, 1:1 corresponds to alternating local and global search at each iteration; 1:2 corresponds to one local search step and two global search steps, and so on. The second column of the table reflects the average number of iterations  $K_{av}$ (thousand.), required to solve a problem with a given accuracy.
 
 \begin{table}
-	\caption{Сравнение стратегий local tuning}
+	\caption{Comparison of local tuning strategies}
 	\label{tab:2}
 	\center
 	\begin{tabular}{|c|c|}
@@ -425,10 +428,10 @@ The accuracy of the search was equal to $10^{-2}$. Computational experiments wer
 \end{table}	
 
 
-Результаты экспериментов показывают, что наименьшее число итераций методу с локальной настройкой требуется при использовании стратегии чередования 1:2, т.е. один шаг локального уточнения чередуется с двумя шагами глобального поиска. Будем использовать эту стратегию и в дальнейших экспериментах.
+Experimental results show that the least number of iterations is required for the locally tuned method when using the 1:2 alternation strategy, i.e. one local refinement step alternates with two global search steps. We will use this strategy in further experiments.
 
 \begin{table}
-	\caption{Среднее время работы $T_{av}$ параллельного алгоритма с локальной настройкой}
+	\caption{Average running time $T_{av}$ of the parallel algorithm with a local setting}
 	\label{tab:3}
 	\center
 	\begin{tabular}{|c|c|c|c|}
@@ -445,21 +448,23 @@ The accuracy of the search was equal to $10^{-2}$. Computational experiments wer
 \end{table}	
 
 
-Последняя серия экспериментов была выполнена для оценки ускорения параллельной версии алгоритма PMGAL. 
-В Table \ref{tab:3} приведено среднее время решения $T_{av}$ (в секундах) в зависимости от задействованного числа процессов $N_{p}$ и потоков $N_{t}$ в каждом процессе. При проведении экспериментов было задействовано от 1 до 16 узлов кластера в зависимости от числа параллельных процессов. 
-Ускорение, которое демонстрирует параллельный алгоритм, не является идеальным, но -- вполне приемлемое.   
+The last series of experiments was performed to evaluate the acceleration of the parallel version of the PMGAL algorithm. 
+Table \ref{tab:3} shows the average solution time  $T_{av}$ (in seconds) depending on the involved number of processes $N_{p}$ and threads $N_{t}$ in each process. Our experiments involved from 1 to 16 cluster nodes depending on the number of parallel processes. 
+The acceleration provided by the parallel algorithm is not ideal, but quite acceptable.
+
 
 
 \section{Conclusions}
 
-В данной статье представлены результаты, связанные с разработкой параллельных алгоритмов глобальной оптимизации для решения многоэкстремальных задач, в которых часть параметров является непрерывными, а часть -- дискретными.
-Рассматриваемые задачи могут включать в себя также невыпуклые ограничения, учет которых организован с использованием специальной индексной схемы. 
-Для задач указанного класса предложен параллельный алгоритм их решения. Основной принцип организации параллельных вычислений в алгоритме основан на одновременном проведении нескольких испытаний в различных точках области поиска. 
+This article presents the results related to the development of parallel algorithms for global optimization for solving multiextremal problems in which some of the parameters are continuous, and some are discrete. 
+These problems can also include non-convex constraints, which are accounted for using a special index scheme.
+We propose to solve the problems of this class using a parallel algorithm. The basic principle of organizing parallel computations in the algorithm is based on the simultaneous carrying out of several trials at different points of the search domain.
 
-В параллельном алгоритме глобальной оптимизации использована техника локальной настройки, основанная на предположении слабой многоэкстремальности задачи. Данное предположение является верным, в частности, на заключительной фазе поиска, когда уже выполнено одно или несколько испытаний в окрестности глобального решения, и осталось найденную оценку решения уточнить.
+The parallel global optimization algorithm uses a local tuning technique based on the assumption that the multiextremity of the problem is weak. This assumption is true, in particular, at the final phase of the search, when one or more trials have already been performed in the vicinity of the global solution, and the only remaining step is to refine the found estimate of the solution.
 
-В последовательном варианте предложенный алгоритм не уступает методам аналогичного назначения, реализованным в Matlab Global Optimization Toolbox.
-В параллельном варианте предложенный алгоритм демонстрирует приемлемую масштабируемость вплоть до ипользования десятков параллельных процессов. 
+In its sequential form, the proposed algorithm remains on par with the similar methods implemented in Matlab Global Optimization Toolbox. 
+In a parallel form, the proposed algorithm demonstrates acceptable scalability up to dozens of parallel processes.
+ 
 
 
 \begin{acknowledgments}
