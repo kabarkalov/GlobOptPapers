@@ -95,13 +95,12 @@ Within this approach
 To provide a proper representation of the results of the study, we structured the text of the article as follows.
 Section 2 provides a brief description of the dimension reduction scheme using space-filling curves, as well as an index scheme for considering constraints. It also contains the formulation of a parallel index algorithm for solving continuous global optimization problems.
 Section 3 outlines a way to take into account the local properties of the problem functions to speed up the convergence of the algorithm.
-
-В Section 4 предложен подход к обобщению параллельного индексного алгоритма с целью решения mixed-integer problems. Приведен способ, позволяющий свести решение mixed-integer problem к решению информационно-связанного множества задач непрерывной оптимизации, которое может выполняться параллельно. 
-
+Section 4 proposes an approach to generalize the parallel index algorithm to solve mixed-integer problems. This method allows reducing the solution of the mixed-integer problem to the solution of an information-related set of continuous optimization problems which can be performed in parallel.
 Section 5 contains the results of numerical experiments. There we compare the sequential version of the algorithm with known alternatives and also demonstrate the efficiency of parallelizing the algorithm with local tuning when solving the multiextremal mixed-integer problem series on a supercomputer. 
 Section 6 concludes the paper.
 
-\section{Parallel global optimization algorithm and dimensionality reduction}
+\section{Parallel global optimization algorithm\protect\\
+and dimensionality reduction}
 
 Let us consider a global optimization problem with continuous parameters of the form
 \begin{eqnarray}\label{problem}
@@ -289,7 +288,7 @@ Then the problem can be written as
 & D=\left\{ a_j\leq y_j \leq b_j, \; 1 \leq j\leq N \right\}.\nonumber 
 \end{eqnarray}
 
-Using the dimensionality reduction scheme by the Hilbert curve $y(x), x\in [0,1]$ we can associate each minimization problem in $y$ with a one-dimensional minimization problem
+Using the dimensionality reduction scheme by the Peano-Hilbert curve $y(x), x\in [0,1],$ we can associate each minimization problem in $y$ with a one-dimensional minimization problem
 \[
  \min{\left\{ g_{m+1}(y(x),u_s):x \in [0,1], \; g_i(y(x),u_s)\leq 0, \; 1 \leq i \leq m\right\}}, s\in\{1,...,S\}.
 \]
@@ -298,12 +297,12 @@ Now let us consider the mapping
 \[
 Y(x)=y(x-E(x)), \; x\in[0,S],
 \]
-Which assigns a point on the interval  [0,S] to a point in the domain $D$ ($E(x)$ corresponds to the integer part of the number $x$) and define the functions 
+which assigns a point on the interval  [0,S] to a point in the domain $D$ ($E(x)$ corresponds to the integer part of the number $x$) and define the functions 
 \[
 f_i(x) = g_i(Y(x),u_{E(x)+1}), x\in[0,S],
 \]
-which have discontinuities of the first kind at integer points $x_k = i, 1\leq i \leq S-1$.
-The value  $z_k = g_\nu(y(x_k))$ from (\ref{trial_result}) at these points will be considered undefined, and the values of the index -- equal to 0, i.e.  $\nu(x_k) = 0$ .
+which have jump discontinuities at integer points $x_k = i, 1\leq i \leq S-1$.
+The values $z_k = g_\nu(y(x_k))$ from (\ref{trial_result}) at these points will be considered undefined, and the values of the index -- equal to 0, i.e. $\nu(x_k) = 0$ .
 
 Using the above assignments, we can reformulate the original problem as
 \begin{equation}\label{problem_is1}
@@ -318,20 +317,18 @@ To illustrate this, Fig. \ref{fig:1} shows graphs of functions corresponding to 
     \label{fig:1}
 \end{figure}
 
-By applying a parallel index algorithm with local tuning to the solution of problem  (\ref{problem_is1}), ), we find a solution to the problem  (\ref{problem_i}). In this case, the main part of the trials will be carried out in the subproblem, the solution of which corresponds to the solution of the original problem (\ref{problem_i}). ). In the remaining subtasks, only an insignificant part of the trials will be carried out, since solutions of these subproblems are locally optimal for the solution of the xth subproblem. This is confirmed by Fig. \ref{fig:1}, where the dashed lines indicate the trial points performed during the solution of this problem.
+By applying a parallel index algorithm with local tuning to the solution of problem  (\ref{problem_is1}), we find a solution to the problem  (\ref{problem_i}). In this case, the main part of the trials will be carried out in the subproblem, the solution of which corresponds to the solution of the original problem (\ref{problem_i}). In the remaining subtasks, only an insignificant part of the trials will be carried out, since solutions of these subproblems are locally optimal. This is confirmed by Fig. \ref{fig:1}, where the dashed lines indicate the trial points performed during the solution of this problem.
 
 Thus, we have formed the Parallel Mixed-integer Global search Algorithm with Local tuning (PMGAL), based on the reduction of the mixed-integer non-convex optimization problem to a simultaneously solved set of continuous problems.
 
-The proposed scheme for solving mixed-integer global optimization problems is based on a parallel index method for solving continuous optimization problems and is not oriented to a specific computing device.  One of the key operations here is the parallel execution of several trials at different points of the search area (see step 7 of the algorithm), which can be implemented both on the CPU (using OpenMP and / or MPI) and on the GPU (using CUDA). 
-In this work, parallelization was done only on CPUs. The workload was distributed between the nodes in accordance with the multilevel parallel computation decomposition scheme described in \cite{Strongin2018,Barkalov2020}.
+The proposed scheme for solving mixed-integer global optimization problems is based on a parallel index method for solving continuous optimization problems and is not oriented to a specific computing device.  One of the key operations here is the parallel execution of several trials at different points of the search domain (see step 7 of the algorithm), which can be implemented both on the CPU (using OpenMP and / or MPI) and on the GPU (using CUDA). 
+In this work, parallelization was done only on CPUs. The workload was distributed between the nodes in accordance with the multilevel scheme of parallel computation decomposition described in \cite{Strongin2018,Barkalov2020}.
 
 \section{Results of experiments}
 
-%Переводить до конца, т.е. до acknowledgments
-
 The first series of experiments was carried out using a sequential version of the algorithm without using local tuning in order to compare it with other similar methods.
 
-The PMGAL algorithm proposed in this work (in its sequential version) was compared with the genetic algorithm for solving mixed-integer optimization problems implemented in the Matlab Global Optimization Toolbox. Table \ref{tab:1} shows the number of trials it took for these methods to solve a number of mixed-integer trial problems taken from \cite{Deep,Floudas}. The same solution search accuracy $10^{-2}$ was used for both methods. All computational experiments were carried out on a computer with an Intel Core i5-7300 2.5 GHz processor and 8 Gb RAM. The experimental results show the superiority of the PMGAL method both in terms of the number of iterations and the running time.
+The PMGAL algorithm proposed in this work (in its sequential version) was compared with the genetic algorithm for solving mixed-integer optimization problems implemented in the Matlab Global Optimization Toolbox. Table \ref{tab:1} shows the number of trials it took for these methods to solve a number of mixed-integer test problems taken from \cite{Deep,Floudas}. The same accuracy of search $10^{-2}$ was used for both methods. All computational experiments were carried out on a computer with an Intel Core i5-7300 2.5 GHz processor and 8 Gb RAM. The experimental results show the superiority of the PMGAL method both in terms of the number of iterations and the running time.
 
 \begin{table}
 	\caption{Comparison of the effectiveness of the PMGAL and GA methods}
@@ -353,7 +350,7 @@ The PMGAL algorithm proposed in this work (in its sequential version) was compar
 \end{table}	
 
 
-The next experiment was conducted to assess the effect of local tuning on accelerating the convergence of the algorithm. We used the GKLS generator \cite{Gaviano} to generate trial problems of continuous multiextremal optimization. GKLS allows generating continuous trial functions of a given dimensionality with specific properties: a known number of local minima, a known domain of attraction of the global solution, etc.  
+The next experiment was conducted to assess the effect of local tuning on accelerating the convergence of the algorithm. We used the GKLS generator \cite{Gaviano} to generate test problems of continuous multiextremal optimization. GKLS allows generating continuous functions of a given dimensionality with specific properties: a known number of local minima, a known domain of attraction of the global solution, etc.  
 %This generator of multiextremal functions is often used for the investigations of the global optimization algorithms \cite{Paulavicius2014,SergeyevKvasov2015,Lebedev2015,Gergel2015}. 
 
 Fig.~\ref{example} (a) and (b) shows the contour plots of two-dimensional GKLS functions. These figures also shows the points of the trials performed by the global search until the required accuracy $\epsilon=10^{-2}$ was achieved.
@@ -374,11 +371,11 @@ In our experiments, the GKLS generator was used as a basis for constructing mixe
 
 \begin{enumerate}
 	\item GKLS generates a continuous multiextremal function $\psi(y), \; y\in D, \; D = \left\{ a_j\leq y_j\leq b_j, 1\leq j \leq N \right\}$. The global minimum of this function is achieved at the known point $y'=(y'_1,...,y'_N)$ and is equal to $\psi'=\psi(y')=-1$.
-	\item GKLS generates a convex mixed-integer function
+	\item A convex mixed-integer function
 	\[
-			\phi (y,u) = 2 \left[ \sum_{j=1}^N \left( \frac{y_j - y'_j}{b_j-a_j} \right)^2 + \sum_{j=1}^M \left( \frac{u_j - b_j}{b_j-a_j} \right)^2 \right],
+			\phi (y,u) = 2 \left[ \sum_{j=1}^N \left( \frac{y_j - y'_j}{b_j-a_j} \right)^2 + \sum_{j=1}^M \left( \frac{u_j - b_j}{b_j-a_j} \right)^2 \right]
 	\]
-	where 
+	is generated, where 
 	\begin{eqnarray*}
 	& y\in D = \left\{ a_j\leq y_j\leq b_j, 1\leq j \leq N \right\} \subset R^N, \\
 	& u\in U = \left\{ u_j \in  \left\{a_j, ..., b_j \right\}, 1\leq j \leq M \right\};
@@ -388,12 +385,12 @@ In our experiments, the GKLS generator was used as a basis for constructing mixe
 	\[
 	C = 4 - \max_{y,u} \left\{ \phi(y,u) \right\}, \; y\in D, u \in U.
 	\]
-	The maximum of the convex function $\phi(y,u)$ is achieved at one of the corner points of the search domain; therefore, when the dimensionality of the problem is around 10, its calculation can be performed by the enumeration method. 
-	\item  multi-extreme mixed-integer function is formed
+	The maximum of the convex function $\phi(y,u)$ is achieved at one of the boundary points of the search domain; therefore, when the dimensionality of the problem is around 10, its calculation can be performed by the enumeration method. 
+	\item  Multi-extreme mixed-integer function is formed
 	\[
 	\varphi(y,u) = \left(\psi(y) - \sum_{j=1}^M{u_j}\right)\left(C - \phi(y,u)\right).
 	\]
-	After mapping $\varphi(y,u)$  will reach the minimum value at the point  $(y',b)$.
+	By construction, $\varphi(y,u)$ will reach the minimum value at the point $(y',b)$.
 	
 \end{enumerate}
 
@@ -408,7 +405,7 @@ The problems generated in our experiments had 5 discrete and 4 continuous parame
 In total, we generated and solved 100 9-dimensional mixed-integer problems of this type. In order to simulate the computational complexity inherent in applied optimization problems, the calculation of the function in all the experiments was complicated by additional calculations that did not change the form of the function and the location of its minima.
 The accuracy of the search was equal to $10^{-2}$. Computational experiments were carried out on the Lobachevsky supercomputer. The node of supercomputer included two Intel Sandy Bridge E5-2660 2.2 GHz CPUs and 64 Gb RAM. 
 
-Table \ref{tab:2} summarizes the experimental results obtained for the sequential version of the PMGAL algorithm using different strategies for alternating local and global search. For local search in formulas  (\ref{lR}), we used the parameter $q=3$, for global -- $q=0$. The first column of the table shows the frequency of alternation of the indicated values. For example, 1:1 corresponds to alternating local and global search at each iteration; 1:2 corresponds to one local search step and two global search steps, and so on. The second column of the table reflects the average number of iterations  $K_{av}$ (thousand.), required to solve a problem with a given accuracy.
+Table \ref{tab:2} summarizes the experimental results obtained for the sequential version of the PMGAL algorithm using different strategies for alternating local and global search. For local search in formulas  (\ref{lR}), we used the parameter $q=3$, for global search -- $q=0$. The first column of the table shows the frequency of alternation of the indicated values. For example, 1:1 corresponds to alternating local and global search at each iteration; 1:2 corresponds to one local search step and two global search steps, and so on. The second column of the table reflects the average number of iterations  $K_{av}$ (thousand.), required to solve a problem with a given accuracy.
 
 \begin{table}
 	\caption{Comparison of local tuning strategies}
@@ -428,10 +425,10 @@ Table \ref{tab:2} summarizes the experimental results obtained for the sequentia
 \end{table}	
 
 
-Experimental results show that the least number of iterations is required for the locally tuned method when using the 1:2 alternation strategy, i.e. one local refinement step alternates with two global search steps. We will use this strategy in further experiments.
+Experimental results show that the least number of iterations is required for the method when using the 1:2 alternation strategy, i.e. one local refinement step alternates with two global search steps. We will use this strategy in further experiments.
 
 \begin{table}
-	\caption{Average running time $T_{av}$ of the parallel algorithm with a local setting}
+	\caption{Average running time $T_{av}$ of the parallel algorithm with a local tuning}
 	\label{tab:3}
 	\center
 	\begin{tabular}{|c|c|c|c|}
@@ -458,7 +455,7 @@ The acceleration provided by the parallel algorithm is not ideal, but quite acce
 
 This article presents the results related to the development of parallel algorithms for global optimization for solving multiextremal problems in which some of the parameters are continuous, and some are discrete. 
 These problems can also include non-convex constraints, which are accounted for using a special index scheme.
-We propose to solve the problems of this class using a parallel algorithm. The basic principle of organizing parallel computations in the algorithm is based on the simultaneous carrying out of several trials at different points of the search domain.
+We propose a parallel algorithm for solving the problems of this class. The basic principle of organizing parallel computations in the algorithm is based on the simultaneous carrying out of several trials at different points of the search domain.
 
 The parallel global optimization algorithm uses a local tuning technique based on the assumption that the multiextremity of the problem is weak. This assumption is true, in particular, at the final phase of the search, when one or more trials have already been performed in the vicinity of the global solution, and the only remaining step is to refine the found estimate of the solution.
 
