@@ -7,7 +7,12 @@
 \usepackage{amsmath}
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
+%\usepackage{algorithmic}
+%\usepackage{algorithm}
+\usepackage{algorithm,algpseudocode,float}
 
+\algnewcommand\algorithmicforeach{\textbf{for each}}
+\algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
 
 \journal{Journal of Parallel and Distributed Computing}
 
@@ -79,21 +84,23 @@ Global optimization \sep dimensionality reduction \sep search information \sep p
 
 \section{Introduction}\label{sec:1}
 
-\cite{c1,c2,c3,c4,c5,c6,c7,c8,c9,c10}
-\cite{c11,c12,c13,c14,c15,c16,c17,c18,c19,c20}
-\cite{c21,c22,c23,c24,c25,c26,c27,c28,c29,c30}
-\cite{c31,c32,c33,c34,c35,c36,c37,c38,c39,c40,c41}
-
 
 Since the early 1960s, the problems of global optimization (GO) have continued to be a grand challenge to the theory and practice of optimization. In contrast to local optimization problems, when searching for a global minimum, the numerical method must evaluate the behavior of the function to be optimized in the entire global search domain. In general, GO problems are subject to the ``dimensionality curse'', when the volume of computations performed increases exponentially with increasing dimensionality. Such computational complexity, as well as high practical demand, have led to a great deal of research activity in the field of global optimization. An overview of approaches developed for solving global optimization problems is presented, for example, in a number of recent monographs and reviews -- see \cite{c1,c2,c3,c4,c5,c6,c7,c8,c9}.
 
-The paper proposes a further complication in formulating the problem, when not only one, but several global optimization problems, need to be solved simultaneously. Such problems are encountered, for example, when one needs to find several efficient solutions of multicriteria optimization problems or when part of the variable parameters in the optimization problem can take only a certain number of discrete values. The formulation of such multiple global optimization (MGO) problems is relatively new; for the first time, this type of problem was considered in \cite{c15,c16,c17}. The limited attention given to MGO problems is most likely due to the high computational complexity involved.
+The first and obvious approach is to use local methods that allow one to efficiently solve optimization problems with unimodal objective functions \cite{c1}. In the case of multiextremal problems, local methods should be applied repeatedly to find global minima using different initial points. Research in this direction began as early as the 1960s and is still relevant today \cite{c10,c11,c12}. Unfortunately, the problem of choosing initial points still remains open -- even using a significant number of initial points does not guarantee a reliable solution of global optimization problems. Another obvious approach is to construct in the search domain  a number of grids in whose nodes values of functions to be minimized are computed \cite{c2,c3,c4,c5}. To reduce computational complexity of uniform grids, this approach envisages different methods for construction of non-uniform grids, which would be denser only in the vicinity of the global minimum. This line of research is developing in the field of so-called nature-inspired metaheuristic methods, including, for example, genetic algorithms, bee algorithms, particle swarm optimization, simulated annealing, ant colony optimization, and firefly algorithms, etc. \cite{c4,c13,c14,c15}. A large number of applied problems have been solved using these methods, however, as before, it is also difficult to obtain guaranteed estimates of the accuracy when finding globally-optimal solutions for these algorithms.
 
-In general, MGO problems can be solved by a simple sequential (or parallel) solution of individual problems from a set. However, this approach means the computational complexity of solving problems increases many times. Meanwhile, MGO problems may have a certain informational interrelation -- a similar connectivity is observed, for example, when MGO problems are generated to solve the same multicriteria optimization problem -- see, for example, \cite{c19,c20}. Such interconnectedness of MGO problems can be used to reduce significantly the amount of computation performed when solving the entire set of problems.
+Yet another line of research in the field of global optimization is based on the assumption that the analytical form of the functions to be optimized is known. In this case, we can speak of d.c.(difference of convex) optimization problems in which nonconvex multiextremal functions are represented as a difference of two convex functions \cite{c16,c17}. Another approach to the development of global optimization methods in this area is based on the use of interval analysis methods \cite{c18}.
 
-The approach proposed in this paper assumes that the computational values of any function of the solvable set of MGO problems can be reduced to the values of any other functions of the set without any time consuming calculations. In such cases, all the search information obtained in solving a particular problem can be used in solving all other problems in the set. Such repeated reuse of search information can significantly reduce the amount of computation performed, up to just a few iterations when solving the next MGO problems. In addition, the presence of informational connectivity significantly expands the possibilities of a parallel solution for MGO problems. The paper proposes two parallel computational schemes: a cooperative scheme, which means the search information between the problems is exchanged when solving several MGO problems in parallel, and a competitive scheme, which occurs when MGO problems solved in parallel compete with each other for the use of available computational resources.
+In case analytical expressions for the functions to be optimized are not known (and this is a typical situation for choosing the best solutions in applied optimization problems), it should be understood that numerical estimates of global optimal solutions cannot in principle be obtained if there are no a priori assumptions about the behaviour of the functions to be minimized. One if the most widely used ways for specifying such information is to assume the validity of the Lipschitz condition according to which possible changes of the function to be minimized are restricted by the variation values of the parameters being varied. The use of this assumption leads to a class of Lipschitzian global optimization problems that has been extensively explored \cite{c3,c6,c7,c19,c19,c20,c21,c22,c23}.  As a rule, algorithms for solving this class of problems are adaptive, i.e. when determining the points for global search iterations, algorithms tend to use all the search information obtained in the process of computation. Such adaptivity leads to non-uniform grids and makes it possible to construct estimates of the global minimum based on a finite number of global search iterations. A large number of results in this direction have been obtained within the framework of the rapidly developing information-statistical theory of global optimization \cite{c6}. It should also be noted that multivariate algorithms of this class quite often use dimensionality reduction using Peano curves or nested optimization scheme \cite{c23}. One can also mention the class of DIRECT-type methods using several estimates of the Lipschitz constant chosen from some set of possible values; a detailed review of this line of research is given in \cite{c22}.
 
-The structure of the paper is as follows. Chapter \ref{sec:2} sets out the problem of multiple global optimization. Chapter \ref{sec:3} presents a general computational scheme for solving global search problems. Chapter \ref{sec:4} proposes parallel methods for solving MGO problems by using computational systems with shared and distributed memory. Chapter \ref{sec:5} contains the results of numerical experiments confirming the effectiveness of the proposed parallel methods. In the conclusion, results are discussed and the main directions for further research are presented.
+
+The paper proposes a further complication in formulating the decision making problems, when not only one, but several global optimization problems need to be solved simultaneously. Such problems are encountered, for example, when one needs to find several efficient solutions of multicriteria optimization problems or when part of the variable parameters in the optimization problem can take only a certain number of discrete values. For the first time, the formulation of such multiple global optimization (MGO was considered in \cite{c25,c26}, and then was investigated in \cite{c27,c28}. The relatively limited attention given to MGO problems is most likely due to the high computational complexity involved for solving even one GO problem.
+
+In general, MGO problems can be solved by a simple sequential (or parallel) solution of individual problems from a set. However, this approach results in a many-fold increase in the computational complexity of solving such problems. Meanwhile, MGO problems may have a certain informational interrelation -- a similar connectivity is observed, for example, when methods based on scalarization of the vector efficiency criterion are applied to solve multicriteria optimization (MCO) problems. In this case, it becomes necessary to solve multiple scalar (in the general case, global) optimization problems in order to find several efficient decisions  for MCO problems -- see, for example, \cite{c29,c30,c31,c32,c33}. Such interconnectedness of MGO problems can be used to reduce significantly the amount of computation performed when solving the entire set of problems.
+
+The approach proposed in this paper assumes that the computational values of any function of the set of MGO problems can be recalculated to the values of any other functions of the set without any time consuming calculations. In such cases, all the search information obtained in solving a particular problem can be used in solving all other problems in the set. Such repeated reuse of search information can significantly reduce the amount of computation performed, up to just a few iterations when solving the next MGO problems. In addition, the presence of informational connectivity significantly expands the possibilities of a parallel solution for MGO problems. The paper proposes two new parallel computational schemes: a cooperative scheme, which means the search information between the problems is exchanged when solving several MGO problems in parallel, and a competitive scheme, which occurs when MGO problems solved in parallel compete with each other for the use of available computational resources.
+
+The structure of the paper is as follows. Section \ref{sec:2} sets out the problem of multiple global optimization. Section \ref{sec:3} presents a general computational scheme for solving global search problems. Section \ref{sec:4} proposes parallel methods for solving MGO problems by using computational systems with shared and distributed memory. Section \ref{sec:5} contains the results of numerical experiments confirming the effectiveness of the proposed parallel methods. In the conclusion, results are discussed and the main directions for further research are presented.
 
 \section{Problem Statement}\label{sec:2}
 
@@ -110,29 +117,29 @@ defined by a set of optimized functions
 F(y) = \{ f_1(y),  f_2(y),\dots, f_s(y) \},
 \end{equation}
 where $y = (y_1,y_2,\dots,y_N)$ is the vector of varied parameters, $N$ is the dimension of the global optimization problems to be solved, and $D$ is the search domain for the given vectors $a$ and $b$. 
+
 In this paper, it is assumed that the functions $f_i(y)$, $1 \leq i \leq s$, can be multiextremal, and the procedures for calculating the values of these functions at points in the search domain $y \in D$ can be computationally expensive. It is also assumed that the functions $f_i(y)$, $1 \leq i \leq s$, satisfy the Lipschitz condition
 \begin{equation}\label{eq:4}
 |f_i (y')-f_i (y'')| \leq L_i \|y'-y''\|, y',y''\in D, 1 \leq i \leq s,
 \end{equation}
 where $L_i$ is the Lipschitz constant for the function $f_i(y)$, $1 \leq i \leq s$, and ${\|*\|}$ denotes the Euclidean norm in $R^N$. Fulfillment of the Lipschitz condition allows us to construct numerical estimates of the possible behavior of minimized functions based on a finite set of calculated function values at points in the search domain.
 
-A key condition of this approach is the assumption that any calculated value of any function $f_i(y)$, $1 \leq i \leq s$, of the set $F$ at an arbitrary point $y \in D$ of the search domain $D$ can be transformed to the value of any other function of the set $F$ at the same point $y \in D$ without any time consuming computations, in a time significantly shorter compared to the computation time values of the functions $f_i(y)$, $1 \leq i \leq s$. In other words, there must be a transformation $Z$ such that
 
+A key condition of this approach is the assumption that any calculated value of any function $f_i(y)$, $1 \leq i \leq s$, of the set F at an arbitrary point $y \in D$ of the search domain $D$ can be transformed to the value of any other function of the set $F$ at the same point $y \in D$ without any time consuming computations, in a time significantly shorter compared to the computation time values of the functions $f_i(y)$, $1 \leq i \leq s$. In other words, there must be a transformation $Z$ such that
 \begin{equation}\label{eq:5}
 \begin{matrix}
 \forall 1 \leq i, j \leq s, \bar{y} \in D \Rightarrow z_i=Z(z_j ), z_i = f_i (\bar{y}),z_j=f_j (\bar{y}), \\
 T(Z) \ll T(f_l (y) ),1 \leq l \leq s,
 \end{matrix}
 \end{equation}
-where $T(*)$ is the computation time of the expression given in parenthesis.
+where $T(*)$  is the computation time of the expression given in parenthesis.
 
-This condition is fulfilled, in part, when solving multicriteria optimization problems (MCO)
-
+This condition is fulfilled, for example, when solving multicriteria optimization (MCO) problems 
 \begin{equation}\label{eq:6}
 g(y) = (g_1(y), g_2(y), \dots , g_s(y)) \to min,  y\in D.
 \end{equation}
 
-To find efficient (unimprovable) solutions, a widely used approach is based on the reduction (scalarization) of the vector criterion $g(y)$ to the general scalar criterion, the minimization of which will lead to the Pareto optimal solution of the MCO problem \cite{c19,c20}. So, when using mini-max convolution, the vector criterion $g(y)$ from (\ref{eq:6}) reduces to the scalar criterion
+To find efficient (unimprovable) solutions, a widely used approach is based on the reduction (scalarization) of the vector criterion $g(y)$ to the general scalar criterion, the minimization of which will lead to the Pareto optimal solution of the MCO problem \cite{c29,c30,c31,c32,c33}. So, when using mini-max convolution, the vector criterion $g(y)$ from (\ref{eq:6}) reduces to the scalar criterion
 \begin{equation}\label{eq:7}
 \begin{matrix}
 G(\lambda,y)=\max{(\lambda_i g_i(y),1 \leq i \leq s)},	\\
@@ -140,22 +147,21 @@ G(\lambda,y)=\max{(\lambda_i g_i(y),1 \leq i \leq s)},	\\
 \end{matrix}
 \end{equation}
 
-If it is necessary to find several efficient decisions to the MCO problem (\ref{eq:6}), the optimization of the scalar criterion $G(\lambda,y)$ from (\ref{eq:7}) is performed for different values of the coefficients $\lambda \in \Lambda$ of the convolution of the criteria $g_i(y)$, $1 \leq i \leq s$. Thus, the problem of finding a set of efficient decisions for the MCO problem can be represented as a statement of the MGO problem (\ref{eq:1})-(\ref{eq:3}), where the optimized functions $f_i(y)$, $1 \leq i \leq s$, and the sets $F$ are defined as
+
+If it is necessary to find several efficient decisions to the MCO problem (\ref{eq:6}), the optimization of the scalar criterion $G(\lambda,y)$ from (\ref{eq:7}) is performed for different values of the coefficients $\lambda \in \Lambda$. Thus, the problem of finding a set of efficient decisions for the MCO problem can be represented as a statement of the MGO problem (\ref{eq:1})-(\ref{eq:3}), where the optimized functions $f_i(y)$, $1 \leq i \leq s$, and the set $F$ are defined as
 \begin{equation}\label{eq:8}
 f_i (y)= G(\lambda_i,y),1 \leq i \leq s.
 \end{equation}
 
-Thus, if the values of efficiency criteria $g_i(y)$, $1 \leq i \leq s$, computed at some point $y=\bar{y}$ of the search domain $D$, the value of the scalar criterion $G(\lambda,y)$ (and, accordingly, the values of the functions $f_i(y)$, $1 \leq i \leq s$, from a set $F$) can be computed at the point $\bar{y} \in D$ for any values of the coefficients $\lambda \in \Lambda$ of the convolution $g_i(y)$, $1 \leq i \leq s$ (the transformation of $Z$ from (\ref{eq:5}) is determined by the expression (\ref{eq:7}) at fixed values of the criteria $g_i(y)$, $1 \leq i \leq s$) \cite{c15,c16,c17}.
+As a result, if the values of efficiency criteria $g_i(y)$, $1 \leq i \leq s$, are computed at some point $y=\bar{y}$ of the search domain $D$, then the value of the scalar criterion $G(\lambda,y)$ can be computed at the point $\bar{y} \in D$ for any values of the coefficients $\lambda \in \Lambda$. In this case the transformation of $Z$ from (\ref{eq:5}) is determined by the expression (\ref{eq:7}) at fixed values of the criteria $g_l (y)$,$1 \leq l \leq m$) \cite{c27,c28}.
 
-The ability to quickly convert the calculated values of optimized functions determines the need to accumulate and use of search information obtained in the calculation process
-
+The ability to quickly convert the calculated values of optimized functions determines the need to accumulate and use search information obtained in the calculation process
 \begin{equation}\label{eq:9}
 \omega_k (j)=\{(y^i,f^i=f_j(y^i)):1 \leq i \leq k \},1 \leq j \leq s,
 \end{equation}
-where $j$, $1 \leq j \leq s$, is the number of the current minimized function $f_j(y)$ of the set $F$ from (\ref{eq:3}), $k$ is the number of iterations of the global search, $y^i \in D$, $1 \leq i \leq k$,  are points in which the values of the optimized problems of the set $F$ were computed, and $z^i$, $1 \leq i \leq k$, are the values of the function $f_j(y)$ at these points. Global optimization methods can use this search information, thereby ensuring the ability to solve each successive problem of the $F$ set, taking into account the results of all previous calculations. Numerical experiments that were performed (see Section \ref{sec:5}), confirm that such repeated use of search information reduces the number of iterations of the global search required to solve the next problem of the set $F$ (even to the point of performing just a few search iterations).
+where $j$, $1 \leq j \leq s$, is the number of the current function being minimized $f_j (y)$ of the set $F$ from (\ref{eq:3}), k is the number of iterations of the global search, $y^i \in D$, $1 \leq i \leq k$,  are points in which the values of the optimized problems of the set $F$ were computed, and $f^i$, $1 \leq i \leq k$, are the values of the function $f_j (y)$ at these points (the procedure for calculating the value of the function will be called a trial). Global optimization methods can use this search information, thereby ensuring the ability to solve each successive problem of the $F$ set, taking into account the results of all previous calculations. Numerical experiments that were performed (see Section \ref{sec:5}), confirm that such repeated use of search information reduces the number of iterations of the global search required to solve the next problem of the set $F$ (even to the point of performing just a few search iterations).
 
-In conclusion, it should be noted that, in general, the set of minimized functions $F$ from (\ref{eq:3}) can be formed dynamically in the course of calculations by adding new or removing existing global optimization functions
-
+In conclusion, it should be noted that, in general, the set of functions being minimized $F$ from (\ref{eq:3}) can be formed dynamically in the course of calculations by adding new or removing existing global optimization functions
 \begin{equation}\label{eq:10}
 F'=F+(-) f(y).
 \end{equation}
@@ -163,9 +169,9 @@ F'=F+(-) f(y).
 
 \section{A General Computational Scheme for Solving Global Optimization Problems}\label{sec:3}
 
-The approach proposed in this paper is based on two key ideas used in the framework of the information-statistical theory of global optimization \cite{c5}.
+The approach proposed in this paper is based on two key ideas used in the framework of the information-statistical theory of global optimization \cite{c6}.
 
-In accordance with this theory, first of all, dimension reduction is achieved using the Peano space-filling curves (evolvents) $y(x)$, uniquely and continuously mapping the interval $[0,1]$ to the $N$-dimensional domain $D$ -- see, for example, \cite{c5,c21}. As a result of this reduction, multidimensional global optimization problems (\ref{eq:7}) can be reduced to one-dimensional ones: 
+In accordance with this theory, first of all, dimensionality reduction is achieved using the Peano space-filling curves (evolvents) $y(x)$, uniquely and continuously mapping the interval [0,1] to the $N$-dimensional domain $D$ -- see, for example, \cite{c6,c23}. As a result of this reduction, multidimensional global optimization problems (\ref{eq:1})-(\ref{eq:2}) can be reduced to one-dimensional ones:
 
 \begin{equation}\label{eq:11}
 \min {f_i (y(x))} = \min{f_i (y)}, x \in [0,1], y \in D, 1 \leq i \leq s.
@@ -178,7 +184,6 @@ It should be noted that the one-dimensional functions obtained as a result of th
 where the constants $H_i$ are determined by the relation $H_i = 2L_i \sqrt{N+1}$, ${1 \leq i \leq s}$, $L_i$ are the Lipschitz constants from (\ref{eq:4}), and $N$ is the dimensionality of the optimization problem (\ref{eq:1}).
 
 Dimensionality reduction significantly decreases the computational complexity of analyzing multidimensional data to highlight the subdomains of the search domain $D$ for the efficient continuation of the global search, and reduces the severity of the ``curse of dimensionality'' problem in solving multidimensional optimization problems. After dimensionality reduction, the search information $\omega_k$ from (\ref{eq:9}) takes the form
-
 \begin{equation}\label{eq:13}
 A_k (j)=\{ (x_i, y(x_i), z_i=f_j (y(x_i) ): 1 \leq i \leq k,1 \leq j \leq s \},
 \end{equation}
@@ -187,9 +192,11 @@ in which, in addition to the reduced representation, the data is arranged in the
 \begin{equation}\label{eq:14}
 x_1< x_2< \cdots < x_k
 \end{equation}
-for a more efficient execution of global search algorithms. It should be noted that in optimizing the reduced one-dimensional functions $f_i (y(x))$, $1 \leq i \leq s$, many one-dimensional global search algorithms can be used (possibly after some generalization).
+or a more efficient execution of global search algorithms. It should be noted that in optimizing the reduced one-dimensional functions $f_i (y(x))$, $1 \leq i \leq s$, many one-dimensional global search algorithms can be used (possibly after some generalization).
 
-Numerical methods for constructing approximations of Peano space-filling curves (evolvents) with a given accuracy for a given dimensionality are considered in \cite{c5}; examples of such approximations are shown in Fig. \ref{fig:1}.
+Numerical methods for constructing approximations of Peano space-filling curves (evolvents) with a given accuracy for a given dimensionality are considered in \cite{c6}; examples of such approximations are shown in Fig.\ref{fig:1}.
+
+Further, in the framework of information-statistical theory, a general computational scheme of global optimization algorithms is proposed \cite{c6}. This scheme can be summarized as follows.
 
 \begin{figure}
   \centering
@@ -198,27 +205,22 @@ Numerical methods for constructing approximations of Peano space-filling curves 
   \label{fig:1}
 \end{figure}
 
-Further, in the framework of information-statistical theory, a general computational scheme of global optimization algorithms is proposed. This scheme can be summarized as follows.
-
-Let $k$, $k \geq 2$, optimization iterations be performed, and the search information $A_k$ from (\ref{eq:13}) is obtained. To adaptively select the points of the next iterations, the optimization algorithm has to evaluate the possibility of placing the global minimum in the subintervals, into which the interval $[0,1]$ is divided by the points $x_i$, $1 \leq i \leq k$, previously performed iterations of the global search. This assessment can be performed by introducing characteristics of the subintervals, the value of which would be proportional to the degree to which the global minimum can be located in these subintervals
-
+Let $f(y)$ be the function to be minimized for which $k$, $k \geq 2$, optimization iterations are performed, and the search information $A_k$ from (\ref{eq:13}) is obtained. To adaptively select the points of the next iterations, the optimization algorithm has to evaluate the possibility of placing the global minimum in the subintervals, into which the interval [0,1] is divided by the points $x_i$, $1 \leq i \leq k$, of previously performed iterations of the global search. This assessment can be performed by introducing \textit{characteristics} of the subintervals, the value of which would be proportional to the degree to which the global minimum can be located in these subintervals
 \begin{equation}\label{eq:15}
 R(i)=\mathcal{R} (i,A_k ), 1 < i \leq k.
 \end{equation}
 
 The type of characteristics $R(i)$, $1 < i \leq k$, is a key design element of global optimization algorithms. For example, for an algorithm that builds a uniform dense grid in the search domain, the characteristics may simply be the length of the interval
-
 \begin{equation}\label{eq:16}
-R(i)=(x_i-x_{i-1}), 1 < i \leq k, \; x_i, x_{i-1} \; \mathrm{from} \; A_k.
+R(i)=(x_i-x_{i-1}), 1 < i \leq k,
 \end{equation}
+where the points $x_i$, $1 < i \leq k$, are from $A_k$.
 
-For the multidimensional generalizations of the algorithms proposed in \cite{c22,c23}, the characteristic is an estimate of the minimum possible value of the minimized function on the interval, i.e.
-
+For the multidimensional generalizations of the algorithms proposed in \cite{c34,c35}, the characteristic is an estimate of the minimum possible value of the function being minimized on the interval, i.e.
 \begin{equation}\label{eq:17}
 R(i)=0.5 H \rho_i - 0.5 (z_{i-1} + z_i), \rho_i=(x_i - x_{i-1})^{1/N}, 1 < i \leq k,
 \end{equation}
-where $H$ is the H\"older constant from (\ref{eq:12}) for the reduced global optimization problem to be solved; $N$ is the dimensionality of the problem from (\ref{eq:7}). For the multidimensional generalized global search algorithm (GSA) \cite{c5,c24}, developed in the framework of the information-statistical approach, the characteristic has the form
-
+where $H$ the values $z_i$, $1<i \leq k$, are from $A_k$, H is the H\"older constant from (\ref{eq:12}) for the reduced global optimization problem to be solved and $N$ is the dimensionality of the problem from (\ref{eq:1}). For the multidimensional generalized global search algorithm (GSA) \cite{c6,c23}, developed in the framework of the information-statistical approach, the characteristic has the form
 \begin{equation}\label{eq:18}
 R(i)=m \rho_i+\frac{(z_i-z_{i-1})^2}{m \rho_i }-2(z_{i-1}+z_i ), \rho_i=(x_i-x_{i-1})^{1/N}  ,1 < i \leq k,
 \end{equation}
@@ -227,141 +229,198 @@ where $m$ is the numerical estimate of the H\"older constant obtained from the a
 \begin{equation}\label{eq:19}
 m=r M, M=\frac{\max|z_i-z_{i-1}|}{\rho_i}, \rho_i=(x_i-x_{i-1})^{1/N}  ,1 < i \leq k
 \end{equation}
-($r>1$ is the parameter of the GSA algorithm).
+($r>1$ is the reliability parameter of the GSA algorithm).
 
-The presence of interval characteristics makes it possible to represent the procedure for iterating a global search as the following sequence of steps \cite{c5}.
+A detailed description of the GSA algorithm is given in Algorithm \ref{alg:1}(see also \cite{c6}). The inputs of the algorithm are the function to be minimized $f(y)$\footnote{ }, the search domain $D$ from (\ref{eq:2}), the reliability parameter $r > 1$, the required accuracy $\varepsilon > 0$ and the maximum permissible number of global search iterations $kmax$. The output of the algorithm is an estimate of the global minimum point $y_k^* =y(x_k^*)$, the value of the function to be minimized at this point $z_k^* =f(y_k^*)$  and the number of performed global search iterations $k$. In the course of calculations, the search information $A_k$\footnote{ } from (\ref{eq:13}) is used, which contains the points of previously performed global search iterations $x_i$, $1 \leq i \leq k$, ordered in ascending order, and the values of the function to be minimized $z_i=f(y(x_i))$, $1\leq i \leq k$.
 
-\textit{Step 1.} Calculate the characteristics of the intervals $R(i)$, $1 < i \leq k$, and determine the interval with the maximum characteristic
-\begin{equation}\label{eq:20}
-R(t)=\max{R(i)}, 1 < i \leq k.
-\end{equation}
-
-\textit{Step 2.} Select the next iteration point in the interval with the maximum characteristic \footnote{The rule $X$ for choosing the point of the next iteration in the interval $(x_{t-1},x_t)$ is another design element of characteristically represented algorithms.}
-\begin{equation}\label{eq:21}
-x^{k+1}=X(x_{t-1},x_t ).
-\end{equation}
-
-Calculate the value $z^{k+1}$ of the minimized function at this point (the procedure for calculating the value of the function will be called a trial) and add the obtained data $(x^{k+1},z^{k+1})$ to the search information $A_k$ from (\ref{eq:13}).
-
-\textit{Step 3.} Check the stopping condition 
-\begin{equation}\label{eq:22}
-\rho_t \leq \varepsilon,	
-\end{equation}
-where $\rho_t=(x_t-x_{t-1})^{1/N}$, $t$ from (\ref{eq:20}) and $\varepsilon > 0$ is the specified accuracy of the solution to the optimization problem. If the stopping condition (\ref{eq:22}) is reached, then the solution to the optimization problem is stopped, otherwise $k=k+1$ is assumed and the next iteration of the global search is performed. 
-
-After the calculations are completed, the lowest calculated value of the minimized function can be taken as the global minimum estimate
+\begin{algorithm}[]
+\caption{PSEUDO CODE OF THE GSA ALGORITHM} \label{alg:1}
+\scriptsize
+\hspace*{\algorithmicindent} \textbf{Input}: $f(y)$, $D$, $r$, $\varepsilon$, $K$;\\
+\hspace*{\algorithmicindent} \textbf{Output}: $y_k^*$, $z_k^*$, $k$;
+\begin{algorithmic}[1]
+\State Initialize $A_2=\{(x_1=0,y_1=y(x_1 ),z_1=f(y(x_1 )),(x_2=1,y_2=y(x_2 ),z_2=f(y(x_2 ))\}$, $k = 2$, $stop = false$;
+\While{$k < kmax$ \textbf{and not} $stop$} 
+  \State Calculate the estimate of the H\"older constant $m$ from (\ref{eq:19}) using $A_k$;
+  \State Calculate the interval characteristics $R(i)$ from (\ref{eq:18}) \textbf{for all} $i = 2, \dots, k$;
+	\State Find the maximum characteristic 
+	\begin{equation}\label{eq:20}
+		R(t)=\max{R(i)}, 1 < i \leq k.
+  \end{equation}
+	\State Calculate the next iteration point
+	\begin{equation}\label{eq:21}
+	\begin{matrix}
+	   x^{k+1}=\frac{x_t+x_{t-1}}{2}-sign(z_t-z_{t-1})(\frac{|z_t-z_{t-1}|}{m})^N/2r \\
+		 sign(v)=\begin{cases}
+		            1, &v>0,\\
+		            0, &v=0,\\
+								-1,&v<0
+							\end{cases}
+	\end{matrix}
+	\end{equation}
+	
+	\State
+	\begin{equation}\label{eq:22}
+     stop = (x_t - x_{t-1})^{1/N} \leq \varepsilon.
+  \end{equation}
+  \If{ \textbf{not} $stop$}
+	  \State Calculate $z^{k+1} = f( y(x^{k+1}))$;
+    \State Insert $(x^{k+1}, y(x^{k+1}), z^{k+1})$ into the search information $A_k$;
+    \State Increase $k = k + 1$;
+  \EndIf
+\EndWhile
+\State Find the estimate of the global minimum point
 \begin{equation}\label{eq:23}
-z_k^*=\min{z_i}, 1 \leq i \leq k.
+y_k^*= y(x_l),  z_k^*=z_l,
 \end{equation}
+where $l= \argmin_{1 \leq i \leq k}z_i$.
+\State \textbf{return} $y_k^*$, $z_k^*$, $k$;
+\end{algorithmic}
+\end{algorithm}
 
-Again, we note that the above computational scheme is quite general. Within the framework of this scheme, many global search algorithms can be presented, as evidenced, in particular, by the examples given in (\ref{eq:16})--(\ref{eq:18}), as well as other characteristically represented algorithms (see, for example, \cite{c22,c23,c24,c25,c26,c27,c28,c29,c30,c31}). Thus, the parallelization methods discussed in Section \ref{sec:4} can be used for a sufficiently wide variety of global search algorithms.
-
-The convergence conditions for the characteristically represented algorithms depend on the properties of the interval characteristics used. For example, one of the sufficient conditions for convergence of the algorithms is the requirement that, when iterating the global search, the characteristic of the interval containing the global minimum point repeatedly takes the maximum value in Step 1 of the general characteristic scheme. This condition is fulfilled, for example, for the multidimensional generalizations of the algorithms proposed in \cite{c22,c23} for the exact setting of the H\"older constant in (\ref{eq:17}). For GSA, the sufficient condition for convergence is the relation \cite{c5}
+The sufficient condition for convergence of the GSA algorithm is the relation
 \begin{equation}\label{eq:24}
 m \geq 2H,
 \end{equation}
-starting with some iteration of the global search. Additional information on the convergence of characteristically represented global search algorithms can be obtained, for example, in \cite{c5}. 
+that should be satisfied starting with some iteration of the global search. 
 
-In the framework of the proposed approach, the GSA algorithm described by rules (\ref{eq:18})-(\ref{eq:23}) will be used to solve global optimization problems of the set $F$. Moreover, due to the informational connectivity (\ref{eq:5}) of the problems of the set $F$, the GSA algorithm can use all the search information $A_k$ from (\ref{eq:13}) when solving the next global optimization problem. The GSA algorithm for solving problems of the set $F$ and using search information $A_k$, will be referred to as the multiple global search algorithm (MGSA). 
-
+In the framework of the proposed approach, the GSA algorithm described above will be used to solve global optimization problems of the set $F$. Moreover, due to the informational connectivity (\ref{eq:5}) of the problems of the set $F$, the search information $A_k$ can be quickly transformed to the values of the next function to be minimized $f(y)$ of the set $F$ and GSA can minimize each successive function $f(y)$, taking into account the results of all previous calculations. The GSA algorithm for solving problems of the set $F$ and using search information $A_k$, will be referred to as the multiple global search algorithm (MGSA).
 
 
 \section{Parallel Computations for Solving Multiple Global Optimization Problems}\label{sec:4}
 
-In keeping with the initial assumption that it is computationally expensive to calculate the values of minimized functions of the set $F$ from (\ref{eq:3}), solving all global optimization problems (\ref{eq:1}) may require a huge amount of calculations, which increases with the number of problems to be solved. Thus, obtaining estimates of globally optimal decisions with reasonable time delays can only be achieved using parallel high-performance computational systems. 
+In keeping with the initial assumption that it is computationally expensive to calculate the values of the functions to be minimized of the set $F$ from (\ref{eq:3}), solving all global optimization problems (\ref{eq:1}) may require a huge amount of calculations, which increases with the number of problems to be solved. Thus, obtaining estimates of globally optimal decisions with reasonable time delays can only be achieved using parallel high-performance computational systems. 
 
-An obvious way to apply parallel computing is to solve the problems of the set $F$ in parallel. This method is simple and does not require any additional efforts for implementation. With this approach and with a sufficient number of computational devices (cores / processors), the time needed to solve all the $F$ set will be determined by the time used in solving the most time-consuming problem. However, this time may turn out to be quite long and necessitate the use of parallel computing to solve even one global optimization problem.
+An obvious way to apply parallel computing is to solve the problems of the set F in parallel. Undoubtedly this approach is straightforward and does not require any additional efforts to be  implemented. In this case, if a sufficient number of computational devices (cores / processors) is available, the time needed to solve all problems from the F set will be determined by the time used in solving the most time-consuming problem. However, this time may turn out to be quite long and necessitate the use of parallel computing to solve even one global optimization problem. However, well-known and widely used parallelization methods are poorly applicable in the case of global optimization problems. For example, the search domain distribution between processors for global optimization problems leads to the global minimum of the problems to be solved being located on only one of the processors, and all other processors will perform redundant calculations.
 
-Unfortunately, well-known and widely used parallelization methods are poorly applicable in the case of global optimization problems. For example, search domain distribution between processors for global optimization problems leads to the global minimum of the problems to be solved being located on only one of the processors; in this case, all other processors will perform redundant calculations.
+In the framework of the information-statistical theory, a general approach to parallelizing global optimization problems has been proposed -- parallel computing is provided by parallel (simultaneous) computing of the values of the minimized function at several different points in the search domain. This approach is general -- it can be applied to solving any global optimization problems in a parallel mode. And such an approach is efficient, since the most time consuming part of the problem is parallelized due to the initial assumption that calculating the values of functions to be minimized is computationally expensive.
 
-In the framework of the information-statistical theory, a general approach to parallelizing global optimization problems has been proposed -- parallel computing is provided by parallel (simultaneous) computing of the values of the minimized function at several different points in the search domain \cite{c5}. This approach is general -- it can be applied to solving any global optimization problems in a parallel mode. And such an approach is efficient, since the most time consuming part of the problem is parallelized due to the initial assumption that calculating the values of minimized functions is computationally expensive.
-
-Next, we propose three different ways of applying this approach for parallel solutions to multiply global optimization problems (\ref{eq:1})-(\ref{eq:3}).
-
+Next, we propose three different methods of applying this approach for parallel solutions to multiply global optimization problems (\ref{eq:1})-(\ref{eq:3}).
 
 \subsection{Strategy 1: The Problem-oriented Parallel Scheme} \label{subsec:1}
 
-In this method of parallel computing, it is proposed to solve the set $F$ problems strictly sequentially, and to use all available computational resources only to solve the one optimization problem. When solving problems of the set $F$ sequentially, all available search information $A_k$, obtained in the calculation process is reused. 
+In this method of parallel computing, it is proposed to solve the set $F$ of problems strictly sequentially, and to use all available computational resources only to solve just the optimization problem. When solving problems of the set $F$ sequentially, all available search information $A_k$, obtained in the calculation process is reused. 
 
-To implement this approach, it is necessary to ensure that at each iteration of the global optimization problem, not one, but several points in the search domain $D$ are selected for parallel calculation of the values of the minimized function at these points. In keeping with the fact that characteristically represented global search algorithms use the characteristics of the intervals $R(i)$, $1 < i \leq k$, from (\ref{eq:15}), to assess the possibility of locating the global minimum in the subinterval of the interval $[0,1]$, it is most reasonable to select the points of the next iteration of the global search in the intervals with the maximum values of the characteristics \cite{c33,c34,c35}.
+To implement this approach, it is necessary to ensure that at each iteration of the global optimization problem, not one, but several points in the search domain $D$ are selected for parallel calculation of the values of the functions to be minimized at these points. In keeping with the fact that characteristically represented global search algorithms use the characteristics of the intervals $R(i)$, $1 < i \leq k$, from (\ref{eq:15}), to assess the possibility of locating the global minimum in the subinterval of the interval [0,1], it is most reasonable to select the points of the next iteration of the global search in the intervals with the maximum values of the characteristics \cite{c6}.
 
-Performing iterations of a global search for a parallel generalization of the MGSA algorithm (PMGSA-1) can be represented as follows ($q>1$ is the number of available computational devices (cores/processors) with shared memory) \cite{c33,c34,c32}.
+A parallel generalization of the MGSA algorithm (PMGSA-1) is given in Algorithm \ref{alg:2}.
 
-\textit{Step 1}. Calculate the characteristics of the intervals $R(i)$, $1 < i \leq k$, and determine $q$ intervals with the maximum values of characteristics 
+\begin{algorithm}[]
+\caption{PSEUDO CODE OF THE PMGSA-1 ALGORITHM} \label{alg:2}
+\scriptsize
+\hspace*{\algorithmicindent} \textbf{Input}: $F(y)$, $D$, $r$, $\varepsilon$, $kmax$, $q$;\\
+\hspace*{\algorithmicindent} \textbf{Output}: $Y$, $Z$, $k$;
+\begin{algorithmic}[1]
+\State Initialize $ k=2, A_2=\{(x_1=0,y_1=y(x_1),z_1=f(y(x_1)),(x_2=1,y_2=y(x_2),z_2=f(y(x_2))\} $;
+\State $Y = \{\emptyset \}, Z = \{\emptyset\}$
+\State Set $stop = false$;
+\ForEach {$f(y)\subset \mathcal{F}(y)$ \textbf{and not} $stop$ }
+\While{$k < kmax$ \textbf{and not} $stop$} 
+  \State Calculate the estimate of the H\"older constant $m$ from (\ref{eq:19}) using $A_k$;
+  \State Calculate the interval characteristics $R(i)$ from (\ref{eq:18}) \textbf{for all} $i = 2, \dots, k$;
+	\State Set $T = \{ \emptyset \}, XK = \{ \emptyset \}$;
+	\ForEach { $i = 1..q$ } 
+	// q is the number of available cores/processors
+	  \State Find the interval with the maximum characteristic 
+		\begin{equation*}
+			t= \argmax_{1<i \leq k} R(i), i \notin T;
+	  \end{equation*}
+		\State Calculate the iteration point $x^{k+i}$ in accordance with (\ref{eq:21});
+    \State Insert $t$ in $T$ and $x^{k+i}$ in $XK$;
 
-\begin{equation}\label{eq:25}
-R(t_j)=\max{R(i)},1 < i \leq k, 1 \leq j\leq q,
-\end{equation}
-(for $j>1$,$t_j \neq t_l$, $1 \leq l < j$ should be satisfied).
+	\EndFor
+  \State \textbf{for each} $t \in T$ \textbf{do if} $(x_t-x_{t-1} )^{1/N} \leq \varepsilon$ \textbf{then} $stop = true$;
+	
+	\If{ \textbf{not} $stop$}
+	  \ForEach { $x \in XK $ } \textbf{in parallel}
+	    \State Calculate $z = f( y(x))$;
+      \State Insert $(x, y(x), z)$ into the search information $A_k$;
+      \State Increase $k = k + 1$;
+	  \EndFor
+  \EndIf
+	\State Find the estimate of the global minimum point of the current function $f(y)$ in accordance with (\ref{eq:23});
+	\State Insert $y_k^*$ in $Y$ and $z_k^*$ in $Z$;
+  \EndWhile
+\EndFor
+\State \textbf{return} $Y$, $Z$, $k$;
+\end{algorithmic}
+\end{algorithm}
 
-\textit{Step 2}. Select $q$ points of the next parallel iteration in the intervals with maximum characteristics
-
-\begin{equation}\label{eq:26}
-x^{k+j}=X(x_{t_j-1},x_{t_j} ), 1 \leq j \leq q,
-\end{equation}
-then calculate the values of $z^{k+j}$, $1 \leq j \leq q$, of the minimized function at these points and add the resulting data $(x^{k+j},z^{k+j})$, $1 \leq j \leq q$, to the search information $A_k$ from (\ref{eq:13}).
-
-\textit{Step 3}. Check the stopping condition
-
-\begin{equation}\label{eq:27}
-\rho_{t_j} \leq \varepsilon, 1 \leq j \leq q,
-\end{equation}
-where $\rho_{t_j}=(x_{t_j}-x_{t_j-1} )^{1/N}$, $t_j$, $1 \leq j \leq q$, from (\ref{eq:25}) and $\varepsilon > 0$ is the specified accuracy for solving the optimization problem. If the stopping condition (\ref{eq:27}) is reached for at least one interval $t_j$, $1 \leq j \leq q$, then the solution to the optimization problem stops; otherwise $k=k+q$ is assumed and the next parallel iteration of the global search is performed. 
-
-Results of the numerical experiments show that this approach of parallelizing the MGSA algorithm allows one to obtain near-linear speedup using up to $2^N$ computational cores ($N$ is the dimensionality of the global optimization problems to be solved). An example of using PMGSA-1 is given in Fig. \ref{fig:2}. On the left in Fig. \ref{fig:2} the MGSA result is given (55 iterations), on the right the PMGSA-1 result is shown (30 iterations, i.e., speedup is 1.8). PMGSA-1 uses 2 cores, iteration points selected by the cores are marked by the different lines.
+Results of the numerical experiments show that this approach of parallelizing the MGSA algorithm allows one to obtain near-linear speedup using up to $2^N$ computational cores ($N$ is the dimensionality of the global optimization problems to be solved). An example of using PMGSA-1 is given in Fig. \ref{fig:2}. On the left in Fig. \ref{fig:2} the MGSA result is given (55 iterations), on the right the PMGSA-1 result is shown (30 iterations, i.e. the speedup is 1.8). PMGSA-1 uses 2 cores, iteration points selected by the cores are marked by the different lines.
 
 \begin{figure}
   \centering
   \includegraphics[width=\linewidth]{fig2}
-  \caption{An example of using PMGSA-1 for solving the univariate optimization problem: a) the graph of the minimized function, b) step-by-step selection of iteration points computed by the method (the ordinate axis is the iteration number, the abscissa axis is the search domain)}
+  \caption{An example of using PMGSA-1 for solving the univariate optimization problem: a) the graph of the function being minimized, b) step-by-step selection of iteration points computed by the methods (the ordinate axis is the iteration number, the abscissa axis is the search domain)}
   \label{fig:2}
 \end{figure}
 
 \subsection{Strategy 2: The Competitive Parallel Scheme} \label{subsec:2}
 
-Selecting several points at once for the same search iteration in the PMGSA-1 algorithm can result in redundant points compared to the sequential GSA version, since these points are selected at the same state of search information $A_k$ from (\ref{eq:13}). Such an undesirable effect can be reduced by reducing the number of computational devices allocated to solve an optimization problem, while simultaneously increasing the number of parallel global optimization problems that are solved due to freed computational resources. In this case, the available computational resources can be distributed dynamically among problems in the global search process.
+Selecting several points at once for the same search iteration in the PMGSA-1 algorithm can result in redundant points compared to the sequential MGSA version, since these points are selected at the same state of search information $A_k$ from (\ref{eq:13}). Such an undesirable effect can be reduced by reducing the number of computational devices allocated to solve an optimization problem, while simultaneously increasing the number of parallel global optimization problems that are solved due to freed computational resources. In this case, the available computational resources can be distributed dynamically among problems in the global search process.
 
-Assume, as before, that $q>1$ is the number of available computational devices (cores/processors) with shared memory, and $ns>1$ is the number of parallel problems solved from the set $F$ from (\ref{eq:3})\footnote{Without lost of generality, we will use sequential numbering of problems solved in parallel from $1$ to $ns$.}. Each optimization problem solved in parallel will compete for available computational resources -- the distribution of resources between problems can be carried out, as before, based on the values of interval characteristics. To calculate the characteristics, the problems solved in parallel have sets of search information $A_k(j)$, $1\leq j \leq ns$, from (\ref{eq:13}), which match the set of iteration points $x_i$, $1 \leq i \leq k$, of the global search, but differ, accordingly, in the values of the minimized functions. The notation $\tau_{ij}$ will then designate the interval $t_j$ in the search information $A_k(i)$ of problem $i$.
+Assume, as before, that $q>1$ is the number of available computational devices (cores/processors) with shared memory, and $ns>1$ is the number of optimization problems\footnote{Without lost of generality, we will use sequential numbering of problems solved in parallel from 1 to $ns$.}  solved in parallel. Each optimization problem will compete for available computational resources -- the distribution of resources between problems can be carried out, as before, based on the values of interval characteristics. To calculate the characteristics, the problems solved in parallel have their own separate sets of search information $A_k (is)$, $1 \leq is \leq ns$, from (\ref{eq:13}), which match the set of iteration points $x_i$, $1 \leq i \leq k$, of the global search, but differ, accordingly, in the values $z_i (is)$, $1 \leq is \leq k$, of the minimized functions $f_is (y)$, $1 \leq is \leq ns$, from the set $F(y)$. As a result, in this case, to specify the intervals where the characteristics are computed, two indices $( is, t )$ are required, where $is$, $1 \leq is \leq ns$, is the number of the function to be minimized  $f_is (y)$ and  $t$, $1 \leq t \leq k$, is the number of the interval in the search information $A_k (is)$.
 
-The new parallel version of the MGSA algorithm (the PMGSA-2 algorithm) obtained as a result of this approach is determined by the following sequence of steps for performing parallel iterations of the global search.
-
-\textit{Step 0}. For each problem to be solved in parallel, normalize the values of the minimized function in the available search information in order to compare the interval characteristics in different global optimization problems\footnote{After transformation (\ref{eq:28}), $z_k^*=0$ and $m_k=1$ are carried out for all $ns$ parallel problems.}
-
-\begin{equation}\label{eq:28}
-z(j)_i'=\frac{z(j)_i-z(j)_k^*}{m(j)_k},1 \leq i \leq k,1 \leq j \leq ns,
+It should also be noted that when implementing this approach to compare the interval characteristics in different global optimization problems, the values of the function being minimized in the available search information should be normalized\footnote{Without loss of generality, we will use sequential numbering of problems solved in parallel from 1 to $ns$.}
+\begin{equation}\label{eq:25}
+z(is)_i'=\frac{z(is)_i - z(is)_k^*}{m(is)_k}, 1 \leq i \leq k,1 \leq is \leq ns,
 \end{equation}
-where $z(j)_k^*$, $1 \leq j \leq ns$, are estimates (\ref{eq:23}) of the minimum values of the minimized functions, and $m(j)_k$, $1 \leq j \leq ns$, are the estimates (\ref{eq:19}) of the H\"older constant from (\ref{eq:12}). Further, when performing the steps of the algorithm, the converted values $z(j)_i'$, $1 \leq i \leq k$, $1 \leq j \leq ns$ should be used when calculating the characteristics of intervals and points of new iterations of the global search.
+where $z(is)_k$, $1 \leq is \leq ns$, are the estimates (\ref{eq:23}) of the minimum values of the functions being minimized, and $m(is)_k$, $1 \leq is \leq ns$, are the estimates (\ref{eq:19}) of the H\"older constants $H_{is}$, $1 \leq is \leq ns$, from (\ref{eq:12}). Further, when performing the steps of the algorithm, the converted values $z(is)_i'$, $1 \leq i \leq k$, $1 \leq is \leq ns$, should be used when calculating the characteristics of intervals and points of new iterations of the global search.
 
-\textit{Step 1}. Calculate the characteristics of intervals $R(i)$, $1 < i \leq k$, for all $ns$ problems to be solved in parallel and determine $q$ intervals with the maximum values of the characteristics
-\begin{equation}\label{eq:29}
-R(\tau_{l(j)j})=\max{R_\nu(i)}, 1 < i \leq k, 1 \leq \nu \leq ns, 1 \leq j \leq q,
-\end{equation}
-where $R_\nu(i)$ is the characteristic of the interval $i$ in the search information $A_k(\nu)$ of the problem with the number $\nu$, $l(j)$ is the number of the problem to be solved, in which the maximum characteristic $R(\tau_{l(j)j})$ was chosen; (in (\ref{eq:29}) for $j>1$, $\tau_{l(j)j}\neq \tau_{l(l)l}$, $1 \leq l < j$ should be satisfied).
+The new parallel version of the MGSA algorithm (the PMGSA-2 algorithm) obtained as a result of this approach is given in Algorithm \ref{alg:3}.
 
-\textit{Step 2}. The execution of Step 2 is divided into three sequential stages: 
-\begin{enumerate}
-	 
-	\item Select $q$ points of the next parallel iteration in intervals with maximum characteristics
-\begin{equation}\label{eq:30}
- x(l(j))^{k+j}=X(x_{\tau_{l(j)j}-1},x_{\tau_{l(j)j}}),1 \leq j \leq q	
-\end{equation}
-(the point $x(l(j))^{k+j}$ is determined in the interval $(x_{\tau_{l(j)j}-1},x_{\tau_{l(j)j}})$, belonging to the search information $A_k (l(j))$ of problem $l(j)$.
-
-	\item Calculate the values $z(l(j))^{k+j}$, $1 \leq j \leq q$, of minimized functions at the points $x(l(j))^{k+j}$, $1 \leq j \leq q$.
+\begin{algorithm}[]
+\caption{PSEUDO CODE OF THE PMGSA-2 ALGORITHM} \label{alg:3}
+\scriptsize
+\hspace*{\algorithmicindent} \textbf{Input}: $F(y)$, $D$, $r$, $\varepsilon$, $kmax$, $ns$;\\
+\hspace*{\algorithmicindent} \textbf{Output}: $Y$, $Z$, $k$;
+\begin{algorithmic}[1]
+\State Initialize $ k=2, A_2=\{(x_1=0,y_1=y(x_1),z_1=f(y(x_1)),(x_2=1,y_2=y(x_2),z_2=f(y(x_2))\} $;
+\State Set $stop = false$;
+\While{$k < kmax$ \textbf{and not} $stop$}
+  \ForEach { $is = 1..ns$ }
+	  \State Calculate the estimate of the H\"older constant $m$ from (\ref{eq:19}) using $A_k$;
+		\State Find the estimate of the global minimum value $z(is)_k^*$ of the function $f_{is}(y)$ in accordance with (\ref{eq:23});
+		\State Set $A_k'(is)=A_k (is)$;
+		\State Normalize the values $z(is)_i'$, $1 \leq i \leq k$, in $A_k'(is)$ in accordance with (\ref{eq:25});
+		\State Set $m_k (is)=1$;
+	\EndFor
 	
-  \item Add the obtained data $(x(l(j))^{k+j}, z(l(j))^{k+j})$, $1 \leq j \leq q$, in the search information $A_k(i)$, $1 \leq i \leq ns$, of each problem being solved in parallel with the necessary values transformation $z(l(j))^{k+j}$, $1 \leq j \leq q$, using the $Z$ transformation from (\ref{eq:5}).
+	\State Set $T = \{ \emptyset \}, XK = \{ \emptyset \}$;
+	\ForEach { $i = 1..q$ } 
+	// q is the number of available cores/processors
+	  \State Find the interval with the maximum characteristic 
+		\begin{equation*}
+			R_{is} (t)= \argmax_{1 \leq is \leq ns, 1 < i \leq k} R(i),i \notin T 
+	  \end{equation*}
+		using $A_k' (is)$;
+		\State Calculate the iteration point $x^{k+i}$ using $A_k' (is)$ in accordance with (\ref{eq:21});
+    \State Insert $t$ in $T$, is in $IS$ and $x^{k+i}$ in $XK$;
 
-\end{enumerate}
+	\EndFor
+  \State \textbf{for each} $t \in T$ \textbf{do if} $(x_t-x_{t-1} )^{1/N} \leq \varepsilon$ \textbf{then} $stop = true$;
+	
+	\If{ \textbf{not} $stop$}
+	  \ForEach { $x \in XK $ } \textbf{in parallel}
+		  \State Take $is$ from $IS$;
+	    \State Calculate $z = f_{is}(y(x))$;
+      \State Insert $(x, y(x), z)$ into the search information $A_k$;
+      \State Increase $k = k + 1$;
+	  \EndFor
+  \EndIf
+	\State Set $Y = \{ \emptyset \}, Z = \{ \emptyset \}$;
+	\ForEach { $iz = 1..ns$ }
+	\State Find the estimate of the global minimum point $y_k^*$ using $A_k (is)$ in accordance with (\ref{eq:23});
+	\State Insert $y_k^*$ in $Y$ and $z_k^*$ in $Z$;
+  \EndFor
+	\EndWhile
+\State \textbf{return} $Y$, $Z$, $k$;
+\end{algorithmic}
+\end{algorithm}
 
-\textit{Step 3}. Verify the stopping condition
-\begin{equation}\label{eq:31}
-\rho_{\tau_{l(j)j}} \leq \varepsilon, 1 \leq j \leq q,
-\end{equation}
-where $\rho_{\tau_{l(j)j}} = (x_{\tau_{l(j)j}} - x_{\tau_{l(j)j)-1}} )^{1/N}$, $\tau_{l(j)j}$, $1 \leq j \leq q$, from (\ref{eq:29}) and $\varepsilon > 0$ is the given accuracy for solving the optimization problem. If the stopping condition (\ref{eq:31}) is reached for at least one interval $\tau_{l(j)j}$, $1 \leq j \leq q$, then the solution to the optimization problem stops; otherwise, $k=k+q$ is assumed and the next parallel iteration of the global search is performed. 
+Let us briefly explain the rules for performing a parallel iteration of the global search. The characteristics of the intervals are calculated for all ns problems to be solved in parallel, and q intervals with the maximum values of the characteristics are selected among them (lines 12-16). As a result, the available computational resources are distributed dynamically among problems -- computational devices can be distributed evenly between problems, or they can be allocated to only one problem with the best interval characteristics. After calculating the values of the functions being minimized, the new search data obtained is added to the search information of all solved problems; regardless of where the intervals for iterating the global search were selected, the search information of all solved problems is updated with a full set of new search data (lines 19-24).
 
-Let us briefly explain the rules for performing a parallel iteration of the global search. The characteristics of the intervals are calculated for all $ns$ problems to be solved in parallel (Step 1), and $q$ intervals with the maximum values of the characteristics are selected among them. As a result, the available computational resources are distributed dynamically among problems -- computational devices can be distributed evenly between problems, or they can be allocated to only one problem with the best interval characteristics. After calculating the values of the minimized functions (Step 2), the new search data obtained is added to the search information of all solved problems; regardless of where the intervals for iterating the global search were selected, the search information of all solved problems is updated with a full set of new search data.
-
-The maximum efficiency of the proposed PMGSA-2 algorithm is achieved if the global minimum in parallel problems is reached at the same point in the search domain. In any case, getting additional search information from simultaneously solved problems can significantly reduce the time needed to solve each global search problem -- see the results of numerical experiments in Section \ref{sec:5}. An example how PMGSA-2 selects the intervals with the maximum characteristics (Step 1) is given in Fig.\ref{fig:3}.
+The maximum efficiency of the proposed PMGSA-2 algorithm is achieved if the global minimum in parallel problems is reached at the same point in the search domain. In any case, getting additional search information from simultaneously solved problems can significantly reduce the time needed to solve each global search problem. This conclusion is rather obvious if the global minima points of the functions $f_i (y)$, $1 \leq i \leq s$, of the set $F$ from (\ref{eq:3}) are situated in the same small neighborhood of the search domain $D$ from (\ref{eq:2}). But even in the case when the global minima points of different functions differ much from each other, the values of different functions $f_i (y)$, $1 \leq i \leq s$, of the set $F$ computed in the process of global search can be used for each function separately. Thus, in PMGSA-2 the execution of one parallel iteration using $q$ computational units adds $q$ computation results. Increasing the amount of available search information allows adaptive global search algorithms to select points for the next iterations of the global search in a more reasonable manner. In the limiting case, when performing sufficiently many $iterations \gg 1$, the amount of search information can be sufficient to find the global minimum point of the next problem in the set $F$ without any additional iterations. This effect is proved also by the results of numerical experiments in Section \ref{sec:5}. An example of how PMGSA-2 selects the intervals with the maximum characteristics is given in Fig.\ref{fig:3}.
 
 \begin{figure}
   \centering
