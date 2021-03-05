@@ -136,21 +136,21 @@ where $T(*)$  is the computation time of the expression given in parenthesis.
 
 This condition is fulfilled, for example, when solving multicriteria optimization (MCO) problems 
 \begin{equation}\label{eq:6}
-g(y) = (g_1(y), g_2(y), \dots , g_s(y)) \to min,  y\in D.
+g(y) = (g_1(y), g_2(y), \dots , g_m(y)) \to min,  y\in D.
 \end{equation}
 
 To find efficient (unimprovable) solutions, a widely used approach is based on the reduction (scalarization) of the vector criterion $g(y)$ to the general scalar criterion, the minimization of which will lead to the Pareto optimal solution of the MCO problem \cite{c29,c30,c31,c32,c33}. So, when using mini-max convolution, the vector criterion $g(y)$ from (\ref{eq:6}) reduces to the scalar criterion
 \begin{equation}\label{eq:7}
 \begin{matrix}
-G(\lambda,y)=\max{(\lambda_i g_i(y),1 \leq i \leq s)},	\\
-\lambda=(\lambda_1,\lambda_2,\dots,\lambda_s)\in \Lambda \subset R^s:\sum_{i=1}^s{\lambda_i =1},\lambda_i\geq 0,1 \leq i \leq s.
+G(\lambda,y)=\max{(\lambda_l g_l(y),1 \leq l \leq m)},	\\
+\lambda=(\lambda_1,\lambda_2,\dots,\lambda_m)\in \Lambda \subset R^m:\sum_{l=1}^m{\lambda_l =1},\lambda_l\geq 0,1 \leq l \leq m.
 \end{matrix}
 \end{equation}
 
 
 If it is necessary to find several efficient decisions to the MCO problem (\ref{eq:6}), the optimization of the scalar criterion $G(\lambda,y)$ from (\ref{eq:7}) is performed for different values of the coefficients $\lambda \in \Lambda$. Thus, the problem of finding a set of efficient decisions for the MCO problem can be represented as a statement of the MGO problem (\ref{eq:1})-(\ref{eq:3}), where the optimized functions $f_i(y)$, $1 \leq i \leq s$, and the set $F$ are defined as
 \begin{equation}\label{eq:8}
-f_i (y)= G(\lambda_i,y),1 \leq i \leq s.
+F(y)= \{ G(\lambda_i,y),1 \leq l \leq s\}.
 \end{equation}
 
 As a result, if the values of efficiency criteria $g_i(y)$, $1 \leq i \leq s$, are computed at some point $y=\bar{y}$ of the search domain $D$, then the value of the scalar criterion $G(\lambda,y)$ can be computed at the point $\bar{y} \in D$ for any values of the coefficients $\lambda \in \Lambda$. In this case the transformation of $Z$ from (\ref{eq:5}) is determined by the expression (\ref{eq:7}) at fixed values of the criteria $g_l (y)$,$1 \leq l \leq m$) \cite{c27,c28}.
@@ -179,13 +179,13 @@ In accordance with this theory, first of all, dimensionality reduction is achiev
 
 It should be noted that the one-dimensional functions obtained as a result of the reduction satisfy the uniform H\"older condition, i.e.
 \begin{equation}\label{eq:12}
-|f_i (y(x'))-f_i (y(x''))| \leq H_i \|x'-x''\|, x',x''\in [0,1], 1 \leq i \leq s,
+|f_i (y(x'))-f_i (y(x''))| \leq H_i |x'-x''|^{1/N}, x',x''\in [0,1], 1 \leq i \leq s,
 \end{equation}
-where the constants $H_i$ are determined by the relation $H_i = 2L_i \sqrt{N+1}$, ${1 \leq i \leq s}$, $L_i$ are the Lipschitz constants from (\ref{eq:4}), and $N$ is the dimensionality of the optimization problem (\ref{eq:1}).
+where the constants $H_i$ are determined by the relation $H_i = 2L_i \sqrt{N+3}$, ${1 \leq i \leq s}$, $L_i$ are the Lipschitz constants from (\ref{eq:4}), and $N$ is the dimensionality of the optimization problem (\ref{eq:1}).
 
 Dimensionality reduction significantly decreases the computational complexity of analyzing multidimensional data to highlight the subdomains of the search domain $D$ for the efficient continuation of the global search, and reduces the severity of the ``curse of dimensionality'' problem in solving multidimensional optimization problems. After dimensionality reduction, the search information $\omega_k$ from (\ref{eq:9}) takes the form
 \begin{equation}\label{eq:13}
-A_k (j)=\{ (x_i, y(x_i), z_i=f_j (y(x_i) ): 1 \leq i \leq k,1 \leq j \leq s \},
+A_k (j)=\{ (x_i, y(x_i), z_i=f_j (y(x_i) ): 1 \leq i \leq k \}, 1 \leq j \leq s,
 \end{equation}
 in which, in addition to the reduced representation, the data is arranged in the ascending order\footnote{Data ordering is reflected by using a subscript.} of points $x_i$,  $1 \leq i \leq k$, i.e.
 
@@ -227,7 +227,7 @@ R(i)=m \rho_i+\frac{(z_i-z_{i-1})^2}{m \rho_i }-2(z_{i-1}+z_i ), \rho_i=(x_i-x_{
 where $m$ is the numerical estimate of the H\"older constant obtained from the available search information $A_k$ from (\ref{eq:13})
 
 \begin{equation}\label{eq:19}
-m=r M, M=\frac{\max|z_i-z_{i-1}|}{\rho_i}, \rho_i=(x_i-x_{i-1})^{1/N}  ,1 < i \leq k
+m=r M, M=\max_{1 < i \leq k} \frac{|z_i-z_{i-1}|}{\rho_i}, \rho_i=(x_i-x_{i-1})^{1/N}  ,1 < i \leq k
 \end{equation}
 ($r>1$ is the reliability parameter of the GSA algorithm).
 
@@ -315,16 +315,14 @@ A parallel generalization of the MGSA algorithm (PMGSA-1) is given in Algorithm 
 \State $Y = \{\emptyset \}, Z = \{\emptyset\}$
 \State Set $stop = false$;
 \ForEach {$f(y)\subset \mathcal{F}(y)$ \textbf{and not} $stop$ }
+\State Recalculate $A_k$ to the values of the function $f(y)$;
 \While{$k < kmax$ \textbf{and not} $stop$} 
   \State Calculate the estimate of the H\"older constant $m$ from (\ref{eq:19}) using $A_k$;
   \State Calculate the interval characteristics $R(i)$ from (\ref{eq:18}) \textbf{for all} $i = 2, \dots, k$;
 	\State Set $T = \{ \emptyset \}, XK = \{ \emptyset \}$;
 	\ForEach { $i = 1..q$ } 
 	// q is the number of available cores/processors
-	  \State Find the interval with the maximum characteristic 
-		\begin{equation*}
-			t= \argmax_{1<i \leq k} R(i), i \notin T;
-	  \end{equation*}
+	  \State Find the interval with the maximum characteristic $t= \argmax_{1<i \leq k} R(i), i \notin T$;
 		\State Calculate the iteration point $x^{k+i}$ in accordance with (\ref{eq:21});
     \State Insert $t$ in $T$ and $x^{k+i}$ in $XK$;
 
@@ -408,12 +406,13 @@ The new parallel version of the MGSA algorithm (the PMGSA-2 algorithm) obtained 
       \State Increase $k = k + 1$;
 	  \EndFor
   \EndIf
+	\EndWhile
 	\State Set $Y = \{ \emptyset \}, Z = \{ \emptyset \}$;
 	\ForEach { $iz = 1..ns$ }
-	\State Find the estimate of the global minimum point $y_k^*$ using $A_k (is)$ in accordance with (\ref{eq:23});
-	\State Insert $y_k^*$ in $Y$ and $z_k^*$ in $Z$;
-  \EndFor
-	\EndWhile
+	  \State Find the estimate of the global minimum point $y_k^*$ using $A_k (is)$ in accordance with (\ref{eq:23});
+	  \State Insert $y_k^*$ in $Y$ and $z_k^*$ in $Z$;
+	\EndFor
+
 \State \textbf{return} $Y$, $Z$, $k$;
 \end{algorithmic}
 \end{algorithm}
@@ -431,21 +430,22 @@ The maximum efficiency of the proposed PMGSA-2 algorithm is achieved if the glob
 
 \subsection{Strategy 3: The Cooperative Parallel Scheme} \label{subsec:3}
 
-When using computational devices with shared memory, the number of cores / processors is quite limited -- the number of processors on one computational node is usually 2, the number of computational cores in one processor usually does not exceed 10-20. For increasing possible parallelism, it becomes inevitable to use computational nodes where memory is distributed.
+When using computational devices with shared memory, the number of cores / processors is quite limited -- the number of cores on one computational node usually does not exceed 12-24. For increasing possible parallelism, it becomes inevitable to use a distributed memory computer with several computational nodes.
 
 Let $p>1$ be the number of computational nodes with distributed memory, each of which has $q>1$ computational cores (that is, the total number of cores in a computational system is $p*q$). 
 
-In the framework of the proposed approach, a parallel multiple search algorithm (the PMGAS-3 algorithm) is proposed for distributed memory computational systems, the main rules of which are as follows.
+In the framework of the proposed approach, a parallel global optimization algorithm (the PMGAS-3 algorithm) is proposed for distributed memory computational systems, the main rules of which are as follows.
 
-1) Solving the problems of the set $F$ from (\ref{eq:3}) is carried out sequentially in groups; the number of problems in each group coincides with the number of available computational nodes.
 
-2) Each problem of the current group is solved on its own computational node using the PMGSA-1 algorithm.
+1) Solving the problems of the set $F(y)$ from (\ref{eq:3}) is carried out sequentially in groups; the number of problems in each group coincides with the number of available computational cores $p*q$.
 
-At the end of each parallel iteration of the global search, the results of the iteration $(x^{k+j}, z^{k+j})$, $1 \leq j \leq q$, of each processor are transferred to all available nodes of the computational system with the necessary transformation of the values of minimized functions in accordance with the transformation $Z$ from (\ref{eq:5}).
-		
-Before performing a new iteration, each computational node accepts the search data transmitted to it and adds this data to the search information $A_k$ from (\ref{eq:13}).
+2) Each computational node is applied for solving q optimization problems using the PMGSA-2 algorithm.
+
+1) At the end of each parallel iteration of the global search, the results of the iteration $(x^{k+j},z^{k+j} )$, $1 \leq j \leq q$, of each node are transferred to all available computational nodes with the necessary recalculation of the values of functions being minimized in accordance with the transformation $Z$ from (\ref{eq:5}).
+
+2) Before performing a new iteration, each computational node accepts the search data transmitted to it and adds this data to the search information $A_k (is)$, $1\leq is \leq q$, from (\ref{eq:13}).
 	
-In this way, in keeping with the above rules, the PMGSA-3 algorithm is distributed -- the problems of the set $F$ are solved independently on different computational nodes. During the global search process, computational nodes exchange the calculation results that are obtained; after each iteration of the global search, the search information for each problem being solved is updated with $q$ calculated values of the minimized function. Thus, the more computational nodes there are (and accordingly, simultaneously solved problems), the faster as a rule, each optimization problem is solved. This is evidenced, in particular, by the results of numerical experiments that were performed (see Section \ref{eq:5}). An example how PMGSA-3 performs an optimization iteration is given in Fig. \ref{fig:4}.
+In this way, in keeping with the above rules, the PMGSA-3 algorithm is distributed -- the problems of the set $F(y)$ are solved independently on different computational nodes. During the global search process, computational nodes exchange the calculation results that are obtained; after each iteration of the global search, the search information for each problem being solved is updated with $q$ calculated values of the function being minimized. Thus, the more computational nodes there are (and accordingly, the problems that are solved simultaneously), the faster, as a rule, each optimization problem is solved. This is evidenced, in particular, by the results of numerical experiments that were performed (see Section \ref{sec:5}). An example of how PMGSA-3 performs an optimization iteration is given in Fig. \ref{fig:4}.
 
 \begin{figure}
   \centering
@@ -456,21 +456,25 @@ In this way, in keeping with the above rules, the PMGSA-3 algorithm is distribut
 
 \section{Results of Numerical Experiments}\label{sec:5}
 
-Numerical experiments were performed on the supercomputers Lobachevsky (University of Nizhni Novgorod), Lomonosov (Moscow State University), MVS-10P (Joint Supercomputer Center of RAS) and supercomputers Endeavor. The numerical results were obtained by using the following computational nodes: 2 Intel Xeon Platinum 8260L, 2.4 GHz, 256 GB RAM (i.e. a total of 48 CPU cores were available on each node). The executable program code was built by using the Intel Parallel Studio XE 2019 software package. The numerical experiments were performed using the Globalizer system \cite{c40}.
+Numerical experiments were performed on the supercomputers Lobachevsky (University of Nizhni Novgorod) and Endeavour (Intel Cluster). The first supercomputer was used for software development. The numerical results were obtained by the second one with the following computational nodes: 2 Intel Xeon Platinum 8260L, 2.4 GHz, 256 GB RAM (i.e. a total of 48 CPU cores were available on each node). The executable program code was built by using the Intel Parallel Studio XE 2019 software package. The numerical experiments were performed using the Globalizer system \cite{c36}. This system offers an opportunity to solve computationally intensive multicriteria multiextremal optimization problems using the parallel global search algorithms presented in the paper.
 
-First, we present the results achieved when comparing the MGSA algorithm with several multicriteria optimization algorithms \cite{c37}. In carrying out the experiments, the two-criteria test problem proposed in \cite{c36} was used:
+First, we present the results achieved when comparing the MGSA algorithm with several multicriteria optimization algorithms \cite{c37}. In carrying out the experiments, the test two-criteria problem proposed in \cite{c38} was used:
 
-\begin{equation}\label{eq:32}
+\begin{equation}\label{eq:26}
 f_1(y)=(y_1-1) y_2^2+1,f_2 (y)=y_2, 0 \leq y_1, y_2 \leq 1.
 \end{equation}
 
-Solving the MCO problem is understood to mean the construction of a numerical approximation of the Pareto domain. To assess the quality of the approximation, the completeness and uniformity of coverage of the Pareto domain were compared using the following two indicators \cite{c15,c36}:
+This problem can be considered as an example of MGO, since, to approximate the Pareto set, the MGSA algorithm was applied for solving 50 subproblems $G (\lambda, y)$ from (\ref{eq:7}) for different values of convolution coefficients $\lambda$, uniformly distributed in the interval [0,1].
+
+
+
+Solving the MCO problem is understood to mean the construction of a numerical approximation of the Pareto domain. To assess the quality of the approximation, the completeness and uniformity of coverage of the Pareto domain were compared using the following two indicators  \cite{c28,c37}:
 \begin{itemize}
 	 \item The hypervolume index (HV). This indicator characterizes how completely the Pareto domain is approximated (a higher value corresponds to a more complete coverage of the Pareto domain). 
 	 \item The distribution uniformity index (DU). This indicator characterizes how uniformly the Pareto domain is covered (a lower value corresponds to a more uniform coverage of the Pareto domain).
 \end{itemize}
 
-During the experiments, five multicriteria optimization algorithms were compared: the Monte-Carlo (MC) method, the genetic algorithm SEMO from the PISA library \cite{c37,c38}, the Non-uniform coverage (NUC) method \cite{c36}, the bi-objective Lipschitz optimization (BLO) method \cite{c37} and the MGSA algorithm. For the MGSA  algorithm, 50 subproblems $G(\lambda, y)$ from (\ref{eq:32}) were solved for different values of convolution coefficients $\lambda$, uniformly distributed in the interval $[0,1]$. The results of the experiments are presented in Table \ref{tab:1}.
+During the experiments, five multicriteria optimization algorithms were compared: the Monte-Carlo (MC) method, the genetic algorithm SEMO from the PISA library \cite{c39}, the Non-uniform coverage (NUC) method \cite{c37}, the bi-objective Lipschitz optimization (BLO) method \cite{c38} and the MGSA algorithm. The results of solving the problem (\ref{eq:26}) for all these methods (except for MAGCS) were obtained in \cite{c38} -- see Table \ref{tab:1}.
 
 \begin{table}[ht]
 \centering
@@ -486,13 +490,13 @@ DU                                                        & 1.277 & 1.116 & 0.21
 \end{tabular}
 \end{table}
 
-These numerical results show that the MGSA algorithm has a noticeable advantage in almost all performance indicators when compared with the methods of multicriteria optimization being considered, even when solving relatively simple MCO problems.
+These numerical results show that the MGSA algorithm has a noticeable advantage in almost all performance indicators when compared with the methods of multicriteria optimization being considered, even when solving relatively simple MGO problems.
 
-Further the numerical experiments were performed for evaluating the efficiency of the parallel PMGSA-1,2,3 algorithms in solving the MGO problems. In the experiments, the MGO problems were generated as problems seeking a set of efficient solutions to the MCO problems using the minimax convolution $G (\lambda, y)$ from (\ref{eq:7}) for different values of the convolution coefficients $\lambda$, uniformly distributed in the domain $\Lambda$. Given the initial assumption about the high complexity of computing the values of minimized functions of the set $F$ from (\ref{eq:3}), the efficiency of the proposed methods is evaluated by the number of optimization iterations performed by the methods to achieve the required accuracy under the stopping condition from (\ref{eq:22}).
+Further the numerical experiments were performed for evaluating the efficiency of the parallel PMGSA-1,2,3 algorithms in solving the MGO problems. In the experiments, the MGO problems were generated as problems seeking a set of efficient solutions to the MCO problems using the minimax convolution $G (\lambda, y)$ from (\ref{eq:7}) for different values of the convolution coefficients $\lambda$, uniformly distributed in the domain $\Lambda$. Given the original assumption about the high complexity of computing the values of functions being minimized of the set $F$ from (\ref{eq:3}), the efficiency of the proposed methods is evaluated by the number of optimization iterations performed by the methods to achieve the required accuracy under the stopping condition from (\ref{eq:22}).
 
-In the first series of numerical experiments, five-criteria four-dimensional MCO problems were solved, i.e. $N = 4$, $m = 5$. In the experiments, 100 MCO problems were solved, in which multiextremal functions obtained by using the GKLS generator \cite{c39} were used as the efficiency criteria; for each problem 100 efficient solutions were calculated (i.e., a total of $10,000$ subproblems $G (\lambda, y)$ were solved). The results obtained (the number of search iterations performed before the stopping condition was fulfilled) were averaged out over the number of MCO problems solved. In solving the problems, the search accuracy $\varepsilon = 0.05$ from (\ref{eq:22}) and the reliability of the method $r = 5.6$ from (\ref{eq:19}) were used.
- 
-The results of the numerical experiments are presented in Table \ref{tab:2}. The first three rows of the table contain information about the computational resources used during the experiments. The first row marked as ``$p$'' indicates the number of computational nodes used. The number of cores used within a single node is presented in the second row marked as ``$q$''. The total number of cores used is presented in the third row marked as ``$p*q$''. The rows four through six show the average number of iterations performed by PMGSA-1,2,3 for solving a single MCO problem accordingly.
+In the first series of numerical experiments, five-criteria four-dimensional MCO problems were solved, i.e. $N = 4$, $m = 5$. In the experiments, 100 MCO problems were solved, in which multiextremal functions obtained by using the GKLS generator \cite{c40} were used as the efficiency criteria; for each problem 100 efficient solutions were calculated (i.e., a total of 10,000 subproblems $G (\lambda, y)$ were solved). The results obtained (the number of search iterations performed before the stopping condition was fulfilled) were averaged out over the number of MCO problems solved. In solving the problems, the search accuracy $\varepsilon = 0.05$ from (\ref{eq:22}) and the reliability parameter $r = 5.6$ from (\ref{eq:19}) were used. 
+
+The results of the numerical experiments are presented in Table \ref{tab:2}. The first three rows of the Table contain information about the computational resources used during the experiments. The first row marked as ``p'' indicates the number of computational nodes used. The number of cores used within a single node is presented in the second row marked as ``q''. The total number of cores used is presented in the third row marked as ``p*q''. The rows four through six show the average number of iterations performed by PMGSA-1,2,3 for solving a single MCO problem accordingly.
 
 \begin{table}[ht]
 \centering
@@ -526,21 +530,23 @@ It should be noted that for the initial sequential GSA algorithm without reusing
 \begin{figure}
   \centering
   \includegraphics[width=0.7\linewidth]{fig5}
-  \caption{Speedup and efficiency of the PMGSA-3 algorithm in solving five-criteria four-dimensional MKO problems}
+  \caption{Speedup and efficiency of the PMGSA-3 algorithm in solving five-criteria four-dimensional MCO problems}
   \label{fig:5}
 \end{figure}
 
 
 It follows from the results of the experiments (see also Fig. \ref{fig:5}), that the proposed parallel methods provide superlinear speedup\footnote{Superlinear speedup can be achieved due to the fact that the sets of iteration points that are selected when performing iterations of the global search by sequential and parallel algorithms are not identical (the search information of the methods may differ).} and high scalability (maintaining the efficiency of parallel computing with an increase in the number of computational cores used). When using a single computational node and all available computational cores for shared memory computational systems, the computational speedup exceeds 55 (with 48 computational cores in use). When using 10 computational nodes (480 cores) with distributed memory, the speedup becomes 411.5. Taking into account the effect of search information reuse, the overall reduction of the number of global optimization iterations is more than 4,890 times.
 
-In the second series of the experiments, the problems being solved were made more complicated by increasing the dimensionality -- the five-criterion six-dimensional MCO problem was solved, i.e., $N = 6$, $m = 5$. For solving these problems the parallel PMGSA-3 method was applied. When performing the experiments, the accuracy of the method $\varepsilon = 0.1$ from (\ref{eq:22}) and the reliability of the method $r = 5.6$ were used. The results of the experiments are presented in Table \ref{tab:3}.
+In the second series of the experiments, the problems being solved were made more complicated by increasing the dimensionality -- the five-criterion six-dimensional MCO problem was solved, i.e., $N = 6$, $m = 5$. For solving these problems the parallel PMGSA-3 method was applied. When performing the experiments, the accuracy of the method $\varepsilon = 0.1$ and the reliability of the method $r = 5.6$ were used. The results of the experiments are presented in Table \ref{tab:3}.
 
-The first three rows of the table, as before, present the number of computational nodes used, the number of cores per a node and the total number of computational cores. The last three rows correspond to the number of global search iterations performed, the speedup achieved, and the overall reduction of executed iterations, taking into account the reuse of information (the average number of iterations performed by the sequential GSA algorithm without the reuse of search information for solving one MCO problem is, on average, 3,131,284.8).
+The first three rows of the Table, as before, present the number of computational nodes used, the number of cores per a node and the total number of computational cores. The last three rows correspond to the number of global search iterations performed, the speedup achieved, and the overall reduction of executed iterations, taking into account the reuse of information (the average number of iterations performed by the sequential GSA algorithm without the reuse of search information for solving one MCO problem is, on average, 3,131,284.8).
+
 Based on the results of the experiments, it can be seen that when the dimensionality of the problem is increased, the efficiency of parallel computations using the PMGSA-3 algorithm also increases (when using 480 cores, the speedup is 472.9). Taking into account the effect of search information reuse, the number of global optimization iterations is reduced, in total, by more than 4,160 times.
+
 
 \begin{table}[ht]
 \centering
-\caption{Results of experiments to solve the five-criterion six-dimensional MCO problem using the parallel PMGSA-3 method}
+\caption{Results of numerical experiments to solve the five-criterion six-dimensional MCO problem using the parallel PMGSA-3 method}
 \label{tab:3}
 \begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{ccccccc}
@@ -557,16 +563,50 @@ Speedup                                                                         
 \end{adjustbox}
 \end{table}
 
+In order to demonstrate the efficiency of the proposed approach, a problem of vibration isolation for a system with several degrees of freedom consisting of an isolated base and an elastic body has been solved. In this problem it is assumed that the protected object can be represented as a multi-mass mechanical system consisting of several material points connected by vibration damping elements. As the criteria, the maximum deformation and maximum displacement of the object relative to the base were minimized \cite{c41}. The number of variable parameters is $N=3$. 
+
+To construct an approximation of the Pareto set, 50 multiextremal functions $G (\lambda, y)$ from (\ref{eq:7}) were minimized for different values of the convolution coefficients $\lambda$, uniformly distributed in the domain $\Lambda$. When performing the experiments, the search accuracy $\varepsilon = 0.025$ and the reliability parameter $r = 3$ were used. The results of the experiments are presented in Table \ref{tab:4}.
+
+\begin{table}[]
+\centering
+\caption{Results of numerical experiments to solve the applies problem}
+\label{tab:4}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{ccccccc}
+\hline
+Computational                     & p                     & 1       & 1      & 1       & 1       & 5       \\
+resources                         & q                     & 1       & 1      & 48      & 48      & 48      \\
+used                              & p*q                   & 1       & 1      & 48      & 48      & 240     \\ \hline
+\multicolumn{2}{c}{Method}                                & GSA     & MGSA   & PMGSA-1 & PMGSA-2 & PMGSA-3 \\
+\multicolumn{2}{c}{Iterations}                            & 703,802 & 13,120 & 403     & 237     & 116     \\
+\multicolumn{2}{c}{HV}                                    & 1.46    & 1.45   & 1.38    & 1.88    & 1.39    \\
+\multicolumn{2}{c}{DU}                                    & 501.03  & 499.43 & 500.46  & 498.73  & 500.39  \\
+\multicolumn{2}{c}{Speedup}                               & -       & 1      & 32.6    & 55.4    & 113.1   \\
+\multicolumn{2}{c}{\begin{tabular}[c]{@{}c@{}}Overall reduction \\ of iteration number\end{tabular}} & 1       & 53.6   & 1,746.4 & 2,969.6 & 6,067.3 \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+The results of the numerical experiments demonstrate that all methods have found the sufficient approximation of the Pareto domain. The lowest number of iterations performed the PMGSA-2 method. In Fig. \ref{fig:6}, the computed approximation of the Pareto domain obtained by the PMGSA-3method is presented.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\linewidth]{fig6}
+  \caption{Approximation of the Pareto domain for the problem of vibration isolation constructed by using PMAGS-2 method}
+  \label{fig:6}
+\end{figure}
+
 
 \section{Conclusion}\label{sec:6}
 
-The paper considers a new class of optimization problems -- multiple global optimization problems, in which minimized functions can be multiextremal, and calculating function values may require a huge amount of calculations. In addition, the set of problems to be solved can change dynamically during calculations by adding or removing solvable global optimization problems. Problems of this kind are encountered, for example, when it is necessary to find several efficient solutions of multicriteria optimization problems or when part of the variable parameters of optimization problems can take only a number of discrete values. Problems of this class have a high computational complexity and the ability to solve such problems efficiently can be achieved only by using high-performance computational systems.
+The paper considers a new approach to solving multiple global optimization problems, in which minimized functions can be multiextremal, and calculating function values may require a huge amount of calculations. Problems of this kind are encountered, for example, when it is necessary to find several efficient solutions of multicriteria optimization problems or when part of the variable parameters of optimization problems can take only a number of discrete values. Problems of this class have a high computational complexity and the ability to solve such problems efficiently can be achieved only by using high-performance computational systems.
 
 The proposed approach assumes that information connectivity exists in the global optimization problems being solved, when the calculated values of any function of the set of problems to be solved can be transformed to the values of any other functions without time consuming calculations. In such cases, all the search information obtained in solving a particular optimization problem can be used to solve all the other problems. Such reuse of search information can significantly reduce the amount of calculations performed, up to just a few iterations when solving the next problems of multiple global optimization.
 
 The availability of informational connectivity significantly expands the possibilities of parallel solutions of the entire set of multiple global optimization problems. The paper proposes two parallel computational schemes: a cooperative scheme, when several problems are solved simultaneously, with the search information that is obtained being exchanged between problems, and a competitive scheme, when problems that are simultaneously being solved compete with each other for using the available computational resources.
 
 Results of computational experiments show that the proposed approach allows us to significantly -- by tens and hundreds of times -- reduce the computational complexity of solving multiple global optimization problems.
+
 In general, one can observe that the proposed approach is promising and requires further research. First, continued computational experiments must be carried out to solve the problems of multiple global optimization of varying computational complexity. It is also necessary to assess the possibility of using other global optimization algorithms within the framework of the proposed approach.
 
 \section*{Acknowledgements} 
