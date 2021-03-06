@@ -259,9 +259,11 @@ A detailed description of the GSA algorithm is given in Algorithm \ref{alg:1} (s
 	\end{matrix}
 	\end{equation}
 	
-	\State
+	\State Calculate the stop condition
 	\begin{equation}\label{eq:22}
-     stop = (x_t - x_{t-1})^{1/N} \leq \varepsilon.
+     stop = \begin{cases} true, &(x_t - x_{t-1})^{1/N} \leq \varepsilon,\\
+		                      false,&(x_t - x_{t-1})^{1/N} > \varepsilon.
+							\end{cases}		
   \end{equation}
   \If{ \textbf{not} $stop$}
 	  \State Calculate $z^{k+1} = f( y(x^{k+1}))$;
@@ -291,7 +293,7 @@ In the framework of the proposed approach, the GSA algorithm described above wil
 
 In keeping with the initial assumption that it is computationally expensive to calculate the values of the functions to be minimized of the set $F$ from (\ref{eq:3}), solving all global optimization problems (\ref{eq:1}) may require a huge amount of calculations, which increases with the number of problems to be solved. Thus, obtaining estimates of globally optimal decisions with reasonable time delays can only be achieved using parallel high-performance computational systems. 
 
-An obvious way to apply parallel computing is to solve the problems of the set $F$ in parallel. Undoubtedly this approach is straightforward and does not require any additional efforts to be  implemented. In this case, if a sufficient number of computational devices ({cores / processors}) is available, the time needed to solve all problems from the set $F$ will be determined by the time used in solving the most time-consuming problem. However, this time may turn out to be quite long and necessitate the use of parallel computing to solve even one global optimization problem. However, well-known and widely used parallelization methods are poorly applicable in the case of global optimization problems. For example, the search domain distribution between processors for global optimization problems leads to the global minimum of the problems to be solved being located on only one of the processors, and all other processors will perform redundant calculations.
+An obvious way to apply parallel computing is to solve the problems of the set $F$ in parallel. Undoubtedly this approach is straightforward and does not require any additional efforts to be  implemented. In this case, if a sufficient number of computational devices ({cores/processors}) is available, the time needed to solve all problems from the set $F$ will be determined by the time used in solving the most time-consuming problem. However, this time may turn out to be quite long and necessitate the use of parallel computing to solve even one global optimization problem. However, well-known and widely used parallelization methods are poorly applicable in the case of global optimization problems. For example, the search domain distribution between processors for global optimization problems leads to the global minimum of the problems to be solved being located on only one of the processors, and all other processors will perform redundant calculations.
 
 In the framework of the information-statistical theory, a general approach to parallelizing global optimization problems has been proposed -- parallel computing is provided by parallel (simultaneous) computing of the values of the minimized function at several different points in the search domain. This approach is general -- it can be applied to solving any global optimization problems in a parallel mode. And such an approach is efficient, since the most time consuming part of the problem is parallelized due to the initial assumption that calculating the values of functions to be minimized is computationally expensive.
 
