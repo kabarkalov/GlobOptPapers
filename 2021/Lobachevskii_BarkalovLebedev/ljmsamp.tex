@@ -323,7 +323,15 @@ In this work, parallelization was done only on CPUs. The workload was distribute
 \section{Results of experiments}
 
 The first series of experiments was carried out using a sequential version of the algorithm without using local tuning in order to compare it with other similar methods.
-The PMGAL algorithm proposed in this work (in its sequential version) was compared with the genetic algorithm for solving mixed-integer optimization problems implemented in the Matlab Global Optimization Toolbox. Table \ref{tab:1} shows the number of trials it took for these methods to solve a number of mixed-integer test problems taken from \cite{Deep,Floudas}. The same accuracy of search $\epsilon = 10^{-2}$ was used for both methods. All computational experiments were carried out on a computer with an Intel Core i5-7300 2.5 GHz processor and 8 Gb RAM. The experimental results show the superiority of the PMGAL method both in terms of the number of iterations and the running time.
+The PMGAL algorithm proposed in this work (in its sequential version) was compared with the genetic algorithm for solving mixed-integer optimization problems implemented in the Matlab Global Optimization Toolbox. Table \ref{tab:1} shows the number of trials and time it took for these methods to solve a number of mixed-integer test problems taken from \cite{Deep,Floudas}.  
+%Russian
+Использованные тестовые задачи содержали от 2 до 4 непрерывных и от 2 до 4 дискретных параметров. 
+
+
+The same accuracy of search $\epsilon = 10^{-2}$ was used for both methods.
+
+
+All computational experiments were carried out on a computer with an Intel Core i5-7300 2.5 GHz processor and 8 Gb RAM. The experimental results show the superiority of the PMGAL method both in terms of the number of iterations and the running time.
 
 \begin{table}[ht]
 	\caption{Comparison of the effectiveness of the PMGAL and GA methods}
@@ -333,7 +341,7 @@ The PMGAL algorithm proposed in this work (in its sequential version) was compar
 		\hline
 	\multirow{2}{*}{Test problem}	 & \multicolumn{2}{c|}{ GA } &  \multicolumn{2}{c|}{PMGAL} \\
 		\cline{2-3} \cline{4-5} 
-		 & $k$ & $t$ &  $k$ & $t$  \\
+		 & Number of trials & Time, sec. &  Number of trials & Time, sec.  \\
 		\hline 
 		 Problem 2 \cite{Floudas}&	481 &	0.0601 & 	417 &	0.04 \\
 		 Problem 6 \cite{Floudas}&	641 &	0.0510 & 	118 &	0.001 \\
@@ -396,7 +404,7 @@ The problems generated in our experiments had 5 discrete and 4 continuous parame
 	\end{eqnarray*}
 
 
-In total, we generated and solved 100 9-dimensional mixed-integer problems of this type. In order to simulate the computational complexity inherent in applied optimization problems, the calculation of the function in all the experiments was complicated by additional calculations that did not change the form of the function and the location of its minima.
+In total, we generated and solved 100 mixed-integer problems of this type with 5 discrete and 4 continuous parameters. In order to simulate the computational complexity inherent in applied optimization problems, the calculation of the function in all the experiments was complicated by additional calculations that did not change the form of the function and the location of its minima.
 The accuracy of the search was equal to $\epsilon = 10^{-2}$. Computational experiments were carried out on the Lobachevsky supercomputer. The node of supercomputer included two Intel Sandy Bridge E5-2660 2.2 GHz CPUs and 64 Gb RAM. 
 
 Table \ref{tab:2} summarizes the experimental results obtained for the sequential version of the PMGAL algorithm using different strategies for alternating local and global search. For local search in formulas  (\ref{lR}), we used the parameter $q=3$, for global search -- $q=0$. The first column of the table shows the frequency of alternation of the indicated values. For example, 1:1 corresponds to alternating local and global search at each iteration; 1:2 corresponds to one local search step and two global search steps, and so on. The second column of the table reflects the average number of iterations  $K_{av}$ (thousand.), required to solve a problem with a given accuracy.
@@ -439,7 +447,11 @@ Experimental results show that the least number of iterations is required for th
 \end{table}	
 
 
-The last series of experiments was performed to evaluate the acceleration of the parallel version of the PMGAL algorithm. 
+The last experiment was performed to evaluate the acceleration of the parallel version of the PMGAL algorithm. 
+%Russian
+Параллельный алгоритм был применен для решения той же серии из 100 problems with 5 discrete and 4 continuous parameters.
+
+
 Table \ref{tab:3} shows the average solution time  $T_{av}$ (in seconds) depending on the involved number of processes $N_{p}$ and threads $N_{t}$ in each process. Our experiments involved from 1 to 16 cluster nodes depending on the number of parallel processes. 
 The acceleration provided by the parallel algorithm is not ideal, but quite acceptable.
 
@@ -449,12 +461,21 @@ The acceleration provided by the parallel algorithm is not ideal, but quite acce
 
 This article presents the results related to the development of parallel algorithms for global optimization for solving multiextremal problems in which some of the parameters are continuous, and some are discrete. 
 These problems can also include non-convex constraints, which are accounted for using a special index scheme.
+
+%Russian
+Основным предположением, которое обеспечивает применимость предложенного алгоритма, является выполнение условия Липшица для функций задачи при варьировании непрерывных параметров для каждого фиксированного набора дискретных параметров.
+Задачи оптимизации, в которых функции являются липшицевыми, относятся к классу вычислительно-трудоемких задач. Любой численный алгоритм решения такой задачи требует вычисления значений функции в узлах некоторой (равномерной или неравномерной) сетки во всей области допустимых изменений параметров.
+Несмотря на то, что предположение липшицевости позволяет провести оценку оптимума на существенно неравномерной (т.е. более экономной по сравнению с равномерной) сетке в области поиска, масштаб решаемых задач здесь ограничен. За приемлемое время даже с использованием параллельного алгоритма можно решать задачи, в которых порядка 10 непрерывных и 10 дискретных параметров. 
+Решение задач с сотнями переменных может быть основано на схеме вложенной оптимизации в предположении, что зависимость целевой функции от части переменных носит локальный характер \cite{Barkalov2020_1}.
+
+
 We propose a parallel algorithm for solving the problems of this class. The basic principle of organizing parallel computations in the algorithm is based on the simultaneous carrying out of several trials at different points of the search domain.
-
 The parallel global optimization algorithm uses a local tuning technique based on the assumption that the multiextremity of the problem is weak. This assumption is true, in particular, at the final phase of the search, when one or more trials have already been performed in the vicinity of the global solution, and the only remaining step is to refine the found estimate of the solution.
-
 In its sequential form, the proposed algorithm remains on par with the similar methods implemented in Matlab Global Optimization Toolbox. 
 In a parallel form, the proposed algorithm demonstrates acceptable scalability up to dozens of parallel processes.
+
+%Russian
+Примером сложной прикладной задачи, к которой планируется применить разработанные алгоритмы, является выбор оптимальных параметров конструкции aircraft hot-air anti-icing system для самолетов российского производства. В математической модели anti-icing system наряду с параметрами, изменяющимися непрерывно (например, диаметр трубки, подводящей теплый воздух от двигателя в крыло; диаметр выпускных отверстий на данной трубке; расстояние между отверстиями; и т.п.), есть и дискретные параметры (например, число рядов выпускных отверстий, которое из технических ограничений может быть равно 1, 2 или 3). Пример подобной постановки задачи см. в \cite{Habashi}.   Использование предложенного в статье алгоритма позволит не проводить оптимизацию для каждого значения дискретного параметра по отдельности, а заранее отсечь неперспективные варианты в процессе поиска. 
  
 
 
@@ -497,7 +518,7 @@ R.~G.~Strongin, V.~P.~Gergel, V.~A.~Grishagin and K.~A.~Barkalov, \textit{Parall
 Yu.~G.~Evtushenko, V.~U.~Malkova and A.~A.~Stanevichyus, \textit{Parallel global optimization of functions of several variables}, Computational Mathematics and Mathematical Physics \textbf{49}(2), 246--260 (2009).
 
 \bibitem{Zilinskas2011}
-R.~Paulavi\v{c}ius, J.~\v{Z}ilinskas and A.~Grothey, \textit{Parallel branch and bound for global optimization with combination of Lipschitz bounds}. Optimization Methods \& Software \textbf{26}(3), 487--498 (2011).
+R.~Paulavi\v{c}ius, J.~\v{Z}ilinskas and A.~Grothey, \textit{Parallel branch and bound for global optimization with combination of Lipschitz bounds}, Optimization Methods \& Software \textbf{26}(3), 487--498 (2011).
 
 \bibitem{Zilinskas2014}
 R.~Paulavi\v{c}ius and J.~\v{Z}ilinskas, \textit{Simplicial Global Optimization} (Springer Briefs in Optimization. Springer, 2014).
@@ -543,6 +564,15 @@ C.~A.~Floudas and M.~P.~Pardalos,  \textit{Handbook of Test Problems in Local an
 
 \bibitem{Gaviano}
 M.~Gaviano, D.~Lera, D.~E.~Kvasov and Y.~D.~Sergeyev, \textit{Software for generation of classes of test functions with known local and global minima for global optimization}, ACM Trans. Math. Softw. \textbf{29}, 469--480 (2003).
+
+\bibitem{Barkalov2020_1}
+K.~Barkalov, I.~Lebedev, M.~Kocheganova, V.~Gergel, \textit{Combining local and global search in a parallel nested optimization scheme}, Communications in Computer and Information Science, \textbf{1263}, 100-112 (2020).
+
+\bibitem{Habashi}
+M.~P.~C. Pellissier, W.~G. Habashi, A.~Pueyo. \textit{Optimization via FENSAP-ICE of aircraft hot-air anti-icing systems}, Journal of Aircraft \textbf{48}(1), 265--276 (2011). 
+
+
+
 
 
 %\bibitem{Floudas}
