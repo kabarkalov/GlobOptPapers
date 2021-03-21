@@ -325,11 +325,10 @@ In this work, parallelization was done only on CPUs. The workload was distribute
 The first series of experiments was carried out using a sequential version of the algorithm without using local tuning in order to compare it with other similar methods.
 The PMGAL algorithm proposed in this work (in its sequential version) was compared with the genetic algorithm for solving mixed-integer optimization problems implemented in the Matlab Global Optimization Toolbox. Table \ref{tab:1} shows the number of trials and time it took for these methods to solve a number of mixed-integer test problems taken from \cite{Deep,Floudas}.  
 %Russian
-Использованные тестовые задачи содержали 2 непрерывных и 1 дискретный параметр, который имел от 3 до 6 значений в зависимости от задачи.
-Также в постановку задач входили от 1 до 4 non-convex constraints. 
-Отметим, что наличие сложных ограничений, которые формируют невыпуклую допустимую область, является препятствием к использованию методов, основанных на идеях локальной оптимизации. 
-Генетический алгоритм из Matlab Global Optimization Toolbox использовался с рекомендованными параметрами (например, population size равнялся 50, максимальное число поколений -- 200, crossover fraction -- 0.8). The PMGAL algorithm использовался со стандартными параметрами, обеспечивающими сходимость к решению ( $r_\nu$ from (\ref{R}) равнялось 2.3 для всех $\nu = 1,2,3$, the evolvent construction parameter $M=10$).
-
+The test problems used contained 2 continuous and 1 discrete parameter, which had from 3 to 6 values, depending on the specific problem.
+Also, the problem statement included from 1 to 4 non-convex constraints.  
+Note that the presence of complex constraints that form a non-convex feasible region prevents the use of methods based on the principles of local optimization. 
+The genetic algorithm from Matlab Global Optimization Toolbox was used with the recommended parameters (for example, the population size was 50, the maximum number of generations was 200, and the crossover fraction was 0.8). The PMGAL algorithm was used with standard parameters providing convergence to the solution ($r_\nu$ from (\ref{R}) was equal to 2.3 for all $\nu = 1,2,3$, the evolvent construction parameter $M=10$).
 The same accuracy of search $\epsilon = 10^{-2}$ was used for both methods.
 
 
@@ -450,9 +449,8 @@ Experimental results show that the least number of iterations is required for th
 
 The last experiment was performed to evaluate the acceleration of the parallel version of the PMGAL algorithm. 
 %Russian
-Параллельный алгоритм был применен с ранее использованными параметрами для решения той же серии из 100 problems with 5 discrete and 4 continuous parameters.
-Fig.~ \ref{fig:3} shows the speedup $S(p)$ depending on the involved number of processes and threads in each process. Под ускореним здесь понимается отношение времени работы последовательного алгоритма $t_1$ ко времени работы параллельного $t_p$, т.е. $S(p) = t_1/t_p$, где $p$ -- суммарное число использованных threads.
-
+We used the parallel algorithm with previously used parameters to solve the same series of 100 problems with 5 discrete and 4 continuous parameters.
+Fig.~\ref{fig:3} shows the speedup $S(p)$ depending on the number of processes and threads involved in each process. Here, the acceleration is the ratio of the running time of the sequential algorithm  $t_1$ to the running time of the parallel algorithm $t_p$, i.e. $S(p) = t_1/t_p$, where $p$ is the total number of threads used.
 Our experiments involved from 1 to 16 cluster nodes depending on the number of parallel processes. The speedup provided by the parallel algorithm is not ideal, but quite acceptable.
 
 \begin{figure}[ht]
@@ -476,12 +474,12 @@ In its sequential form, the proposed algorithm remains on par with the similar m
 In a parallel form, the proposed algorithm demonstrates acceptable scalability up to dozens of parallel processes.
 
 %Russian
-Основным предположением, которое обеспечивает применимость предложенного алгоритма, является выполнение условия Липшица для функций задачи при варьировании непрерывных параметров для каждого фиксированного набора дискретных параметров.
-Задачи оптимизации, в которых функции являются липшицевыми, относятся к классу вычислительно-трудоемких задач. Любой численный алгоритм решения такой задачи требует вычисления значений функции в узлах некоторой (равномерной или неравномерной) сетки во всей области допустимых изменений параметров.
-Несмотря на то, что предположение липшицевости позволяет провести оценку оптимума на существенно неравномерной (т.е. более экономной по сравнению с равномерной) сетке в области поиска, масштаб решаемых задач здесь ограничен по сравнению с задачами на локальный экстремум. За приемлемое время даже с использованием параллельных алгоритмов можно решать задачи, в которых порядка 10 непрерывных и 10 дискретных параметров. 
-Решение задач с сотнями переменных может быть основано на схеме вложенной оптимизации в предположении, что зависимость целевой функции от части переменных носит локальный характер \cite{Barkalov2020_1}.
+The principal assumption which ensures that the proposed algorithm is applicable is that the Lipschitz condition for the functions of the problem with varying continuous parameters for each fixed set of discrete parameters is fulfilled.
+Optimization problems in which the functions are Lipschitzian belong to the class of computationally expensive problems. Any numerical algorithm for solving such a problem requires the values of the function to be calculated at the nodes of a particular (uniform or non-uniform) grid in the entire domain of admissible parameter changes.
+Although the assumption of Lipschitzness makes it possible to estimate the optimum on a substantially non-uniform (i.e., more resource-efficient than uniform) grid in the search domain, the scale of the problems being solved here is rather limited in comparison with the problems for a local extremum. In a reasonable time, even using parallel algorithms, it is possible to solve problems with approximately 10 continuous and 10 discrete parameters. 
+A solution to problems with hundreds of variables can be based on a nested optimization scheme assuming that the dependence of the objective function on some of the variables is local \cite{Barkalov2020_1}.
 
-Примером сложной прикладной задачи, к которой планируется применить разработанные алгоритмы, является выбор оптимальных параметров конструкции aircraft hot-air anti-icing system для самолетов российского производства. В математической модели anti-icing system наряду с параметрами, изменяющимися непрерывно (например, диаметр трубки, подводящей теплый воздух от двигателя в крыло; диаметр выпускных отверстий на данной трубке; расстояние между отверстиями; и т.п.), есть и дискретные параметры (например, число рядов выпускных отверстий, которое из технических ограничений может быть равно 1, 2 или 3). Пример подобной постановки задачи см. в \cite{Habashi}. Использование предложенного в статье алгоритма позволит не проводить оптимизацию для каждого значения дискретного параметра по отдельности, а заранее отсечь неперспективные варианты в процессе поиска. 
+An example of a complex applied problem to which the developed algorithms could be applied is the selection of the optimal design parameters of an aircraft hot-air anti-icing system. The mathematical model of the anti-icing system, along with the parameters that change continuously (for example, the diameter of the tube supplying warm air from the engine to the wing; the diameter of the outlets on this tube; the distance between the outlets; etc.), also contains discrete parameters (for example, the number of rows of outlets, which due to the technical limitations may be equal to 1, 2 or 3). An example of such a problem is featured in \cite{Habashi}. The use of the algorithm proposed in the paper makes it possible to avoid optimization for each value of a discrete parameter separately, and instead cut off unpromising options in advance during the search process.
  
 
 
