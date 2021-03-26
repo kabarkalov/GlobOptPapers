@@ -1,3 +1,4 @@
+\makeatletter\@ifundefined{UseRawInputEncoding}{\newcommand\UseRawInputEncoding{}}{\UseRawInputEncoding}\makeatother
 \documentclass{svproc}
 
 \usepackage{url}
@@ -24,65 +25,64 @@
 
 \maketitle              % typeset the title of the contribution
 
-
 \begin{abstract}
-The paper discusses a new approach to solving computationally time-consuming multicriteria optimization problems, in which some variable parameters can only take on discrete values. Under the proposed approach, the solution of mixed-integer optimization problems is reduced to solving a family of optimization problems where only continuous parameters are used. All problems of the family are solved simultaneously in the time-shared mode, where the optimization problem for the next global search iteration is selected adaptively taking into account the search information obtained in the course of the calculations. The algorithms proposed enable parallel computing on high-performance computing systems. Computational experiments confirm that the proposed approach makes it possible to significantly reduce computation volume and time for solving complex multicriteria mixed-integer optimization problems.
-\keywords{Multicriteria optimization $\cdot$ mixed-integer optimization problems $\cdot$ methods of criteria scalarization $\cdot$ global optimization $\cdot$ search information $\cdot$ parallel computing $\cdot$ computational experiment}
-\end{abstract}
+The paper discusses a new approach to solving computationally time-consuming multicriteria optimization problems in which some variable parameters can only take on discrete values. Under the proposed approach, the solution of mixed-integer optimization problems is reduced to solving a family of optimization problems where only continuous parameters are used. All problems of the family are solved simultaneously in time-shared mode, where the optimization problem for the next global search iteration is selected adaptively, taking into account the search information obtained in the course of the calculations. The suggested algorithms enable parallel computing on high-performance computing systems. The computational experiments confirm that the proposed approach can significantly reduce the computation volume and time required for solving complex multicriteria mixed-integer optimization problems.
 
+\keywords{Multicriteria optimization $\cdot$ Mixed-integer optimization problems $\cdot$ Methods of criteria scalarization $\cdot$ Global optimization $\cdot$ Search information $\cdot$ Parallel computing $\cdot$ Computational experiment}
+\end{abstract}
 
 \section{Introduction}\label{sec:1}
 
-Multicriteria optimization (MCO) problems arise almost every time when the optimal decision need to be chosen when developing complex technical devices and systems. The scale of demand for MCO problems determines the high intensity of research in this area -- see, for example, monographs \cite{c1,c2,c3,c4,c5} and reviews of scientific and practical results in this area \cite{c6,c7,c8,c9}.
+Multicriteria optimization (MCO) problems arise whenever optimal decisions need to be made during the development of complex technical devices and systems. The scale of demand for MCO problems determines the high intensity of research in this area (see, for example, the monographs \cite{c1,c2,c3,c4,c5} and reviews of scientific and practical results in this area \cite{c6,c7,c8,c9}).
 
-Usually, the solution of a MCO problem is a set of efficient (non-dominated) decisions for which an improvement in values with respect to some criteria cannot be achieved without deteriorating the efficiency with respect to some other criteria. The definition of the whole set of efficient decisions (the Pareto set), on the one hand, may require a large amount of computation and, on the other hand, may be redundant as the analysis of a large number of efficient decisions may require a significant effort for the person who makes the decision (decision maker, DM). Thus, it may be practically justified to find only a relatively small set of efficient decisions that can be formed according to the optimality requirements defined by the DM. 
+Usually, the solution to an MCO problem is a set of efficient (non-dominated) decisions which cannot be improved under some criteria without deteriorating the efficiency under some other criteria. The definition of the whole set of efficient decisions (the Pareto set) may, on the one hand, require a large amount of computation and, on the other, may be redundant as the analysis of a large number of efficient decisions may require a significant effort from the person who makes the decision (the decision maker, DM). Thus, it may be practically justified to find only a relatively small set of efficient decisions that can be formed according to the optimality requirements defined by the DM.
 
-By limiting the set of efficient decisions to be computed, one can achieve a noticeable reduction in the amount of calculations required. However, efficiency criteria may be complex, \textit{multiextremal}, and calculating the values of these criteria can prove \textit{computationally demanding}. In addition, some variables may only take on discrete values. In such cases, MCO problems involve \textbf{significant computational complexity}, which can only be overcome by using high-performance supercomputer systems.
+By restricting the set of efficient decisions to be computed, one can achieve a noticeable reduction in the number of computations required. However, efficiency criteria may be complex, \textit{multiextremal}, and calculating the values of these criteria can prove \textit{computationally demanding}. Besides, some variables may only take on discrete values. In such cases, MCO problems involve a \textbf{significant computational complexity}, which can only be overcome by using high-performance supercomputer systems.
 
-Many different approaches have been proposed for solving MCO problems (see, for example, \cite{c3,c6,c10,c11}.  Most commonly, various methods based on reduction of the vector criterion to a particular scalar function are used \cite{c2,c12}. The number of works on multicriteria mixed-integer problems is however more limited -- in most cases, the issues of discrete parameter analysis are considered in relation to scalar optimization problems (see, for example, reviews \cite{c13,c14}). The widely used deterministic methods for solving problems of this class are usually based on the Branch-and-Bound \cite{c15} or on the Branch-and-Reduce approaches \cite{c16}. A number of meta-heuristic and genetic algorithms are also known and are based, in one way or another, on the random search concept \cite{c17,c18}.
+Many different approaches have been proposed for solving MCO problems (see, for example, \cite{c3,c6,c10,c11}.  Most commonly, various methods based on the reduction of the vector criterion to a particular scalar function are used \cite{c2,c12}. The number of works concerned with multicriteria mixed-integer problems is however more limited; in most cases, the issues of discrete parameter analysis are considered in connection with scalar optimization problems (see, for example, reviews \cite{c13,c14}). The widely used deterministic methods for solving problems of this class are usually based on either the Branch-and-Bound \cite{c15} or the Branch-and-Reduce approaches \cite{c16}. Several meta-heuristic and genetic algorithms are also known and are based, in one way or another, on the random search concept \cite{c17,c18}.
 
-This paper presents the results of research that was carried out to develop highly effective parallel methods of multicriteria optimization making use of all the search information obtained in the course of calculations \cite{c19,c20,c21}. A new contribution to this research area consists in the development of an approach for solving MCO problems, in which some of the varied parameters can only take discrete values. The proposed approach reduces the solution of mixed-integer optimization problems to a family of optimization problems where only continuous parameters are used. All problems of the family are solved simultaneously in the time-shared mode, where the selection of the optimization problem for the next iteration of the global search is performed adaptively taking into account the search information obtained in the course of the calculations. The algorithms developed enable efficient parallel computing on high-performance computing systems.
+This paper presents the results of a study concerned with the development of highly effective parallel methods of multicriteria optimization making use of all the search information obtained throughout computations \cite{c19,c20,c21}. A new contribution to this research field is the development of an approach for solving MCO problems in which some of the varied parameters can only take on discrete values. The suggested approach reduces the solution of mixed-integer optimization problems to a family of optimization problems where only continuous parameters are used. All problems of the family are solved simultaneously in time-shared mode, where the selection of the optimization problem for the next iteration of the global search is performed adaptively, taking into account the search information obtained in the course of computations. The developed algorithms enable efficient parallel computing on high-performance computing systems.
 
-The rest of the paper is organized as follows. In Section \ref{sec:2}, we give the statement of multicriteria optimization problems, present a minimax scheme for scalarization of the vector efficiency criterion and introduce the concept of multistage solution of multicriteria optimization problems. In Section \ref{sec:3}, we present a description of the proposed approach based on the reduction of mixed-integer optimization problems to solving a family of optimization problems with the use of only continuous parameters. This section also describes a dimensionality reduction scheme, which allows multidimensional optimization problems to be reduced to a one-dimensional global search problem. Section \ref{sec:4} presents a parallel algorithm for solving multicriteria mixed-integer optimization problems, which is used in the framework of the proposed approach. Section \ref{sec:5} contains the results of numerical experiments confirming that the proposed approach is promising. In conclusion, the results obtained are discussed and possible main directions for continuing the research are outlined.
-
+The rest of the paper is structured as follows. In Section \ref{sec:2}, we statement of multicriteria optimization problems, present a minimax scheme for scalarization of the vector efficiency criterion, and introduce the concept of multistage solution for multicriteria optimization problems. In Section \ref{sec:3}, we describe the proposed approach based on the reduction of mixed-integer optimization problems to the solution of a family of optimization problems using only continuous parameters. In that section, we also describe a dimensionality reduction scheme by which multidimensional optimization problems can be reduced to one-dimensional global search problems. Section \ref{sec:4} presents a parallel algorithm for solving multicriteria mixed-integer optimization problems under of the proposed approach. Section \ref{sec:5} contains the results of numerical experiments that confirm that the approach we propose is promising. In the Conclusions section, we discuss the results obtained and outline possible directions for future research.
 
 \section{Problems of Multicriteria Mixed-Integer Optimization}\label{sec:2}
 
-The problem of multicriteria mixed-integer optimization (MCOmix) can be formulated as follows
+The problem of multicriteria mixed-integer optimization (MCOmix) can be expressed as follows
 \begin{equation}\label{eq:1}
-f(y,u)\to \min, y\in D,u \in U,
+f(y,u)\to \min,\ y\in D,\ u \in U,
 \end{equation}
-where $f(y,u)=(f_1 (y,u),f_2 (y,u), \dots,f_s (y,u))$ is the vector criterion of efficiency in which the varied parameters belong to two different types:
+where $f(y,u)=(f_1 (y,u),f_2 (y,u), \dots,f_s (y,u))$ is the vector criterion of efficiency, in which the varied parameters belong to two different types:
 \begin{itemize}
-	\item continuous parameters $y=(y_1,y_2,\dots,y_n)$, whose domain of possible values is represented by an $N$-dimensional hyperparallelepiped:
+	\item continuous parameters $y=(y_1,y_2,\dots,y_n)$, whose domain of possible values is represented by an $N$-dimensional hyperparallelepiped,
 \begin{equation}\label{eq:2}
-D=\{ y\in R^n: a_i \leq y_i \leq b_i, 1 \leq i \leq n \}, 
+D=\{ y\in R^n: a_i \leq y_i \leq b_i, 1 \leq i \leq n \},
 \end{equation}
-for specified vectors $a$ and $b$.
-	\item discrete parameters  $u=(u_1,u_2, \dots ,u_m)$, each of which can only take on a fixed (discrete) set of values:
+for specified vectors $a$ and $b$;
+
+	\item discrete parameters  $u=(u_1,u_2, \dots ,u_m)$, each of which can only take on a fixed (discrete) set of values,
 \begin{equation}\label{eq:3}
-U=U_1 \times U_2 \times \dots \times U_m=\{w_k=<w_{1k},w_{2k}, \dots, w_{mk}>: 1 \leq k \leq l\}, w_{ik} \in U_i, 
+U=U_1 \times U_2 \times \dots \times U_m=\{w_k=\langle w_{1k},w_{2k}, \dots, w_{mk}\rangle : 1 \leq k \leq l\},\ w_{ik} \in U_i,
 \end{equation}
-where $U_i=\{v_{i1},v_{i2}, \dots ,v_{il_i} \}$, $1 \leq i \leq m$, is a set of $l_i>0$ admissible discrete values for the parameter $u_i$, i.e., the whole set of all possible discrete parameter values $U$ contains
+where $U_i=\{v_{i1},v_{i2}, \dots ,v_{il_i} \}$, $1 \leq i \leq m$, is a set of $l_i>0$ admissible discrete values for the parameter $u_i$, i.e., the set $U$ of all possible discrete parameter values contains
 \begin{equation}\label{eq:4}
   l=\prod\limits^m_{i = 1}{l_i}
 \end{equation}
-different elements (tuples $w_k$,$1 \leq k \leq l$). Without loss of generality, it will be assumed in further consideration that the criteria $f_i (y,u)$, $1 \leq i \leq s$, are non-negative and their reduction corresponds to an increase in the efficiency of the decisions selected.
+different elements (tuples $w_k$, $1 \leq k \leq l$). Without loss of generality, we assume below that the criteria $f_i(y,u)$, $1 \leq i \leq s$, are non-negative, and their reduction corresponds to an increase in the efficiency of the decisions selected.
 \end{itemize}
 
-In the most complex variant, the criteria $f_i(y,u)$, $1 \leq i \leq s$, may be multiextremal, and the procedures for calculating their values can be computationally time-consuming.  It is also assumed that the criteria $f_i (y,u)$, $1 \leq i \leq s$, meet the Lipschitz condition   
+In the most difficult case, the criteria $f_i(y,u)$, $1 \leq i \leq s$, may be multiextremal, and the procedures for calculating their values can be computationally time-consuming.  We also assume that the criteria $f_i (y,u)$, $1 \leq i \leq s$, meet the Lipschitz condition
 \begin{equation}\label{eq:5}
   |f_i (y_1,u_1 )-f_i (y_2, u_2 )| \leq L_i \|(y_1, u_1)-(y_2, u_2)\|, 1 \leq i \leq s,
 \end{equation}
-where $L_i$ is the Lipschitz constant for the criterion $f_i (y,u)$, $1 \leq i \leq s$,  and $\|*\|$ denotes the Euclidean norm in $R^N$. 
+where $L_i$ is the Lipschitz constant for the criterion $f_i (y,u)$, $1 \leq i \leq s$,  and $\|*\|$ denotes the Euclidean norm in $R^N$.
 
-Efficiency criteria in an MCO problem are usually controversial and the parameters $(y^*,u^*) \in D \times U$ with the optimal values for all criteria at the same time may not be available. In such situations, it is a common approach for MCO problems to find efficient (non-dominated) decisions, for which an improvement in the values of some criteria leads to a deterioration of efficiency indicators for other criteria. Obtaining the whole set of efficient decisions (the Pareto set) can require a lot of computation and, as a result, another approach is often used -- to find only a relatively small set of efficient decisions defined according to the decision maker's requirements.
+Efficiency criteria in an MCO problem are usually controversial, and there may not exist parameters $(y^*,u^*) \in D \times U$ with values simultaneously optimal for all criteria. In such situations, it is a common practice in MCO problems to search for efficient (non-dominated) decisions, for which an improvement in the values of some criteria leads to a deterioration of the efficiency indicators for other criteria. Obtaining the whole set of efficient decisions (the Pareto set) can require a lot of computation and, for this reason, a different approach is often used, namely search only for a relatively small set of efficient decisions defined according to the decision maker's requirements.
 
-A commonly used approach to obtaining efficient decisions is to transform a vector criterion into some combined scalar efficiency function\footnote{It should be noted that this approach ensures that a wide range of already existing global optimization methods can be used to solve MCO problems.}
+A commonly used approach to obtaining efficient decisions is to transform the vector criterion into some combined scalar efficiency function\footnote{It should be noted that this approach ensures that a wide range of already existing global optimization methods can be used to solve MCO problems.}
 \begin{equation}\label{eq:6}
-  \min{F(\alpha,y,u)}, y \in D, u \in U,
+  \min{F(\alpha,y,u)},\ y \in D,\ u \in U,
 \end{equation}
-where $F$ is an objective function generated by scalarization of the criteria $f_i$, $1 \leq i \leq s$, $\alpha$ is the vector of the parameters of the criteria convolution applied, while $D$ and $U$ are the domains of possible parameter values from (\ref{eq:2})-(\ref{eq:3}). By virtue of (\ref{eq:5}), the function $F(\alpha, y, u)$ also satisfies the Lipschitz condition with some constant $L$, i.e.  
+where $F$ is an objective function generated by scalarization of the criteria $f_i$, $1 \leq i \leq s$, $\alpha$ is the vector of parameters of the criteria convolution applied, while $D$ and $U$ are the domains of possible parameter values from (\ref{eq:2})--(\ref{eq:3}). By virtue of (\ref{eq:5}), the function $F(\alpha, y, u)$ also satisfies the Lipschitz condition with some constant $L$, that is,
 \begin{equation}\label{eq:7}
   |F(\alpha, y_1, u_1)-F(\alpha, y_2, u_2)| \leq L\|(y_1,u_1)-(y_2,u_2)\|.
 \end{equation}
@@ -91,205 +91,194 @@ To construct a combined scalar efficiency function $F(\alpha,y,u)$ from (\ref{eq
 \begin{equation}\label{eq:8}
 \begin{matrix}
   F(\lambda,y,u)=\max{(\lambda_i f_i (y,u),1\leq i \leq s)},\\
-  \lambda=(\lambda_1,\lambda_2, \dots, \lambda_s)\in \Lambda \subset R^s: \sum_{i=1}^{s}\lambda_i=1, \lambda_i \geq 0, 1 \leq i \leq s.
+  \lambda=(\lambda_1,\lambda_2, \dots, \lambda_s)\in \Lambda \subset R^s: \sum_{i=1}^{s}\lambda_i=1, \lambda_i \geq 0,\ 1 \leq i \leq s.
 \end{matrix}
 \end{equation}
 
-It should be noted that due to the possible changes in the requirements for optimality in the process of calculations it may be necessary to change the parameters of the convolution $\lambda$ from (\ref{eq:8}). Such variations yield a set of scalar global optimization problems (\ref{eq:6})
+It should be noted that, due to the possible changes in the requirements for optimality in the process of calculation, it may be necessary to change the parameters of the convolution $\lambda$ from (\ref{eq:8}). Such variations yield a set of scalar global optimization problems (\ref{eq:6})
 \begin{equation}\label{eq:10}
 \mathbb{F}_T=\{F(\alpha_t,y , u):1 \leq t \leq T\},
 \end{equation}
-which is necessary for solving the MCOmix problem. This set of problems can be formed sequentially in the course of calculations; the problems of the set can be solved strictly sequentially or simultaneously in time-shared mode. In addition, the problems of the set $\mathbb{F}_T$ can be solved in parallel using high-performance computing systems. The possibility of forming the set $\mathbb{F}_T$ defines a \textit{new approach to multistage solution of multicriteria optimization} (MMCO) problems -- see, for example, \cite{c22}.
-
+which is necessary for solving the MCOmix problem. This set of problems can be formed sequentially during the calculations; the problems of the set can be solved strictly sequentially or simultaneously in time-shared mode. Furthermore, the problems of the set $\mathbb{F}_T$ can be solved in parallel using high-performance computing systems. The possibility of forming the set $\mathbb{F}_T$ determines \textit{a new approach to the multistage solution of multicriteria optimization} (MMCO) problems (see, for instance, \cite{c22}).
 
 \section{The Approach: Unrolling Mixed-Integer Optimization Problems and Dimensionality Reduction}\label{sec:3}
 
-In the presence of discrete parameters, solving multicriteria optimization  problems becomes considerably  more complicated -- in many cases, it becomes necessary to calculate criterion values for all possible values of discrete parameters. The proposed approach to improving the efficiency of solving MCOmix problems is based on the following two basic ideas: unrolling mixed-integer optimization problems \cite{c23} and dimensionality reduction \cite{c24,c25}.
+The solution of multicriteria optimization  problems becomes considerably  more complicated in the presence of discrete parameters: in many cases, it is necessary to calculate the criterion values for all possible values of the discrete parameters. The proposed approach to improving the efficiency of the solution of MCOmix problems is based on two basic ideas: unrolling mixed-integer optimization problems \cite{c23} and dimensionality reduction \cite{c24,c25}.
 
 \subsection{Simultaneous Solution of Mixed-Integer Optimization Problems} \label{subsec:31}
 
-To solve the global optimization problem (\ref{eq:6}), a two-stage nested optimization scheme can be used
+To solve the global optimization problem (\ref{eq:6}), a two-stage nested optimization scheme can be used:
 \begin{equation}\label{eq:11}
-\begin{matrix}
-  F(\alpha,y^*,u^*)=\min{F(\alpha,y,u)} = \min_{y \in D} \min_{u \in U}{F(\alpha,y,u)} = \\ 
-  \min_{y \in D}(F(\alpha,y,w_1 ),F(\alpha,y,w_2 ), \dots, F(\alpha,y,w_l )),\\
-	w_i\in U,1 \leq i \leq l.
-\end{matrix}
+\begin{gathered}
+  F(\alpha,y^*,u^*)=\min{F(\alpha,y,u)} = \min_{y \in D} \min_{u \in U}{F(\alpha,y,u)} = \\
+  \qquad=\min_{y \in D}\bigl(F(\alpha,y,w_1 ),F(\alpha,y,w_2 ), \dots, F(\alpha,y,w_l )\bigr),\\
+	w_i\in U,\ 1 \leq i \leq l.
+\end{gathered}
 \end{equation}
 
-In the computational scheme (\ref{eq:11}), for any value of continuous parameters $y \in D$, the values of the function $F(\alpha,y,u)$ are calculated for all possible values of discrete parameters $u \in U$. However, the smallest value of the function $F(\alpha,y,u)$ is achieved only with one specific value of discrete parameters $u^*$, so the calculation of function $F(\alpha,y,u)$ values for other values of discrete parameters is redundant. Thus, for example, for the problem
+In computational scheme (\ref{eq:11}), the values of the function $F(\alpha,y,u)$ for any value of continuous parameters $y \in D$ are computed for all possible values of the discrete parameters $u \in U$. However, the smallest value of the function $F(\alpha,y,u)$ is achieved only with one specific value of the discrete parameters $u^*$, so the computation of the values of the function $F(\alpha,y,u)$ for other values of the discrete parameters is redundant. For example, consider the problem
 \begin{equation}\label{eq:12}
- \min\{u^2(sin(x)+sin(10x/3)):x\in[2.7,7.5],u\in \{1,2\}\}
+ \min\{u^2(\sin(x)+\sin(10x/3)):x\in[2.7,7.5],\ u\in \{1,2\}\},
 \end{equation}
-having one continuous and one discrete parameter, the plots of the  function $F(\alpha,y,u)$ for different values of the discrete parameter have form shown in Fig.~\ref{fig:1} and, as one can see, there is no need to calculate the value of the function $F(\alpha,y,u)$ for $u=1$.
+which has one continuous and one discrete parameter. The plots of the  function $F(\alpha,y,u)$ for different values of the discrete parameter have the form shown in Figure~\ref{fig:1} and, as we can see, there is no need to compute the value of the function $F(\alpha,y,u)$ for $u=1$.
 
 \begin{figure}
   \centering
   \includegraphics[width=0.9\linewidth]{fig1}
-  \caption{The function $F(\alpha,y,u)$ of the problem (\ref{eq:12}) plotted for different values of the discrete parameter (left, $u=1$,  right, $u=2$)}
+  \caption{The function $F(\alpha,y,u)$ from problem (\ref{eq:12}) plotted for different values of the discrete parameter (on the left, $u=1$;  on the right, $u=2$)}
   \label{fig:1}
 \end{figure}
 
+It is possible to increase the efficiency and, accordingly, to reduce the computational complexity when solving the problem (\ref{eq:6}), by excluding (or, at least, by reducing) the computation of the function $F(\alpha,y,u)$ for discrete parameters $u \neq u^*$. In some rare situations,  we may know a priori information about the values of discrete parameters that do not allow the function $F(\alpha,y,u)$ to reach a minimum value. In most cases, that information can be obtained only in the process of computations based on the calculated search information.
 
-It is possible to increase the efficiency and, accordingly, to reduce computational complexity when solving  the problem (\ref{eq:6}) by excluding (or at least by reducing) the calculation of the function $F(\alpha,y,u)$ for discrete parameters $u \neq u^*$. In some rare situations, the information about the values of the discrete parameters that do not allow the minimum value of the function $F(\alpha,y,u)$ to be reached, may be known a priori. In most cases, such information can be obtained only in the process of calculations based on the calculated search information. 
-
-Assume that 
+Assume that
 \begin{equation}\label{eq:13}
- \Omega_k=\{ y^i,u^i,z^i=F(\alpha,y^i,u^i ): 1\leq i\leq k \}
+ \Omega_k=\{ y^i,u^i,z^i=F(\alpha,y^i,u^i ) : 1\leq i\leq k \}
 \end{equation}
-is the search information obtained in the process of calculation after $k>1$ global search iterations. Then the procedure for adaptive estimation of the discrete parameter value, at which the minimum value  of the function $F(\alpha,y,u)$ is expected to be obtained, can be determined using the decision rule
+is the search information obtained in the process of calculation after $k>1$ global search iterations. Then, the procedure for adaptive estimation of the discrete parameter value at which the function $F(\alpha,y,u)$ is expected to reach the minimum value can be determined using the decision rule
 \begin{equation}\label{eq:14}
-	\theta =\Theta(\Omega_k ),1 \leq \theta \leq l, 
+	\theta =\Theta(\Omega_k ),\ 1 \leq \theta \leq l,
 \end{equation}
- that determines the most promising value of the discrete parameter $u \in U$ at each step of the global search.
+which determines the most promising value of the discrete parameter $u \in U$ at each step of the global search.
 
 With the decision rule $\Theta$ from (\ref{eq:14}), the general computational scheme for solving the problem can be presented as follows.
 
-\textit{Rule 1.} Apply the decision rule $\Theta$ from (\ref{eq:14}) to available search information $\Omega_k$ from (\ref{eq:13}),  and determine the value of the discrete parameter $u=w_\theta$, $w_\theta \in U$.
+\textit{Rule 1.} Apply the decision rule $\Theta$ from (\ref{eq:14}) to the available search information $\Omega_k$ from (\ref{eq:13})  and determine the value of the discrete parameter $u=w_\theta$, $w_\theta \in U$.
 
-\textit{Rule 2.} Determine the point $y \in D$ of the global search iteration to be performed with a fixed value of the discrete parameter $u=w_\theta$, $w_\theta \in U$.
+\textit{Rule 2.} Determine the point $y \in D$ of the global search iteration that needs to be performed with a fixed value of the discrete parameter $u=w_\theta$, $w_\theta \in U$.
 			
-\textit{Rule 3.} Check the stopping condition for the computation. If the required accuracy of the global search is not achieved, it is necessary to supplement the search information $\Omega_k$ from (\ref{eq:13}) with the results of the current iteration and continue calculations starting from Rule 1.
+\textit{Rule 3.} Check the stopping condition of the computation. If the required accuracy of the global search is not achieved, it is necessary to supplement the search information $\Omega_k$ from (\ref{eq:13}) with the results of the current iteration and continue the computation starting from Rule~1.
 
-   The above computational scheme will be presented in more detail after the description of the global search algorithm. 
-
-
+The above computational scheme will be presented in more detail after the description of the global search algorithm.
 
 \subsection{Dimensionality Reduction of Mixed-Integer Optimization Problems} \label{subsec:32}
 
-It should be noted that the computational complexity of solving global optimization problems increases exponentially with increasing dimensionality. The problem of increasing computational complexity was even called the ``dimensionality curse''. In particular, when applying the computational scheme discussed in subsection \ref{subsec:31}, it is necessary to accumulate and analyze multidimensional search information $\Omega_k$ from (\ref{eq:13}). This computational complexity can be significantly reduced by reducing the optimization problems to be solved by using Peano \textit{curves} or \textit{evolvents} $y(x)$, which unmbiguously and continuously map a segment [0,1] on an $n$-dimensional hyper-cube $D$ -- see, for example, \cite{c24,c25}. As a result of this reduction, the multidimensional global optimization problem (\ref{eq:6}) is reduced to a one-dimensional problem
+Note that the computational complexity of the solution of global optimization problems increases exponentially as the dimensionality grows. The problem of growth of the computational complexity was even called the ``dimensionality curse''. In particular, when applying the computational scheme discussed in subsection \ref{subsec:31}, it is necessary to accumulate and analyze the multidimensional search information $\Omega_k$ from (\ref{eq:13}). This computational complexity can be significantly reduced by reducing the optimization problems to be solved, through the use of \textit{Peano curves} or \textit{evolvents} $y(x)$ that unambiguously and continuously map the segment $[0,1]$ onto an $n$-dimensional hypercube $D$ (see, for example, \cite{c24,c25}). As a result, the multidimensional global optimization problem in (\ref{eq:6}) is reduced to a one-dimensional problem, namely
 \begin{equation}\label{eq:15}
- \min_{y\in D, u \in U}F(\alpha,y,u) = \min_{x \in [0,1]}(F(\alpha,y(x),w_1 ),F(\alpha,y(x),w_2 ),\dots,F(\alpha,y(x),w_l ))
+\min_{y\in D, u \in U}F(\alpha,y,u) = \min_{x \in [0,1]} \bigl(F(\alpha,y(x),w_1 ),F(\alpha,y(x),w_2 ),\dots,F(\alpha,y(x),w_l )\bigr)
 \end{equation}
 
-It should be noted that the one-dimensional functions $F(\alpha,y(x),u)$ resulting from the reduction satisfy the uniform H{\" o}lder condition, i.e.
+We should also note that one-dimensional functions $F(\alpha,y(x),u)$ resulting from the reduction satisfy a uniform H{\"o}lder condition,
 \begin{equation}\label{eq:16}
-|F(\alpha, y(x_1),u_1)-F(\alpha, y(x_2),u_2)| \leq H|x_1-x_2 |^{1/n},
+|F(\alpha, y(x_1),u_1)-F(\alpha, y(x_2),u_2)| \leq H \lvert x_1-x_2\rvert^{1/n},
 \end{equation}
-where the constant $H$ is determined by the relation $H=2L\sqrt{N+3}$, $L$ is the Lipschitz constant from (\ref{eq:7}) and $n$ is the dimensionality of the MCOmix problem from (\ref{eq:1}). 
+where the constant $H$ is determined by the relation $H=2L\sqrt{N+3}$, $L$ is the Lipschitz constant from (\ref{eq:7}), and $n$ is the dimensionality of the MCOmix problem from (\ref{eq:1}).
 
-As a result of dimensionality reduction, the search information $\Omega_k$ from (\ref{eq:13}) obtained in the calculation can be presented in the form 
+As a result of the dimensionality reduction, the search information $\Omega_k$ from (\ref{eq:13}) obtained by computation can be expressed as
 \begin{equation}\label{eq:17}
-A_k=\{(x_i, u_i, z_i, f_i = f(y(x_i), u_i): 1 \leq i \leq k \},
+A_k=\{(x_i, u_i, z_i, f_i = f(y(x_i), u_i) : 1 \leq i \leq k \},
 \end{equation}
-where $x_i$, $u_i$, $1 \leq i \leq k$,  are the points of the global search iterations, $z_i$, $f_i$, $1 \leq i \leq k$,  are the values of the scalar criterion $F(\alpha,y(x),u)$ and the criteria $f_i (y)$, $1 \leq i \leq s$, calculated at the points $x_i$, $u_i$, $1 \leq i \leq k$. Note that the data in the set $A_k$ are arranged in ascending order\footnote{Data ordering is reflected by using a subscript.} of the points $x_i$, $1 \leq i \leq k$, i.e.
+where $x_i, u_i$, $1 \leq i \leq k$,  are the points of the global search iterations, and $z_i$, $f_i$, $1 \leq i \leq k$,  are the values of the scalar criterion $F(\alpha,y(x),u)$ and criteria the $f_i (y)$, $1 \leq i \leq s$, computed at the points $x_i$, $u_i$, $1 \leq i \leq k$. Note that the data in the set $A_k$ are arranged in ascending order\footnote{The order is indicated by the subscript.} of the points $x_i$, $1 \leq i \leq k$, that is,
 \begin{equation}\label{eq:18}
- x_1< x_2< \dots < x_k
+ x_1< x_2< \dots < x_k,
 \end{equation}
-for a more efficient execution of global search algorithms.
+for more efficient execution of global search algorithms.
 
-The use of dimensionality reduction makes it possible to combine (concatenate) one-dimensional functions $F(\alpha, y(x),w_i)$, $1 \leq i \leq l$, from (\ref{eq:15}) into a single one-dimensional function $\Phi(\alpha,y(x))$, defined over the segment $[0,l]$ (see Fig.~\ref{fig:1}).
-
+Dimensionality reduction makes it possible to combine (concatenate) the one-dimensional functions $F(\alpha, y(x),w_i)$, $1 \leq i \leq l$, from~(\ref{eq:15}) into a single one-dimensional function $\Phi(\alpha,y(x))$ defined over the segment $[0,l]$ (see Figure~\ref{fig:1}),
 \begin{equation}\label{eq:19}
- \Phi(\alpha,y(x)) = 
+ \Phi(\alpha,y(x)) =
 \begin{cases}
-F(\alpha,y(x),w_1 ),x \in [0,1], \\
-F(\alpha,y(x),w_2 ),x \in (1,2], \\
-\dots \\
-F(\alpha,y(x),w_l ),x \in (l-1,l],
+F(\alpha,y(x),w_1 ),\ x \in [0,1], \\
+F(\alpha,y(x),w_2 ),\ x \in (1,2], \\
+\hdotsfor{1} \\
+F(\alpha,y(x),w_l ),\ x \in (l-1,l],
 \end{cases}
 \end{equation}
-where $l$ from (\ref{eq:4}) is the number of different variants of the values of discrete parameters $u \in U$.  The mapping of the extended segment $[0,l]$ onto the domain $D$ of the continuous parameter values from (\ref{eq:2}) can be determined as follows 
+where $l$, as expressed in (\ref{eq:4}), is the number of different variants of the values of discrete parameters $u \in U$.  The mapping of the extended segment $[0,l]$ onto the domain $D$ of continuous parameter values from (\ref{eq:2}) can be determined as
 \begin{equation}\label{eq:20}
-Y(x)=y(x-E(x)),x\in[0,l]
+Y(x)=y(x-E(x)),\ x\in[0,l]
 \end{equation}
-($E(x)$ denotes the operation of taking the integral part of the number $x$). It should be noted that the function $\Phi(\alpha,y(x))$ is discontinuous at the points $x_i$, $1 \leq i \leq l-1$,  further on, the values of the function $\Phi(\alpha,y(x))$ at these points are considered undefined and are not used in the calculations.
- 
-
-
-
+where $E(x)$ denotes the integral part of the number $x$. Note that the function $\Phi(\alpha,y(x))$ is discontinuous at the points $x_i$, $1 \leq i \leq l-1$. Below, we consider the values of the function $\Phi(\alpha,y(x))$ at these points undefined and will not use them in computations.
 
 \section{Parallel Computation for Solving Mixed-Integer Optimization Problems}\label{sec:4}
 
-In the general case, the problem of minimizing the function $F(\lambda,y,u)$ from (\ref{eq:8}) is one of  global optimization problems. The solution of such problems involves the construction of grids covering the search domain $D$ -- see, for example, \cite{c24,c25,c26,c27,c28,c29,c30,c31}.
- 
-The proposed approach uses the algorithm of global mixed-integer search (AGMIS) to minimize the function $F(\lambda,y,u)$. This algorithm expands the possibilities of multiextremal optimization methods developed within the framework of the information-statistical theory of global search \cite{c19,c20,c21,c22,c23,c32,c33,c34,c35,c36,c37,c38,c39} to minimize the reduced one-dimensional function $\Phi(\alpha,y(x))$ from (\ref{eq:19}).
- 
+In the general case, the problem of minimizing the function $F(\lambda,y,u)$ from (\ref{eq:8}) is one of the global optimization problems. The solution to such problems involves the construction of grids covering the search domain $D$ (see, for example, \cite{c24,c25,c26,c27,c28,c29,c30,c31}).
 
-The AGMIS general computational scheme can be presented as follows (see also \cite{c21}).
+The proposed approach relies on the algorithm of global mixed-integer search (AGMIS) to minimize the function $F(\lambda,y,u)$. This algorithm expands the possibilities of multiextremal optimization methods developed within the framework of the information-statistical theory of global search \cite{c19,c20,c21,c22,c23,c32,c33,c34,c35,c36,c37,c38,c39} to minimize the reduced one-dimensional function $\Phi(\alpha,y(x))$ from (\ref{eq:19}).
 
-At the initial iteration of AGMIS, the value of the minimized function is calculated at some arbitrary point of the interval $(0,l)$(further, obtaining the function value will be called a \textit{trial}). Next, let $k$, $k > 1$, global search iterations be performed. Selection of the trial point $(k+1)$ for the next iteration is determined by the following rules.
+The AGMIS general computational scheme can be described as follows (see also \cite{c21}).
 
-\textit{Rule 1.} For each interval $(x_{i-1}, x_i)$,$1<i \leq k$, calculate the value $R(i)$, further referred to as the interval \textit{characteristic}. 
+At the initial iteration of AGMIS, the value of the minimized function is calculated at some arbitrary point of the interval $(0,l)$ (below, the computation of the function value is called a \textit{trial}). Next, assume that $k$, $k > 1$, global search iterations have already been performed. The selection of the trial point $(k+1)$ for the next iteration is done according to the following rules.
 
-\textit{Rule 2.} Determine the interval $(x_{t-1}, x_t)$, to which the maximum characteristic
+\textit{Rule 1.} For each interval $(x_{i-1}, x_i)$, $1<i \leq k$, compute the value $R(i)$, (below, we refer to it as the \textit{interval characteristic}).
+
+\textit{Rule 2.} Determine the interval $(x_{t-1}, x_t)$ that the maximum characteristic
 \begin{equation}\label{eq:21}
 R(t)=\max\{R(i): 1<i\leq k\}.
 \end{equation}
-corresponds.
+corresponds to.
 
-\textit{Rule 3.} Perform a new trial at $x^{k+1}$ in the interval $(x_{t-1}, x_t)$ with the maximum characteristic
+\textit{Rule 3.} Perform a new trial at $x^{k+1}$ in the interval $(x_{t-1}, x_t)$ with maximum characteristic
 \begin{equation}\label{eq:22}
 x^{k+1} \in (x_{t-1}, x_t).
 \end{equation}
-(the values of the discrete parameters $u \in U$ are given according to (\ref{eq:19})).
+(the values of the discrete parameters $u \in U$ are given as specified in~(\ref{eq:19})).
 
- The stopping condition under which the trials are stopped is determined by the following condition
+The stopping condition under which the trials are stopped is determined as
 \begin{equation}\label{eq:23}
-(x_t - x_{t-1})^{1/n} \leq \varepsilon, 
+(x_t - x_{t-1})^{1/n} \leq \varepsilon,
 \end{equation}
-where $t$ is from (\ref{eq:21}), $n$ is the dimensionality of the problem being solved from (\ref{eq:1}), and $\varepsilon > 0$ is the specified accuracy of the problem solution. If the stopping condition is not satisfied, the number of iteration $k$ is increased by one, and a new global search iteration is executed.
+where $t$ is taken from (\ref{eq:21}), $n$ is the dimensionality of the problem being solved (see (\ref{eq:1})), and $\varepsilon > 0$ is the specified accuracy of the problem solution. If the stopping condition is not satisfied, the number of iterations $k$ is increased by one, and a new global search iteration is executed.
 
-   To explain the computation scheme under consideration, the following may be noted. The calculated characteristics $R(i)$, $1<i \leq k$, can be interpreted as some measure of the importance of intervals in terms of the presence of the global minimum point. The interval selection scheme for the next trial becomes clear -- the point of each subsequent trial $x^{k+1}$ from (\ref{eq:22}) is chosen in the interval with the maximum value of the interval characteristic (i.e., in the interval  where the global minimum is most likely to be located).
+   To explain the computation scheme under consideration, note the following. The calculated characteristics $R(i)$, $1<i \leq k$, can be interpreted as some measure of the importance of the intervals in terms of the presence of the global minimum point. The interval selection scheme for the next trial becomes obvious: the point $x^{k+1}$ of each subsequent trial from (\ref{eq:22}) is chosen in the interval with the maximum value of the interval characteristic (i.e., in the interval where the global minimum is most likely to be located).
 
-It should also be noted that the AGMIS computational scheme considered above refines the general scheme of global search for mixed-integer optimization problems from subsection \ref{subsec:31}. Thus, the choice of the function $F(\alpha, y(x), w_i)$, $1\leq i\leq l$, for the next iteration is provided by the procedure of finding the interval with the maximum characteristic.
+It should also be noted that the AGMIS computational scheme, considered above, refines the general scheme of global search for mixed-integer optimization problems from subsection \ref{subsec:31}. Thus, the choice of the function $F(\alpha, y(x), w_i)$, $1\leq i\leq l$, for the next iteration is provided by the procedure of finding the interval with the maximum characteristic.
 
 A full description of multiextremal optimization algorithms and conditions for their convergence developed within the framework of the information-statistical theory of global search are given in \cite{c24}. Thus, with a proper numerical estimation of the H{\"o}lder constants $H$ from (\ref{eq:16}), the AGMIS algorithm converges to all available points of the global minimum of the minimized function $F(\lambda, y, u)$.
- 
-An example of using the AGMIS algorithm for the problem (\ref{eq:12}) within the framework of the proposed approach is shown in Fig.~\ref{fig:1}. In this example, the function value $F(\lambda, y, u)$ for the discrete parameter value $u=1$ was calculated only 7 times, and for the value $u=2$, 17 times, i.e. the global search iteration was performed mainly for the value of the discrete parameter, which allows the smallest value of the function $F(\lambda, y, u)$ to be achieved.
 
-Now, let us return to the initial problem statement (\ref{eq:1}) and remind that for solving the MCOmix problem it may be necessary to solve the set of problems $\mathbb{F}_T$ from (\ref{eq:10}). In solving this set of problems by using the AGMIS algorithm, one more key property of the proposed approach is manifested -- the results of all previous  calculations of criteria values can be recalculated into the values of the next optimization problem $F(\alpha, y(x), u)$ from (\ref{eq:6}) to be solved with new values of $\alpha'$ from (\ref{eq:8}) without repeating any time-consuming calculations of criteria values, i.e.
+Figure~\ref{fig:1} depicts the use of AGMIS for the problem (\ref{eq:12}) under the proposed approach. In this example, the function value $F(\lambda, y, u)$ is calculated only seven times for the discrete-parameter value $u=1$, and seventeen times for the value $u=2$, that is, the global search iteration is performed mainly for the value of the discrete parameter, which makes it possible to achieve the smallest value of the function $F(\lambda, y, u)$.
+
+Now, let us return to the initial problem statement (\ref{eq:1}) and remember that for solving the MCOmix problem it may be necessary to solve the set of problems $\mathbb{F}_T$ from (\ref{eq:10}). One more key property of the proposed approach becomes apparent when solving this set of problems by the AGMIS algorithm: the results of all previous  computations of criteria values can be reused to calculate the values of the next optimization problem $F(\alpha, y(x), u)$ from (\ref{eq:6}), which is to be solved with new values of $\alpha'$ from (\ref{eq:8}), without having to repeat any time-consuming calculation of criteria values, that is,
 \begin{equation}\label{eq:24}
- z_i'=F(\alpha',y(x_i), u), 1 \leq i \leq k.
+ z_i'=F(\alpha',y(x_i), u),\ 1 \leq i \leq k.
 \end{equation}
 
-Thus, all search information $A_k$ from (\ref{eq:17}), recalculated according to (\ref{eq:24}), can be reused to continue solving the next problem $F(\alpha, y(x), u)$.  This reuse of search information can provide a significant reduction in the amount of computations performed for each subsequent problem of the set $\mathbb{F}_T$ from (\ref{eq:10})  that may only require a relatively small number of global search iterations. This  has been confirmed  by our computational experiments -- see Section \ref{sec:5}.
+Thus, all search information $A_k$ from (\ref{eq:17}), recalculated according to (\ref{eq:24}), can be reused to continue the solution of the next problem $F(\alpha, y(x), u)$.  This reuse of search information can significantly reduce the number of computations performed for each subsequent problem of the set $\mathbb{F}_T$ from (\ref{eq:10}), which may require only a relatively small number of global search iterations. This  has been confirmed  in our computational experiments (see Section \ref{sec:5}).
 
-The AGMIS algorithm, supplemented with the ability to reuse search information in MCOmix problems, will be further referred to as the Algorithm for Multicriteria Mixed-Integer Search (AMMIS).
+The AGMIS algorithm supplemented with the ability to reuse search information in MCOmix problems will be further referred to as the Algorithm for Multicriteria Mixed-Integer Search (AMMIS).
 
-The final stage in improving the efficiency of solving MCOmix problems in the proposed approach is to organize parallel computing on parallel high-performance systems. Unfortunately, attempts to develop parallel variants of AGMIS and AMMIS algorithms using existing parallelization methods have not succeeded. For example, data parallelization (splitting the computation domain between available computing elements) results in only one processor processing a subdomain of the search domain  containing the sought globally optimal solution of the problem, with other processors performing redundant calculations.  In \cite{c24,c32} a new approach to parallelizing calculations for solving global optimization problems is proposed: parallelism of calculations is provided by organizing simultaneous calculation of the values of the minimized function $F(\alpha,y,u)$ from (\ref{eq:8}) at several different points of the search domain $D$. This approach makes it possible to parallelize the most time-consuming part of the global search process, and, due to its general nature -- it can be applied to almost any global search method for a wide variety of global optimization problems.
+The final stage in improving the efficiency of solving MCOmix problems in the proposed approach is to organize parallel computing on parallel high-performance systems. Unfortunately, attempts to develop parallel variants of AGMIS and AMMIS algorithms using existing parallelization methods have not succeeded. For example, data parallelization (splitting the computation domain between available computing elements) results in only one processor processing the subdomain of the search domain containing the sought global optimal solution of the problem, while other processors perform redundant calculations.  A new approach to parallelizing calculations for solving global optimization problems is proposed in \cite{c24,c32}: the parallelism of calculations is ensured by organizing simultaneous computation of values of the minimized function $F(\alpha,y,u)$ from (\ref{eq:8}) at several different points of the search domain~$D$. This approach makes it possible to parallelize the most time-consuming part of the global search process and, due to its general nature, it can be applied to almost any global search method for a wide variety of global optimization problems.
 
-Applying this approach and taking into account the interpretation of the characteristics $R(i)$, $1<i \leq k$, of search intervals $(x_{i-1}, x_i)$, $1<i \leq k$, from (\ref{eq:21}) as a measure of the intervals importance in terms of containing the global minimum point, a parallel version of the AGMIS algorithm can be obtained with the following generalization of rules (\ref{eq:21})-(\ref{eq:22}) \cite{c32,c40}:
+Applying this approach and taking into account the interpretation of the characteristics $R(i)$, $1<i \leq k$, of search intervals $(x_{i-1}, x_i)$, $1<i \leq k$, from (\ref{eq:21}) as a measure of the interval importance in terms of containing the global minimum point, we can obtain a parallel version of the AGMIS algorithm with the following generalization of rules (\ref{eq:21})--(\ref{eq:22}) (see \cite{c32,c40}):
 
-\textit{Rule 2 $'$}. Arrange the characteristics of intervals in descending order
+\textit{Rule 2$'$}. Arrange the characteristics of intervals in descending order,
 \begin{equation}\label{eq:25}
- R(t_1) \geq R(t_2) \geq \dots \geq R(t_{k-2}) \geq R(t_{k-1})
+ R(t_1) \geq R(t_2) \geq \dots \geq R(t_{k-2}) \geq R(t_{k-1}),
 \end{equation}
 and select $p$ intervals with numbers $t_j$, $1 \leq j \leq p$, having maximum values of their characteristics ($p$ is the number of processors (cores) used for parallel computations).
 
-\textit{Rule 3 $'$}. Perform new trials (calculate the values of the minimized function $F(\alpha,y(x),u)$) at the points $x^{k+j}$, $1 \leq j \leq p$ located in the intervals with the maximum characteristics from (\ref{eq:25}).
+\textit{Rule 3$'$}. Perform new trials (calculate the values of the minimized function $F(\alpha,y(x),u)$) at the points $x^{k+j}$, $1 \leq j \leq p$, located in the intervals with the maximum characteristics from (\ref{eq:25}).
 
-The stopping condition for the algorithm (\ref{eq:23}) must be checked for all the intervals in which the next trials are performed
+Stopping condition (\ref{eq:23}) for the algorithm must be checked for all the intervals in which the next trials are performed,
 \begin{equation}\label{eq:26}
-(x_{t_j} - x_{t_j-1})^{1/n} \leq \varepsilon, 1 \leq j \leq p. 
+(x_{t_j} - x_{t_j-1})^{1/n} \leq \varepsilon,\ 1 \leq j \leq p.
 \end{equation}
 
-As in previous cases, if the stopping condition is not fulfilled, the number of iteration $k$ is increased by $p$, and a new global search iteration is executed.
-      
-This parallel variant of the AGMIS algorithm will be further referred to as Parallel Algorthm for  Global Mixed-Integer Search (PAGMIS), and the parallel variant of the AMMIS algorithm will be referred to as PAMMIS, respectively.
+As in the cases considered before, if the stopping condition is not fulfilled, the number of iterations $k$ is increased by $p$, and a new global search iteration is executed.
 
-To assess the efficiency of the parallel algorithms, a large series of computational experiments has been carried out confirming that the proposed approach allows for a significant reducion in the amount of computation and time when solving complex multicriteria mixed-integer optimization problems -- see Section \ref{sec:5}.
+This parallel variant of the AGMIS algorithm will be further referred to as the Parallel Algorithm for Global Mixed-Integer Search (PAGMIS), and the parallel variant of the AMMIS algorithm, as PAMMIS.
 
+To assess the efficiency of the parallel algorithms, we conducted a large series of computational experiments, in which it was confirmed that the suggested approach can significantly reduce the number of computations and the time required to solve complex multicriteria mixed-integer optimization problems (see Section \ref{sec:5}).
 
+\section{Results of Numerical Experiments}\label{sec:5}
 
-\section{Results of numerical experiments}\label{sec:5}
+The numerical experiments were performed on the supercomputers Lobachevsky (University of Nizhni Novgorod), Lomonosov (Moscow State University), MVS-10P (Joint Supercomputer Center of RAS), and Endeavor. Each computational node was equipped with two processors Intel Xeon Platinum 8260L 2.4 GHz (i.e., a total of 48 CPU cores on each node) and 256 GB of RAM. The executable program code was built with the software package Intel Parallel Studio XE 2019. For the numerical experiments, we used the Globalizer system \cite{c41}.
 
-Numerical experiments were performed on the supercomputers Lobachevsky (University of Nizhni Novgorod), Lomonosov (Moscow State University), MVS-10P (Joint Supercomputer Center of RAS) and supercomputers Endeavor. The numerical results were obtained by using the following computational nodes: 2 Intel Xeon Platinum 8260L, 2.4 GHz, 256 GB RAM (i.e. a total of 48 CPU cores were available on each node). The executable program code was built by using the Intel Parallel Studio XE 2019 software package. The numerical experiments were performed using the Globalizer system \cite{c41}.
-
-The multiextremal optimization algorithms used in the framework of the proposed approach have demonstrated their effectiveness in numerical experiments and have been widely used in solving practical global search problems -- see, for example, \cite{c20,c21,c22,c23}. Below, we present the results of numerical experiments obtained earlier that prove the effectiveness of this approach \cite{c21}. In the experiments, the following bi-criteria test problem proposed in \cite{c42} was solved:
+The multiextremal optimization algorithms used under the suggested approach have demonstrated their effectiveness in numerical experiments and have been widely used to solve practical global search problems (see, for example, \cite{c20,c21,c22,c23}). Below, we present the results of previous numerical experiments obtained that prove the effectiveness of this approach \cite{c21}. The following bi-criteria test problem, proposed in \cite{c42}, was solved in the experiments:
 \begin{equation}\label{eq:27}
-f_1(y)=(y_1-1) y_2^2+1,f_2 (y)=y_2, 0 \leq y_1, y_2 \leq 1.
+f_1(y)=(y_1-1) y_2^2+1,f_2 (y)=y_2,\ 0 \leq y_1, y_2 \leq 1.
 \end{equation}
 
-The solution of the MCO problem consisted in constructing a numerical approximation of the Pareto set. To assess the quality of approximation, the completeness and uniformity of the Pareto set coverage was compared using the following two indicators \cite{c42,c43}:
+The solution of the MCO problem consisted of the construction of a numerical approximation of the Pareto set. To assess the quality of the approximation, the completeness and uniformity of the Pareto set coverage were compared using the following two indicators \cite{c42,c43}:
 \begin{itemize}
 	\item The hypervolume index (HV). This indicator evaluates the approximation of the Pareto set in terms of completeness (a higher value corresponds to a more complete coverage of the Pareto domain).
+
   \item The distribution uniformity index (DU). This indicator evaluates the uniformity of the Pareto domain coverage (a lower value corresponds to a more uniform coverage of the Pareto domain).
 \end{itemize}
 
-Five multicriteria optimization algorithms were compared in this experiment: the Monte-Carlo (MC) method \cite{c42}, the genetic algorithm SEMO from the PISA library \cite{c42}, the Non-uniform coverage (NUC) method \cite{c42}, the bi-objective Lipschitz optimization (BLO) method \cite{c43}, and the AMMIS method developed by the authors within the framework of the proposed approach. 
+Five multicriteria optimization algorithms were compared in this experiment: the Monte-Carlo (MC) method \cite{c42}, the genetic algorithm SEMO from the PISA library \cite{c42}, the non-uniform coverage (NUC) method \cite{c42}, the bi-objective Lipschitz optimization (BLO) method \cite{c43}, and the AMMIS method, developed by the authors under the proposed approach.
 
-For AMMIS, 50 global optimization problems with different values of convolution coefficients $\lambda\in \Lambda$ from (\ref{eq:8}) were solved.  The accuracy of the method $\varepsilon=0.05$ and the reliability parameter $r=3.0$ from (\ref{eq:23}) were used when solving the series of problems. The results of the experiments are presented in Table \ref{tab:1}.
+Fifty global optimization problems were solved with AMMIS for different values of the convolution coefficients $\lambda\in \Lambda$ from (\ref{eq:8}), with accuracy $\varepsilon=0.05$ and reliability parameter $r=3.0$ from (\ref{eq:23}). The results of the experiments are given in Table~\ref{tab:1}.
 
 \begin{table}[ht]
 \centering
@@ -298,31 +287,31 @@ For AMMIS, 50 global optimization problems with different values of convolution 
 \begin{tabular}{cccccc}
 \hline
 Solution method     & MC    & SEMO  & NUC   & BLO   & \textbf{AMMIS} \\ \hline
-Number of method iterations  & 500   & 500   & 515   & 498   & \textbf{370}   \\
+Number of iterations of the method & 500   & 500   & 515   & 498   & \textbf{370}   \\
 \begin{tabular}[c]{@{}c@{}}Number of points found in the Pareto domain\end{tabular} & 67    & 104   & 29    & 68    & \textbf{100}    \\
 HV index  & 0.300 & 0.312 & 0.306 & 0.308 & \textbf{0.316} \\
 DU index  & 1.277 & 1.116 & 0.210 & 0.175 & \textbf{0.101} \\ \hline
 \end{tabular}
 \end{table}
 
-As revealed in the experiments, the AMMIS algorithm has a noticeable advantage over the multicriteria optimization methods considered here even when solving relatively simple MCO problems.
+The experiments confirmed that AMMIS has a noticeable advantage over the multicriteria optimization methods considered here, even when solving relatively simple MCO problems.
 
-The results of computational experiments to solve 100 MCOmix problems of the set $\mathbb{F}_T$ from (10) are given below. Each problem in the set $\mathbb{F}_T$ contained two criteria. Each criterion was formed using the functions obtained by the GKLS generator \cite{c44}, where some parameters were discrete \cite{c45}. To generate MCOmix problems, 4 continuous parameters $y$ from (\ref{eq:2}) and 5 discrete parameters $u$ from (\ref{eq:3}) were used, each of them only having two values (i.e., $n=4$, $m=5$, $l=32$).
- 
-To solve each MCOmix problem, 50 uniformly distributed values of convolution coefficients $\lambda \in \Lambda$ from (\ref{eq:8}) were used. To estimate the values of HV and DU efficiency indicators, an approximation of the Pareto domain was calculated for each MCOmix problem  using a uniform grid in the search domain $D\times U$ from (\ref{eq:2})-(\ref{eq:3}). The PAMMIS algorithm was used for the following parameter values: accuracy $\varepsilon=0.05$ from (\ref{eq:26}) and reliability $r=5.6$ (the $r$ parameter is used in PAMMIS to construct estimates of the H{\"o}lder constant $H$ from (\ref{eq:16})). 
+The results of the computational experiments with 100 MCOmix problems of the set $\mathbb{F}_T$ from (\ref{eq:10}) are given below. Each problem in the set $\mathbb{F}_T$ contained two criteria. Each criterion was defined through functions obtained by the GKLS generator \cite{c44}, with some of the parameters being discrete \cite{c45}. To generate the MCOmix problems, we considered four continuous parameters $y$ from (\ref{eq:2}) and five discrete parameters $u$ from (\ref{eq:3}), with only two values for each of them (i.e., $n=4$, $m=5$, $l=32$).
 
-Table \ref{tab:2} gives the results of numerical experiments, averaged by the number of MCOmix problems solved. The first column shows the number of cores used. The second column contains information on the average number of trials (computation of criteria values) performed during the global search. The third column shows the resulting speedup (reduction in the number of trials) when using parallel computations. The last two columns contain the values of HV and DU indicators.
+Fifty uniformly distributed values of the convolution coefficients $\lambda \in \Lambda$ from (\ref{eq:8}) were used to solve each MCOmix problem. To estimate the values of the HV and DU efficiency indicators, we calculated an approximation of the Pareto domain for each MCOmix problem, using a uniform grid in the search domain $D\times U$ from (\ref{eq:2})--(\ref{eq:3}). The following parameter values were used for PAMMIS: accuracy $\varepsilon=0.05$ from (\ref{eq:26}) and reliability $r=5.6$ (the $r$ parameter is used in PAMMIS to construct estimates of the H{\"o}lder constant $H$ in (\ref{eq:16})).
+
+Table \ref{tab:2} contains the results of the numerical experiments, averaged by the number of MCOmix problems solved. The first column shows the number of cores used. The second column contains information on the average number of trials (computations of criteria values) performed during the global search. The third column shows the resulting speedup (reduction in the number of trials) when using parallel computations. The last two columns show the values of the HV and DU indicators.
 
 \begin{table}[ht]
 \centering
-\caption{Efficiency of the PAMMIS parallel algorithm in solving MCOmix problems}
+\caption{Efficiency of PAMMIS in the solution of MCOmix problems}
 \label{tab:2}
 \begin{tabular}{ccccccc}
 \hline
 Cores                  & Iterations                  & Speedup                 & DU           & &       & HV                      \\ \hline
-\multicolumn{7}{c}{\begin{tabular}[c]{@{}c@{}}The Pareto domain estimate obtained \\ by exhaustive search\end{tabular}}        \\ \hline
+\multicolumn{7}{c}{\begin{tabular}[c]{@{}c@{}} Pareto domain estimate obtained \\ by exhaustive search\end{tabular}}        \\ \hline
 48                     & 1706667                   & -                       & 20.6         & &       & 29784.9                \\ \hline
-\multicolumn{7}{c}{\begin{tabular}[c]{@{}c@{}}The Pareto    domain  estimate obtained \\ using the PAMMIS method\end{tabular}} \\ \hline
+\multicolumn{7}{c}{\begin{tabular}[c]{@{}c@{}} Pareto    domain  estimate obtained \\ using the PAMMIS method\end{tabular}} \\ \hline
 1                      & 86261.6                    & 1.0                     & 13.8         & &      & 30212.3                \\
 6                      & 15406.2                    & 5.6                     & 14.4         & &      & 30317.6                \\
 12                     & 6726.1                     & 12.8                    & 16.2         & &      & 30248.3                \\
@@ -335,21 +324,17 @@ Cores                  & Iterations                  & Speedup                 &
 \end{tabular}
 \end{table}
 
-The results of the computational experiments show that the PAMMIS algorithm is scalable as the  speedup of parallel computations increases almost linearly with the number of computing cores used. The obtained values of HV and DU indicators show that the Pareto set estimate using the PAMMIS algorithm is calculated with a greater accuracy and requires a significantly smaller number of trials compared to the results obtained using uniform grids in the search domain $D \times U$.
+The results of the experiments demonstrate that PAMMIS is scalable as the  speedup of parallel computations increases almost linearly with the number of computing cores used. The obtained values of the HV and DU indicators indicate that the Pareto set estimate obtained by the PAMMIS method is calculated with greater accuracy and requires a significantly smaller number of trials compared to the results obtained by using uniform grids in the search domain $D \times U$.
 
-\section{Conclusion}
+\section{Conclusions}
+In this paper, we proposed a new approach to solving computationally intensive optimization problems, where some varied parameters can only take on discrete values (MCOmix). It is assumed that the efficiency criteria may be multiextremal, and the computation of criterion values may involve a large number of calculations. Due to the high computational complexity of this class of problems, parallel solution methods that rely on the efficient use of high-performance computing systems need to be developed.
 
-In this paper, a new approach is proposed to solving computationally intensive optimization problems, where some varied parameters can only take on discrete values (MCOmix). It is also assumed that the efficiency criteria may be multiextremal, and the computing of criterion values may involve a large amount of calculations. Due to the high computational complexity of this class of problems, parallel solution methods need to be developed, relying on the efficient use of high-performance computing systems.
+Under the proposed approach, the solution of mixed-integer optimization problems is reduced to solving a family of global search optimization problems that use only continuous parameters. All problems of the family are solved simultaneously in time-shared mode, where the optimization problem for the next global search iteration is selected adaptively taking into account the search information obtained in the course of the calculations.  The results of numerical experiments prove that  this approach can significantly reduce the computational intensity when solving MCOmix problems.
 
-In the framework of the proposed approach, solution of mixed-integer optimization problems is reduced to solving a family of global search optimization problems that use only continuous parameters. All problems of the family are solved simultaneously in the time-shared mode, where the optimization problem for the next global search iteration is selected adaptively taking into account the search information obtained in the course of computations. The results of numerical experiments prove that  this approach can significantly reduce computational intensity when solving MCOmix problems.
+Finally, it should be noted that the approach we propose is quite promising and requires further research. First of all, it is necessary to perform numerical experiments involving multicriteria mixed-integer optimization problems with a greater number of efficiency criteria and higher dimensionality. It is also necessary to assess the possibility of implementing parallel computations on high-performance systems with distributed memory.
 
-In conclusion, it may be noted that the proposed approach is promising and requires continued investigations. First of all, it is necessary to continue numerical experiments to solve multicriteria mixed-integer optimization problems with a greater number of efficiency criteria and having a greater dimensionality. The possibility of organizing parallel computations using high-performance systems with distributed memory should be also evaluated.
-
-
-
-\section*{Acknowledgements} 
-This work was supported by the Ministry of Science and Higher Education of the Russian Federation, project no.0729-2020-0055, and by the Research and Education Mathematical Center, project no. 075-02-2020-1483/1.
-
+\section*{Acknowledgements}
+The work was supported by the Ministry of Science and Higher Education of the Russian Federation (project no.0729-2020-0055) and by the Research and Education Mathematical Center (project no. 075-02-2020-1483/1).
 
 \begin{thebibliography}{10}
 \providecommand{\url}[1]{{#1}}
@@ -622,6 +607,4 @@ Zhigljavsky, A., {\v Z}ilinskas, A.: Stochastic global optimization, vol.~9.
 
 \end{thebibliography}
 
-
-
-\end{document}
+\end{document} 
