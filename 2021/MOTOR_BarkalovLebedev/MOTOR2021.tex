@@ -70,6 +70,8 @@ The general scheme discussed above can be extended by the possibility of selecti
 
 It is also important to note that by solving simultaneously a large number of scalar optimization problems thus generated it is possible to significantly decrease computational complexity of each separate problem. This effect is achived due to the fact that all such scalar problems  are based on the same MOO problem and, consequently, all computed values of the efficiency criteria of the MOO problem can be reduced to values of any scalar problem being solved simultaneously without any time consuming calculations. In such cases, all the search information obtained in solving any single scalar problem can be used for solving all other scalar problems of the same group. 
 
+This paper presents the results of the authors continuing research aimed to develop effective methods for solving MOO problems \cite{c35,c36,c37,c44}. In \cite{c35}, some methods for solving global optimization problems are considered, in \cite{c36},  a general decision-making model based on MOO problems is proposed, and in \cite{c37}, a theoretical analysis is presented regarding the effectiveness of the use of search information when solving MOO problems. In \cite{c44}, we consider MOO problems in which the efficiency criteria can be ordered by importance (lexicographic multi-objective optimization). In this case, MOO problems are reduced to global optimization problems with non-convex constraints for which constrained optimization methods should be applied. In this paper, we propose new computational schemes for using search information that significantly reduce the amount of calculations required to solve MOO problems.
+
 The structure of the paper is as follows. In Section \ref{sec:02}, we give the statement of the multi-objective optimization problem. Section \ref{sec:03} presents a scheme for reduction of multi-objective optimization problems to one-dimensional global optimization problems as well as some methods for solving such problems. Section \ref{sec:04} considers the proposed approach for simultaneous solution of several global optimization problems yielding several Pareto-optimal decisions at a time. Section \ref{sec:05} contains the results of numerical experiments confirming the effectiveness of the proposed approach. In conclusion, the results obtained are discussed and possible main lines of action for further research are outlined.
 
 
@@ -216,7 +218,12 @@ which must be fulfilled starting from some iteration $k>1$ of the global search 
 
 \section{An Approach for Simultaneous Finding of Multiple Efficient Decisions in Multi-objective Optimization Problems} \label{sec:04}
 
-\textbf{1. The need to solve multiple global optimization problems.} As mentioned earlier, in the process of solving the MOO problem, it may be necessary to find several different efficient decisions due to possible changes in the optimality requirements. Obtaining different efficient decisions in the proposed approach is ensured by choosing different convolution coefficients (importance indicators) for the objective functions $f_i(y)$, $1 \leq i \leq s$, which results in obtaining different  scalar multi-extremal functions $F(\lambda, y)$ from (\ref{eq:04}). These functions $F(\lambda, y)$ can be optimized sequentially. This determines a multi-stage scheme for solving the MOO problem, when at each stage DM specifies the necessary scalarization coefficients, then the resulting scalar optimization problem is solved, after which DM analyzes the efficient decisions found. 
+In this Section, the proposed approach for finding $p$, $p>1$ Pareto-optimal decisions of the MOO problem is presented. This problem is formulated as the problem of solving the set $\Phi_p (y)$, $p>1$ of global optimization problems (see \ref{subsec:41}). To solve this set of optimization problems, two efficient computational schemes are proposed. The first scheme is based on the traditional sequential procedure for solving multiple problems, however, to solve each subsequent optimization problem, all the search information obtained during previous calculations is taken into account. This accumulated search information can significantly reduce the number of global search iterations required to solve the next optimization problems of the set $\Phi_p (y)$ (see \ref{subsec:42} and Chapter \ref{sec:05}). In the second scheme, all the problems of the set $\Phi_p (y)$ are solved simultaneously, but the search information obtained when solving each problem is also used for solving all the other problems of the set $\Phi_p (y)$ (see \ref{subsec:43}). This useful exchange of search information also significantly reduces the amount of required calculations for solving the problems of the set $\Phi_p (y)$.
+
+\subsection{The need to solve multiple global optimization problems.} 
+\label{subsec:41}
+
+As mentioned earlier, in the process of solving the MOO problem, it may be necessary to find several different efficient decisions due to possible changes in the optimality requirements. Obtaining different efficient decisions in the proposed approach is ensured by choosing different convolution coefficients (importance indicators) for the objective functions $f_i(y)$, $1 \leq i \leq s$, which results in obtaining different  scalar multi-extremal functions $F(\lambda, y)$ from (\ref{eq:04}). These functions $F(\lambda, y)$ can be optimized sequentially. This determines a multi-stage scheme for solving the MOO problem, when at each stage DM specifies the necessary scalarization coefficients, then the resulting scalar optimization problem is solved, after which DM analyzes the efficient decisions found. 
 
 The general scheme considered above can be extended by the option of selecting not one but several different scalarization coefficients at each stage. Having such an option makes it easier for DM  to specify importance coefficients $\lambda \in \Lambda$ of the objective functions $f_i(y)$, $1 \leq i \leq s$. By solving simultaneously several generated scalar optimization problems, one can  obtain the estimates of efficient decisions at the earliest stages of computing, which makes it possible to dynamically (in the process of computations) change the set of problems being solved -- to stop solving those that obviously have no prospect of success (from DM's point of view) or to add new optimization problems. 
 
@@ -228,7 +235,10 @@ Such generalization of the process of solving a MOO problem means that at each c
 which can be changed dynamically in the course of the calculations by adding new or removing existing optimization functions $F(\lambda, y)$ from (\ref{eq:04}). 
 
 
-\textbf{2. Step-by-step solution of a set of global optimization problems.} As shown in Section \ref{sec:03}, the information-statistical multiextremal optimization algorithms used in the proposed approach determine the points of consecutive iterations of the global search taking into account the search information
+\subsection{Step-by-step solution of a set of global optimization problems.} 
+\label{subsec:42}
+
+As shown in Section \ref{sec:03}, the information-statistical multiextremal optimization algorithms used in the proposed approach determine the points of consecutive iterations of the global search taking into account the search information
 \begin{equation}
 \label{eq:22}
 A_k=\{(x_i,z_i,f_i )^T:1 \leq i \leq k\}
@@ -249,7 +259,10 @@ Thus, all the search information $A_k$ from (\ref{eq:22}), recalculated accordin
 
 The GSA algorithm applied to optimize the functions of the set $\Phi_p(y)$ from (\ref{eq:21}) and using the search information $A_k$ will be further referred to as the Multiple Global Search Algorithm (MGSA).
 
-\textbf{3. Simultaneous solution of a set of global optimization problems.} Information connectivity makes it possible to propose a more general scheme for simultaneous optimization of all the functions of the set $\Phi_p(y)$ from (\ref{eq:21}). In this case, the search information $A_k$ from (\ref{eq:22}) will contain the computed values of all simultaneously optimized functions $F(\lambda_i, y)$, $1 \leq i \leq p$, i.e. 
+\subsection{Simultaneous solution of a set of global optimization problems.} 
+\label{subsec:43}
+
+Information connectivity makes it possible to propose a more general scheme for simultaneous optimization of all the functions of the set $\Phi_p(y)$ from (\ref{eq:21}). In this case, the search information $A_k$ from (\ref{eq:22}) will contain the computed values of all simultaneously optimized functions $F(\lambda_i, y)$, $1 \leq i \leq p$, i.e. 
 \begin{equation}
 \label{eq:24}
 A_k=\{(x_i,\overrightarrow{z_i},f_i )^T : 1 \leq i \leq k\},
@@ -352,7 +365,7 @@ As the experimental results show, the MGSA algorithm has a distinct advantage ov
 
    In the second series of numerical experiments, we solved bi-criteria two-dimensional MOO problems, i.e. with $N = 2$, $s = 2$. We used multiextremal functions obtained with the help of the GKLS generator \cite{c43} as objective functions of the MOO problem. During the experiments, we solved 100 multi-objective problems of this class, for each of them the set $\Phi_p (y)$ from (\ref{eq:21}) comprised 5, 10 and 25 simultaneously optimized functions respectively (the convolution coefficients $\lambda \in \Lambda$ from (\ref{eq:06}) for the functions of the set $\Phi_p (y)$ being uniformly distributed in $\Lambda$). To check the accuracy of the solution of MOO problems, the computed estimates of the efficient solutions were checked to confirm they belonged to the Pareto domain. For the parameters of the MGSA algorithm, the following values were used: accuracy $\varepsilon=0.01$,  reliability $r=5.6$. The computational results were averaged over the number of MOO problems solved.
 
-The results of numerical experiments are presented in Table \ref{tab:2}. The table shows in the first column the number of functions $\Phi_p (y)$ from (\ref{eq:21}) being optimized.  The columns named Iters contain the average number of iterations performed by the algorithm to solve the MOO problem. The columns named HV and DU contain the values of the HV and DU indicators. The results of the numerical experiments are divided with respect to the three algorithms used: GSA is described in Section \ref{sec:03}, MGSA is discussed in Section \ref{sec:03} (item 2), SGSA is presented in Section \ref{sec:04} (item 3). 
+The results of numerical experiments are presented in Table \ref{tab:2} and fig. \ref{fig:1}. The table shows in the first column the number of functions $\Phi_p (y)$ from (\ref{eq:21}) being optimized.  The columns named Iters contain the average number of iterations performed by the algorithm to solve the MOO problem. The columns named HV and DU contain the values of the HV and DU indicators. The results of the numerical experiments are divided with respect to the three algorithms used: GSA is described in Section \ref{sec:03}, MGSA is discussed in Section \ref{sec:03} (item 2), SGSA is presented in Section \ref{sec:04} (item 3). 
 
 \begin{table}[ht]
 \centering
@@ -368,6 +381,13 @@ The results of numerical experiments are presented in Table \ref{tab:2}. The tab
 25                                                                                      & 20456.2 & 6.504 & 0.143 &  & 2135.8  & 6.490  & 0.209 &  & 2456.1  & 6.493  & 0.188 \\ \hline
 \end{tabular}
 \end{table}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\linewidth]{fig_t2}
+  \caption{The average number of iterations for solving bi-criteria two-dimensional MOO problems}
+  \label{fig:1}
+\end{figure}
 
 The experimental results show that by reusing search information when optimizing 25 functions from the set $\Phi_p (y)$ the total computational iterations can be reduced  by more than 9.5 times without resorting to any additional computational resources. At the same time, the MGSA algorithm performs the least number of iterations (the number of calculations of objective function values), while the SGSA algorithm provides a better approximation of the Pareto domain both in terms of approximation completeness and coverage uniformity. It is also noteworthy that the average number of iterations to optimize one function from the set $\Phi_p (y)$ decreases by more than 4 times as the number of functions in the set $\Phi_p (y)$ increases -- see Table \ref{tab:3}. 
 
@@ -404,6 +424,14 @@ In the third series of numerical experiments, 10 bi-criteria five-dimensional MO
 \end{tabular}
 \end{table}
 
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\linewidth]{fig_t5}
+  \caption{The average number of iterations for solving bi-criteria five-dimensional MOO problems}
+  \label{fig:1}
+\end{figure}
+
+
 The results of our experiments show that with increasing dimensionality of the MOO problems to be solved, the trend that has been identified continues: the amount of computation (the number of global search iterations) is reduced by more than 5.6 times due to reuse of search information, the MGSA algorithm performs the least number of iterations, and the SGSA algorithm provides the best approximation of the Pareto domain.
 
 \section*{Conclusion}
@@ -438,6 +466,10 @@ It should be noted in conclusion that the proposed approach is promising and req
 \bibitem{c10} Collette, Y., Siarry, P.: Multiobjective Optimization: Principles and Case Studies. Decision Engineering. Springer, Heidelberg (2011). \doi{10.1007/978-3-662-08883-8}
 \bibitem{c11} Eichfelder, G.: Scalarizations for adaptively solving multi-objective optimization problems. Comput. Optim. Appl. \textbf{44}, 249--273 (2009).
 \bibitem{c12} Figueira, J., Liefooghe, A., Talbi, E., Wierzbicki, A.: A parallel multiple reference point approach for multi-objective optimization. European Journal of Operational Research, \textbf{205}(2), 390--400 2010. \doi{10.1016/j.ejor.2009.12.027}
+\bibitem{c35} Gergel, V.: An Unified Approach to Use of Coprocessors of Various Types for Solving Global Optimization Problems. 2nd International Conference on Mathematics and Computers in Sciences and in Industry, 13--18 (2015). \doi{10.1109/MCSI.2015.18}
+\bibitem{c36} Gergel, V.P., Kozinov, E.A.: Accelerating multicriterial optimization by the intensive exploitation of accumulated search data. AIP Conference Proceedings, \textbf{1776}, 090003 (2016). \doi{10.1063/1.4965367}
+\bibitem{c37} Gergel, V., Kozinov, E. Efficient multicriterial optimization based on intensive reuse of search information. Journal of Global Optimization 71(1), 73--90 (2018).
+\bibitem{c44} Gergel, V., Kozinov, E., Barkalov, K.: Computationally efficient approach for solving lexicographic multicriteria optimization problems. Optim. Lett. (2020). \doi{10.1007/s11590-020-01668-y}
 \bibitem{c13} Zhigljavsky, A.A.: Theory of Global Random Search. Dordrecht: Kluwer Academic Publishers (1991).
 \bibitem{c14} Pint{\' e}r, J.D.: Global optimization in Action (continuous and Lipschitz optimization: algorithms, implementations and applications). Kluwer Academic Publishers, Dortrecht (1996).
 \bibitem{c15} Strongin, R., Sergeyev, Ya.: Global optimization with non-convex constraints. Sequential and parallel algorithms. Kluwer Academic Publishers, Dordrecht (2nd ed. 2013, 3rd ed. 2014).
@@ -460,15 +492,14 @@ It should be noted in conclusion that the proposed approach is promising and req
 \bibitem{c32} Sergeyev, Y.D., Grishagin, V.A.: Parallel asynchronous global search and the nested optimization scheme. J. Comput. Anal. Appl., \textbf{3}(2), 123--145 (2001).
 \bibitem{c33} Lera D., Sergeyev Ya.D.: Deterministic global optimization using space-filling curves and multiple estimates of Lipschitz and Holder constants. Communications in Nonlinear Science and Numerical Simulation, \textbf{23}, 328--342 (2015).
 \bibitem{c34} Grishagin, V., Israfilov, R., Sergeyev, Y.: Comparative efficiency of dimensionality reduction schemes in global optimization. AIP Conference Proceedings 1776 (2016).
-\bibitem{c35} Gergel, V.: An Unified Approach to Use of Coprocessors of Various Types for Solving Global Optimization Problems. 2nd International Conference on Mathematics and Computers in Sciences and in Industry, 13--18 (2015). \doi{10.1109/MCSI.2015.18}
-\bibitem{c36} Gergel, V.P., Kozinov, E.A.: Accelerating multicriterial optimization by the intensive exploitation of accumulated search data. AIP Conference Proceedings, \textbf{1776}, 090003 (2016). \doi{10.1063/1.4965367}
-\bibitem{c37} Gergel, V., Kozinov, E. Efficient multicriterial optimization based on intensive reuse of search information. Journal of Global Optimization 71(1), 73--90 (2018).
 \bibitem{c38} Gergel, V., Barkalov, K., Sysoyev, A. Globalizer: A novel supercomputer software system for solving time-consuming global optimization problem. Numerical algebra, control and optimization, \textbf{8}(1), 47--62 (2018).
 \bibitem{c39} {\v Z}ilinskas, A., Zilinskas, J.: Adaptation of a one-step worst-case optimal univariate algorithm of bi-objective Lipschitz optimization to multidimensional problems. Commun Nonlinear Sci Numer Simulat, \textbf{21}(1-3), 89--98 (2015). \doi{10.1016/j.cnsns.2014.08.025}
 \bibitem{c40} Evtushenko. Y., Posypkin, M.: A deterministic algorithm for global multiobjective optimization, Optimization Methods \& Software, \textbf{29}(5), 1005--1019 (2014). \doi{10.1080/10556788.2013.854357}
 \bibitem{c41} Evtushenko, Y., Posypkin, M.: Method of non-uniform coverages to solve the multicriteria optimization problems with guaranteed accuracy. Autom. Remote Control \textbf{75}(6), 1025--1040 (2014).
 \bibitem{c42} Bleuler, S., Laumanns, M., Thiele, L., Zitzler, E.: Pisa-a platform and programming language independent interface for search algorithms, Evolutionary Multi-Criterion Optimization. LNCS, \textbf{2632}, 494--508 (2003). \doi{10.1007/3-540-36970-8\_35}
 \bibitem{c43} Gaviano, M., Kvasov, D.E, Lera, D., and Sergeyev, Ya.D.: Software for generation of classes of test functions with known local and global minima for global optimization. ACM Transactions on Mathematical Software, \textbf{29}(4), 469--480 (2003).
+
+
 \end{thebibliography}
 
 
