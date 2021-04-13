@@ -21,7 +21,7 @@
 \usepackage{amssymb}
 \usepackage{cite}
 
-%\usepackage[russian]{babel}
+\usepackage[russian]{babel}
 
 % to typeset URLs, URIs, and DOIs
 \usepackage{url}
@@ -41,21 +41,23 @@
 %                                     \toctitle is used
 %
 \author{
-Irek Gubaidullin$^{1}$\and
-Leniza Enikeeva$^{1}$\and
-Konstantin Barkalov$^2$%\orcidID{0000-0001-5273-2471}
+Irek Gubaydullin$^{1,2}$\and
+Leniza Enikeeva$^{2,3}$\orcidID{0000-0003-4219-4870}
 \and
-Ilya Lebedev$^2$%\orcidID{0000-0002-8736-0652} 
+Konstantin Barkalov$^4$\orcidID{0000-0001-5273-2471}
+\and
+Ilya Lebedev$^4$\orcidID{0000-0002-8736-0652} 
 }
 
 %
-\authorrunning{I. Gubaidullin et al.} % abbreviated author list (for running head)
+\authorrunning{I. Gubaydullin et al.} % abbreviated author list (for running head)
 %
 %%%% list of authors for the TOC (use if author list has to be modified)
 %\tocauthor{Konstantin Barkalov and Ilya Lebedev }
 %
 
-\institute{$^2$Lobachevsky State University of Nizhny Novgorod, Nizhny Novgorod, Russia\\
+\institute{$^1$Institute of Petrochemistry and Catalysis – Subdivision of the Ufa Federal Research Centre of RAS, Ufa, Russia\\$^2$Ufa State Petroleum Technological University, Ufa, Russia \\$^3$Novosibirsk State University, Novosibirsk, Russia\\$^4$Lobachevsky State University of Nizhny Novgorod, Nizhny Novgorod, Russia\\
+\email{leniza.enikeeva@yandex.ru},
 \email{konstantin.barkalov@itmm.unn.ru},
 \email{ilya.lebedev@itmm.unn.ru}
 }
@@ -64,14 +66,114 @@ Ilya Lebedev$^2$%\orcidID{0000-0002-8736-0652}
 \maketitle              % typeset the title of the contribution
 
 \begin{abstract}
-The paper considers the application of parallel computing technology to the simulation of a catalytic chemical reaction, which is widely used in the modern chemical industry to produce synthesis gas. As a chemical reaction, the process of pre-forming propane on a Ni catalyst is assumed. To simulate a chemical process, it is necessary to develop a kinetic model of the process, that is, to determine the kinetic parameters. To do this, the inverse problem of chemical kinetics is solved, which predicts the values of kinetic parameters based on laboratory data. From a mathematical point of view, the inverse of the chemical kinetics problem is a global optimization problem. A parallel information-statistical global search algorithm was used to solve it. The use of the parallel algorithm has reduced significantly the search time for the optimum. The found optimal parameters of the model made it possible to adequately simulate the process of pre-forming propane on a Ni-catalyst.
+The paper considers the application of parallel computing technology to the simulation of a catalytic chemical reaction, which is widely used in the modern chemical industry to produce synthesis gas. As a chemical reaction, the process of pre-reforming propane on a Ni catalyst is assumed. To simulate a chemical process, it is necessary to develop a kinetic model of the process, that is, to determine the kinetic parameters. To do this, the inverse problem of chemical kinetics is solved, which predicts the values of kinetic parameters based on laboratory data. From a mathematical point of view, the inverse of the chemical kinetics problem is a global optimization problem. A parallel information-statistical global search algorithm was used to solve it. The use of the parallel algorithm has reduced significantly the search time for the optimum. The found optimal parameters of the model made it possible to adequately simulate the process of pre-reforming propane on a Ni-catalyst.
 
 \keywords{Global optimization $\cdot$ Multiextremal functions $\cdot$ Parallel computing }
 \end{abstract}
 
 \section{Introduction}
 
+%Одним из направлений лаборатории математической химии Института нефтехимии и катализа УФИЦ РАН является исследование химических реакций методами математического моделирования. На данный момент изучено большое количество сложных химических процессов -- реакция циклоалюминирования алкенов триэтилалюминием в алюмациклопентаны, реакция гидроалюминирования олефинов алюминийорганическими соединениями, реакция спиртов с диметилкарбонатом и др. Математическое описание химических реакций необходимо для построения математических моделей химической кинетики, которые называются кинетическими моделями. Кинетическая модель является основой математического моделирования химических реакций и исходным уровнем при математическом моделировании химических реакторов. При разработке кинетической модели многостадийной химической реакции решается обратная задача химической кинетики (ХК). Обратной задачей ХК в общем случае называют процесс выбора механизма сложного процесса и определение его количественных характеристик -- констант скорости одностадийных реакций на основе опытных данных о динамике протекания процесса. С математической точки зрения обратная задача химической кинетики представляет собой задачу оптимизации, поэтому актуальной является задача выбора метода оптимизации. 
 
+One of the areas of the Laboratory of Mathematical Chemistry of the Institute of Petrochemistry and Catalysis of the UFIC RAS is the study of chemical reactions by mathematical modeling methods. At the moment, a large number of complex chemical processes have been studied-the reaction of cycloalumination of alkenes with triethylaluminium into alumacyclopentanes, the reaction of hydroalumination of olefins with organoaluminum compounds, the reaction of alcohols with dimethyl carbonate, etc. The mathematical description of chemical reactions is necessary for the construction of mathematical models of chemical kinetics, which are called kinetic models. The kinetic model is the basis for mathematical modeling of chemical reactions and the initial level for mathematical modeling of chemical reactors. When developing a kinetic model of a multi-stage chemical reaction, the inverse problem of chemical kinetics (CK) is solved. The inverse problem of HC is generally called the process of selecting the mechanism of a complex process and determining its quantitative characteristics - the rate constants of single-stage reactions based on experimental data on the dynamics of the process. From a mathematical point of view, the inverse problem of chemical kinetics is a global optimization problem, so the problem of choosing an optimization method is relevant.
+
+%Russian
+Метод решения оптимизационных задач подобного типа должен учитывать следующую специфику. Во-первых, целевая функция задачи является "черным ящиком", т.к. она задается не в виде формулы, а в виде некоторого алгоритма вычисления ее значений. Во-вторых, вычисление даже одного значения целевой функции является трудоемкой операцией, т.к. требует численного моделирования. Перечисленная специфика не позволяет задействовать для решения обратных задач мультистартовые методы, основанные на идеях многократного градиентного спуска. С одной стороны, вычисление градиента в данном случае будет чрезмерно дорогой операцией, а с другой стороны - мультистартовые методы слабо применимы для существенно многоэкстремальных задач, какими и являются обратные задачи химической кинетики.
+
+Перечисленные особенности inverse problem of chemical kinetics учитываются в разработанном в University of Nizhni Novgorod параллельном алгоритме глобальной оптимизации. Теоретическим базисом данного алгоритма является information-statistical approach, детально изложенный в \cite{Strongin2000}. Разработанный алгоритм основан на редукции исходной многомерной задачи к эквивалентной ей одномерной задаче с последующим ее решением эффективными методами оптимизации функций одной переменной. Вопросы распараллеливания алгоритма на разных архитектурах рассмотрены в \cite{Barkalov2016}. В данной статье представлены результаты, полученные при использовании parallel global search algorithm для решения inverse problem of chemical kinetics.
+
+
+\section{Mathematical Model}\label{Sec_math_mod}
+
+The process under study is propane pre-reforming into methane-rich gas over Ni catalyst, which is an industrially important chemical process \cite{USKOV2019126741, Uskov_en}. Pre-reforming of propane was studied over industrial nickel-chromium catalyst at pressure of 1 and 5 bar in the temperature range of 220 -- 380 $^0$C and at flow rates of 4000 and 12000 h$^{-1}$. The experimental data on propane pre-reforming was acquired from our previous work \cite{Uskov_en}.  The reaction scheme consists of two reactions: propane steam conversion and CO$_2$ methanation \cite{Uskov_cat}:
+\begin{gather}
+C_3H_8 + 6H_2O \rightarrow 10H_2 + 3CO_2 \label{reac_ref}\\
+CO_2 + 4H_2 \rightleftharpoons CH_4 + 2H_2O \label{reac_met},
+\end{gather}
+
+where the rates of reactions \eqref{reac_ref} -- \eqref{reac_met} are expressed according to the Langmuir-Hinshelwood model \cite{USKOV2019126741}:
+
+\[
+W_{ref} = \dfrac{k_{ref}^0 \cdot \exp \left(- \dfrac{E_{ref}}{RT} \right) }{\left(1 + B \cdot C_{C3H8}\right)^m},
+\]
+
+\[
+W_{met} = k_{met}^0 \cdot \exp \left(- \dfrac{E_{met}}{RT} \right) \cdot C_{H2} \cdot \left[1 - \dfrac{P_{CH4} P_{H2O}^2}{K_{eq} P_{CO2} P_{H2}^4 }\right] ,
+\]
+
+where $W_{ref}$ and $W_{met}$ are the reaction rates; $E_{ref}$ and $E_{met}$ are the observed activation energies, J/mol; $k^0_{ref}$ and $k^0_{met}$ are the pre–exponential multipliers; $B$ is the constant parameter, $T$ is the temperature, K; $R$ is the universal gas constant, J(K$\cdot$ mol). The "$ref$"and "$met$" indexes refer to pre-reforming and methanation reactions, respectively. $C_{C3H8}$ and $C_{H2}$ are concentrations of propane and hydrogen, mol/m$^3$; $m$ is order of the denominator, which varied from 0 to 2; $K_{eq}$ is the equilibrium constant of $CO_2$ methanation; $P_{CH4}$, $P_{H2O}$, $P_{CO2}$, $P_{H2}$ are partial pressures of the corresponding substances, bar. The mathematical model is a system of equations of material balance:
+
+\begin{equation}\label{mater_balance}
+\begin{cases}
+G \dfrac{dy_i}{dl} = \left(\nu_i^{ref} W_{ref} + \nu_i^{met} W_{met} \right) m_i, 
+\\
+0 \le l \le , i \in \left\lbrace C_3H_8, CH_4, H_2O, H_2, CO_2 \right\rbrace,
+\\
+l = 0, y_i = y_{i0},
+\end{cases}
+\end{equation}
+
+where $G$ is a mass flow of the mixture, kg/(m$^2 \cdot$ sec); $y_i$ is a mass fraction of the $i$-th component; $\nu_i$ is a stoichiometric coefficient of the $i$-th component; $m_i$ is a molar mass of the $i$-th component, kg/mol; $l$ is coordinate along the catalytic layer, m; $L$ is a length of the catalytic layer, m. The length of the catalytic layer is 0.008 m. The mathematical model of chemical kinetics problems is a system of differential equations that describes the variations in substance concentrations over time according to the rates of reaction stages. The system of differential equations is a Cauchy problem containing the initial data \cite{ENIKEEV2020123131, Chainikova}. The numerical solving of such a system of equations is a direct problem of chemical kinetics. 
+
+%Системы обыкновенных дифференциальных уравнений (ОДУ), описывающие химические прцоессы, зачастуя являются жесткими за счет наличия быстропротекающих и медленнопротекающих стадий реакции. Поэтому в качестве метода решения системы ОДУ был выбран метод RADAU-IIA, который подходит для решения жестких систем ОДУ. Рассмотрим в общем случае задачу Коши вида:
+
+Systems of ordinary differential equations (ODES) describing chemical processes are often rigid due to the presence of fast-flowing and slow-flowing reaction stages. Therefore, the RADAU-IIA method was chosen as a method for solving the ODE system, which is suitable for solving rigid ODE systems. Let us consider in the general case the Cauchy problem of the form:
+
+\begin{equation}\label{ode}
+\dfrac{dx}{dt} = f(\textbf{x}, y), \textbf{x}(0) = \textbf{x}_0, 0 \le t \le T,
+\end{equation}
+
+%где x в нашем случае это вектор концентраций веществ реакции размерности 5, а f это правая часть уравнения \eqref{mater_balance}. Тогда s-стадийный метод Рунге-Кутты для решения системы \eqref{ode} выписывается следующим образом:
+
+where $x$ in our case is the vector of concentrations of reaction substances of dimension 5, and $f$ is the right-hand side of the equation \eqref{mater_balance}. Then the $s$-stage Runge-Kutta method for solving the \eqref{ode} system is written as follows:
+
+\begin{equation}\label{runge}
+\begin{cases}
+X_i = x_n + h \sum\limits_{j=1}^s a_{ij} f(X_j, t_n + c_j h) , 1 \le i \le s, 
+\\
+x_{n+1} = x_n + h \sum\limits_{i=1}^s b_i f (X_i, t_n + c_i h),
+\end{cases}
+\end{equation}
+
+%где $x_n$, $x_{n+1}$, $X_i$ -- приближенные решения системы \eqref{ode} в моменты времени $t_n$, $t_{n+1} = t_n + h$, $t_n + c_i h$. Коэффициенты  методов  Рунге-Кутты  обычно  записывают  в  виде таблицы Бутчера:  
+
+where $x_n$, $x_{n+1}$, $X_i$ are approximate solutions of the \eqref{ode} system at time points $t_n$, $t_{n+1} = t_n + h$, $t_n + c_i h$. The coefficients of the Runge-Kutta methods are usually written in the form of a Butcher table:
+
+\begin{equation}\label{butcher}
+\begin{array}{c|cccc}
+c_1 & a_{11} & a_{12} & ... & a_{1s} \\
+c_2 & a_{21} & a_{22} & ... & a_{2s} \\
+... & ... & ... & ... & ... \\
+c_s & a_{s1} & a_{s2} & ... & a_{ss} \\
+\hline
+ & b_{1} & b_{2} & ... & b_{s} \\
+\end{array}
+\end{equation}
+
+% Таблица  Бутчера  содержит  векторы  b  и  с,  состоящие  из коэффициентов  bi  и  ci  соответственно  и  матрицу  A  размерностью $s \times s$, включающую  коэффициенты  aij. 
+%Метод Радо-IIA пятого порядка (Radau 5):
+
+The Butcher table contains the vectors $b$ and $c$, consisting of the coefficients $b_i$ and $c_i$, respectively, and the matrix $A$ of dimension $s \times s$, including the coefficients $a_{ij}$.
+
+Fifth-order Rado-IIA method (Radau 5):
+
+\begin{equation}\label{radau}
+\begin{array}{c|ccc}
+\dfrac{4 - \sqrt{6}}{10} & \dfrac{88 - 7\sqrt{6}}{360} & \dfrac{296 - 169\sqrt{6}}{1800} & \dfrac{-2 + 3\sqrt{6}}{225} \\
+\dfrac{4 + \sqrt{6}}{10} & \dfrac{296 + 169\sqrt{6}}{1800} & \dfrac{88 + 7\sqrt{6}}{360} & \dfrac{-2 - 3\sqrt{6}}{225} \\
+1 & \dfrac{16 - \sqrt{6}}{36} & \dfrac{16 + \sqrt{6}}{36} & \dfrac{1}{9} \\
+\hline
+& \dfrac{16 - \sqrt{6}}{36} & \dfrac{16 + \sqrt{6}}{36}  & \dfrac{1}{9} \\
+\end{array}
+\end{equation}
+
+Determining the kinetic parameters of reaction stages by comparing calculated values of substance concentrations and experimental results is an inverse problem of chemical kinetics. The mathematical problem is to minimize the functional of the deviation between calculated and experimental values. The functional of minimizations determined as the sum of absolute deviations between calculated and experimental concentrations:
+
+\begin{equation}\label{func}
+F = \sum\limits_{i=1}^M \sum\limits_{j=1}^N \left| x_{ij}^{calc} - x_{ij}^{exp} \right| \rightarrow \min,
+\end{equation}
+
+where $x_{ij}^{calc}$ and $x_{ij}^{exp}$ are calculated and experimental values of component concentrations; $M$ is the number of measuring points; $N$ is the number of substances involved in the reaction.
 
 \section{Parallel Global Search Algorithm}\label{Sec_GSA}
 
@@ -89,9 +191,7 @@ with the constant $L, \; L<\infty,$ unknown a priori.
 The assumption of the objective function to be Lipschitzian is typical of many approaches to the development of the deterministic global optimization algorithms.
 The first methods of Lipschitz optimization were proposed in the early 1970s \cite{Piyavskii1972,Shubert1972}. Since that time, this line of research has continued to develop actively \cite{Evtushenko2013,Zilinskas2010,Pinter1996,Jones2009}.
 
-Currently, nature-inspired algorithms are widely used for solving optimization problems with the black-box objective functions; for example, see \cite{Yang2013,Gendreau2010,Eiben2015}. Such algorithms, in one way or another, employ the ideas of random search. Due to simple implementation and use, they have become very popular. However, these algorithms are inferior to the deterministic counterparts in terms of quality \cite{Kvasov2018,Sergeyev2018} (e.g., measured by the number of correctly solved problems from a certain
-set).
-
+Currently, nature-inspired algorithms are widely used for solving optimization problems with the black-box objective functions; for example, see \cite{Yang2013,Gendreau2010,Eiben2015}. Such algorithms, in one way or another, employ the ideas of random search. Due to simple implementation and use, they have become very popular. However, these algorithms are inferior to the deterministic counterparts in terms of quality \cite{Kvasov2018,Sergeyev2018} (e.g., measured by the number of correctly solved problems from a certain set).
 
 One of the efficient deterministic methods for solving multiextremal optimization problems is \textit{the information-statistical global search algorithm} \cite{Strongin2000}. This method initially proposed for solving unconstrained optimization problems was successfully generalized to the classes of optimization problems with non-convex constraints and multicriteria optimization problems. For different versions of the algorithm, parallelization methods taking into account the architecture of modern computing systems were also suggested \cite{Barkalov2016,globalizerSystem,Strongin2018}.%поставить ссылку
 
@@ -166,32 +266,50 @@ x^{k+j} = \frac{x_{t_j}+x_{t_j-1}}{2} - \mathrm{sign}(z_{t_j}-z_{t_j-1})\frac{1}
 \end{enumerate}
 
 The algorithm stops if condition $\Delta_{t_j}<\epsilon$ is satisfied for at least one index $t_j, 1 \leq j \leq p$ ; here $\epsilon>0$ is the predefined accuracy. 
-%Также алгоритм останавливается, если превышено заданное при запуске число испытаний $K_{max}$.
 
+%Russian
+Также алгоритм останавливается, если превышено заданное при запуске число испытаний $K_{max}$.
 The considered variant of the parallelization is \textit{synchronous}, when the transition to the next iteration is performed after full termination of the current one, i.e., after completing the last trial of the current iteration.
-% Конкретная реализация данной схемы распараллеливания будет зависеть от архитектуры вычислительной системы, а также от требований к программному обеспечению, необходимому для вычисления значений целевой функции задачи. В данном исследовании проведение испытаний требовало решения жесткой системы ODE (для ее решения был использован метод Radau IIA из бибилиотеки SciPy языка Python). Поэтому распараллеливание было ораганизовано на CPU с использованием технологии MPI. В одном (master) процессе работал алгоритм глобального поиска; остальные (slave) процессы проводили параллельные испытания в рамках выполнения шага 5 алгорита. Объем передаваемых данных между процессами будет небольшим: требуется лишь разослать координаты точек испытаний и затем собрать вычисленные значения целевой функции в этих точках. Одновременно с этим процесс проведения испытания достаточно трудоемкий (время проведения одного испытания занимает не менее 1 сек.), что значительно превышает время передачи данных между процессами. 
+Конкретная реализация данной схемы распараллеливания будет зависеть от архитектуры вычислительной системы, а также от требований к программному обеспечению, необходимому для вычисления значений целевой функции задачи. В данном исследовании проведение испытаний требовало решения жесткой системы ODE (для ее решения был использован метод Radau IIA). Поэтому распараллеливание было организовано на CPU с использованием технологии MPI. В одном (master) процессе работал алгоритм глобального поиска; остальные (slave) процессы проводили параллельные испытания в рамках выполнения шага 5 алгоритма. Объем передаваемых данных между процессами был небольшим: требовалось лишь разослать координаты точек испытаний и затем собрать вычисленные значения целевой функции в этих точках. Одновременно с этим время проведения одного испытания составляло не менее 1 сек., что значительно превышает время передачи данных между процессами. Тем самым, накладные расходы на передачу данных не оказывали существенного влияния на эффективность распараллеливания.
 
 
 \section{Numerical Experiments}\label{Sec_Exp}
 
-The numerical experiments were carried out using the Lobachevsky supercomputer (Lobachevsky State University of Nizhny Novgorod). 
-%Указать актуальную конфигурацию
-%Each supercomputer node included two quad-core processors Intel Xeon X5570, two NVIDIA Tesla X2070 and 12 Gb RAM.
-%Указать актуальное программное обеспечение
-%To build the program for running on the Lobachevsky supercomputer, the GCC 4.3.0 compiler, CUDA 6.5 and Intel MPI 2017 were used.
-%Для вычисления значений целевой функции задачи использовался Python .
+Numerical experiments were performed on the Lobachevsky supercomputer of the University of Nizhni Novgorod (operating system -- CentOS 7.2, control system -- SLURM). One supercomputer node has 2 Intel Sandy Bridge E5-2660 2.2 GHz processors, 64 Gb RAM. The CPU is 8-core (i.e. a total of 16 CPU cores are available on the node). The numerical experiments were performed using the Globalizer system \cite{globalizerSystem}.
+To build the system for running on the Lobachevsky supercomputer, the GCC 5.5.0 compiler and Intel MPI 2017 were used.
 
-%Parallel global search algorithm запускался со следующими параметрами: параметр надежности $r=3$, точность поиска $\epsilon = 0.01$, плотность построения развертки $m=10$, максимальное число испытаний $K_{max}=1000$. После завершения работы parallel global search algorithm найденное решение уточнялось с помощью локального поиска, использовался Hooke--Jeeves method \cite{HookJeeves}. Точность локального поиска составляла $\epsilon = 0.001$. 
+%Russian
+Для решения жесткой системы уравнений, возникающей при вычислении значений целевой функции, использовался метод Radau из библиотеки SciPy, Python 3.9.
+Global search algorithm запускался со следующими параметрами: параметр надежности $r=5$, точность поиска $\epsilon = 0.01$, плотность построения evolvent $m=10$, максимальное число испытаний $K_{max}=5000$. После завершения работы алгоритма найденное решение уточнялось с помощью локального поиска, использовался Hooke--Jeeves method \cite{HookJeeves}. Точность локального поиска составляла $\epsilon = 0.001$. 
+Для оценки эффективности распараллеливания global search algorithm запускался в последовательном и паралелльном режимах, максимальное число задействованных вычислительных узлов составляло 20, соответственно, максимальное число задействованных процессоров было 40.
+На Fig.~\ref{fig_time},\ref{fig_speedup} приведены графики, отражающие время и ускорение параллельного алгортима в зависимости от числа процессоров; время работы приведено в часах.
 
-%Далее - описать параллельный запуск и его результаты, например, в виде таблицы с ускорением
+\begin{figure}[ht]
+\center{\includegraphics[width=0.8\linewidth]{time.pdf}}
+\caption{The parallrl algorithm running time}
+\label{fig_time}
+\end{figure}
 
-%Затем - проинтерпретировать результаты с содержателной точки зрения
+
+\begin{figure}[ht]
+\center{\includegraphics[width=0.8\linewidth]{speedup.pdf}}
+\caption{Speedup of the parallel algorithm}
+\label{fig_speedup}
+\end{figure}
 
 
 
-\section{Conclusion}
 
-%планы дальнейших работ - реализация метода решения системы 
+\section{Conclusion }
+
+
+%Russian
+В планы дальнейших работ входит также и повышение эффективности распараллеливания используемого метода. Относительно невысокие показатели ускорения при решении данной задачи объясняются двумя обстоятельствами. Во-первых, при реализации параллельного алгоритма была применена синхронная схема распараллеливания. Управляющий процесс (в котором работал метод оптимизации) при выполнении  шага 5 алгоритма ожидал окончания проведения всех испытаний, проводимых подчиненными процессами. Тогда как в рассматриваемой задаче время проведения одного испытания (как было экспериментально установлено) варьировалось от 1 до 40 секунд в зависимости от конкретных значений параметров. Возможный путь к повышению эффективности распаралелливания - реализация асинхронной схемы проведения испытаний на шаге 5 алгоритма. 
+В этом случае результаты испытания, полученные в одном из подчиненных процессов, могут быть отправлены для обработки в управляющий процесс немедленно, без ожидания окончания других испытаний. После чего подчиненный процесс получает от управляющего процесса новую точку, в которой проводит очередное испытание. Асинхронная схема распараллеливания, теоретически, способна обеспечить полную загрузку задействованных вычислительных ресурсов даже в том случае, когда время выполнения испытаний различно в разных точках области поиска. 
+
+Во-вторых, при масштабном распараллеливании "узким местом" становится локальный поиск, который выполняется для уточнения решения после завершения фазы глобального поиска. Локальный поиск требует незначительного (по сравнению с глобальным) числа trials, но эти испытания выполняются последовательно. И при паралелльном запуске это незначительное число последовательных испытаний становится сопоставимым с числом параллельных итераций глобального поиска. 
+В дальнейшем планируется использовать параллельную реализацию метода локального поиска на завершающем этапе работы, что способно повысить эффективность распараллеливания в целом.
+
 
 
 \medskip
