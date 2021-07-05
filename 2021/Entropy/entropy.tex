@@ -275,7 +275,7 @@ z_k^\ast=\min_{0\leq i \leq k}\varphi(x^i), \ x_k^\ast=\arg \min_{0\leq i \leq
 %Пример работы алгоритма - функция Хилла. Эту же задачу надо будет показать и в след.разделе
 
 
-\subsection{Machine Learning Regression как инструмент для выделения областей притяжения локальных экстремумов}
+\subsection{Machine Learning Regression как инструмент для выделения областей притяжения локальных экстремумов}\label{TreeGSA}
 
 Функции, рассматриваемые в рамках данного исследования, принадлежат классу липшицевых функций. Поэтому классические методы регрессии (например, полиномиальная регрессия, когда функция приближается полиномом заданной степени) не будут хорошо соответствовать поведению функции. 
 
@@ -296,13 +296,59 @@ z_k^\ast=\min_{0\leq i \leq k}\varphi(x^i), \ x_k^\ast=\arg \min_{0\leq i \leq
 	\item Любому значению, попадающему в область $D_j$, т.е. $x \in D_j$, ставится в соответствие среднее значение $c_j$ по значениям training trials, попавших в эту область.
 \end{itemize}
 
-Фактически, деревья решений представляют модель функции вида
+Фактически, деревья решений строят модель функции вида
 \begin{equation}\label{dtree}
 f(x) = c_j, \; x\in D_j.
 \end{equation}
  
 Указанная модель является, с одной стороны, довольно простой, а с другой стороны, адекватно отражает интересующие нас свойства функции (наличие или отсутствие локальных минимумов). Выделение областей притяжения локальных минимумов с использованием модели (\ref{dtree}) можно организовать следующим образом.
-%Здесь - описание алгоритма выделения локальных минимумов, с примером на Шекеле.
+%Здесь - описание алгоритма выделения локальных минимумов, с иллюстрацией на функции Шекеля.
+
+Пусть $x^{k+1}$ -- текущая точка испытания. Для данной точки ищется номер $j$, такой что $x^{k+1} \in D_j$ 
+Далее сравниваются значения $c_j$, соответствующие соседним подобластям. Если выполняется одно из условий
+\begin{gather}\label{LocalPointC}
+c_{j} \leq c_{j+1} \leq c_{j+2} \leq c_{j+3} \leq c_{j+4}, \; j=1, \\ \nonumber
+c_{j-1} \geq c_{j} \leq c_{j+1} \leq c_{j+2} \leq c_{j+3}, \; j=2,  \\ \nonumber
+c_{j-2} \geq c_{j-1} \geq c_{j} \leq c_{j+1} \leq c_{j+2}, \; 3 \leq j \leq J-2;\\
+c_{j-3} \geq c_{j-2} \geq c_{j-1} \geq c_{j} \leq c_{j+1}, \; j=J-1, \\ \nonumber
+c_{j-4} \geq c_{j-3} \geq c_{j-2} \geq c_{j-1} \geq c_{j}, \; j=J, \nonumber
+\end{gather}
+то область $D_j$ считается областью притяжения локального минимума. В ней можно запускать локальный поиск.
+
+%\begin{equation}\label{LocalPointC}
+%c_{j-t_1} > ... > c_{j-1} > c_{j} < c_{j+1} < c_{j+t_2}
+%\end{equation}
+%\begin{equation}\label{LocalPointT}
+ %t_1 + t_2 + 1  = T,
+%\end{equation}
+%где $T$ -- параметр метода, экспериментально было выбрано значение 5.
+%Тогда область $D_j$ является областью притяжения локального минимума.
+
+Для того, чтобы использовать выделение локальных минимумов в алгоритме глобального поиска, описанном в subsection \ref{CoreGSA}, всем точкам получаемым в ходе работы алгоритма присваивается метка q, со значениями global - по умолчанию, означает что точка получена в результате описанного алгоритма глобального поиска, local - точка получена в результате работы локального метода, localMin - точка является найденным локальным минимумом. Индексы метки соответствуют индексам координаты $x$, т.е. у точки  $x^{k+1}$ метка $q^{k+1}$ и так далее.
+
+Также алгоритм необходимо дополнить следующими шагами. 
+
+Step 6. Если хотя бы одна из точек $x_{t-1}$ или $x_t$ имеет метку local или localMin, то точка $x^{k+1}$ исключается из поисковой информации и переходим к проверке критерия остановки. Иначе переходим на Step 7.
+
+Step 7. Построить дерево решений на основе результатов выполненных испытаний, и получить соответствующую кусочно линейную аппроксимацию, которая каждой подобласти $D_1, D_2, ..., D_J$ сопоставляет значение $с_1, с_2, ..., с_J$.
+
+Step 8. Для точки $x^{k+1}$ текущего испытания найти $j$ такой, что $x^{k+1} \in D_j$ и проверить выполнимость условия (\ref{LocalPointC}). Если условие (\ref{LocalPointC}) выполняется, запустить локальный поиск из точки $x^{k+1}$. Все $N_{local}$ точек полученных локальным методом сохраняются и получают номера $x^{k+2}, ..., x^{k+N_{local}+1}$  и используются на последующих итерациях алгоритма. Также эти точки получают метку local, $q^{i}=local, i = k+2, ... , k+N_{local}+1 $. Точка соответствующая найденному локальному минимуму получает метку localMin.
+
+
+В качестве локального алгоритма на шаге 7 может использоваться любой из локальных методов нулевого порядка, например,  golden section search or parabolic interpolation \cite{Press}.
+
+Критерий остановки будет выглядеть следующим образом:
+ Алгоритм прекращает свою работу при выполнении одного из условий
+ 
+1. $\Delta_t<\epsilon$; здесь $t$ из (\ref{MaxR}), а $\epsilon>0$ есть заданная точность. 
+ 
+2. $|x^{k+1}_i-x_{t-1}|<\epsilon$ и $x_{t-1}$ имеет метку localMin.
+
+3. $|x^{k+1}_i-x_{t}|<\epsilon$ и $x_{t}$ имеет метку localMin.
+
+
+%Нужно еще описать исключение интервалов из глоабльно поиска, и также - новый критерий остановки.
+
 
 
 \subsection{Адаптивная схема редукции размерности }
@@ -348,7 +394,7 @@ f(x) = c_j, \; x\in D_j.
 	\item 
 для вычисления значения функции $i$-го уровня из (\ref{nested_i}) порождается новая задача уровня $i+1$, в которой проводится только одно испытание, после чего новая порожденная задача включается в множество уже имеющихся задач, подлежащих решению;
 	\item 
-	итерация глобального поиска состоит в выборе одной (наиболее перспективной) задачи из множества имеющихся задач, в которой проводится одно испытание; точка проведения нового испытания определяется в соответствии с базовым алгоритмом глобального поиска из subsection \ref{CoreGSA};
+	итерация глобального поиска состоит в выборе одной (наиболее перспективной) задачи из множества имеющихся задач, в которой проводится одно испытание; точка проведения нового испытания определяется в соответствии с базовым алгоритмом глобального поиска из subsection \ref{CoreGSA} или же модифицированным алгоритмом из subsection \ref{TreeGSA};
 	\item
 в качестве минимальных значений функций из (\ref{nested_i}) используются их текущие оценки, полученные на основе накопленной поисковой информации.
 \end{itemize}
@@ -364,6 +410,8 @@ f(x) = c_j, \; x\in D_j.
 
 
 \section{Conclusions}
+
+
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Materials and Methods}
@@ -501,7 +549,7 @@ This section is not mandatory, but can be added to the manuscript if the discuss
 % \supplementary{The following are available at \linksupplementary{s1}, Figure S1: title, Table S1: title, Video S1: title. A supporting video article is available at doi: link.} 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\authorcontributions{For research articles with several authors, a short paragraph specifying their individual contributions must be provided. The following statements should be used ``Conceptualization, X.X. and Y.Y.; methodology, X.X.; software, X.X.; validation, X.X., Y.Y. and Z.Z.; formal analysis, X.X.; investigation, X.X.; resources, X.X.; data curation, X.X.; writing---original draft preparation, X.X.; writing---review and editing, X.X.; visualization, X.X.; supervision, X.X.; project administration, X.X.; funding acquisition, Y.Y. All authors have read and agreed to the published version of the manuscript.'', please turn to the  \href{http://img.mdpi.org/data/contributor-role-instruction.pdf}{CRediT taxonomy} for the term explanation. Authorship must be limited to those who have contributed substantially to the work~reported.}
+\authorcontributions{Conceptualization and methodology, K.B.; software and validation, I.L.; formal analysis, K.B.; investigation, I.L.; data curation, I.L.; writing---original draft preparation, K.B.; writing---review and editing, K.B.; visualization, I.L.; funding acquisition, K.B. All authors have read and agreed to the published version of the manuscript.}
 
 \funding{This research was funded by the Ministry of Science and Higher Education of the Russian Federation, agreement number 075-15-2020-808.}
 
