@@ -4,13 +4,18 @@
 \usepackage[numbers]{natbib}
 \usepackage{rotating}
 \usepackage{graphicx}
-
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{positioning}
+\usetikzlibrary{patterns}
+\usetikzlibrary{arrows,decorations.markings}
+\usetikzlibrary{spy}
 
 % Document starts
 \begin{document}
 
 % Title portion
-\title{Modelling and Optimization of Injector Parameters with OpenFOAM and Globalizer Tools}
+\title{Simulation and Optimization of Injector Parameters with OpenFOAM and Globalizer Tools}
 
 \author[aff1]{Konstantin Barkalov\corref{cor1}}
 \author[aff1]{Ilya Lebedev}
@@ -24,7 +29,7 @@
 \maketitle
 
 \begin{abstract}
-The paper presents the results of solving the problem of modelling and research of processes taking place in a fuel system injector. Modelling has been carried using the tools of the OpenFOAM system. The problem of differential pressure minimization at the injector inlet and outlet was set and solved. This problem was a Lipschitz optimization problem with a black-box type objective function. To solve it, we used an efficient global search algorithm implemented in the Globalizer system.
+The paper presents the results of solving the problem of simulation and research of processes taking place in a fuel system injector. Simulation has been carried using the tools of the OpenFOAM system. The problem of differential pressure minimization at the injector inlet and outlet was set and solved. This problem was a Lipschitz optimization problem with a black-box type objective function. To solve it, we used an efficient global search algorithm implemented in the Globalizer system.
 \end{abstract}
 
 % Head 1
@@ -32,9 +37,9 @@ The paper presents the results of solving the problem of modelling and research 
 
 The problem of designing new engineering objects is inseparably connected with the problem of selecting the best values of item parameters, because the choice of specific values of parameters (with a fixed overall structure) can significantly affect its characteristics.
 
-As engineering objects  and conditions of their functioning become more complicated, it results in a significant increase in the complexity of corresponding mathematical models and numerical methods for their analysis. Nowadays, the main (and often the only possible) tool for such analysis is supercomputer simulation of the object's behaviour. For this purpose, CAD/CAM/CAE-systems are widely used. A well-known example of open source software of this kind is OpenFOAM, an open platform for numerical modelling of continuum mechanics problems \cite{OpenFOAM}).
+As engineering objects and conditions of their functioning become more complicated, it results in a significant increase in the complexity of corresponding mathematical models and numerical methods for their analysis. Nowadays, the main (and often the only possible) tool for such analysis is supercomputer simulation of the object's behavior. For this purpose, CAD/CAM/CAE-systems are widely used. A well-known example of open source software of this kind is OpenFOAM, an open platform for numerical simulation of continuum mechanics problems \cite{OpenFOAM}).
 
-In this study, we used the OpenFOAM system to simulate a fuel injector. In the simulation process, the pressure drop at the inlet and outlet of the injector was calculated. The problem of minimizing the pressure drop in order to save fuel by reducing the concentration of combustible substance in the mixture was set and solved. The parameters used in the problem included the width of the gap between the injector inlet and the injector outlet.
+In this study, we used the OpenFOAM system to simulate a fuel injector. In the simulation process, the pressure drop at the inlet and outlet of the injector was calculated. The problem of minimizing the pressure drop in order to save fuel by reducing the concentration of combustible substances in the mixture after leaving the ejector was set and solved. The parameters used in the problem included the width of the gap between the injector inlet and the injector outlet.
 
 \section{GLOBAL SEARCH ALGORITHM}
 
@@ -92,15 +97,13 @@ A detailed description of the algorithm, its various modifications (including pa
 
 The calculations were performed on the computer cluster of the Institute for Systems Programming and the UniHub web-lab \cite{UniHub}. The web-lab architecture is based on the cloud computing model where resources (servers, networks, storage systems, applications, etc.) are provided remotely as a set of different-level services with on-demand servicing.
 
-To carry out numerical experiments, we used the OpenFOAM software package \cite{OpenFOAM}. It is a set of tools for representing, discretizing and manipulating hydrodynamic fields and solving systems of algebraic equations. The OpenFOAM serves to perform a complete cycle of numerical solution of continuum mechanics problems using the finite volume method: from mathematical formulation by setting initial conditions, boundary conditions, computational geometry and computational grid to representation of the results in the form of hydrodynamic fields.
+To carry out numerical experiments, we used the OpenFOAM software package \cite{OpenFOAM}. It is a set of tools for representing, discretizing and manipulating hydrodynamic fields. OpenFOAM also provides methods for solving systems of algebraic equations. The OpenFOAM serves to perform a complete cycle of numerical solution of continuum mechanics problems using the finite volume method: from the mathematical formulation by setting initial conditions, boundary conditions, computational geometry, and computational grid to a representation of the results in the form of hydrodynamic fields.
 
-In our particular case, each iteration of the optimal solution search process was a separate numerical calculation of the hydrodynamic fields. The injector modelling was divided into several key steps.
-
-In our particular case, each iteration of the optimal solution search process was a separate numerical calculation of the hydrodynamic fields. The injector modelling was divided into several key steps:
+In our particular case, each iteration of the optimal solution search process was a separate numerical calculation of the hydrodynamic fields. The injector simulation was divided into several key steps:
 \begin{enumerate}
 \item Mathematical formulation. This includes a procedure for selecting equations describing the dynamics of a fluid or gas, setting boundary conditions and initial conditions. It does not change from iteration to iteration.
-\item Parametrization. Selection of varying parameters that will vary from iteration to iteration.
-\item Generating the geometry and the computational grid. In line with parametrization, a procedure for renewing the geometry and computational grid is performed.
+\item Parameterization. Selection of varying parameters that will vary from iteration to iteration.
+\item Generating the geometry and the computational grid. In line with Parameterization, a procedure for renewing the geometry and computational grid is performed.
 \item Calculation of hydrodynamic fields. At each iteration, the system of equations describing fluid dynamics is solved numerically.
 \item Interpretation. Physical interpretation of the results after the optimization procedure.
 \end{enumerate}
@@ -112,7 +115,7 @@ The fluid dynamics for the problem described in this paper is defined by the Nav
 \[
 \frac{\partial \vec{U}}{\partial t} + \nabla \cdot \left( \vec{U} \otimes \vec{U}\right) - \nabla \cdot v \left( \nabla \vec{U} + (\nabla \vec{U})^T\right) = - \frac{1}{\rho} \nabla p,
 \]
-where $\vec{U}$ is the velocity vector, $v$  is the liquid viscosity (assumed constant), $p$  is the overpressure, $\rho$ is the density of the liquid. In this system of equations, there are two unknown variables: $\vec{U}$  and $p$. For each of these variables, initial conditions are set: 
+where $\vec{U}$ is the velocity vector, $\nu$  is the liquid viscosity (assumed constant), $p$  is the overpressure, $\rho$ is the density of the liquid. In this system of equations, there are two unknown variables: $\vec{U}$  and $p$. For each of these variables, initial conditions are set: 
 \[
 \vec{U}(x,y) = 0,
 \]
@@ -145,7 +148,68 @@ At the exit of the computational domain:
 The geometric representation of the computational domain is shown in Figure 1, with the parameterization points highlighted in red. The geometry is parametrized by increasing the distance between the red points symmetrically with respect to the channel centreline. 
 
 \begin{figure}%[ht]
-\includegraphics[width=1.0\linewidth]{fig1.png}
+%\includegraphics[width=1.0\linewidth]{fig1.png}
+
+    \centering
+    \begin{tikzpicture}[scale=0.5,>=stealth]
+         \draw (-5,-2.5,0)--(-15,-2.5,0)--(-15,2.5,0)--(-5,2.5,0.0);%--(0,0.5,0.0)--(5,2.5,0)--(15,2.5,0)--(15,-2.5,0);
+         \draw (-5,-2.5) .. controls (0,0) .. (5,-2.5);
+         \draw (5,2.5,0)--(15,2.5,0)--(15,-2.5,0)--(5,-2.5,0.0);
+         \draw (-5,2.5) .. controls (0,0) .. (5,2.5);
+         
+         \filldraw [black] (-5,-2.5,0) circle (4pt);
+         \filldraw [black] (-15,-2.5,0) circle (4pt);
+         \filldraw [black] (-15,2.5,0) circle (4pt);
+         \filldraw [black] (-5,2.5,0.0) circle (4pt);
+         
+         \filldraw [black] (5,2.5,0) circle (4pt);
+         \filldraw [black] (15,2.5,0) circle (4pt);
+         \filldraw [black] (15,-2.5,0) circle (4pt);
+         \filldraw [black] (5,-2.5,0.0) circle (4pt);
+         
+         \filldraw [red] (0,0.6,0.0) circle (4pt);
+         \filldraw [red] (0,-0.6,0.0) circle (4pt);
+         
+         \draw [->,ultra thick] (-16,0,0) --node[above right]{$x$} (-13,0,0);
+         \draw [->,ultra thick] (-16,0,0) --node[above left]{$y$} (-16,3,0);
+         
+         \draw [<->, thick] (-15,-4,0)--node[below]{$6\;\;cm$} (15,-4,0);
+         
+         \draw [dashed] (-15,-2.5) -- (-15,-5);
+         \draw [dashed] (15,-2.5) -- (15,-5);
+         
+         \draw [dashed] (15,-2.5) -- (16.5,-2.5);
+         \draw [dashed] (15,2.5) -- (16.5,2.5);
+         
+         \draw [<->, thick] (16,-2.5,0)--node[above, rotate=-90]{$0.5\;\;cm$} (16,2.5,0);
+         
+         \draw[dashed] (-17,0,0)--(17,0,0);
+         
+         \draw[opacity=0.2] (-5,2.5) .. controls (0,1) .. (5,2.5);
+         \draw[opacity=0.2] (-5,-2.5) .. controls (0,-1) .. (5,-2.5);
+         
+         \filldraw [red,opacity=0.2] (0,1.4,0.0) circle (4pt);
+         \filldraw [red,opacity=0.2] (0,-1.4,0.0) circle (4pt);
+         
+         \draw[opacity=0.2] (-5,2.5) .. controls (0,2) .. (5,2.5);
+         \draw[opacity=0.2] (-5,-2.5) .. controls (0,-2) .. (5,-2.5);
+         
+         \filldraw [red,opacity=0.2] (0,2.15,0.0) circle (4pt);
+         \filldraw [red,opacity=0.2] (0,-2.15,0.0) circle (4pt);
+         
+         \draw[opacity=0.2] (-5,2.5) .. controls (0,3) .. (5,2.5);
+         \draw[opacity=0.2] (-5,-2.5) .. controls (0,-3) .. (5,-2.5);
+         
+         \filldraw [red,opacity=0.2] (0,2.9,0.0) circle (4pt);
+         \filldraw [red,opacity=0.2] (0,-2.9,0.0) circle (4pt);
+         
+        \draw[opacity=0.2] (-5,2.5) .. controls (0,4) .. (5,2.5);
+        \draw[opacity=0.2] (-5,-2.5) .. controls (0,-4) .. (5,-2.5);
+         
+        \filldraw [red,opacity=0.2] (0,3.65,0.0) circle (4pt);
+        \filldraw [red,opacity=0.2] (0,-3.65,0.0) circle (4pt);
+         
+    \end{tikzpicture}
 \caption{Schematic representation of the computational domain, with the geometry parameterization points marked in red and the black points independent of the optimization iterations. The grey lines show the possible deformation of the geometry.}
 \label{fig}
 \end{figure}
