@@ -1,0 +1,101 @@
+\documentclass[12pt]{article}
+
+
+
+\usepackage[cp1251]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{epsfig,graphicx}
+
+\usepackage{graphicx}
+\usepackage{marvosym}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{cite}
+
+\usepackage{url}
+\usepackage{hyperref}
+\def\UrlFont{\rmfamily}
+
+\def\orcidID#1{\unskip$^{[#1]}$}
+\def\letter{$^{\textrm{(\Letter)}}$}
+
+\oddsidemargin 0cm
+\topmargin 0cm
+\textwidth=16cm
+\textheight=23cm
+\thispagestyle{empty}
+
+\begin{document}
+\renewcommand{\refname}{}%<----------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{center}
+{\large\bf
+Parallel Global Search Algorithm for Optimization of the Kinetic Parameters of Chemical Reactions\bigskip\\} %<== put the title here
+Irek Gubaydullin$^{1,2}$,
+Leniza Enikeeva$^{2,3}$,
+Konstantin Barkalov$^4$,
+Ilya Lebedev$^4$\medskip\\       %<== put the authors here
+{\em $^1$Institute of Petrochemistry and Catalysis – Subdivision of the Ufa Federal Research Centre of RAS, Ufa, Russia, $^2$Ufa State Petroleum Technological University, Ufa, Russia, $^3$Novosibirsk State University, Novosibirsk, Russia, $^4$Lobachevsky State University of Nizhny Novgorod, Nizhny Novgorod, Russia\\}             %<== put affiliation(s) here
+\bigskip
+\end{center}
+
+
+% <==Put your text here.
+
+Одним из направлений лаборатории математической химии Института нефтехимии и катализа УФИЦ РАН является исследование химических реакций методами математического моделирования. Кинетическая модель является основой математического моделирования химических реакций и исходным уровнем при математическом моделировании химических реакторов. С математической точки зрения обратная задача химической кинетики представляет собой задачу оптимизации, поэтому актуальной является задача выбора метода оптимизации.  В данной работе рассматривается решение этой задачи параллельным алгоритмом глобальной оптимизации. Теоретическим базисом данного алгоритма является информационно-статистический подход, детально изложенный в \cite{Strongin2000}. Разработанный алгоритм основан на редукции исходной многомерной задачи к эквивалентной ей одномерной задаче с последующим ее решением эффективными методами оптимизации функций одной переменной. Вопросы распараллеливания алгоритма на разных архитектурах рассмотрены в \cite{Barkalov2016}. 
+
+Исследуемый процесс представляет собой преобразование пропана в газ, богатый метаном, на никелевом катализаторе, который является промышленно важным химическим процессом \cite{Uskov2019, Uskov2020}. Экспериментальные данные по предварительному риформингу пропана были получены из работы \ cite {Uskov2020}. Схема реакции состоит из двух реакций: паровая конверсияпропана и метанирование CO$_2$ \cite{Uskov2017}
+\begin{gather}
+C_3H_8 + 6H_2O \rightarrow 10H_2 + 3CO_2 \label{reac_ref}\\
+CO_2 + 4H_2 \rightleftharpoons CH_4 + 2H_2O \label{reac_met},
+\end{gather}
+
+Математическая модель задач химической кинетики представляет собой систему дифференциальных уравнений, которая описывает изменения концентраций веществ во времени в соответствии со скоростью стадий реакции. Решение системы обыкновенных дифференциальных уравнений представляет собой вектор рассчитанных концентраций компонентов реакции, которые затем сравниваются с экспериментальными данными.
+Математическая задача - минимизировать функционал отклонения расчетных значений от экспериментальных. Целевая функция определяется как сумма абсолютных отклонений расчетных и экспериментальных концентраций:
+
+\begin{equation}\label{func}
+F = \sum\limits_{i=1}^M \sum\limits_{j=1}^N \left| x_{ij}^{calc} - x_{ij}^{exp} \right| \rightarrow \min,
+\end{equation}
+
+где $ x_ {ij} ^ {calc} $ и $ x_ {ij} ^ {exp} $ - расчетные и экспериментальные значения концентраций компонентов; $ M $ - количество точек измерения; $ N $ - количество веществ, участвующих в реакции.
+
+
+Таким образом, в результате решения поставленной задачи химической кинетики параллельным методом глобального поиска были рассчитаны кинетические параметры процесса предриформинга пропана на Ni катализаторе.
+
+Для оценки эффективности распараллеливания алгоритм глобального поиска запускался в последовательном и паралелльном режимах, максимальное число задействованных вычислительных узлов составляло 20, соответственно, максимальное число задействованных процессоров (P) было 40. В таблице \ref{table:Acceleration} приведено ускорение полученное при решение задачи.
+
+\begin{table}[]
+	\caption{Ускорение на P процессах }\label{table:Acceleration}
+	\center
+\begin{tabular}{ccc}
+
+         \textbf{P=10} & \textbf{P=20} & \textbf{P=40}  \\
+													
+          5,74  &  8,58  &  15,63  \\
+
+\end{tabular}
+\end{table}
+
+Вычислительные эксперименты проводились на кластере «Лобачевский», Узел кластера состоит из 2-х Intel Sandy Bridge E5-2660 2.2 GHz CPUs, 64 Gb RAM.
+
+\begin{thebibliography}{10}
+
+\bibitem{Strongin2000} Strongin R.G., Sergeyev Y.D. Global optimization with non-convex constraints. Sequential and parallel algorithms, Kluwer Academic Publishers, Dordrecht, {2000}
+
+\bibitem{Barkalov2016} Barkalov, K. and Lebedev, I. Solving multidimensional global optimization problems using graphics accelerators. 
+Communications in Computer and Information Science, volume 687, p. 224-235. 2016
+
+\bibitem{Uskov2019} Uskov, S.I. and Potemkin, D.I. and Kamboj, N. and Snytnikov, P.V. and  Pakharukova,V.P. and Enikeeva, L.V. and Gubaydullin, I.M. and Hussainova, I. Fibrous alumina-based Ni-MOx (M = Mg, Cr, Ce) catalysts for propane pre-reforming. Materials Letters, 	volume = 257, 	p. 126741, 	{2019}
+
+\bibitem{Uskov2020} Uskov, S.I. and Potemkin, D.I. and Enikeeva, L.V. and Snytnikov, P.V. and Gubaydullin, I.M. and Sobyanin, V.A. Propane Pre-Reforming into Methane-Rich Gas over Ni Catalyst: Experiment and Kinetics Elucidation via Genetic Algorithm. Energies, volume = 13, {2020}
+
+\bibitem{Uskov2017} Uskov, S.I. and  Enikeeva, L.V. and Potemkin, D. I. and Belyaev, V. D. and Snytnikov, P.V. and Gubaidullin, I.M. and  Kirillov, V. A. and  Sobyanin, V. A. Kinetics of low-temperature steam reforming of propane in a methane excess on a Ni-based catalyst.Catalysis in Industry. volume = 9, p. 104 -- 109, {2017}
+
+
+\end{thebibliography}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
