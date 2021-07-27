@@ -327,7 +327,7 @@ c_{j-4} \geq c_{j-3} \geq c_{j-2} \geq c_{j-1} \geq c_{j}, \; j=J,
 
 Step 6. Если $q_{t-1} \in \{1,2\}$ или $q_t \in \{1,2\}$, то перейти к проверке критерия остановки. Иначе перейти на Step 7.
 
-Step 7. Построить дерево решений на основе результатов выполненных испытаний, и получить соответствующую кусочно линейную аппроксимацию, которая каждой подобласти $D_1, D_2, ..., D_J$ сопоставляет значение $с_1, с_2, ..., с_J$.
+Step 7. Построить дерево решений на основе результатов выполненных испытаний, и получить соответствующую кусочно линейную аппроксимацию, которая каждой подобласти $D_1, D_2, ..., D_J$ сопоставляет значение $c_1, c_2, ..., c_J$.
 
 Step 8. Для точки $x^{k+1}$ текущего испытания найти номер $j$ такой, что $x^{k+1} \in D_j$ и проверить выполнимость условия (\ref{LocalPointC}). Если условие (\ref{LocalPointC}) выполняется, запустить в области $D_j$ локальный поиск из точки $x^{k+1}$. 
 Результаты всех испытаний, выполненных в процессе работы локального поиска в точках $x^{k+2}, ...,x^{k+k_{local}}$, сохраняются в информационной базе алгоритма и используются на последующих итерациях. 
@@ -343,18 +343,22 @@ Step 8. Для точки $x^{k+1}$ текущего испытания найт
 \end{itemize}
 
 
-Проиллюстрируем работу алгоритма при минимизации двух конкретных многоэкстремальных функций, которые задаются в соответствии с формулами (\ref{shekel}) и (\ref{hill}). 
+Рисунки \ref{fig1} и figure \ref{fig2} иллюстрируют работу алгоритма при минимизации конкретной многоэкстремальной функции, которая задаются в соответствии с формулой (\ref{hill}). При запуске алгоритма использовался параметр $r=2.2$ из (\ref{R}) и значение $\epsilon = 10^{-3}$ в критерии остановки метода.
+
+На рисунке \ref{fig1} изображен график objective function и точки 71 поискового испытания, потребовавшихся GSA для решения задачи с указанной точностью. Наглядно видна концентрация точек в окрестностях локальных минимумов задачи. 
+Рисунок \ref{fig2} соответствуют работе алгоритма GSA-DT. Кроме графика целевой функици на нем изображена кусочно-постоянная аппроксимация вида (\ref{dtree}), построенная на финальной стадии поиска. Черные точки на графике соответствуют фазе глобального поиска, зеленые точки соответствуют работе локального метода. Всего методу GSA-DT потребовалось 49 испытаний для решения задачи; накопление точек испытаний в окрестностях локальных минимумов отсутствует. 
+ 
 %далее нужны иллюстрации
 \begin{figure}[H]
 \label{fig1}
-\includegraphics[width=1.0\linewidth]{hill.png}
-\caption{This is a figure. A caption on a single line should be centered.}
+\includegraphics[width=1.0\linewidth]{HillAGP90.png}
+\caption{Минимизация функции вида (\ref{hill}) с помощью GSA.}
 \end{figure}   
 
 \begin{figure}[H]
 \label{fig2}
-\includegraphics[width=1.0\linewidth]{shekel.png}
-\caption{This is a figure. A caption on a single line should be centered.}
+\includegraphics[width=1.0\linewidth]{HillTree90.png}
+\caption{Минимизация функции вида (\ref{hill}) с помощью GSA-DT.}
 \end{figure}   
 
 
@@ -436,18 +440,18 @@ Numerical experiments were performed on the Lobachevsky supercomputer of the Uni
 
 В таблицах \ref{table:average_Shekel} и \ref{table:average_Hill} приведено число поисковых испытаний, которые в среднем требовалось для минимизации функций Шекеля и Хилла с разной точностью поиска. При этом в скобках в таблице указано число нерешенных задач.
 
-Результаты экспериментов показывают, что при грубой точности решения задачи все методы показывают схожие результаты по числу trials, тогда как при высокой точности решения  алгоритму GSA-DT требуется в 2 раза меньше trials, чем его прототипу. Одновременно GSA-DT превосходит метод DIRECT как по среднему числу search trials, так и по числу корректно решенных задач.
+Результаты экспериментов показывают, что при грубой точности решения задачи все методы показывают схожие результаты по числу trials, тогда как при высокой точности решения  алгоритму GSA-DT требуется в 2 раза меньше trials, чем его прототипу. Одновременно GSA-DT превосходит метод DIRECT как по среднему числу search trials, так и по числу корректно решенных задач. В частности, если использовать точность $\epsilon = 10^{-2}$, то метод DIRECT останавливается слишком рано, и не находит глобального решения во многих задачах. 
 
 \begin{specialtable}[H] 
 	\caption{Среднее число испытаний при минимизации Shekel test functions}\label{table:average_Shekel}
 	\center
-\begin{tabular}{cccccc}
+\begin{tabular}{cccc}
 \toprule
-        & \textbf{0,0001} & \textbf{0,0005} & \textbf{0,001} & \textbf{0,005} & \textbf{0,01} \\
+        & \textbf{$\epsilon = 10^{-4}$} & \textbf{$\epsilon = 10^{-3}$} & \textbf{$\epsilon = 10^{-2}$} \\
 \midrule													
-DIRECT         & 64(99)   &  -   &  34(94)   &  -   &  20(83)    \\
-GSA            & 106  & 64  & 53  & 37  & 31   \\
-GSA-DT         & 49   & 45  & 43  & 38  & 35   \\
+DIRECT         & 64(1) &  34(6)   & 20(17)    \\
+GSA            & 106  & 53  &  31   \\ 
+GSA-DT         & 49   & 43  &  35   \\
 
 \bottomrule
 \end{tabular}
@@ -456,13 +460,13 @@ GSA-DT         & 49   & 45  & 43  & 38  & 35   \\
 \begin{specialtable}[H] 
 	\caption{Среднее число испытаний при минимизации Hill test functions}\label{table:average_Hill}
 	\center
-\begin{tabular}{cccccc}
+\begin{tabular}{cccc}
 \toprule
-                      & \textbf{0,0001} & \textbf{0,0005} & \textbf{0,001} & \textbf{0,005} & \textbf{0,01} \\
+        & \textbf{$\epsilon = 10^{-4}$} & \textbf{$\epsilon = 10^{-3}$} & \textbf{$\epsilon = 10^{-2}$} \\
 \midrule					  
-DIRECT                & 66(88) &  -  &  36(69)  & -  &   20(49)  \\
-GSA                   & 130             & 87              & 75             & 52             & 43            \\
-GSA-DT                & 64              & 60              & 59             & 55             & 50            \\
+DIRECT                & 66(12) & 36(31)  & 20(51)  \\
+GSA                   & 130    & 75      & 43      \\
+GSA-DT                & 64     & 59      & 50      \\
 \bottomrule
 \end{tabular}
 \end{specialtable}
@@ -494,124 +498,6 @@ DiRect                &   39,84(0)  & 29,92
 В таблицах \ref{table:average_GKLS} приведено среднее число итераций полученное на  задачах GKLS, для алгоритмов Direct, АГП, АГП с адаптивной схемой и АГП с адаптивной схемой с использованием локального метода запущенного по результатам работы дерева решений.
 
 
-
-\section{Conclusions}
-
-
- 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Materials and Methods}
-
-Materials and Methods should be described with sufficient details to allow others to replicate and build on published results. Please note that publication of your manuscript implicates that you must make all materials, data, computer code, and protocols associated with the publication available to readers. Please disclose at the submission stage any restrictions on the availability of materials or information. New methods and protocols should be described in detail while well-established methods can be briefly described and appropriately cited.
-
-Research manuscripts reporting large datasets that are deposited in a publicly avail-able database should specify where the data have been deposited and provide the relevant accession numbers. If the accession numbers have not yet been obtained at the time of submission, please state that they will be provided during review. They must be provided prior to publication.
-
-Interventionary studies involving animals or humans, and other studies require ethical approval must list the authority that provided approval and the corresponding ethical approval code.
-\begin{quote}
-This is an example of a quote.
-\end{quote}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Results}
-
-This section may be divided by subheadings. It should provide a concise and precise description of the experimental results, their interpretation as well as the experimental conclusions that can be drawn.
-\subsection{Subsection}
-\subsubsection{Subsubsection}
-
-Bulleted lists look like this:
-\begin{itemize}
-\item	First bullet;
-\item	Second bullet;
-\item	Third bullet.
-\end{itemize}
-
-Numbered lists can be added as follows:
-\begin{enumerate}
-\item	First item; 
-\item	Second item;
-\item	Third item.
-\end{enumerate}
-
-The text continues here. 
-
-\subsection{Figures, Tables and Schemes}
-
-All figures and tables should be cited in the main text as Figure~\ref{fig1}, Table~\ref{tab1}, etc.
-
-%\begin{figure}[H]
-%\includegraphics[width=10.5 cm]{Definitions/logo-mdpi}
-%\caption{This is a figure. Schemes follow the same formatting. If there are multiple panels, they should be listed as: (\textbf{a}) Description of what is contained in the first panel. (\textbf{b}) Description of what is contained in the second panel. Figures should be placed in the main text near to the first time they are cited. A caption on a single line should be centered.\label{fig1}}
-%\end{figure}   
-
-% The MDPI table float is called specialtable
-\begin{specialtable}[H] 
-\caption{This is a table caption. Tables should be placed in the main text near to the first time they are~cited.\label{tab1}}
-%%% \tablesize{} %% You can specify the fontsize here, e.g., \tablesize{\footnotesize}. If commented out \small will be used.
-\begin{tabular}{ccc}
-\toprule
-\textbf{Title 1}	& \textbf{Title 2}	& \textbf{Title 3}\\
-\midrule
-Entry 1		& Data			& Data\\
-Entry 2		& Data			& Data\\
-\bottomrule
-\end{tabular}
-\end{specialtable}
-
-%\begin{listing}[H]
-%\caption{Title of the listing}
-%\rule{\columnwidth}{1pt}
-%\raggedright Text of the listing. In font size footnotesize, small, or normalsize. Preferred format: left aligned and single spaced. Preferred border format: top border line and bottom border line.
-%\rule{\columnwidth}{1pt}
-%\end{listing}
-
-Text.
-
-Text.
-
-\subsection{Formatting of Mathematical Components}
-
-This is the example 1 of equation:
-\begin{equation}
-a = 1,
-\end{equation}
-the text following an equation need not be a new paragraph. Please punctuate equations as regular text.
-%% If the documentclass option "submit" is chosen, please insert a blank line before and after any math environment (equation and eqnarray environments). This ensures correct linenumbering. The blank line should be removed when the documentclass option is changed to "accept" because the text following an equation should not be a new paragraph.
-
-This is the example 2 of equation:
-\end{paracol}
-\nointerlineskip
-\begin{equation}
-a = b + c + d + e + f + g + h + i + j + k + l + m + n + o + p + q + r + s + t + u + v + w + x + y + z
-\end{equation}
-
-% Example of a figure that spans the whole page width (the commands \widefigure and \begin{paracol}{2}, \linenumbers, and\switchcolumn need to be present). The same concept works for tables, too.
-%\begin{figure}[H]	
-%\widefigure
-%\includegraphics[width=15 cm]{Definitions/logo-mdpi}
-%\caption{This is a wide figure.\label{fig2}}
-%\end{figure}  
-\begin{paracol}{2}
-\linenumbers
-\switchcolumn
-
-Please punctuate equations as regular text. Theorem-type environments (including propositions, lemmas, corollaries etc.) can be formatted as follows:
-%% Example of a theorem:
-\begin{Theorem}
-Example text of a theorem.
-\end{Theorem}
-
-The text continues here. Proofs must be formatted as follows:
-
-%% Example of a proof:
-\begin{proof}[Proof of Theorem 1]
-Text of the proof. Note that the phrase ``of Theorem 1'' is optional if it is clear which theorem is being referred to.
-\end{proof}
-The text continues here.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Discussion}
-
-Authors should discuss the results and how they can be interpreted from the perspective of previous studies and of the working hypotheses. The findings and their implications should be discussed in the broadest context possible. Future research directions may also be highlighted.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions}
