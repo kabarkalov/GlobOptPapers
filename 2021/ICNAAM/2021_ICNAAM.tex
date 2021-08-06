@@ -29,7 +29,7 @@
 \maketitle
 
 \begin{abstract}
-The paper presents results of solving the problem of simulation and research of processes taking place in a fuel system injector. Simulation has been carried using tools of the OpenFOAM system. The problem of differential pressure minimization at the injector inlet and outlet was set and solved. This problem was considered as a Lipschitz optimization problem with a black-box type objective function. To solve it, we used an efficient global search algorithm implemented in the Globalizer system.
+The paper presents results of simulation and optimization of the processes taking place in a fuel system injector. Simulation has been carried using tools of the OpenFOAM system. The problem of differential pressure minimization at the injector inlet and outlet was set and solved. This problem was considered as a Lipschitz optimization problem with a black-box type objective function. To solve it, we used an efficient global search algorithm implemented in the Globalizer system.
 \end{abstract}
 
 % Head 1
@@ -50,9 +50,9 @@ The global optimization problem
 &D=\left\{y\in R^N: a_j\leq y_j \leq b_j, 1\leq j \leq N \right\},\label{D}
 \end{eqnarray}
 can serve as a mathematical model for the process of choosing optimum values of parameters $y=(y_1,y_2,...,y_N)$ of the engineering object under consideration.
-The choice of the value  $y^*$ that determines the best option  is reduced to an approximate (with some required accuracy) solution of the above optimization problem based on the evaluation of object characteristics for the set of options $y^i\in D, \; 1 \leq i \leq k$, determined by available resources.
+Finding the value $y^*$ that determines the best option is reduced to an approximate (with some required accuracy) solution of the above optimization problem based on the evaluation of object characteristics for the set of options $y^i\in D, \; 1 \leq i \leq k$, determined by available resources.
 
-The optimal parameter selection problems under consideration are characterized by the fact that the objective function $\varphi(y)$ is not defined analytically; there is only some algorithm to calculate its values at the points of the domain $D$.  In this case, one search trial (calculating the function value in a particular point of the search domain) is a computationally intensive operation \cite{Sergeyev1999,Kvasov2013,Kalyulin2017,Sergeyev2018,Paulavicius2020,Lera2021}.
+The optimal parameter selection problems under consideration are characterized by the fact that the objective function $\varphi(y)$ is not defined analytically; there is only some algorithm to calculate its values at the points of the domain $D$.  In this case, one search trial (calculating the function value in a particular point of the search domain) is a computationally intensive operation \cite{Sergeyev1999,Kvasov2013,Kalyulin2017,Sergeyev2018,Paulavicius2020}.%,Lera2021}.
 
 Multi-extremal optimization problems are essentially more time-consuming in comparison with other types of optimization problems because global optimum is an integral characteristic of the problem to be solved and demands investigation of the whole search domain. As a result, the search for the global optimum is reduced to generating  some covering (grid) in the parameter domain and choosing the best function value on this grid. The amount of calculations can be reduced by creating a non-uniform coverage of the search domain: the grid has to be dense enough in the vicinity of the global optimum and more sparse farther away from the solution being sought.
 
@@ -60,18 +60,18 @@ A typical assumption used in many global optimization methods \cite{Sergeyev2013
 \[
 \left|\varphi(y_1)-\varphi(y_2)\right|\leq L\left\|y_1-y_2\right\|,\; y_1,y_2 \in D, 0<L<\infty.
 \]
-% Предположение такого рода является достаточно естественным для многих прикладных задач, поскольку относительные вариации целевой функции, характеризующей моделируемую систему, обычно не могут превышать некоторый порог, определяемый ограниченной энергией изменений в системе.
+This kind of assumption is quite natural for many applied problems, since the relative variations of the objective function characterizing the system being modeled usually cannot exceed a certain threshold determined by the limited energy of changes in the system.
 
-At the same time, various dimensionality reduction schemes are widely used to reduce the complexity of designing global optimization algorithms. By means of  such schemes, it is possible to reduce solution of multidimensional optimization problems to the solution of one or more nested one-dimensional optimization problems.
+At the same time, various dimensionality reduction schemes are widely used to simplify the rules of global optimization algorithms. By means of such schemes, it is possible to reduce solution of multidimensional optimization problems to the solution of one or more nested one-dimensional optimization problems.
 
 One approach to dimensionality reduction is to use Peano-type space filling curves (\textit{evolvents}). Using evolvents $y(x)$, which continuously and uniquely map a unit interval onto a hypercube, reduces the problem of finding the minimum of the function $\varphi(y)$ in the domain $D$ to finding the minimum of a one-dimensional function  on the interval $[0,1]$
 \[
 \varphi(y^\ast)=\varphi(y(x^\ast))=\min{\left\{\varphi(y(x)): x\in[0,1]\right\}}.
 \]
-As follows from the properties of the space-filling curve \cite{Sergeyev2013}, the reduced one-dimensional function $\varphi(y(x))$ satisfies a uniform H{\"o}lder condition
-\[
-\left|\varphi(y(x_1))-\varphi(y(x_2))\right|\leq H\left|x_1-x_2\right|^{1/N}, \; x_1,x_2 \in [0,1],
-\]
+As follows from the properties of the space-filling curve \cite{Sergeyev2013}, the reduced one-dimensional function $\varphi(y(x))$ satisfies a uniform H{\"o}lder condition,
+%\[
+%\left|\varphi(y(x_1))-\varphi(y(x_2))\right|\leq H\left|x_1-x_2\right|^{1/N}, \; x_1,x_2 \in [0,1],
+%\]
 where the H{\"o}lder constant $H$ is related to the Lipschitz constant $L$ by the relationship $H=2L\sqrt{N+3}$.
 
 The above assumptions and approaches have led to the development of a number of global search algorithms based on the information-statistical approach \cite{Strongin2000}. These algorithms are implemented in the Globalizer software system for solving global optimization problems \cite{globalizerSystem}. Here, we present a scheme of the basic global search algorithm (GSA). This is a Divide-the-Best algorithm \cite{Sergeyev1998}, i.e. it is aimed to conduct a subsequent search trial in the most promising (from the point of view of global minimum detection) search subdomain.
@@ -96,7 +96,6 @@ Step 4. Execute the next trial in the inner point of the interval  $(x_{t-1},x_t
 Step 5. Check termination condition  $\left(x_t-x_{t-1}\right)^{1/N}<\epsilon$, where $t$ is the number of the interval with the maximum characteristic and $\epsilon>0$ is the predefined accuracy.
 
 The global search algorithm has the folloing interpretation. Using trial points it is possible to design a minorant for which characteristic $R(i)$ is the minimum value of the minorant in the interval $(x_{i-1}, x_i ), 1 \leq i \leq k + 1,$ taken with the opposite sign. Then new trial is carried out in the interval where the global minimizer of the current minorant is situated and the new trial point $x^{k+1}$ coincides with it.
-
 A detailed description of the algorithm, its various modifications (including parallel ones), and the corresponding convergence  theory are presented in \cite{Strongin2000,Barkalov2010,Strongin2020}.
 	
 
@@ -124,42 +123,30 @@ The fluid dynamics for the problem described in this paper is defined by the Nav
 \]
 where $\vec{U}$ is the velocity vector, $\nu$  is the liquid viscosity (assumed constant), $p$  is the overpressure, $\rho$ is the density of the liquid. In this system of equations, there are two unknown variables: $\vec{U}$  and $p$. For each of these variables, initial conditions are set: 
 \[
-\vec{U}(x,y) = 0,
-\]
-\[
-p(x,y) = 0.
+\vec{U}(x,y) = 0, \; p(x,y) = 0.
 \]
 There are three types of boundaries in the computational domain; special boundary conditions are set on each of them. 
 On a rigid wall:
 \[
-\nabla p \cdot \vec{n} = 0,
-\]
-\[
-\vec{U} = 0.
+\nabla p \cdot \vec{n} = 0, \; \vec{U} = 0.
 \]
 At the entrance to the computational domain:
 \[
-\nabla p \cdot \vec{n} = 0,
-\]
-\[
-\vec{U} = \vec{U_i}.
+\nabla p \cdot \vec{n} = 0, \; \vec{U} = \vec{U_i}.
 \]
 At the exit of the computational domain:
 \[
- p = 0,
-\]
-\[
-\vec{U} = \vec{U_o}.
+ p = 0, \vec{U} = \vec{U_o}.
 \]
 
 The geometric representation of the computational domain is shown in Figure 1, with the parameterization points highlighted in red. The geometry is parametrized by increasing the distance between the red points symmetrically with respect to the channel centreline. 
-%Таким образом, в задаче имеется один варьируемый параметр (диаметр сечения канала в его средней части), значения которого изменяются в диапазоне $[0,10]$.
+Thus, the problem has one variable parameter (the diameter of the channel section in its middle part), the values of which vary in the range $[0,10]$. The objective function values represent fuel consumption.
 
 \begin{figure}%[ht]
 %\includegraphics[width=1.0\linewidth]{fig1.png}
 
     \centering
-    \begin{tikzpicture}[scale=0.5,>=stealth]
+    \begin{tikzpicture}[scale=0.45,>=stealth]
          \draw (-5,-2.5,0)--(-15,-2.5,0)--(-15,2.5,0)--(-5,2.5,0.0);%--(0,0.5,0.0)--(5,2.5,0)--(15,2.5,0)--(15,-2.5,0);
          \draw (-5,-2.5) .. controls (0,0) .. (5,-2.5);
          \draw (5,2.5,0)--(15,2.5,0)--(15,-2.5,0)--(5,-2.5,0.0);
@@ -226,11 +213,10 @@ The geometric representation of the computational domain is shown in Figure 1, w
 
 The calculation was carried out with the standard pisoFoam solver and the PISO algorithm \cite{Issa1986_2,Issa1986_1}.
 A total of 300 finite elements were involved in the calculation. The process of finding the effective channel thickness took 3395 seconds on an Intel(R) Xeon(R) CPU X5670 2.93 GHz, during which time 69 iterations of the global search algorithm were performed. 
-% Для решения задачи был использован смешанный локально-глобальный алгоритм \cite{Barkalov2010}, реализованный в Globalizer.
-% При этом в критерии остановки метода было использовано значение $\epsilon = 10^{-3}$.
+The mixed local-global algorithm \cite{Barkalov2010} implemented in Globalizer \cite{globalizerSystem} was used to solve the problem. The value $\epsilon = 10^{-3}$ was used in the method’s stopping condition.
 The horizontal component of the velocity at the entrance to the computational domain $\vec{U_i}$  was 10 m/s. The pressure at the exit of the computational domain $p_o$ was equal to zero, just like all components of the velocity vector at the exit $\vec{U_o}$ . Linear dimensions of the computational domain are shown in the schematic of Figure 1. As a result of solving the problem, the optimum channel thickness (0.59 cm) was found, giving the minimum fuel consumption.
 
-%Найденное решение является удовлетворительным с точки зрения решаемой задачи. Например, другие решения, которые получаются при запуске методов локальной оптимизации для решения данной задачи, зависят от выбора стартовой точки. И значение целевой функции при этом получается не меньше, чем значение в точке, найденной Globalizer.
+The solution found is satisfactory from the point of view of the problem being solved. For example, other solutions that are obtained when running local optimization methods to solve the problem depend on the choice of the starting point. The value of the objective function obtained  in these runs is not smaller than the value at the optimum point found by Globalizer.
 
 % Acknowledgement
 \section{ACKNOWLEDGMENTS}
