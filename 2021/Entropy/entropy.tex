@@ -38,10 +38,10 @@
 % The option pdftex is for use with pdfLaTeX. If eps figures are used, remove the option pdftex and use LaTeX and dvi2pdf.
 
 %%%% ДЛЯ РУССКОГО ТЕКСТА закомментировать потом!
-\usepackage{inputenc}
-\usepackage[T2A,T1]{fontenc}
-\usepackage[english,russian]{babel}
-\usepackage{cmap}
+%\usepackage{inputenc}
+%\usepackage[T2A,T1]{fontenc}
+%\usepackage[english,russian]{babel}
+%\usepackage{cmap}
 %%%%
 
 
@@ -161,7 +161,7 @@ The successful application of machine learning (ML) methods to solve a wide rang
 Methods of machine learning were shown to be particularly effective for identifying the principal properties of the phenomena (for example, physical, economic, or social), which are stochastic by nature or contain some hidden parameters \cite{Golovenkin2020,Gonoskov2019}.
 ML is also successfully used to solve complex problems of computational mathematics, for example, for simulation of dynamical systems  \cite{Seleznev2019}, solution of ordinary, partial, or stochastic differential equations \cite{Lagaris1998,Blechschmidt2021,Xu2020}.
 
-For example, ML could be applied for solving such a complex problem of computational mathematics as global optimization.
+Particularly, ML could be applied for solving such a complex problem of computational mathematics as global optimization.
 The solution to this class of problems, as a rule, cannot be found analytically and, therefore, one needs to construct numerical methods to solve it.
 
 The numerical solution of optimization problems is fraught with significant difficulties. In many ways, they are related to the dimensionality and type of the objective function. Consequently, the most difficult problems are those in which the objective function is multi-extremal, nondifferentiable, and, moreover, given in the form of a ``black box'' (i.e., in the form of some computational procedure, the input of which is an argument, and the output is the corresponding value of the function). These complex problems are the main focus of this article.
@@ -171,7 +171,7 @@ There are several approaches to the construction of numerical methods for solvin
 Some algorithms are based on the idea of a multistart: launching a local search either from different starting points or with varying parameters. Local optimization methods have a high convergence rate. At the same time, one of the main problems in multistart schemes is the choice of starting points that would correspond to the regions of attraction of various local solutions. 
 Machine learning methods can be successfully applied to solve this problem.  
 For example, in \cite{RinnooyKan1987} methods of cluster analysis were used to select promising starting points.
-In \cite{Cassioli2012}, the area for launching the local method was allocated based on the classification of starting points using a support vector machine.
+In \cite{Cassioli2012} the area for starting the local method was allocated based on the classification of starting points using a support vector machine.
 
 Another popular class of methods for solving global optimization problems is metaheuristic algorithms. 
 Many of them are based on imitation of the processes occurring in living nature. The parameters of such algorithms could also be tuned using ML. For example, \cite{Jin2005} provides an overview of machine learning applications in evolutionary algorithms.
@@ -179,7 +179,7 @@ Many of them are based on imitation of the processes occurring in living nature.
 Note that the algorithms of the last two classes do not provide guaranteed convergence to the solution of the problem and are inferior to deterministic algorithms in terms of the quality of solution \cite{Kvasov2018,Sergeyev2018} (e.g., measured by the number of correctly solved problems from a particular set). Therefore, deterministic methods seem to be potentially more effective.
 
 
-One of the efficient deterministic methods for solving multiextremal optimization problems is \textit{the information-statistical global search algorithm} \cite{Strongin2000}. This method initially proposed for solving unconstrained optimization problems was successfully generalized to the classes of optimization problems with non-convex constraints and multicriteria optimization problems. For different versions of the algorithm, parallelization methods taking into account the architecture of modern computing systems were also suggested \cite{Barkalov2016,globalizerSystem,Strongin2018}.
+One of the efficient deterministic methods for solving multiextremal optimization problems is \textit{the information-statistical global search algorithm} \cite{Strongin2000}. This method initially proposed for solving unconstrained optimization problems was successfully generalized to the classes of optimization problems with non-convex constraints \cite{Barkalov2002} and multicriteria optimization problems \cite{Gergel2020}. For different versions of the algorithm, parallelization methods taking into account the architecture of modern computing systems were also suggested \cite{Barkalov2016,globalizerSystem,Strongin2018}.
 
 
 Several strategies have been proposed to speedup the global search algorithm (in terms of the number of iterations required to solve the problem with a given accuracy). In this paper, we propose a new approach to acceleration based on identifying areas of attraction of local minima using machine learning methods. The identification of regions of attraction and the launch of local search in these regions can significantly reduce the number of trials required for the method to achieve global convergence. Experiments carried out on a series of several hundred test problems confirm this statement. 
@@ -193,7 +193,7 @@ In this paper, we will consider global optimization problems of the form
 & \varphi(y^\ast)=\min{\left\{\varphi(y):y\in D\right\}},\\
 & D=\left\{y\in \text{R}^N: a_i\leq y_i \leq b_i, 1\leq i \leq N\right\}. \nonumber
 \end{eqnarray}
-Problem (\ref{main_problem}) is considered under the assumption that the objective function is multi-extreme, is given in a form of a ``black box'', and the calculation of its values is associated with solving the problem of numerical simulation, which makes the solution a labor-intensive operation.
+Problem (\ref{main_problem}) is considered under the assumption that the objective function is multi-extremal, is given in a form of a ``black box'', and the calculation of its values is associated with solving the problem of numerical simulation, which makes the solution a labor-intensive operation.
 
 A typical situation for many applied problems is when a limited change in the vector of parameters $y$ causes a limited change in the values of $\varphi(y)$. The mathematical model describing this premise is based on the assumption that the Lipschitz condition is satisfied
 \[
@@ -503,7 +503,7 @@ This graph demonstrates that using decision trees to identify areas of attractio
 We used GKLS to generate 300 test problems of dimensionalities $N=2,3,4$ (100 problems of each dimensionality).
 The resulting series of problems were solved using the GSA and GSA-DT algorithms with the parameter $r=5.0$ from (\ref{R}). The specified value of the parameter $r$ ensures the solution of  $100\%$ of the problems; at lower values of the parameter, some problems were not solved correctly.
 
-Tables \ref{table:average_GKLS01} and \ref{table:average_GKLS002} show the average number of trials required by the GSA and GSA-DT methods to correctly solve all problems with an accuracy of $\epsilon = 10^{-2}\left|b-a\right|$ и $\epsilon = 2 \cdot 10^{-3}\left|b-a\right|$ respectively.
+Tables \ref{table:average_GKLS01} and \ref{table:average_GKLS002} show the average number of trials required by the GSA and GSA-DT methods to correctly solve all problems with an accuracy of $\epsilon = 10^{-2}\left|b-a\right|$ and $\epsilon = 2 \cdot 10^{-3}\left|b-a\right|$ respectively.
 
 The data from the tables confirm that the global search algorithm based on the application of machine learning to extract local extremum provides a faster solution to multiextremum problems than the basic global search algorithm. For rough accuracy solutions, the acceleration is about  $30\%$, for high accuracy solutions, the process is accelerated from 2 to 6 times.
 
