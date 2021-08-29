@@ -38,10 +38,10 @@
 % The option pdftex is for use with pdfLaTeX. If eps figures are used, remove the option pdftex and use LaTeX and dvi2pdf.
 
 %%%% ДЛЯ РУССКОГО ТЕКСТА закомментировать потом!
-\usepackage{inputenc}
-\usepackage[T2A,T1]{fontenc}
-\usepackage[english,russian]{babel}
-\usepackage{cmap}
+%\usepackage{inputenc}
+%\usepackage[T2A,T1]{fontenc}
+%\usepackage[english,russian]{babel}
+%\usepackage{cmap}
 %%%%
 
 
@@ -97,7 +97,7 @@
 
 % Affiliations / Addresses (Add [1] after \address if there is only one affiliation.)
 \address[1]{%
-$^{1}$ \quad Department of Mathematical Software and Supercomputing Technologies, Lobachevsky University, 603950 Nizhny Novgorod, Russia; ilya.lebedev@itmm.unn.ru (I.L.), evgeny.kozinov@itmm.unn.ru (E.A.)}
+$^{1}$ \quad Department of Mathematical Software and Supercomputing Technologies, Lobachevsky University, 603950 Nizhny Novgorod, Russia; ilya.lebedev@itmm.unn.ru (I.L.), evgeny.kozinov@itmm.unn.ru (E.K.)}
 %$^{2}$ \quad Affiliation 2; e-mail@e-mail.com}
 
 % Contact information of the corresponding author
@@ -161,7 +161,7 @@ The successful application of machine learning (ML) methods to solve a wide rang
 Methods of machine learning were shown to be particularly effective for identifying the principal properties of the phenomena (for example, physical, economic, or social), which are stochastic by nature or contain some hidden parameters \cite{Golovenkin2020,Gonoskov2019}.
 ML is also successfully used to solve complex problems of computational mathematics, for example, for simulation of dynamical systems  \cite{Seleznev2019}, solution of ordinary, partial, or stochastic differential equations \cite{Lagaris1998,Blechschmidt2021,Xu2020}.
 
-For example, ML could be applied for solving such a complex problem of computational mathematics as global optimization.
+Particularly, ML could be applied for solving such a complex problem of computational mathematics as global optimization.
 The solution to this class of problems, as a rule, cannot be found analytically and, therefore, one needs to construct numerical methods to solve it.
 
 The numerical solution of optimization problems is fraught with significant difficulties. In many ways, they are related to the dimensionality and type of the objective function. Consequently, the most difficult problems are those in which the objective function is multi-extremal, nondifferentiable, and, moreover, given in the form of a ``black box'' (i.e., in the form of some computational procedure, the input of which is an argument, and the output is the corresponding value of the function). These complex problems are the main focus of this article.
@@ -171,7 +171,7 @@ There are several approaches to the construction of numerical methods for solvin
 Some algorithms are based on the idea of a multistart: launching a local search either from different starting points or with varying parameters. Local optimization methods have a high convergence rate. At the same time, one of the main problems in multistart schemes is the choice of starting points that would correspond to the regions of attraction of various local solutions. 
 Machine learning methods can be successfully applied to solve this problem.  
 For example, in \cite{RinnooyKan1987} methods of cluster analysis were used to select promising starting points.
-In \cite{Cassioli2012}, the area for launching the local method was allocated based on the classification of starting points using a support vector machine.
+In \cite{Cassioli2012} the area for starting the local method was allocated based on the classification of starting points using a support vector machine.
 
 Another popular class of methods for solving global optimization problems is metaheuristic algorithms. 
 Many of them are based on imitation of the processes occurring in living nature. The parameters of such algorithms could also be tuned using ML. For example, \cite{Jin2005} provides an overview of machine learning applications in evolutionary algorithms.
@@ -179,7 +179,7 @@ Many of them are based on imitation of the processes occurring in living nature.
 Note that the algorithms of the last two classes do not provide guaranteed convergence to the solution of the problem and are inferior to deterministic algorithms in terms of the quality of solution \cite{Kvasov2018,Sergeyev2018} (e.g., measured by the number of correctly solved problems from a particular set). Therefore, deterministic methods seem to be potentially more effective.
 
 
-One of the efficient deterministic methods for solving multiextremal optimization problems is \textit{the information-statistical global search algorithm} \cite{Strongin2000}. This method initially proposed for solving unconstrained optimization problems was successfully generalized to the classes of optimization problems with non-convex constraints and multicriteria optimization problems. For different versions of the algorithm, parallelization methods taking into account the architecture of modern computing systems were also suggested \cite{Barkalov2016,globalizerSystem,Strongin2018}.
+One of the efficient deterministic methods for solving multiextremal optimization problems is \textit{the information-statistical global search algorithm} \cite{Strongin2000}. This method initially proposed for solving unconstrained optimization problems was successfully generalized to the classes of optimization problems with non-convex constraints \cite{Barkalov2002} and multicriteria optimization problems \cite{Gergel2020}. For different versions of the algorithm, parallelization methods taking into account the architecture of modern computing systems were also suggested \cite{Barkalov2016,globalizerSystem,Strongin2018}.
 
 
 Several strategies have been proposed to speedup the global search algorithm (in terms of the number of iterations required to solve the problem with a given accuracy). In this paper, we propose a new approach to acceleration based on identifying areas of attraction of local minima using machine learning methods. The identification of regions of attraction and the launch of local search in these regions can significantly reduce the number of trials required for the method to achieve global convergence. Experiments carried out on a series of several hundred test problems confirm this statement. 
@@ -193,7 +193,7 @@ In this paper, we will consider global optimization problems of the form
 & \varphi(y^\ast)=\min{\left\{\varphi(y):y\in D\right\}},\\
 & D=\left\{y\in \text{R}^N: a_i\leq y_i \leq b_i, 1\leq i \leq N\right\}. \nonumber
 \end{eqnarray}
-Problem (\ref{main_problem}) is considered under the assumption that the objective function is multi-extreme, is given in a form of a ``black box'', and the calculation of its values is associated with solving the problem of numerical simulation, which makes the solution a labor-intensive operation.
+Problem (\ref{main_problem}) is considered under the assumption that the objective function is multi-extremal, is given in a form of a ``black box'', and the calculation of its values is associated with solving the problem of numerical simulation, which makes the solution a labor-intensive operation.
 
 A typical situation for many applied problems is when a limited change in the vector of parameters $y$ causes a limited change in the values of $\varphi(y)$. The mathematical model describing this premise is based on the assumption that the Lipschitz condition is satisfied
 \[
@@ -432,9 +432,9 @@ Let us compare the basic global search algorithm (GSA) and its decision tree-bas
 The decision trees in the GSA-DT algorithm were built using the OpenCV 4.5.1 library (class cv::ml::DTrees). A regression function was constructed by a single decision tree. This allowed us to obtain a piecewise constant approximation of the objective function in which one or several trial points corresponded to each leaf node of the tree. 
 The tree was built without any limitations on maximum depth (MaxDepth); the accuracy of tree construction (RegressionAccuracy) was $10^{-3}$; the minimum number of trial points in the tree node (MinSampleCount) was equal to one; all other parameters were set by default. Stopping tree building occurred if all absolute differences between an estimated value in a node and values of train samples in this node are less than accuracy.
 
-The global optimization methods discussed above were compared when solving 100 problems from the  $F_{SH}$ and $F_{HL}$ classes. The problem will be considered correctly solved if after stopping the method by accuracy (i.e. when the length of the current search interval becomes less than $\epsilon$) the current estimate of the optimum  $x_k^*$ lies in the $\epsilon$-neighborhood of the known solution of the problem  $x^*$, i.e. if the condition  $|x^*-x_k^*| \leq \epsilon$ is satisfied.
+The global optimization methods discussed above were compared when solving 100 problems from the  $F_{SH}$ and $F_{HL}$ classes. The problem will be considered correctly solved if after stopping the method by accuracy (i.e. when the length of the current search interval becomes less than $\epsilon \cdot \left|b-a\right| $) the current estimate of the optimum  $x_k^*$ lies in the $\epsilon$-neighborhood of the known solution of the problem  $x^*$, i.e. if the condition  $|x^*-x_k^*| \leq \epsilon \cdot \left|b-a\right|$ is satisfied.
 
-Tables \ref{table:average_Shekel} and \ref{table:average_Hill} show the number of search trials that, on average, were required to minimize the Shekel and Hill functions with different search accuracy  $\epsilon$. The number of unsolved problems is indicated in parentheses. The experimental results show that with a rough solution to the problem, all methods show similar results in terms of the number of trials, while with a high solution accuracy, the GSA-DT algorithm requires 2 times fewer trials than its prototype. At the same time, GSA-DT outperforms the DIRECT method both in the average number of search trials and in the number of correctly solved problems. In particular, if we use the accuracy $\epsilon = 10^{-2}$, then the DIRECT method stops too early and does not find a global solution to many problems. 
+Tables \ref{table:average_Shekel} and \ref{table:average_Hill} show the number of search trials that, on average, were required to minimize the Shekel and Hill functions with different search accuracy  $\epsilon$. The number of unsolved problems is indicated in parentheses. The experimental results show that with a rough solution to the problem, all methods show similar results in terms of the number of trials, while with a high solution accuracy, the GSA-DT algorithm requires 2 times fewer trials than its prototype. At the same time, GSA-DT outperforms the DIRECT method both in the average number of search trials and in the number of correctly solved problems. In particular, if we use the accuracy $\epsilon = 10^{-2}\left|b-a\right|$, then the DIRECT method stops too early and does not find a global solution to many problems. 
 Therefore, in further experiments in which multidimensional problems are solved, we will not use DIRECT for comparison, since when solving multidimensional problems with stopping by accuracy, this method will provide a correct solution to no more than  $50\%$ of problems. 
 
 \begin{specialtable}[H] 
@@ -481,7 +481,7 @@ In the experiments, the values $l=10$, $f^*=-1$, $\rho^*=0.2$ and $d^*=0.9$ were
 
 As an example, consider the operation of the GSA and GSA-DT algorithms when solving one of the two-dimensional problems generated by the GKLS generator. 
 The level lines of the objective function shown in Figures \ref{fig3} and \ref{fig4}, indicate the presence of ten local extrema. 
-When starting the algorithms, the same parameters were used:  $r=3.0$ from (\ref{R}) and $\epsilon = 10^{-2}$ in the stopping criterion of the method. 
+When starting the algorithms, the same parameters were used:  $r=3.0$ from (\ref{R}) and $\epsilon = 10^{-2}\left|b-a\right|$ in the stopping criterion of the method. 
 Black dots in Figures \ref{fig3} and \ref{fig4} show the points of the search trials performed by the methods in the process of solving the problem. In this case, the GSA algorithm required 247 trials, while the GSA-DT algorithm took 138 trials.
 The red dot in the figures marks the exact solution of the problem, and the yellow dot indicates the best approximation found by the algorithm. 
 Green dots in Figure \ref{fig4} indicate trials performed as part of a local search. 
@@ -503,12 +503,12 @@ This graph demonstrates that using decision trees to identify areas of attractio
 We used GKLS to generate 300 test problems of dimensionalities $N=2,3,4$ (100 problems of each dimensionality).
 The resulting series of problems were solved using the GSA and GSA-DT algorithms with the parameter $r=5.0$ from (\ref{R}). The specified value of the parameter $r$ ensures the solution of  $100\%$ of the problems; at lower values of the parameter, some problems were not solved correctly.
 
-Tables \ref{table:average_GKLS01} and \ref{table:average_GKLS002} show the average number of trials required by the GSA and GSA-DT methods to correctly solve all problems with an accuracy of $\epsilon = 10^{-2}$ и $\epsilon = 2 \cdot 10^{-3}$ respectively.
+Tables \ref{table:average_GKLS01} and \ref{table:average_GKLS002} show the average number of trials required by the GSA and GSA-DT methods to correctly solve all problems with an accuracy of $\epsilon = 10^{-2}\left|b-a\right|$ and $\epsilon = 2 \cdot 10^{-3}\left|b-a\right|$ respectively.
 
 The data from the tables confirm that the global search algorithm based on the application of machine learning to extract local extremum provides a faster solution to multiextremum problems than the basic global search algorithm. For rough accuracy solutions, the acceleration is about  $30\%$, for high accuracy solutions, the process is accelerated from 2 to 6 times.
 
 \begin{specialtable}[H] 
-	\caption{Solving GKLS problems with an accuracy  $\epsilon = 10^{-2}$}\label{table:average_GKLS01}
+	\caption{Solving GKLS problems with an accuracy  $\epsilon = 10^{-2}\left|b-a\right|$}\label{table:average_GKLS01}
 	\center
 \begin{tabular}{cccc}
 \toprule
@@ -521,7 +521,7 @@ GSA-DT  &  653  &  9204  &  156190  \\
 \end{specialtable}
 
 \begin{specialtable}[H] 
-	\caption{Solving GKLS problems with an accuracy $\epsilon = 2 \cdot 10^{-3}$}\label{table:average_GKLS002}
+	\caption{Solving GKLS problems with an accuracy $\epsilon = 2 \cdot 10^{-3}\left|b-a\right|$}\label{table:average_GKLS002}
 	\center
 \begin{tabular}{cccc}
 \toprule
@@ -566,7 +566,7 @@ Further research into this issue will focus on using more complex models of the 
 % \supplementary{The following are available at \linksupplementary{s1}, Figure S1: title, Table S1: title, Video S1: title. A supporting video article is available at doi: link.} 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\authorcontributions{Conceptualization and methodology, K.B.; software and validation, I.L., E.A.; formal analysis, K.B.; investigation, I.L.; data curation, I.L.; writing --- original draft preparation, K.B.; writing- -- review and editing, K.B.; visualization, I.L.; funding acquisition, K.B. All authors have read and agreed to the published version of the manuscript.}
+\authorcontributions{Conceptualization and methodology, K.B.; software and validation, I.L., E.K.; formal analysis, K.B.; investigation, I.L.; data curation, I.L.; writing --- original draft preparation, K.B.; writing- -- review and editing, K.B.; visualization, I.L.; funding acquisition, K.B. All authors have read and agreed to the published version of the manuscript.}
 
 \funding{This research was funded by the Ministry of Science and Higher Education of the Russian Federation, agreement number 075-15-2020-808.}
 
