@@ -38,10 +38,10 @@
 % The option pdftex is for use with pdfLaTeX. If eps figures are used, remove the option pdftex and use LaTeX and dvi2pdf.
 
 %%%% ДЛЯ РУССКОГО ТЕКСТА закомментировать потом!
-%\usepackage{inputenc}
-%\usepackage[T2A,T1]{fontenc}
-%\usepackage[english,russian]{babel}
-%\usepackage{cmap}
+\usepackage{inputenc}
+\usepackage[T2A,T1]{fontenc}
+\usepackage[english,russian]{babel}
+\usepackage{cmap}
 %%%%
 
 
@@ -167,20 +167,23 @@ The solution to this class of problems, as a rule, cannot be found analytically 
 The numerical solution of optimization problems is fraught with significant difficulties. In many ways, they are related to the dimensionality and type of the objective function. Consequently, the most difficult problems are those in which the objective function is multi-extremal, nondifferentiable, and, moreover, given in the form of a ``black box'' (i.e., in the form of some computational procedure, the input of which is an argument, and the output is the corresponding value of the function). These complex problems are the main focus of this article.
 
 There are several approaches to the construction of numerical methods for solving global optimization problems. 
-%Надо ли добавить алгоритмы на основе метамоделей ?
 Some algorithms are based on the idea of a multistart: launching a local search either from different starting points or with varying parameters. Local optimization methods have a high convergence rate. At the same time, one of the main problems in multistart schemes is the choice of starting points that would correspond to the regions of attraction of various local solutions. 
 Machine learning methods can be successfully applied to solve this problem.  
 For example, in \cite{RinnooyKan1987} methods of cluster analysis were used to select promising starting points.
 In \cite{Cassioli2012} the area for starting the local method was allocated based on the classification of starting points using a support vector machine.
 
+%Russian
+Методы машинного обучения активно используются в сочетании с алгоритмами bayesian optimization, основанными на использовании probabilistic surrogate models of the objective function. Детальный обзор данного направления развития методов глобальной оптмизации представлен в \cite{Archetti2019,Zhigljavsky2021}.
+
 Another popular class of methods for solving global optimization problems is metaheuristic algorithms. 
 Many of them are based on imitation of the processes occurring in living nature. The parameters of such algorithms could also be tuned using ML. For example, \cite{Jin2005} provides an overview of machine learning applications in evolutionary algorithms.
 
-Note that the algorithms of the last two classes do not provide guaranteed convergence to the solution of the problem and are inferior to deterministic algorithms in terms of the quality of solution \cite{Kvasov2018,Sergeyev2018} (e.g., measured by the number of correctly solved problems from a particular set). Therefore, deterministic methods seem to be potentially more effective.
+Note that the algorithms of the last class do not provide guaranteed convergence to the solution of the problem and are inferior to deterministic algorithms in terms of the quality of solution \cite{Kvasov2018,Sergeyev2018} (e.g., measured by the number of correctly solved problems from a particular set). Therefore, deterministic methods seem to be potentially more effective.
 
-
-One of the efficient deterministic methods for solving multiextremal optimization problems is \textit{the information-statistical global search algorithm} \cite{Strongin2000}. This method initially proposed for solving unconstrained optimization problems was successfully generalized to the classes of optimization problems with non-convex constraints \cite{Barkalov2002} and multicriteria optimization problems \cite{Gergel2020}. For different versions of the algorithm, parallelization methods taking into account the architecture of modern computing systems were also suggested \cite{Barkalov2016,globalizerSystem,Strongin2018}.
-
+%Russian
+Настоящая работа направлена на дальнейшее развитие эффективного детерминированного метода глобальной оптимизации, известного как \textit{the information-statistical global search algorithm} \cite{Strongin2000}. Указанная здесь книга содержит результаты теоретических исследований метода, имеющих непосредственное значение для его практической реализации. В частности, в ней детально рассмотрены вопросы сходимости, выбора параметров и условия остановки алгоритма, и т.д.
+Отметим, что алгоритм глобального поиска первоначально был ориентирован на решение unconstrained optimization problems. Впоследствии он был обобщен для решения problems with non-convex constraints\cite{Barkalov2002} and multicriteria optimization problems \cite{Gergel2020}.
+Одновременно с этим были предложены различные параллельные варианты указанных алгоритмов, которые могут быть использованы на современных суперкомпьютерах \cite{Barkalov2016,globalizerSystem,Strongin2018}.
 
 Several strategies have been proposed to speedup the global search algorithm (in terms of the number of iterations required to solve the problem with a given accuracy). In this paper, we propose a new approach to acceleration based on identifying areas of attraction of local minima using machine learning methods. The identification of regions of attraction and the launch of local search in these regions can significantly reduce the number of trials required for the method to achieve global convergence. Experiments carried out on a series of several hundred test problems confirm this statement. 
 
@@ -199,8 +202,8 @@ A typical situation for many applied problems is when a limited change in the ve
 \[
 \left|\varphi(y')-\varphi(y'')\right|\leq L\left\|y'-y''\right\|,\; y',y'' \in D,\; 0<L<\infty.
 \]
-This assumption is typical for many approaches to the development of optimization algorithms \cite{Jones1993,Pinter1996,Zilinskas2008,Evtushenko2009}.
-At the same time, many known approaches are based on various methods of dividing the search domain into a system of subdomains and then choosing the most promising subdomain for placing the next trial (calculating the value of the objective function)  \cite{Jones2009,Zilinskas2010,Evtushenko2013,Kvasov2013,Paulavicius2016}. 
+This assumption is typical for many approaches to the development of optimization algorithms \cite{Jones1993,Pinter1996,Zilinskas2008,Evtushenko2009,Sergeyev2020}.
+At the same time, many known approaches are based on various methods of dividing the search domain into a system of subdomains and then choosing the most promising subdomain for placing the next trial (calculating the value of the objective function)  \cite{Jones2009,Zilinskas2010,Evtushenko2013,Kvasov2013,Paulavicius2016,Paulavicius2020}. 
 An important property of global optimization problems is the fact that, in contrast to the problems of finding a local extremum, the global minimum is an integral characteristic of the problem being solved. Making sure that the point  $y^*\in D$ is a solution to the problem requires going beyond its neighborhood to the investigation of the entire search domain. As a result, when minimizing substantially multi-extremal functions, the numerical method must construct a coverage of the search domain. The number of nodes of this coverage increases exponentially with increasing dimensionality. 
 This feature determines the high complexity of solving multiextremal optimization problems making dimensionality a critical factor that affects the complexity of their solving.
 
