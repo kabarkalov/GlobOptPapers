@@ -301,13 +301,27 @@ Building a regression using a decision tree consists of two main steps:
 	\item Search domain $D$ is divided into $J$ non-overlapping subdomains  $D_1, D_2, ..., D_J$, provided that $D = \bigcup_{j=1}^{J}{D_j}$.
 	\item Any value falling into the subdomain $D_j$, i.e. $x \in D_j$, is matched to the average value  $c_j$ based on the training trials that fall into this subdomain. 
 \end{itemize}
-
 In fact, decision trees build a model of a function of the form
 \begin{equation}\label{dtree}
 f(x) = c_j, \; x\in D_j.
 \end{equation}
- 
-This model is, on the one hand, rather simple, and on the other hand, it adequately reflects the properties of the function under investigation (the presence or absence of local minima). The selection of regions of attraction of local minima using model (\ref{dtree}) can be organized as follows.
+
+%Russian
+В целом, можно сказать, что дерево принятия решений -- это бинарное дерево, в листьях которого находятся значения функции, а в остальных узлах -- условия перехода.
+В нашем случае при применении дерева решений для построения регрессии каждому узлу соответствует несколько результатов испытаний и значение узла $c_j$, которое вычисляется как среднее квадратичное значений в точках испытаний, приписанных к этому узлу.
+Итоговая кусочно-постоянная аппроксимация строится с использованием значений $c_j$, которые находятся в листьях дерева. 
+
+Дерево строится рекурсивно, начиная с корневого узла. 
+В каждом узле применяется правило принятия решения: все данные  разбиваются на две группы (согласно некоторому правилу разбиения) и отправляются в левый и правый узлы-потомки. Затем процедура рекурсивно разделяет левый и правый узлы. 
+Остановка рекурсии в узле происходит в одном из следующих случаев:
+\begin{itemize}
+	\item Количество приписанных к узлу точе испытаний становится меньше указанного порогового значения (мы использовали 1).
+	\item Сумма квадратов отклонений значений функции от значения $c_j$, приписанного к этому узлу, становится меньше заданной точности (мы использовали 0.0001).
+\end{itemize}
+Подробнее об алгоритме построения регрессии с использованием деревьев решений см., например, \cite{Breiman1984}.
+
+Регрессия, построенная с помощью деревьев решений,
+is, on the one hand, rather simple, and on the other hand, it adequately reflects the properties of the function under investigation (the presence or absence of local minima). The selection of regions of attraction of local minima using model (\ref{dtree}) can be organized as follows.
 
 Let $x^{k+1}$ be the point of the current trial. For a given point, an index  $j$ is sought such that $x^{k+1} \in D_j$. 
 Next, the  $c_j$ values corresponding to neighboring subdomains are compared. If one of the conditions is met
@@ -412,9 +426,8 @@ to calculate the value of $i$-th level function from (\ref{nested_i}) a new $i+1
 the minimum values of functions from  (\ref{nested_i}) are their current estimates obtained based on accumulated search information.
 \end{itemize}
 
-A brief description of the main steps of the adaptive dimensionality reduction scheme is as follows.
-
-Let nested subproblems of the form (\ref{nested_i}) be solved using the global search algorithm described in subsection  \ref{CoreGSA}. Then each subproblem  (\ref{nested_i})  can be assigned some numerical value called a characteristic of this problem. As such a characteristic, we can take the value $R(t)$ from (\ref{MaxR}), i.e. the maximum characteristic from the characteristics of the intervals formed in this task. The higher the values of this characteristic, the more promising is the search for the global minimum of the original problem (\ref{main_problem}) in the given subproblem.Therefore, at each iteration, a subproblem with the maximum characteristic is selected, and a trial is carried out in it. This either leads to the calculation of the value of the objective function  $\varphi(y)$ (if the selected subtask belonged to the level  $j=M$), or generates new subproblems according to (\ref{nested_i}) for $j\leq M-1$. In the latter case, new generated tasks are added to the current set of tasks, their characteristics are calculated, and the process is repeated. The completion of the optimization process occurs when the condition for stopping the algorithm that solves this problem is satisfied for the root problem.
+%A brief description of the main steps of the adaptive dimensionality reduction scheme is as follows.
+%Let nested subproblems of the form (\ref{nested_i}) be solved using the global search algorithm described in subsection  \ref{CoreGSA}. Then each subproblem  (\ref{nested_i})  can be assigned some numerical value called a characteristic of this problem. As such a characteristic, we can take the value $R(t)$ from (\ref{MaxR}), i.e. the maximum characteristic from the characteristics of the intervals formed in this task. The higher the values of this characteristic, the more promising is the search for the global minimum of the original problem (\ref{main_problem}) in the given subproblem.Therefore, at each iteration, a subproblem with the maximum characteristic is selected, and a trial is carried out in it. This either leads to the calculation of the value of the objective function  $\varphi(y)$ (if the selected subtask belonged to the level  $j=M$), or generates new subproblems according to (\ref{nested_i}) for $j\leq M-1$. In the latter case, new generated tasks are added to the current set of tasks, their characteristics are calculated, and the process is repeated. The completion of the optimization process occurs when the condition for stopping the algorithm that solves this problem is satisfied for the root problem.
 
 
 
@@ -437,6 +450,20 @@ The next generator (denoted   $F_{HL}$) is determined by the expression
 where the values of the parameters $A_j,\: B_j,\: 1 \le j \le 14$, are independently and uniformly distributed in the interval  $[-1,1]$. 
 
 Let us compare the basic global search algorithm (GSA) and its decision tree-based modification (GSA-DT) with the well-known DIRECT global optimization algorithm  \cite{Jones2009}.
+%Russian
+Выбор именного этого метода для сравнения объясняется следующим. DIRECT является одним из наиболее известных и популярных детерминированных методов решения задач глобальной оптмизации with ``black box'' objective function. Обзор различных модификаций метода, а также примеров решения задач приведен в \cite{Jones2021}.
+Для этого метода известно, что при достаточно большом числе поисковых испытаний DIRECT гарантированно найдет глобальное решение задачи.  
+Однако если использовать критерий основки по точности, то метод может быстро остановиться в одном из локальных минимумов. Сказанное подтверждается приведенными в данном разделе результатами экспериментов. 
+
+Если же говорить про детерминированные оптимизационные алгоритмы, реализованные in popular Computer Algebra Systems (CAS), то их сравнение с такими методами, как DIRECT или GSA, будет некорректным по следующей причине.
+Оптимизационные алгоритмы из CAS ориентированы на решение задач с целевой функцией, заданной явно, в виде формулы.
+Формульное задание целевой функции предполагает известным также и ее производные, что позволяет использовать методы первого порядка, обладающие значительно более быстрой сходимостью, чем методы нулевого порядка, к которым отноится и DIRECT, и GSA. Но при этом методы первого порядка не гарантируют нахождение глобального минимума. 
+Например, система Mathematica предлагает для решения задач глобальной оптмизации методы, которые гарантированно найдут глобальное решение задачи только в случае, если целевая функция и ограничения являются линейными или выпуклыми. Otherwise, the result may sometimes only be a local minimum.
+
+Более того, методы, требующие формульного задания целевой функции, не могут применяться к решению большого класса прикладных задач, в которых вид целевой функции не известен, а ее значения вычисляются в результате численного моделирования. Использование для решения задач подобного вида эвристических методов (таких как Differential Evolution, Simulated Annealing or Random Search) также не всегда приводит к решению задачи. 
+These methods often do find the global minimum, but are not guaranteed to do so. В терминах числа корректно решенных задач эвристические методы проигрывают детерминированным \cite{Sergeyev2018}.
+
+
 The decision trees in the GSA-DT algorithm were built using the OpenCV 4.5.1 library (class cv::ml::DTrees). A regression function was constructed by a single decision tree. This allowed us to obtain a piecewise constant approximation of the objective function in which one or several trial points corresponded to each leaf node of the tree. 
 The tree was built without any limitations on maximum depth (MaxDepth); the accuracy of tree construction (RegressionAccuracy) was $10^{-3}$; the minimum number of trial points in the tree node (MinSampleCount) was equal to one; all other parameters were set by default. Stopping tree building occurred if all absolute differences between an estimated value in a node and values of train samples in this node are less than accuracy.
 
@@ -445,20 +472,11 @@ The global optimization methods discussed above were compared when solving 100 p
 Tables \ref{table:average_Shekel} and \ref{table:average_Hill} show the number of search trials that, on average, were required to minimize the Shekel and Hill functions with different search accuracy  $\epsilon$. The number of unsolved problems is indicated in parentheses. 
 %Russian
 В этих и последующих таблицах для метода GSA-DT приведено полное число испытаний, которые были выполнены как во время глобального, так и во время локального поиска.
+При решении задач с точностью $10^{-2}$, $10^{-3}$, $10^{-4}$ число запусков локального поиска при решении одной задачи составляло в среднем 2, 3 и 4 соответственно; а отношение числа испытаний, выполненных по правилам глобального поиска, к числу испытаний, выполненных локальным методом, составляло (при соответствующей точности) 7.2, 6.0, 4.5 для задач класса $F_{HL}$ и 3.2, 2.3, 1.9 для задач класса $F_{SH}$.
+
 %Ebglish
 The experimental results show that with a rough solution to the problem, all methods show similar results in terms of the number of trials, while with a high solution accuracy, the GSA-DT algorithm requires 2 times fewer trials than its prototype. At the same time, GSA-DT outperforms the DIRECT method both in the average number of search trials and in the number of correctly solved problems. In particular, if we use the accuracy $\epsilon = 10^{-2}\left|b-a\right|$, then the DIRECT method stops too early and does not find a global solution to many problems. 
 Therefore, in further experiments in which multidimensional problems are solved, we will not use DIRECT for comparison, since when solving multidimensional problems with stopping by accuracy, this method will provide a correct solution to no more than  $50\%$ of problems.
-
-%Russian
-Отметим, что DIRECT является одним из наиболее известных и популярных детерминированных методов решения задач глобальной оптмизации with ``black box'' objective function, и при достаточно большом числе поисковых испытаний DIRECT гарантированно найдет глобальное решение задачи.  
-Однако если использовать критерий основки по точности, то метод может быстро остановиться в одном из локальных минимумов. Сказанное подтверждается приведенными в данном разделе результатами экспериментов. 
-
-Если же говорить про детерминированные оптимизационные алгоритмы, реализованные in popular Computer Algebra Systems (CAS), то их сравнение с такими методами, как DIRECT или GSA, будет некорректным по следующей причине.
-
-Оптимизационные алгоритмы из CAS ориентированы на решение задач с целевой функцией, заданной явно, в виде формулы.
-Формульное задание целевой функции предполагает известным также и ее производные, что позволяет использовать методы первого порядка, обладающие значительно более быстрой сходимостью, чем методы нулевого порядка, к которым отноится и DIRECT, и GSA.
-Однако методы, требующие формульного задания целевой функции, не могут применять к решению большого класса прикладных задач, в которых вид целевой функции не известен, а ее значения вычисляются в результате численного моделирования. 
-
 
 
 \begin{specialtable}[H] 
