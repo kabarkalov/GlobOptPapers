@@ -14,9 +14,9 @@
 \newcommand{\sign}{\operatorname{sign}}
 
 %%%% ДЛЯ РУССКОГО ТЕКСТА закомментировать потом!
-%\usepackage{inputenc}
-%\usepackage[english,russian]{babel}
-%\usepackage{cmap}
+\usepackage{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{cmap}
 %%%%
 
 
@@ -61,9 +61,9 @@ This paper considers the problem of finding the global minimum $x^*$ of a one-di
 \varphi(x^*)=\min\left\{\varphi(x):x\in\left[a,b\right]\right\}.
 \end{equation}
 
-Global optimization problems involving many local extrema arise in many areas of applications (see, e.g., \cite{Cavoretto2021,Kvasov2015,Kvasov2013,Modorskii2016}). As a rule, the calculation of even a single value of the objective function in such problems requires considerable time, since the analytical form of the function is not known and the calculation of its values involves time-consuming numerical modelling. In this case, we have to deal with expensive black-box optimization problems as they are often called. Problems of this class are extremely complicated and are the object of intensive research.
+Global optimization problems involving many local extrema arise in many areas of applications (see, e.g., \cite{Cavoretto2021,Kvasov2013,Kvasov2015,Modorskii2016}). As a rule, the calculation of even a single value of the objective function in such problems requires considerable time, since the analytical form of the function is not known and the calculation of its values involves time-consuming numerical modelling. In this case, we have to deal with expensive black-box optimization problems as they are often called. Problems of this class are extremely complicated and are the object of intensive research.
 
-One should note an important role of one-dimensional global optimization problems. Firstly, as has already been mentioned, they arise in many applications (see, e.g., \cite{Gillard2017,Sergeyev2020}). Secondly, many approaches to solving multidimensional optimization problems are, in one way or another, based on reducing the solution of the original multidimensional problem to solving a series of related one-dimensional optimization problems (see, for example, popular approaches in \cite{Pinter1996,PaulaviciusZilinskas2014,Sergeyev2017,Sergeyev2013}).
+One should note an important role of one-dimensional global optimization problems. Firstly, as has already been mentioned, they arise in many applications (see, e.g., \cite{Gillard2017,Sergeyev2020}). Secondly, many approaches to solving multidimensional optimization problems are, in one way or another, based on reducing the solution of the original multidimensional problem to solving a series of related one-dimensional optimization problems (see, for example, popular approaches in \cite{PaulaviciusZilinskas2014,Pinter1996,Sergeyev2017,Sergeyev2013}).
 
 The literature describes various methods for solving the problem (\ref{problem}) depending on the assumptions about the properties of the objective function \cite{Horst1995,Horst1996,Pinter1996}. One of such assumptions, which is often fulfilled in applied optimization problems, is that the objective function $\varphi(x)$ satisfies the Lipschitz condition 
 \[
@@ -132,14 +132,12 @@ When $\mu=0$, use the value $\mu=1$.
 Note that rule (\ref{gamma}) ensures that the inequality $0 \leq \gamma_i+\gamma_{i-1} \leq 1$ holds for every $1 \leq i \leq m$. Therefore, the value $\mu_i$ will be equal to 0 if one of the endpoints of the interval $ (x_{i-1},x_i ), \; 1 \leq i \leq m,$ belongs to $\Omega$.
 
 \item For each interval $(x_{i-1},x_i), \; 1\leq i \leq m,$ calculate the characteristic
-%\begin{equation}\label{R_i}
-\[
+\begin{equation}\label{R_i}
 \begin{gathered}
 R(i)=(1+\gamma_i+\gamma_{i-1} )\Delta_i+(1-\gamma_i-\gamma_{i-1} ) \frac{ (z_i-z_{i-1} )^2}{(r\mu)^2 \Delta_i }-\\
 -\frac{2[(1-\gamma_i )(1+\gamma_{i-1} ) z_i+(1+\gamma_i )(1-\gamma_{i-1} ) z_{i-1} ]}{r\mu},
 \end{gathered}
-%\end{equation}
-\]
+\end{equation}
 where $r>1$ is the method parameter.
 
 \item Determine the interval to which the maximum characteristic corresponds 
@@ -160,7 +158,23 @@ x^{k+1}=\frac {(x_t+x_{t-1})}{2}-(1-\gamma_t-\gamma_{t-1} ) \frac{(z_t-z_{t-1})}
 
 \end{enumerate}
 
-Note that the erroneous assignment of some discontinuity points from the series (\ref{points}) will not lead to the loss of convergence of the method. The algorithm will interpret such points as a recoverable discontinuity case since the left and right limits of the objective function at such points coincide.
+%Russian
+
+\textbf{Remark 1}. Еще раз отметим, что в соответствии с (\ref{gamma}) значение $\gamma_i+\gamma_{i-1}$ может быть равно либо 0 (обе граничных точки интервала принадлежат области непрерывности функции), либо 1 (одна из граничных точек является точкой разрыва). В этом случае формула (\ref{R_i}) иметь вид
+\[
+R(i)=\Delta_i+\frac{ (z_i-z_{i-1} )^2}{(r\mu)^2 \Delta_i }-\frac{2(z_i + z_{i-1})}{r\mu},
+\]
+в случае отстутсвия точке разрыва и 
+\[
+R(i)=2\Delta_i - \frac{4 z_i }{r\mu}, \; R(i)=2\Delta_i - \frac{4 z_{i-1} }{r\mu},
+\]
+в случае разрыва в точке $x_{i-1}$ или $x_{i}$ соответственно.
+
+\textbf{Remark 2}.
+Приведенные выше формулы для вычисления характеристик интервалов могут быть использованы (в модифицированной форме) в алгоритме решения задач невыпуклыми ограничениями \cite{Sergeyev1995,Sergeyev2006_1,Sergeyev2007}. Здесь решение задачи с частично определенными ограничениями неявно сводится к минимизации разрывной функции, в которой точками разрыва являются границы допустимого множества решений задачи.
+
+
+\textbf{Remark 3}. The erroneous assignment of some discontinuity points from the series (\ref{points}) will not lead to the loss of convergence of the method. The algorithm will interpret such points as a recoverable discontinuity case since the left and right limits of the objective function at such points coincide.
 
 It can be proved that the conditions for the convergence of this algorithm will correspond to the conditions for the convergence of its basic prototype -- the global search algorithm from \cite{Strongin2000}. The formulation and rigorous proof of the convergence conditions will be the subject of further publications.
 
@@ -198,7 +212,10 @@ and define the minimum number $p$ satisfying the conditions
 \begin{equation}\label{mu_main_cond}
  \frac{\mu(p)}{\mu(p+1)} \geq Q, \; 1 \leq p < q(m-2(s+1)),
 \end{equation}
-where $Q>1$ and $0<q<1$ are set numbers.
+where $Q>1$ and $0<q<1$ are parameters.
+%Russian
+Значение параметра $Q$ определяет наши априорные предположения о том, во сколько раз относительная разность $\mu_i$, вычисленная на интервале $(x_{i-1},x_i)$, содержащем точку разрыва, будет превышать максимальную разность $\mu$, найденную по всем интервалам, принадлежащим области непрерывности функции. Данное значение задается исследователем, и в проведенных эксмериментах оно было выбрано равным 3.
+
 
 When at the current $k$-th iteration of the method there is no $p$ that satisfies these conditions, it is interpreted as the absence of unspecified discontinuities. If such $p$ exists, this situation corresponds to the presence of undefined discontinuities. In this case, zero differences $\mu_i$ from (\ref{mu_i}), corresponding to intervals containing specified discontinuity points, are excluded from consideration by the condition $p<m-2(s+1)$.
 
@@ -268,6 +285,18 @@ x^{k+1}=\frac {(x_t+x_{t-1})}{2}-(1-\gamma_t-\gamma_{t-1}- |\delta_t|) \frac{(z_
 
 \item Check the termination condition $x_t-x_{t-1} \leq \epsilon$, where $t$ is the number of the interval with the maximal characteristic and $\epsilon > 0$ is the predefined accuracy.
 \end{enumerate}
+
+\textbf{Remark}. В соответствии с (\ref{gamma}) and (\ref{delta_cond}) значение $\gamma_i+\gamma_{i-1}+|\delta_i |$ может быть равно 0 либо 1, в зависимости от наличия либо отсутствия точки разрыва в интервале $(x_{i-1},x_i)$.
+Так, если данный интервал не содержит точек разрыва, т.е. $\gamma_i+\gamma_{i-1}+|\delta_i | = 0$, его характеристика (\ref{R_i}) пример вид 
+\[
+R(i)=\Delta_i+\frac{ (z_i-z_{i-1} )^2}{(r\mu)^2 \Delta_i }-\frac{2(z_i + z_{i-1})}{r\mu}.
+\]
+Если одна из граничных точек интервала является заданной точкой разрыва, т.е. $\gamma_{i-1} = 1$ или $\gamma_i = 1$, то мы получим соответственно характеристики
+\begin{equation}\label{RR}
+R(i)=2\Delta_i - \frac{4 z_i }{r\mu}, \; R(i)=2\Delta_i - \frac{4 z_{i-1} }{r\mu}.
+\end{equation}
+Аналогичные формулы для характеристик интервалов будут получаться, если $(x_{i-1},x_i)$ является интервалом, который содержит незаданную точку разрыва, т.е. когда $|\delta_i | = 1 $. В этом случае мы таже будем получать формулы (\ref{RR}) для $\delta_i = -1$ и $\delta_i = 1$ соответственно.
+
 
 Fig.~\ref{ris2} shows the results of solving the problem from the previous example (\ref{testFunction}), in which the discontinuity points were considered unspecified. Here we used the parameters of the method $r=2.0, \epsilon=0.001, Q=3.0, q=0.3$. The dashes under the graph indicate the points of 70 trials required for the algorithm to solve problems with the specified accuracy.
 
