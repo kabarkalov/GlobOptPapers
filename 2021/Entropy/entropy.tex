@@ -173,17 +173,20 @@ For example, in \cite{RinnooyKan1987} methods of cluster analysis were used to s
 In \cite{Cassioli2012} the area for starting the local method was allocated based on the classification of starting points using a support vector machine.
 
 %Russian
-Методы машинного обучения активно используются в сочетании с алгоритмами bayesian optimization, основанными на использовании probabilistic surrogate models of the objective function. Детальный обзор данного направления развития методов глобальной оптимизации представлен в \cite{Archetti2019,Zhigljavsky2021}.
+{ \color{red}
+Machine learning methods are actively used in combination with bayesian optimization algorithms based on the probabilistic surrogate models of the objective function. The detailed overview of this trend in the development of global optimization methods is presented in \cite{Archetti2019,Zhigljavsky2021}.
+}
 
 Another popular class of methods for solving global optimization problems is metaheuristic algorithms. 
 Many of them are based on imitation of the processes occurring in living nature. The parameters of such algorithms could also be tuned using ML. For example, \cite{Jin2005} provides an overview of machine learning applications in evolutionary algorithms.
 
-Note that the algorithms of the last class do not provide guaranteed convergence to the solution of the problem and are inferior to deterministic algorithms in terms of the quality of solution \cite{Kvasov2018,Sergeyev2018} (e.g., measured by the number of correctly solved problems from a particular set). Therefore, deterministic methods seem to be potentially more effective.
+Note that the algorithms of the latter class do not provide guaranteed convergence to the solution of the problem and are inferior to deterministic algorithms in terms of the quality of solution \cite{Kvasov2018,Sergeyev2018} (e.g., measured by the number of correctly solved problems from a particular set). Therefore, deterministic methods seem to be potentially more effective.
 
 %Russian
-Настоящая работа направлена на дальнейшее развитие эффективного детерминированного метода глобальной оптимизации, известного как \textit{the information-statistical global search algorithm} \cite{Strongin2000}. Указанная здесь книга содержит результаты теоретических исследований метода, имеющих непосредственное значение для его практической реализации. В частности, в ней детально рассмотрены вопросы сходимости, выбора параметров и условия остановки алгоритма, и т.д.
-Отметим, что алгоритм глобального поиска первоначально был ориентирован на решение unconstrained optimization problems. Впоследствии он был обобщен для решения problems with non-convex constraints\cite{Barkalov2002} and multicriteria optimization problems \cite{Gergel2020}.
-Одновременно с этим были предложены различные параллельные варианты указанных алгоритмов, которые могут быть использованы на современных суперкомпьютерах \cite{Barkalov2016,globalizerSystem,Strongin2018}.
+This paper aims to further develop the efficient deterministic global optimization method known as \textit{the information-statistical global search algorithm} \cite{Strongin2000}. The book referenced here contains the results of theoretical studies of the method that are of direct importance for its practical implementation. In particular, it discusses in detail the issues of convergence, the choice of parameters, and the conditions for stopping the algorithm, etc.
+Note that the global search algorithm was originally designed for solving unconstrained optimization problems. Later, it was generalized to solve problems with non-convex constraints\cite{Barkalov2002} and multicriteria optimization problems \cite{Gergel2020}.
+At the same time, scholars proposed various parallel versions of these algorithms, which can be used on modern supercomputers.\cite{Barkalov2016,globalizerSystem,Strongin2018}.
+
 
 Several strategies have been proposed to speedup the global search algorithm (in terms of the number of iterations required to solve the problem with a given accuracy). In this paper, we propose a new approach to acceleration based on identifying areas of attraction of local minima using machine learning methods. The identification of regions of attraction and the launch of local search in these regions can significantly reduce the number of trials required for the method to achieve global convergence. Experiments carried out on a series of several hundred test problems confirm this statement. 
 
@@ -307,20 +310,22 @@ f(x) = c_j, \; x\in D_j.
 \end{equation}
 
 %Russian
-В целом, можно сказать, что дерево принятия решений -- это бинарное дерево, в листьях которого находятся значения функции, а в остальных узлах -- условия перехода.
-В нашем случае при применении дерева решений для построения регрессии каждому узлу соответствует несколько результатов испытаний и значение узла $c_j$, которое вычисляется как среднее квадратичное значений в точках испытаний, приписанных к этому узлу.
-Итоговая кусочно-постоянная аппроксимация строится с использованием значений $c_j$, которые находятся в листьях дерева. 
+{\color{red}
+Generally speaking, a decision tree is a binary tree, the leave nodes of which contain the values of the function, and the other nodes contain the transition conditions.
+In our case, when applying a decision tree to construct a regression, each node corresponds to the results of several trials and the value $c_j$, which is calculated as the mean square of the trial points assigned to this node.
+The final piecewise constant approximation is constructed using the values $c_j$, located in the leave nodes of the tree. 
 
-Дерево строится рекурсивно, начиная с корневого узла. 
-В каждом узле применяется правило принятия решения: все данные  разбиваются на две группы (согласно некоторому правилу разбиения) и отправляются в левый и правый узлы-потомки. Затем процедура рекурсивно разделяет левый и правый узлы. 
-Остановка рекурсии в узле происходит в одном из следующих случаев:
+The tree is built recursively, starting from the root node. 
+A decision rule is applied at each node: all data is divided into two groups (according to a partitioning rule) and sent to the left and right child nodes. The procedure then recursively separates the left and right nodes. 
+Recursion stops at a node in one of the following cases:
 \begin{itemize}
-	\item Количество приписанных к узлу точек испытаний становится меньше указанного порогового значения (мы использовали 1).
-	\item Сумма квадратов отклонений значений функции от значения $c_j$, приписанного к этому узлу, становится меньше заданной точности (мы использовали 0.001).
+	\item The number of trial points assigned to the node becomes less than the specified threshold value (we used 1).
+	\item The sum of the squared deviations of the function values from the value $c_j$, assigned to this node becomes less than the set accuracy (we used $10^{-3}$).
 \end{itemize}
-Подробнее об алгоритме построения регрессии с использованием деревьев решений см., например, \cite{Breiman1984}.
+For more information on the algorithm for constructing regression using decision trees, see, for example \cite{Breiman1984}.
+}
 
-Регрессия, построенная с помощью деревьев решений,
+Regression built using decision trees,
 is, on the one hand, rather simple, and on the other hand, it adequately reflects the properties of the function under investigation (the presence or absence of local minima). The selection of regions of attraction of local minima using model (\ref{dtree}) can be organized as follows.
 
 Let $x^{k+1}$ be the point of the current trial. For a given point, an index  $j$ is sought such that $x^{k+1} \in D_j$. 
@@ -340,8 +345,10 @@ The value  $q^i=0$ is assigned by default and indicates that point $x^i$ is obta
 The value $q^i=1$ is assigned to the points obtained as a result of the work of the local method, while the value  $q^i=2$ corresponds to the point of the local minimum found as a result of the work of the local search.
 
 %Russian
-Использование additional attribute $q^i, \; 0 \leq i \leq k ,$ позволяет различать точки, полученные во время глобального ($q^i=0$) и во время локального ($q^i=1,2$) поиска. Интервалы, граничные точки которых имеют значение $q^i=1$ или $q^i=2$, будут пропускаться при глобальном поиске, т.е. в них не будут проводиться дальнейшие испытания. 
-А выделенное значение $q^i=2$, соответствующее локальному минимуму, будет позволять использовать данные точки при проверке критерия остановки. Если по правилам глобального поиска новая точка испытания должна быть поставлена в заданной $\epsilon$-окрестности одного из найденных локальных минимумов, это будет соответствовать окончанию поиска. 
+{\color{red}
+Using the additional attribute $q^i, \; 0 \leq i \leq k ,$ makes it possible to distinguish between points obtained during a global ($q^i=0$) and a local ($q^i=1,2$) search. The intervals, the boundary points of which have the value  $q^i=1$ or $q^i=2$, will be skipped in the global search, i.e. they will not be tried further. 
+While the selected value $q^i=2$, which corresponds to the local minimum will allow using these points for checking the stopping criterion. When the rules of the global search signal that a new trial point needs be placed in a given  $\epsilon$-neighborhood of one of the found local minima, this will correspond to the end of the search.
+}
 
 Let us now describe a modified global search algorithm that uses decision trees to isolate and exclude areas of attraction of local minima; we will further refer to this algorithm as GSA-DT. Recall that the superscript corresponds to the number of the iteration at which the trial was carried out at this point, and the subscript corresponds to the number of the point in the row  (\ref{xt}).
 
@@ -366,7 +373,9 @@ The algorithm stops when one of the following conditions is met:
 where $t$ is from (\ref{MaxR}), and $\epsilon>0$ is a given accuracy.
 
 %Russian
-Отметим, что указанный критерий остановки проверяется после Step 6, т.е. после вычисления по правилам глобального поиска точки $x^{k+1}$ очередного испытания, но до проведения самого испытания в ней. Смысл данного критерия заключается в следующем. Поиск останавливается, когда интервал $(x_{t-1},x_t)$, в который попадает точка $x^{k+1}$, становится достаточно малым, либо когда точка $x^{k+1}$ попадает в малую окрестность одного из найденных локальных минимумов, который в этом случае будет одновременно являться и глобальным.
+{\color{red}
+Note that the specified stopping criterion is checked after Step 6, i.e. after the calculation according to the rules of the global search for the point of the next trial $x^{k+1}$, but before the trial itself is carried out in it. The idea behind this criterion is as follows. The search stops when the interval  $(x_{t-1},x_t)$, in which the point $x^{k+1}$ falls, becomes sufficiently small, or when the point $x^{k+1}$ falls into a small neighborhood of one of the found local minima. Such minima in this case will be simultaneously global.
+}
 
 For example, consider the work of the GSA-DT algorithm with minimization of the same multi-extremal function, which is presented in Figure \ref{fig1}. The same parameters were used at the start of the algorithm: the parameter  $r=2.2$ from (\ref{R}) and value $\epsilon = 10^{-3}$ in the stopping criterion of the method. 
 Figure \ref{fig2} illustrates the operation of the GSA-DT algorithm. In addition to the graph of the objective function, it shows a piecewise constant approximation of the form (\ref{dtree}) built at the final stage of the search. Black points on the graph correspond to the global search phase, green points correspond to the work of the local method. In total, the GSA-DT method required 49 trials to solve the problem; there was no accumulation of trial points in the vicinity of local minima.
@@ -450,19 +459,20 @@ The next generator (denoted   $F_{HL}$) is determined by the expression
 where the values of the parameters $A_j,\: B_j,\: 1 \le j \le 14$, are independently and uniformly distributed in the interval  $[-1,1]$. 
 
 Let us compare the basic global search algorithm (GSA) and its decision tree-based modification (GSA-DT) with the well-known DIRECT global optimization algorithm  \cite{Jones2009}.
-%Russian
-Выбор именно этого метода для сравнения объясняется следующим. DIRECT является одним из наиболее известных и популярных детерминированных методов решения задач глобальной оптимизации with ``black box'' objective function. Обзор различных модификаций метода, а также примеров решения задач приведен в \cite{Jones2021}.
-Для этого метода известно, что при достаточно большом числе поисковых испытаний DIRECT гарантированно найдет глобальное решение задачи.  
-Однако если использовать критерий остановки по точности, то метод может быстро остановиться в одном из локальных минимумов. Сказанное подтверждается приведенными в данном разделе результатами экспериментов. 
+{\color{red}
+%Russian 
+The choice of this particular method for comparison is explained as follows. DIRECT is one of the most well-known and popular deterministic methods for solving global optimization problems with a `` black box '' objective function. An overview of various modifications of the method, as well as examples of solving problems, is given in \cite{Jones2021}.
+It is known that with a sufficiently large number of search trials, DIRECT is guaranteed to find a global solution to the problem. 
+However, if the stopping by accuracy is used as a criterion, then the method can abruptly stop at one of the local minima, which is confirmed by the experimental results presented in this section. 
 
-Если же говорить про детерминированные оптимизационные алгоритмы, реализованные in popular Computer Algebra Systems (CAS), то их сравнение с такими методами, как DIRECT или GSA, будет некорректным по следующей причине.
-Оптимизационные алгоритмы из CAS ориентированы на решение задач с целевой функцией, заданной явно, в виде формулы.
-Формульное задание целевой функции предполагает известным также и ее производные, что позволяет использовать методы первого порядка, обладающие значительно более быстрой сходимостью, чем методы нулевого порядка, к которым относится и DIRECT, и GSA. Но при этом методы первого порядка не гарантируют нахождение глобального минимума. 
-Например, система Mathematica предлагает для решения задач глобальной оптмизации методы, которые гарантированно найдут глобальное решение задачи только в случае, если целевая функция и ограничения являются линейными или выпуклыми. Otherwise, the result may sometimes only be a local minimum.
+Regarding the deterministic optimization algorithms implemented in popular Computer Algebra Systems (CAS), their comparison with methods such as DIRECT or GSA will be incorrect for the following reason.
+Optimization algorithms from CAS are focused on solving problems with an objective function set explicitly, in the form of a formula.
+Formula definition of the objective function assumes that its derivatives are also known, which makes it possible to use first-order methods with significantly faster convergence than zero-order methods, which include both DIRECT and GSA. However, first-order methods do not guarantee finding the global minimum. 
+For example, the Mathematica system offers methods for solving global optimization problems that are guaranteed to find a global solution to the problem only if the objective function and constraints are linear or convex. Otherwise, the result may sometimes only be a local minimum.
 
-Более того, методы, требующие формульного задания целевой функции, не могут применяться к решению большого класса прикладных задач, в которых вид целевой функции не известен, а ее значения вычисляются в результате численного моделирования. Использование для решения задач подобного вида эвристических методов (таких как Differential Evolution, Simulated Annealing or Random Search) также не всегда приводит к решению задачи. 
-These methods often do find the global minimum, but are not guaranteed to do so. В терминах числа корректно решенных задач эвристические методы проигрывают детерминированным \cite{Sergeyev2018}.
-
+Moreover, methods that require a formulaic specification of the objective function cannot be applied to the solution of a large class of applied problems in which the form of the objective function is not known, and its values are calculated as a result of numerical simulation. The use of heuristic methods for solving problems of this kind (such as Differential Evolution, Simulated Annealing or Random Search) also does not always lead to the solution of the problem. 
+These methods often do find the global minimum, but are not guaranteed to do so. In terms of the number of correctly solved problems, heuristic methods are inferior to deterministic ones \cite{Sergeyev2018}.
+}
 
 The decision trees in the GSA-DT algorithm were built using the OpenCV 4.5.1 library (class cv::ml::DTrees). A regression function was constructed by a single decision tree. This allowed us to obtain a piecewise constant approximation of the objective function in which one or several trial points corresponded to each leaf node of the tree. 
 The tree was built without any limitations on maximum depth (MaxDepth); the accuracy of tree construction (RegressionAccuracy) was $10^{-3}$; the minimum number of trial points in the tree node (MinSampleCount) was equal to one; all other parameters were set by default. Stopping tree building occurred if all absolute differences between an estimated value in a node and values of train samples in this node are less than accuracy.
@@ -470,9 +480,10 @@ The tree was built without any limitations on maximum depth (MaxDepth); the accu
 The global optimization methods discussed above were compared when solving 100 problems from the  $F_{SH}$ and $F_{HL}$ classes. The problem will be considered correctly solved if after stopping the method by accuracy (i.e. when the length of the current search interval becomes less than $\epsilon \cdot \left|b-a\right| $) the current estimate of the optimum  $x_k^*$ lies in the $\epsilon$-neighborhood of the known solution of the problem  $x^*$, i.e. if the condition  $|x^*-x_k^*| \leq \epsilon \cdot \left|b-a\right|$ is satisfied.
 
 Tables \ref{table:average_Shekel} and \ref{table:average_Hill} show the number of search trials that, on average, were required to minimize the Shekel and Hill functions with different search accuracy  $\epsilon$. The number of unsolved problems is indicated in parentheses. 
-%Russian
-В этих и последующих таблицах для метода GSA-DT приведено полное число испытаний, которые были выполнены как во время глобального, так и во время локального поиска.
-При решении задач с точностью $10^{-2}$, $10^{-3}$, $10^{-4}$ число запусков локального поиска при решении одной задачи составляло в среднем 2, 3 и 4 соответственно; а отношение числа испытаний, выполненных по правилам глобального поиска, к числу испытаний, выполненных локальным методом, составляло (при соответствующей точности) 7.2, 6.0, 4.5 для задач класса $F_{HL}$ и 3.2, 2.3, 1.9 для задач класса $F_{SH}$.
+{\color{red}
+These and subsequent tables feature the total number of trials that were performed during both global and local searches by GSA-DT.
+When solving problems with an accuracy  $10^{-2}$, $10^{-3}$, $10^{-4}$ the number of local search launches when solving one problem on average was equal to 2, 3, and 4, respectively; and the ratio of the number of trials performed according to the global search rules to the number of trials performed by the local method was (with appropriate accuracy) 7.2, 6.0, 4.5 for problems of the $F_{HL}$ class and 3.2, 2.3, 1.9 for the $F_{SH}$ class problems.
+}
 
 %Ebglish
 The experimental results show that with a rough solution to the problem, all methods show similar results in terms of the number of trials, while with a high solution accuracy, the GSA-DT algorithm requires 2 times fewer trials than its prototype. At the same time, GSA-DT outperforms the DIRECT method both in the average number of search trials and in the number of correctly solved problems. In particular, if we use the accuracy $\epsilon = 10^{-2}\left|b-a\right|$, then the DIRECT method stops too early and does not find a global solution to many problems. 
@@ -590,10 +601,11 @@ The experimental results show that the use of the GSA-DT algorithm can significa
 Further research into this issue will focus on using more complex models of the objective function to obtain a more accurate approximation. We plan to use artificial neural networks as such an approximator. This will require the development of new methods for identifying local extrema since function approximation using a neural network is more complicated from this point of view. We also plan to pay attention to the issues of the reliability of the results obtained using machine learning methods. For the solved model problems, the use of machine learning methods shows good results, but the question of whether this effect will persist in more complex problems remains open.
 
 %Russian
-Еще одним направлением дальнейшей работы будет являться комбинирование предложенного подхода к использованию локального поиска с традиционными способами ускорения алгоритмов глобальной оптимизации. Например, широко известным способом ускорения алгоритмов данного класса является использование local adaptive estimates of the Lipschitz constant $L_i$ в различных зонах $D_i \in D$ области поиска $D$ вместо одной глобальной оценки константы $L$ во всей области $D$ ( see \cite{Kvasov2020,Sergeyev2021}).
-Это позволяет алгоритму настраиваться на локальное поведение целевой функции в различных частях допустимой области и сокращает число поисковых испытаний, требующихся для достижения сходимости. Использование только глобальной информации о поведении целевой функции в ходе ее минимизации может значительно замедлить сходимость алгоритма к точке
-глобального минимума. В данном направлении также планируется использовать методы машинного обучения для выделения подобластей $D_i \in D$ и построения локальных оценок константы Липшица $L_i$ в выделенных подобластях. 
-
+{\color{red}
+Another direction for further work will be the combination of the proposed approach to the application of local search with traditional methods of accelerating global optimization algorithms. For example, a well-known way to speed up algorithms of this class is to use local adaptive estimates of the Lipschitz constant $L_i$ in various subdomains $D_i \in D$ within the search domain $D$ instead of a single global estimate of the constant $L$ for the entire domain $D$ ( see \cite{Kvasov2020,Sergeyev2021}).
+This allows the algorithm to adjust to the local behavior of the objective function in different parts of the feasible domain, and, thereby, reduces the number of search trials required to achieve convergence. Using only global information about the behavior of the objective function during its minimization can significantly slow down the convergence of the algorithm to a point of global minimum. 
+Further research on this issue could focus on using machine learning methods to isolate subdomains $D_i \in D$ and construct local estimates of the Lipschitz constant  $L_i$ in the selected subdomains.
+}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
