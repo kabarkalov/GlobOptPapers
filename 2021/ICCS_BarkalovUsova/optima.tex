@@ -1,0 +1,422 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2017/10/04
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{amsmath,amssymb}
+\usepackage{mathtext}
+
+%\usepackage{hyperref}
+
+\newcommand{\sign}{\operatorname{sign}}
+
+%%%% ДЛЯ РУССКОГО ТЕКСТА закомментировать потом!
+%\usepackage{inputenc}
+%\usepackage[english,russian]{babel}
+%\usepackage{cmap}
+%%%%
+
+
+% If you use the hyperref package, please uncomment the following line
+% to display URLs in blue roman font according to Springer's eBook style:
+% \renewcommand\UrlFont{\color{blue}\rmfamily}
+
+\begin{document}
+%
+\title{A Search Algorithm for the Global Extremum \break of a Discontinuous Function\thanks{This work was supported by the Russian Science Foundation, project No.\,21-11-00204.}}
+%
+\titlerunning{A Search Algorithm for the Global Extremum}
+% If the paper title is too long for the running head, you can set 
+% an abbreviated paper title here
+%
+\author{Konstantin Barkalov \orcidID{0000-0001-5273-2471}  
+\and Marina Usova \orcidID{0000-0002-0722-6884}
+}
+%
+\authorrunning{K. Barkalov, M. Usova}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{Lobachevsky State University of Nizhny Novgorod, Nizhny Novgorod, 
+Russia \email{konstantin.barkalov@itmm.unn.ru}}
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+This article discusses the problem of finding the global minimum of a one-dimensional function that may have several finite jump discontinuity points. The discontinuities of the objective function may be due to the nature of the optimized object in the mathematical model (for example, shock effects, resonance phenomena, jumps in geometric dimensions or material properties, etc.). In some cases, the discontinuity poits are known; but at the same time, there are problems with no a priori estimates of discontinuity points. It is known, however, that such points do exist. The paper gives a description of the global search algorithm for solving such class of problems. In addition, the authors conducted an experimental comparison of the proposed algorithm with the methods of MATLAB Global Optimization Toolbox.
+
+\keywords{Global optimization \and Multiextremal functions \and Discontinuous functions \and Algorithms' comparison }
+
+\end{abstract}
+%
+%
+%
+\section{Introduction}
+
+This paper considers the problem of finding the global minimum $x^*$ of a one-dimensional function $\varphi(x)$ of the form 
+\begin{equation}\label{problem}
+\varphi(x^*)=\min\left\{\varphi(x):x\in\left[a,b\right]\right\}.
+\end{equation}
+
+Global optimization problems involving many local extrema arise in many applications (see, e.g. \cite{Cavoretto2021,Kvasov2013,Kvasov2015,Modorskii2016}). As a rule, the calculation of even a single value of the objective function in these problems takes considerable time, since the analytical form of the function is not known and the calculation of its values involves time-consuming numerical modelling. That is why these computationally expensive optimization problems are often called black-box problems. They are extremely complicated and are the subject of intensive research.
+
+Despite their complex nature, these problems play an important role in many aspects of mathematical research. First, as has already been mentioned, they are applied for multiple tasks in a variety of fields (see, e.g., \cite{Gillard2017,Sergeyev2020}). Secondly, many approaches to solving multidimensional optimization problems, in one way or another, are based on reducing the solution of the original multidimensional problem to solving a series of related one-dimensional optimization problems (see, for example, popular approaches in \cite{PaulaviciusZilinskas2014,Pinter1996,Sergeyev2017,Sergeyev2013}).
+
+The literature describes various methods for solving the problem (\ref{problem}) depending on the assumptions about the properties of the objective function \cite{Horst1995,Horst1996,Pinter1996}. One of such assumptions, which is often made about  applied optimization problems, is that the objective function $\varphi(x)$ satisfies the Lipschitz condition 
+\[
+\left|\varphi(x')-\varphi(x'')\right|\leq L\left|x'-x''\right|,\; x',x'' \in [a,b],
+\]
+where the constant $L$ is unknown a priori. 
+This feature of the objective function is used for the development of algorithms for multiextremal optimization \cite{Evtushenko2009,Evtushenko2013,Jones2009,Paulavicius2011}.
+
+
+
+However, in some applied problems, the Lipschitz condition may not be satisfied due to the presence of discontinuous jumps in the values of the function at certain points of the search domain. Such jumps can be caused by sharp changes in the characteristics of the optimized object which trigger minor changes in its parameters, for example:
+\begin{itemize}
+  \item changes in the thickness of material (or other geometric parameters of the object);
+  \item changes in physical properties (both when different materials are used in a single design project, and when the properties of one material change as a result of technological operations, for example,  welding, etc.);
+  \item changes in external sources of impact (temperature, force, etc.).
+\end{itemize}
+
+We will interpret such sharp changes as jump discontinuities. For these cases, the set of points, at which the characteristics of the object jump, is typically known in advance. However, there are problems with no a priori estimates of discontinuity points. It is known, however, that such points may exist.
+
+The known methods for solving such problems, as a rule, either generalize the concept of a gradient for discontinuous functions \cite{Batukhtin1993,Batukhtin1998,Moreau2000}, or belong to the class of bio-inspired algorithms \cite{Ban2019,ZhangXu}. Generally speaking, these methods only search for a local solution to the problem.
+
+In this paper, we will consider a deterministic algorithm for solving global optimization problems with both given and unspecified discontinuity points. This algorithm was developed on the basis of the \textit{global search algorithm} proposed by Strongin \cite{Strongin2000}, and it can be used to find the global optimum. 
+%Russian
+The scope of this article is limited to the one-dimensional case. Generalization of the new algorithm to the multidimensional case can be performed in accordance with the already existing standard approaches from \cite{Grishagin2016,Grishagin2018}, which use a dimensionality reduction based on the adaptive nested optimization scheme. 
+The indicated dimensionality reduction scheme allows replacing the solution of the original multidimensional problem with the solution of a family of one-dimensional problems that are recursively related to each other. 
+
+The main part of the article is organized as follows.
+Section 2 describes the algorithm for functions with given discontinuities. Section 3 discusses how to identify unspecified discontinuities. Section 4 describes how the discontinuity detection method can be used in the original algorithm. Section 5 presents the results of a comparison of the developed algorithm with the global search methods implemented in MATLAB Global Optimization Toolbox \cite{MatlabOTB}. Section~6 concludes the paper. 
+
+\section{Algorithm for Functions with Given Discontinuity Points}
+
+Let us consider the problem (\ref{problem}) assuming that the objective function $\varphi(x), x\in[a,b],$ has jump discontinuities at the given points
+\begin{equation}\label{points}
+a = \omega_0 <\omega_1 < ... <\omega_s < \omega_{s+1} = b
+\end{equation}
+and satisfies the Lipschitz condition between these points, i.e.
+\begin{equation}\label{LipschitzСondition}
+\left|\varphi(x')-\varphi(x'')\right|\leq L\left|x'-x''\right|, \; x',x'' \in (\omega_{i-1},\omega_{i}), \; 1 \leq i \leq s+1.
+\end{equation}
+Points $\omega_{0}$ and $\omega_{s+1}$ are included in the general list regardless of the presence of function discontinuities at them for the convenience of subsequent presentation. Let us denote the resulting set of points $\Omega$, i.e. $\Omega = \{\omega_{0}, ..., \omega_{s+1}\}$, where $\omega_{0} = a, \; \omega_{s+1} = b$.
+
+In \cite{Strongin2000}, the global search algorithm (GSA) was applied for solving problems without discontinuities. The authors also proposed a method for accounting for discontinuities based on a smoothing transformation of the objective function. Below we consider an algorithm based on GSA, in which the discontinuous function is minimized without smoothing of the discontinuities, which substantially simplifies the computational scheme of the algorithm.
+
+In the preliminary step of the method, the first $s+1$ trials are carried out at arbitrary interior points $x^i \in (\omega_{i-1},\omega_{i}), \; 1 \leq i \leq s+1 $. A point $x^{k+1}$, $k \geq s+1$, for the next trial is selected as follows.
+
+\begin{enumerate}
+\item Arrange prior trial points $x^1,...,x^k$ and points $\omega_{0}, ..., \omega_{s+1}$ in ascending coordinate order. Designate the points of the resulting single series $x_i, 0\leq i \leq m = k + s + 1$,
+\begin{equation}\label{pointsX}
+a = x_0 < x_1 < ... < x_{m-1} < x_{m} = b,
+\end{equation}
+and match them with values $z_i=\varphi(x_i)$ for $x_i \not\in \Omega$. Note that, in accordance with the choice of trial points at the preliminary step of the algorithm, there will be no interval $(x_{i-1},x_i)$, the boundary points of which simultaneously belong to the set $\Omega$.
+
+\item For each interval $(x_{i-1},x_i ), 1\leq i \leq m$, calculate the values
+\begin{equation}\label{mu_i}
+\mu_i=(1-\gamma_i-\gamma_{i-1} )  \frac{|z_i-z_{i-1} |}{(x_i-x_{i-1} )}
+\end{equation}
+where
+\begin{equation}\label{gamma}
+\gamma_i = 
+\begin{cases}
+	1, &\text{$x_i \in \{\omega_{0},...,\omega_{s+1}\} $}, \\
+	0, &\text{$x_i \not\in \{\omega_{0},...,\omega_{s+1}\}. $}
+\end{cases}
+\end{equation}
+Find the maximum value 
+%\begin{equation}\label{mu}
+\[
+\mu=\max\left\{\mu_i: 1 \leq i \leq m\right\}.
+\]
+%\end{equation}
+When $\mu=0$, use the value $\mu=1$.
+Note that rule (\ref{gamma}) ensures that the inequality $0 \leq \gamma_i+\gamma_{i-1} \leq 1$ holds for every $1 \leq i \leq m$. Therefore, the value $\mu_i$ will be equal to 0 if one of the endpoints of the interval $ (x_{i-1},x_i ), \; 1 \leq i \leq m,$ belongs to $\Omega$.
+
+\item For each interval $(x_{i-1},x_i), \; 1\leq i \leq m,$ calculate the characteristic
+\begin{equation}\label{R_i}
+\begin{gathered}
+R(i)=(1+\gamma_i+\gamma_{i-1} )\Delta_i+(1-\gamma_i-\gamma_{i-1} ) \frac{ (z_i-z_{i-1} )^2}{(r\mu)^2 \Delta_i }-\\
+-\frac{2[(1-\gamma_i )(1+\gamma_{i-1} ) z_i+(1+\gamma_i )(1-\gamma_{i-1} ) z_{i-1} ]}{r\mu},
+\end{gathered}
+\end{equation}
+where $r>1$ is the method parameter.
+
+\item Determine the interval to which the maximum characteristic corresponds 
+%\begin{equation}\label{R_max}
+\[
+R(t)=\max\left\{R(i): 1 \leq i \leq m\right\}.
+%\end{equation}
+\]
+
+\item Carry out next trial at the point
+%\begin{equation}\label{new_x}
+\[
+x^{k+1}=\frac {(x_t+x_{t-1})}{2}-(1-\gamma_t-\gamma_{t-1} ) \frac{(z_t-z_{t-1})}{2r\mu}.
+%\end{equation}
+\]
+
+\item Check the stopping condition $x_t-x_{t-1} \leq \epsilon$, where $t$ is the number of the interval with the maximal characteristic and $\epsilon > 0$ is the predefined accuracy.
+
+\end{enumerate}
+
+%Russian
+\textbf{Remark 1}. In accordance with (\ref{gamma}), the value $\gamma_i+\gamma_{i-1}$ can be equal to either 0 (both boundary points of the interval belong to the domain of continuity of the function), or 1 (one of the boundary points is the jump point). In the first case, the formula  (\ref{R_i}) will have the form
+\[
+R(i)=\Delta_i+\frac{ (z_i-z_{i-1} )^2}{(r\mu)^2 \Delta_i }-\frac{2(z_i + z_{i-1})}{r\mu}.
+\]
+And in the second case we will have
+\[
+R(i)=2\Delta_i - \frac{4 z_i }{r\mu}, \; R(i)=2\Delta_i - \frac{4 z_{i-1} }{r\mu},
+\]
+in case of discontinuity at the point  $x_{i-1}$ or $x_{i}$ respectively.
+
+\textbf{Remark 2}.
+The above formulas for calculating the characteristics of intervals can be used (in a modified form) in the algorithm for solving problems with non-convex constraints  \cite{Barkalov2002,Sergeyev2006_1,Sergeyev2007,Sergeyev1995}. Here, the solution to the problem with partially defined constraints is implicitly reduced to minimizing a discontinuous function, in which the discontinuity points are the boundaries of the admissible set of the constrained problem.
+
+
+\textbf{Remark 3}. The erroneous assignment of some discontinuity points from the series (\ref{points}) will not lead to the loss of convergence of the method. The algorithm will interpret such points as a recoverable discontinuity case since the left and right limits of the objective function at such points coincide.
+
+It can be proved that the convergence conditions for this algorithm correspond to the convergence conditions for its prototype -- the global search algorithm from \cite{Strongin2000}. The formulation and rigorous proof of the convergence conditions will be the subject of further publications.
+
+Let us illustrate the operation of the algorithm during the search for the minimum of the function
+\begin{equation}\label{testFunction}
+\varphi(x) =  0.1\sum_{i=1}^5{i\sin{(10(i+1)x+i)}}+
+\begin{cases}
+	-4, &0 \leq x < 3.1\\
+	10, &3.1 \leq x < 4.6\\
+	0, &4.6 \leq x < 7.0\\
+	30, &7.0 \leq x < 9.0\\
+	0, &9.0 \leq x \leq 10.0
+\end{cases}
+\end{equation}
+at $x\in[0,10]$. Here, all the discontinuity points were considered to be known, and the parameters of the method were $r=2.0,\; \epsilon=0.001$. Fig.~\ref{ris1} shows a graph of this function; the discontinuities are marked with a dotted line. The dashes under the graph indicate the points of 70 trials required for the algorithm to solve problem with the specified accuracy.
+
+\begin{figure}[ht]
+	\begin{center}
+			\includegraphics[width=0.9\linewidth]{ris_1.jpg}
+			\caption{Discontinuous objective function graph and trial points in case of given discontinuity points}
+      \label{ris1}
+	\end{center}
+\end{figure}
+
+\section{Identifying Unspecified Discontinuities}
+
+Let us suppose that the location of the discontinuity points for the function $\varphi(x)$ is not known, but it is known that such points are possible. Let the function have a discontinuity at an a priori unknown point $\omega \in(x_{i-1},x_i)$, then the relative difference $\mu_i$ from (\ref{mu_i}) will significantly exceed the relative differences for other intervals, since within within these intervals the function satisfies the Lipschitz condition. Therefore, such instances can be identified based on a comparison of the relative differences $\mu_i$ from (\ref{mu_i}) corresponding to different search intervals $(x_{i-1},x_i)$.
+
+Let us enumerate the differences $\mu_i$ from (\ref{mu_i}) in decreasing order (by the index in brackets)
+
+\begin{equation}\label{mu_cond}
+\mu(1) \geq \mu(2) \geq ... \geq \mu(m)
+\end{equation}
+and define the minimum number $p$ satisfying the conditions
+\begin{equation}\label{mu_main_cond}
+ \frac{\mu(p)}{\mu(p+1)} \geq Q, \; 1 \leq p < q(m-2(s+1)),
+\end{equation}
+where $Q>1$ and $0<q<1$ are parameters.
+%Russian
+The value of the parameter $Q$ determines the a priori assumptions about how many times the relative difference $\mu_i$, calculated on the interval $(x_{i-1},x_i)$ with the jump point, will exceed the maximum difference $\mu$, found over all intervals belonging to the domain of continuity of the function. This value is set by the researcher. In our experiments it was equal to 3.
+
+
+The lack of $p$ at the $k$-th iteration of the method that satisfies these conditions is interpreted as the absence of unspecified discontinuities. If such $p$ exists, it indicates the existence of undefined discontinuities. In this case, zero differences $\mu_i$ from (\ref{mu_i}) corresponding to intervals containing specified discontinuity points, are excluded from consideration by the condition $p<m-2(s+1)$.
+
+Note that the value of the difference $\mu_i$ for the interval containing the extremum point can be close to zero, which will lead to the fulfillment of the first inequality from (\ref{mu_main_cond}). To eliminate the effect of small relative differences of intervals containing extreme points, the additional constraint $1 \leq p < q(m-2(s+1))$ is introduced in (\ref{mu_main_cond}) to exclude small values of $\mu_i$ from consideration. 
+%Russian
+The parameter $0<q<1$ is also set by the researcher. The value $1 - q$ reflects a priori assumptions about what proportion of search intervals will have $\mu_i$ values close to zero, i.e. actually characterizes the degree of multi-extremity of the problem. In our experiments, we used the value $q=0.3$.
+
+
+Let us select a subset of numbers
+\begin{equation}\label{set_I}
+I=\left\{ i:1 \leq i \leq m, \; \mu_i=\mu(j), \; 1 \leq j \leq p\right\}
+\end{equation}
+of the intervals $(x_{i-1},x_i)$, which correspond to large relative differences $\mu_i$. Large difference values are interpreted as the presence of undefined discontinuities in the intervals $(x_{i-1},x_i), i \in I$. Moreover, the set $I$ can change in the process of solving the problem.
+
+\section{Algorithm for Unspecified Discontinuities}
+
+This algorithm is a modification of the algorithm described in Section 2 for given discontinuities and consists of the following. 
+
+The first $s+1$ trials are carried out at arbitrary interior points $x^i \in (\omega_{i-1},\omega_i )$,  $1 \leq i \leq s+1$, where the set $\Omega=\{\omega_0,...,\omega_{s+1}\}$ contains the given discontinuity points, as well as boundary points $\omega_0=a$ and $\omega_{s+1}=b$. A point for the next trial $x^{k+1}, \; k \geq s+1$, is selected as follows.
+
+\begin{enumerate}
+\item Sort points of a set $\{x^1,...,x^k\} \cup \Omega$ in ascending order by their coordinates 
+\begin{equation}\label{x_cond}
+ a=x_0<x_1<...<x_{m-1}<x_m=b,
+\end{equation}
+where $m=s+k+1$. Each point is matched with an attribute $\gamma_i$ from (\ref{gamma}) (the presence or absence of a given discontinuity) and with the value of the function $z_i=\varphi(x_i)$ calculated only for $x_i \not\in \Omega$, i.e. at $\gamma_i=0$.
+
+\item Calculate the relative differences $\mu_i, \; 1 \leq i \leq m$, from (\ref{mu_i}) and order them in descending order, i.e. build a series (\ref{mu_cond}).
+
+\item Determine $p$ which satisfies the inequalities (\ref{mu_main_cond}), where $0<q<1<Q$ are the parameters of the algorithm. Construct a set $I$ from (\ref{set_I}), the elements of which are interpreted as numbers of intervals that can contain a discontinuity. Generate interval attributes
+\begin{equation}\label{delta_cond}
+\delta_i=
+\begin{cases}
+	\sign{(z_i - z_{i-1})}, &\text{$i \in I$}, \\
+	0, &\text{$i \not \in I$}.
+\end{cases}
+\end{equation}
+The value $\delta_i=-1$ corresponds to a sharp decrease in the function in the interval $(x_{i-1},x_i)$, $\delta_i=1$ -- to an increase, $\delta_i=0$ -- to the lack of jump. Note that in accordance with the rules (\ref{gamma}) and (\ref{delta_cond}) for calculating attributes $\gamma_i$ and $\delta_i$ the inequalities
+$ 0 \leq \gamma_i+\gamma_{i-1}+|\delta_i | \leq 1, \; 1 \leq i \leq m, $
+are satisfied.
+
+\item Determine the maximum value
+\begin{equation}\label{mu_new}
+\mu=\max\left\{\left(1-\gamma_i-\gamma_{i-1}-|\delta_i|\right) \frac {|z_i-z_{i-1}|}{(x_i-x_{i-1})}: 1 \leq i \leq m\right\}.
+\end{equation}
+When $\mu=0$, use the value $\mu=1$.
+
+\item For each interval $(x_{i-1},x_i), \; 1 \leq i \leq m$, calculate the characteristic
+%\begin{equation}\label{R_new}
+\[
+\begin{gathered}
+R(i)=(1+\gamma_i+\gamma_{i-1}+|\delta_i |) \Delta_i+(1-\gamma_i-\gamma_{i-1}-|\delta_i |)\frac{(z_i-z_{i-1} )^2}{(r\mu)^2 \Delta_i } - \\
+- \frac{2[((1-\gamma_i )(1+\gamma_{i-1} )(1-\delta_i )) z_i+((1+\gamma_i )(1-\gamma_{i-1} )(1+\delta_i )) z_{i-1} ]}{r\mu},
+\end{gathered}
+%\end{equation}
+\]
+where $r > 1$ is the method parameter, $\mu$ is from (\ref{mu_new}) and $\Delta_i=x_i-x_{i-1}$.
+
+\item Determine the interval corresponding to the maximum characteristic
+%\begin{equation}\label{R}
+\[
+R(t)=\max\left\{R(i): 1 \leq i \leq m\right\}.
+\]
+%\end{equation}
+
+\item Carry out next trial at the point 
+\begin{equation}\label{new_x_2}
+x^{k+1}=\frac {(x_t+x_{t-1})}{2}-(1-\gamma_t-\gamma_{t-1}- |\delta_t|) \frac{(z_t-z_{t-1})}{2r\mu}.
+\end{equation}
+
+\item Check the stopping condition $x_t-x_{t-1} \leq \epsilon$, where $t$ is the number of the interval with the maximal characteristic and $\epsilon > 0$ is the predefined accuracy.
+\end{enumerate}
+
+%Russian
+\textbf{Remark}. According to (\ref{gamma}) and (\ref{delta_cond}) the value $\gamma_i+\gamma_{i-1}+|\delta_i |$ can be 0 or 1, depending on the presence or absence of a jump in the interval  $(x_{i-1},x_i)$.
+So, if the given interval does not contain jumps, i.e. $\gamma_i+\gamma_{i-1}+|\delta_i | = 0$, then its characteristic  (\ref{R_i}) takes the form
+\[
+R(i)=\Delta_i+\frac{ (z_i-z_{i-1} )^2}{(r\mu)^2 \Delta_i }-\frac{2(z_i + z_{i-1})}{r\mu}.
+\]
+If one of the boundary points of the interval is a given discontinuity, i.e. $\gamma_{i-1} = 1$ or $\gamma_i = 1$, then we get the characteristics
+\begin{equation}\label{RR}
+R(i)=2\Delta_i - \frac{4 z_i }{r\mu}, \; R(i)=2\Delta_i - \frac{4 z_{i-1} }{r\mu}.
+\end{equation}
+Similar formulas for the characteristics of intervals will be obtained if $(x_{i-1},x_i)$ is an interval that contains an unspecified discontinuity, i.e. when $|\delta_i | = 1 $. In this case, we will also obtain formulas (\ref{RR}) for $\delta_i = -1$ and $\delta_i = 1$, which correspond to using the trial result at the right point of the interval to compute its characteristic in the case of decreasing function and choosing left point as the function increases.
+
+\begin{figure}%[!ht]
+	\begin{center}
+			\includegraphics[width=0.9\linewidth]{ris_2.jpg}
+			\caption{Discontinuous objective function graph and trial points in case of unspecified discontinuity points}
+      \label{ris2}
+	\end{center}
+\end{figure}
+
+Fig.~\ref{ris2} shows the results of solving the problem from the previous example (\ref{testFunction}), in which the discontinuity points were unspecified. Here we used the parameters of the method $r=2.0, \epsilon=0.001, Q=3.0, q=0.3$. The dashes under the graph indicate the points of 70 trials required for the algorithm to solve problems with the specified accuracy.
+
+\begin{figure}%[!ht]
+	\begin{center}
+			\includegraphics[width=0.9\linewidth]{ris_3.jpg}
+			\caption{Discontinuous objective function graph and trial points in case of partially given discontinuity points}
+      \label{ris3}
+	\end{center}
+\end{figure}
+
+The proposed algorithm also allows for partial specification of known discontinuities. Fig.~\ref{ris3} shows the results of solving the same problem, for which the discontinuities were considered partially given (the discontinuities at the points 4.6 and 9.0 were considered to be known). Here we used the same parameters of the method $r=2.0, \epsilon=0.001, Q=3.0, q=0.3$. The dashes under the graph indicate the points of 67 trials required for the algorithm to solve problems with the specified accuracy.
+
+\section{Results of Numerical Experiments}
+
+To demonstrate the efficiency of the global search algorithm for discontinuous functions (GSA-D) described in the previous section, we compared it with Direct Search (DS) \cite{Audet}, Simulated Annealing (SA) \cite{Kirkpatrick}, and Genetic Algorithm (GA) \cite{Goldberg} implemented in MATLAB Global Optimization Toolbox \cite{MatlabOTB}.
+
+We  used the number of search trials $K$ (i.e., the number of calculations of the objective function) performed by the method before it converges as the main comparison criterion.
+
+The algorithms were compared on 1000 problems with a discontinuous objective function, which were constructed as follows. First, we generated continuous functions of the form
+\begin{equation}\label{seriaFunction}
+f(x) =  \sum_{j=0}^4{(j+1)A_j\sin{(5\pi jx+j)}+(j+1)B_j\cos(3\pi jx+j)}, x\in[0,1],
+\end{equation}
+where the values of the coefficients $A_j, B_j$ were chosen randomly and uniformly from the interval $[-6,6]$. Then 4 discontinuity points were added to the continuous functions. The coordinates of these points $\omega_1, \; \omega_2, \; \omega_3, \; \omega_4$ were set randomly and uniformly from the ranges $[0,0.25), \; [0.25,0.5), \; [0.5,0.75), \; [0.75,1]$ respectively. The jump values $\delta_1, \; \delta_2, \; \delta_3, \; \delta_4$ at discontinuities were also randomly selected from the range $[-50,50]$. These operations produced a discontinuous function of the form
+\begin{equation}\label{seriaFunction_jump}
+\varphi(x) =  f(x)+
+\begin{cases}
+	\delta_1, &0 \leq x < \omega_1\\
+	\delta_2, &\omega_1 \leq x < \omega_2\\
+	\delta_3, &\omega_2 \leq x < \omega_3 \;, \;\;\; x\in[0,1].\\
+	\delta_4, &\omega_3 \leq x < \omega_4\\
+	\delta_1, &\omega_4 \leq x \leq 1.0
+\end{cases}
+\end{equation}
+
+Since the solution of the test problem assumes that the global optimizer $x^*$ is known, its value was preemptively estimated for each function of the series by iterating through all nodes of a uniform grid with the sufficiently small step.
+
+The first experiment was performed on a series of 1000 problems with continuous functions of the form (\ref{seriaFunction}). Table~\ref{tab1} shows the number of problems solved, the average number of iterations performed by different methods, and the number of trials performed by the methods during the search. The problem was considered solved if the condition $|x^k-x^* | \leq \delta$ was satisfied for the trial point $x^k$, where $x^*$ is the known solution of the problem and $\delta= 10^{-2}$. At the same time, the accuracy used in the termination criteria for all methods was $\epsilon = 10^{-3}$.
+
+In order to exclude the influence onherent randomness when running algorithms from MatLab, the GA, SA, and DS methods were run 5 times for each problem, and only the best result was recorded (in terms of the proximity of the found solution to the true one). In this case, the GA and SA methods were run with default parameters, while in the DS method the parameter $x_0$ (the starting point of the search) varied from 0 to 1 with a step of 0.2.
+
+With multiple runs, the methods from MATLAB Global Optimization Toolbox solved almost all the problems in the series, while with a single run of these methods the number of correctly solved problems was almost 2 times lower. At the same time, the GSA-D method successfully solved all the problems in the series (the reliability parameter $r=2.2$ was used for the method). At the same time, the number of trials spent was comparable to the DS method and significantly less than the number of trials of the GA and SA methods.
+
+\begin{table}[ht]
+	\caption{Results of solving a series of problems with continuous functions}
+	\label{tab1}
+	\begin{center}
+		\begin{tabular}{c|c|c|c}
+			\hline
+			Method & Problems solved & Average number of iterations & Average number of trials \\
+			\hline
+%			\hline
+                                GSA-D & 1000  &  52  &  53 \\
+                                \hline
+                                SA    &  1000  &  774  &  777  \\
+			\hline
+			GA    &   999  &  24  &  1290  \\
+			\hline
+                                DS    &  970  & 38  &  71  \\
+			\hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+The next experiment was performed on a series of 1000 problems with discontinuous functions of the form (\ref{seriaFunction_jump}).  GSA-D used the parameters $r=3.7, \; Q=3.0, \; q=0.3$, the other experimental conditions were similar to the previous run. The results of solving a series of problems with discontinuous functions are shown in Table~\ref{tab2}.
+
+\begin{table}[ht]
+	\caption{Results of solving a series of problems with discontinuous functions}
+	\label{tab2}
+	\begin{center}
+		\begin{tabular}{c|c|c|c}
+			\hline
+			Method & Problems solved & Average number of iterations & Average number of trials \\
+			\hline
+%			\hline
+                                GSA-D & 1000  & 79  &  80 \\
+                                \hline
+                                SA    &  998  &  765  &  770  \\
+			\hline
+			GA    &   993  &  25  &  1310  \\
+			\hline
+                                DS    &  964  & 38  &  71  \\
+			\hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+The results show that the Global Optimization Toolbox methods are somewhat worse at solving discontinuous problems than continuous ones, while the GSA-D algorithm proposed in the paper successfully solves the entire series of problems. The GA and SA algorithms show high reliability of finding the global optimizer after several runs, but these methods are significantly inferior to the GSA-D algorithm in terms of the number of objective function calculations. The DS method, while being able to solve the problem in a comparable number of trials, is inferior in the number of correctly solved problems.
+
+Although the methods from the MATLAB Global Optimization Toolbox are claimed to work with discontinuous functions, they do not guarantee convergence to the global minimum. The convergence rate (in terms of the number of trials) for the GA and SA methods is significantly lower than that for the DS method. However, the DS algorithm, while surpassing the GA and SA methods by this indicator, has the lowest reliability among the considered methods. The GSA-D method proposed in the article demonstrated both the guaranteed convergence to the global minimizer for the problems with discontinuous functions and uses less  trials to achieve convergence.
+
+\section{Conclusion}
+
+In this paper, we propose an algorithm for finding the minimum of a multiextremal function with jump discontinuities. The proposed GSA-D algorithm, unlike many known approaches, does not rely on the concept of a gradient and provides a search for a global solution to the problem. We carried out computational experiments confirming the convergence of the algorithm for a wide class of discontinuous multiextremal problems. The convergence conditions of the proposed algorithm, in general, correspond to the convergence conditions of its prototype -- the global search algorithm for continuous problems, described in detail in \cite{Strongin2000}. Justification and research of the theoretical properties of the proposed GSA-D algorithm will be the subject of future publications.
+
+
+%
+% ---- Bibliography ----
+%
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted in the correct style.
+%
+ \bibliographystyle{splncs04}
+ \bibliography{bibliography}
+
+
+\end{document}
