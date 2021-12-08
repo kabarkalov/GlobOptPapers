@@ -35,8 +35,8 @@
 \mainmatter              % start of a contribution
 % Решение обратных задач химической кинетки с помощью асинхронного алгоритма глобального поиска
 % Решение обратных задач химической кинетки с помощью смешанного локально-глобального поискового алгоритма 
-\title{Solving the Inverse Problems of Chemical Kinetics Using the Asynchronous Global Optimization Algorithm}
-%
+%\title{Solving the Inverse Problems of Chemical Kinetics Using the Asynchronous Global Optimization Algorithm}
+\title{Modeling of Isobutane Alkylation with Mixed C4 Olefins and Sulfuric Acid as Catalyst Using the Asynchronous Global Optimization Algorithm}
 \titlerunning{Solving the Inverse Problems of Chemical Kinetics}  % abbreviated title (for running head)
 %                                     also used for the TOC unless
 %                                     \toctitle is used
@@ -68,7 +68,7 @@ Ilya Lebedev$^4$\orcidID{0000-0002-8736-0652}
 
 \begin{abstract}
 
-The paper considers the application of parallel computing technology to the simulation of a catalytic chemical reaction, which is widely used in the modern chemical industry to produce synthesis gas. As a chemical reaction, the process of pre-reforming propane on a Ni catalyst is assumed. To simulate a chemical process, it is necessary to develop a kinetic model of the process, that is, to determine the kinetic parameters. To do this, the inverse problem of chemical kinetics is solved, which predicts the values of kinetic parameters based on laboratory data. From a mathematical point of view, the inverse problem of chemical kinetics is a global optimization problem. A parallel information-statistical global search algorithm was used to solve it. The use of the parallel algorithm has significantly reduced the search time to find the optimum. The found optimal parameters of the model made it possible to adequately simulate the process of pre-reforming propane on a Ni-catalyst.
+The paper considers the application of parallel computing technology to the simulation of catalytic chemical reaction, which is widely used in the modern automobile industry to produce gasoline with high octane number. As a chemical reaction, the process of alkylation of isobutane with mixed C4 olefins catalyzed by sulfuric acid is assumed. To simulate a chemical process, it is necessary to develop a kinetic model of the process, that is, to determine the kinetic parameters. To do this, the inverse problem of chemical kinetics is solved, which predicts the values of kinetic parameters based on laboratory data. From a mathematical point of view, the inverse problem of chemical kinetics is a global optimization problem. A parallel information-statistical global search algorithm was used to solve it. The use of the parallel algorithm has significantly reduced the search time to find the optimum. The found optimal parameters of the model made it possible to adequately simulate the process of alkylation of isobutane with mixed C4 olefins catalyzed by sulfuric acid.
 
 %обновить ключевые слова
 \keywords{Global optimization $\cdot$ Multiextremal functions $\cdot$ Parallel computing $\cdot$ Chemical kinetics $\cdot$ Inverse problems }
@@ -77,9 +77,9 @@ The paper considers the application of parallel computing technology to the simu
 \section{Introduction}
 
 %Часть УГНТУ
-
+Currently, there is a tendency to improve the environmental characteristics of automobile fuel while maintaining a high octane number. Sulfuric acid alkylation of isobutane with olefins makes it possible to obtain a high-octane component of gasoline with a minimum content of aromatic hydrocarbons. The alkylate, which is produced by the alkylation of isobutane with C3-C5 olefins in the presence of strong acid, has the advantages of high octane number, low vapor pressure, and zero content of olefins and aromatics that allow it to be a desirable blending component for high-quality gasoline. Alkylates will continue to act as a desirable blending component for high-quality gasoline as the quality of gasoline continues to increase [ссылка на китайскую статью]. Therefore, it is a significant process of the modern refinery [ссылка на catalyst]. To optimize the chemical process in industry, it is necessary to first develop its model, which in this case means building a mathematical model of the chemical process and then its kinetic model, that is, numerically calculate the kinetic constants of the reaction. 
 %Стыковочный абзац
-Постоянно возрастающая сложность исследуемых реакций влечет за собой усложнение их математических моделей, что существенно затрудняет поиск кинетических констант. Как правило, найти кинетические константы реакций аналитическим путем не представляется возможным, поэтому возникает необходимость в разработке и использовании численных методов их поиска (см., например, [ссылки]). В этом случае критерий качества найденного решения (целевая функция) не имеет явного аналитического описания, но допускает алгоритмическое представление и требует значительных затрат на расчет. Кроме того, в обратных задачах химической кинетики целевая функция может быть существенно многоэкстремальной, т.е. иметь много локальных экстремумов наряду с глобальным. 
+Как правило, найти кинетические константы реакций аналитическим путем не представляется возможным, поэтому возникает необходимость в разработке и использовании численных методов их поиска (см., например, [ссылки (Наша совместная статья Суперкомп дни 2021 ??)]). В этом случае критерий качества найденного решения (целевая функция) не имеет явного аналитического описания, но допускает алгоритмическое представление и требует значительных затрат на расчет. Кроме того, в обратных задачах химической кинетики целевая функция может быть существенно многоэкстремальной, т.е. иметь много локальных экстремумов наряду с глобальным. 
 
 %Часть ННГУ
 Численные методы решения подобных многоэкстремальных задач (методы глобальной оптимизации) существенно отличаются от методов локального поиска (see, e.g., \cite{Sergeyev2017,PaulaviciusZilinskas2014}). Как правило, методы локальной оптимизации не могут покинуть области притяжения локального экстремума и не находят глобальный оптимум. А использование параметров модели, соответствующих найденному локальному решению, может оказаться недостаточным, поскольку глобальное решение может дать существенный выигрыш по сравнению с локальным. 
@@ -97,8 +97,99 @@ The paper considers the application of parallel computing technology to the simu
 
 
 \section{Problem Statement}\label{Sec_math_mod}
-
 %Содержательная постановка задачи
+
+Рассмотрим математическую модель реакции алкилирования изобутана олефинами в присутствии серной кислоты, которая представляет собой систему обыкновенных нелинейлых дифференциальных уравнений (\ref{eq:one}) -- (\ref{eq:twelve}).
+
+\begin{equation}
+  \frac{dc_1}{dt} = -k_1c_1 + k_2c_3 - k_3c_1c_3 - k_7c_1c_2c_4 - k_{11}c_1 + k_{14}c_{11}
+  \label{eq:one}
+\end{equation}
+
+\begin{equation}
+  \frac{dc_2}{dt} = -k_4c_2c_4 - k_6c_2c_5 - k_7c_1c_2c_4 - k_{15}c_{11}c_2c_4
+  \label{eq:two}
+\end{equation}
+
+\begin{equation}
+  \frac{dc_3}{dt} = k_1c_1 + k_4c_2c_5 - k_3(c_1 + c_{11})c_3 - k_{5}c_{12}c_3 - k_2c_3 + k_7c_1c_2c_4 + k_{15}c_{11}c_2c_4
+  \label{eq:three}
+\end{equation}
+
+\begin{equation}
+  \frac{dc_4}{dt} = k_3(c_1 + k_{11})c_3 - k_4c_2c_4 - k_{7}c_{1}c_2c_4 - k_{15}c_{11}c_2c_4
+  \label{eq:four}
+\end{equation}
+
+\begin{equation}
+  \frac{dc_5}{dt} = k_5c_{12}c_3 - k_{6}c_2c_5
+  \label{eq:five}
+\end{equation}
+
+\begin{equation}
+  \frac{dc_6}{dt} = k_4c_{2}c_4
+  \label{eq:six}
+\end{equation}
+
+\begin{equation}
+  \frac{dc_7}{dt} = k_6c_{2}c_5 - k_{10}c_7
+  \label{eq:seven}
+\end{equation}
+
+\begin{equation}
+  \frac{dc_8}{dt} = k_7c_{1}c_2c_4 + k_{15}c_{11}c_2c_4 + k_9c_9c_{10} - k_8c_8
+  \label{eq:eight}
+\end{equation}
+
+\begin{equation}
+  \frac{dc_9}{dt} = k_8c_{8} - k_{9}c_{9}c_{10}
+  \label{eq:nine}
+\end{equation}
+
+\begin{equation}
+  \frac{dc_{10}}{dt} = k_8c_{8} - k_{9}c_{9}c_{10}
+  \label{eq:ten}
+\end{equation}
+
+\begin{equation}
+  \frac{dc_{11}}{dt} = -k_3c_{11}c_3 - k_{15}c_{11}c_{2}c_4 + k_{11}c_1 + k_{12}c_{12} - k_{13}c_{11} - k_{14}c_{11}
+  \label{eq:eleven}
+\end{equation}
+
+\begin{equation}
+  \frac{dc_{12}}{dt} = -k_5c_{12}c_3 + k_{13}c_{11} - k_{12}c_{12}
+  \label{eq:twelve}
+\end{equation}
+
+The initial conditions are $t = 0, c_1 = c_1^0; c_2=c_2^0; c_3 = 0; c_4 = 0; c_5= 0; c_6 = 0; c_7 = 0; c_8 = 0; c_9 = 0; c_{10} = 0; c_{11}=c_{11}^0; c_{12} = c_{12}^0$.
+The corresponding species in eqs (\ref{eq:one}) -- (\ref{eq:twelve}) are 1, iC4H8; 2, iC4, 3, iC4+; 4, TMPs+; 5, DMHs+; 6, TMPs; 7, DMHs; 8, HEs; 9, iCx+; 10, iCy=; 11, 2-C4H8; 12, 1-C4H8.
+
+В качестве экспериментальных данных взяты данные со статьи [], которые представляют собой изменение концентраций компонентов реакции во времени при различных температурах; в качестве примера экспериментальных данных для сырья \#1 при температуре 276.2 K представлены данные в таблице \ref{table1}.
+
+\begin{table}
+\label{table1}
+\caption{Experimental Data}
+\begin{center}
+\begin{tabular}{ccccccc}
+\hline
+%\multicolumn{1}{l}{\rule{0pt}{12pt}
+%                   Year}&\multicolumn{2}{l}{World population}\\[2pt]
+& 1 min & 2 min & 5 min & 10 min & 15 min & 20 min  \\
+\hline\rule{0pt}{12pt}
+DMH & 0.12 & 0.11 & 0.1	& 0.1 &	0.095 &	0.09  \\
+TMP & 0.54 & 0.65 & 0.69 & 0.69 & 0.7 & 0.705 \\[2pt]
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+Таким образом, решая систему (\ref{eq:one}) -- (\ref{eq:twelve}) с соответсвующими начальными данными, мы получим изменение рассчитанных концентраций компонентов реакции по времени. ...
+Необходимо минимизировать следующую целевую фукнцию:
+
+\begin{equation}
+  F = \sum ...
+  \label{eq:objective_func}
+\end{equation}
 
 
 \section{}\label{Sec_GSA}
@@ -145,7 +236,6 @@ with the H{\"o}lder constant $H$ linked to the Lipschitz constant $L$ by the rel
 Будем считать, что на каждой итерации процесс-мастер вычисляет одну точку нового испытания и передает ее для проведения испытания в процесс-рабочий. При этом проведение испытания рабочим является значительно более трудоемкой операцией, чем выбор новой точки мастером, что исключает простой процессов-рабочих. 
 В данном случае (в отличие от синхронных параллельных алгоритмов) общее число выполненных испытаний каждым процессом-рабочим будет зависеть от трудоемкости проведения конкретного испытания и не может быть оценено заранее.
 
-%комментарий про асинхронность? или ниже?
 При описании параллельного алгоритма будем предполагать, что в нашем распоряжении имеется $p+1$ вычислительный процесс: один мастер и $p$ рабочих.
  
 В начале поиска процесс-мастер (будем считать, что это процесс No 0) инициирует параллельное проведение $p$ испытаний в $p$ различных точках области поиска, две из которых являются граничными, а остальные -- внутренними, т.е. в точках $\{y(x^1), y(x^2), ...,y(x^p)\}$, где $x^1 = 0$, $x^p = 1$, $x^i\in(0,1), i=2,..., p-1$.
