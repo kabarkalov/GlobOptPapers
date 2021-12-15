@@ -77,7 +77,7 @@ The paper considers the application of parallel computing technology to the simu
 \section{Introduction}
 
 %Часть УГНТУ
-Currently, there is a tendency to improve the environmental characteristics of automobile fuel while maintaining a high octane number. Sulfuric acid alkylation of isobutane with olefins makes it possible to obtain a high-octane component of gasoline with a minimum content of aromatic hydrocarbons. The alkylate, which is produced by the alkylation of isobutane with C3-C5 olefins in the presence of strong acid, has the advantages of high octane number, low vapor pressure, and zero content of olefins and aromatics that allow it to be a desirable blending component for high-quality gasoline. Alkylates will continue to act as a desirable blending component for high-quality gasoline as the quality of gasoline continues to increase [ссылка на китайскую статью]. Therefore, it is a significant process of the modern refinery [ссылка на catalyst]. To optimize the chemical process in industry, it is necessary to first develop its model, which in this case means building a mathematical model of the chemical process and then its kinetic model, that is, numerically calculate the kinetic constants of the reaction. 
+Currently, there is a tendency to improve the environmental characteristics of automobile fuel while maintaining a high octane number. Sulfuric acid alkylation of isobutane with olefins makes it possible to obtain a high-octane component of gasoline with a minimum content of aromatic hydrocarbons. The alkylate, which is produced by the alkylation of isobutane with C3 -- C5 olefins in the presence of strong acid, has the advantages of high octane number, low vapor pressure, and zero content of olefins and aromatics that allow it to be a desirable blending component for high-quality gasoline. Alkylates will continue to act as a desirable blending component for high-quality gasoline as the quality of gasoline continues to increase [ссылка на китайскую статью]. Therefore, it is a significant process of the modern refinery [ссылка на catalyst]. To optimize the chemical process in industry, it is necessary to first develop its model, which in this case means building a mathematical model of the chemical process and then its kinetic model, that is, numerically calculate the kinetic constants of the reaction. 
 
 %Стыковочный абзац
 As a rule, it is impossible to find out the kinetic constants of the reactions analytically. Therefore, there is a need in the development and application of numerical methods for finding the kinetic constants (see, e.g., []). In this case, the quality criteria of the solution found (objective function) haven't an explicitt analytical description but allows an algorithmic representation and requires considerable computaton resources. Moreover, in the inverse problems of chemical kinetics the objective function can be multiextremal essentially, i.e. can have many local extrema along with the global one. 
@@ -97,7 +97,7 @@ This paper presents the results of application of parallel Lipschitz optimizatio
 \section{Problem Statement}\label{Sec_math_mod}
 %Содержательная постановка задачи
 
-Рассмотрим математическую модель реакции алкилирования изобутана олефинами в присутствии серной кислоты, которая представляет собой систему обыкновенных нелинейлых дифференциальных уравнений (\ref{eq:one}) -- (\ref{eq:twelve}).
+Let us consider a mathematical model of the isobutane alkylation reaction with olefins in the presence of sulfuric acid, which is a system of ordinary nonlinear differential equations (\ref{eq:one}) -- (\ref{eq:twelve}).
 
 \begin{gather}
   \frac{dc_1}{dt} = -k_1c_1 + k_2c_3 - k_3c_1c_3 - k_7c_1c_2c_4 - k_{11}c_1 + k_{14}c_{11} \label{eq:one} \\
@@ -117,7 +117,8 @@ This paper presents the results of application of parallel Lipschitz optimizatio
 The initial conditions are $t = 0, c_1 = c_1^0; c_2=c_2^0; c_3 = 0; c_4 = 0; c_5= 0; c_6 = 0; c_7 = 0; c_8 = 0; c_9 = 0; c_{10} = 0; c_{11}=c_{11}^0; c_{12} = c_{12}^0$.
 The corresponding species in eqs (\ref{eq:one}) -- (\ref{eq:twelve}) are 1, iC4H8; 2, iC4, 3, iC4+; 4, TMPs+; 5, DMHs+; 6, TMPs; 7, DMHs; 8, HEs; 9, iCx+; 10, iCy=; 11, 2-C4H8; 12, 1-C4H8.
 
-В качестве экспериментальных данных взяты данные со статьи [], которые представляют собой изменение концентраций компонентов реакции во времени при различных температурах; в качестве примера экспериментальных данных для сырья \#1 при температуре 276.2 K представлены данные в таблице \ref{table1}.
+As experimental data, information is taken from the article [], which represent a change in the concentrations of reaction components over time at different temperatures; as an example of experimental data at a temperature of 276.2 K, the data in the table \ref{table1} are presented.
+
 \begin{table}
 \label{table1}
 \caption{Experimental Data}
@@ -133,29 +134,30 @@ TMP & 0.54 & 0.65 & 0.69 & 0.69 & 0.7 & 0.705 \\[2pt]
 \end{center}
 \end{table}
 
-Таким образом, решая систему (\ref{eq:one}) -- (\ref{eq:twelve}) с соответсвующими начальными данными, мы получим изменение рассчитанных концентраций компонентов реакции по времени. Однако, необходимо учитывать тот факт, что константы скоростей реакций $k_1$, $k_2$, ..., $k_{15}$, входящие в уравнения (\ref{eq:one}) -- (\ref{eq:twelve}), являются величинами, зависящими от температуры проведения реакции, причем эта зависимость является уравнением Аррениуса и имеет следующий вид:
+Thus, solving the system (\ref{eq:one}) -- (\ref{eq:twelve}) with the corresponding initial data, we will get a change in the calculated concentrations of the reaction components over time.
+
+However, it is necessary to take into account the fact that the reaction rate constants $k_1$, $k_2$, ..., $k_{15}$ included in the equations (\ref{eq:one}) -- (\ref{eq:twelve}) are parameters depending on the reaction temperature, and this dependence is the Arrhenius equation and has the following form:
 
 \begin{equation}
   k_i (T) = k_i^0 \exp \left(- \dfrac{E_i}{RT} \right),
   \label{eq:arren}
 \end{equation}
-where $k_i(T)$ is a constant of $i$-th stage of reation rate, $k_i^0$ is a pre-exponential factor of $i$-th reation stage, $E_i$ is an activation energy, J/mol, $R$ is the universal gas constant, J $\cdot$ (K$\cdot$mol), $T$ is the temperature, K. Таким образом, чтобы полностью построить кинетическую модель реакции, необходимо вычислить энергии активации $E_i$ и pre-exponential factors $k_i^0$ всех стадий химической реакции. Существует две постановки задач поиска данных кинетических параметров $E$ и $k^0$: первый заключается в решении обратной задачи по подбору кинетических параметров, входящих в уравнение (\ref{eq:arren}), которые в ходе решения позволяют нам вычислить все константы скоростей реакции $k_i$, после чего с найденными константами скоростей стадий реакции проиходит решение системы дифференциальных уравнений (\ref{eq:one}) -- (\ref{eq:twelve}), далее расчитанные концентрации сравниваются с соответсвующими экспериментальными данными. Математически, данная задача имеет следующую постановку: необходимо минимизировать следующую целевую фукнцию:
+where $k_i(T)$ is a constant of $i$-th stage of reation rate, $k_i^0$ is a pre-exponential factor of $i$-th reation stage, $E_i$ is an activation energy, J/mol, $R$ is the universal gas constant, J $\cdot$ (K$\cdot$mol), $T$ is the temperature, K. Thus, in order to fully develop the kinetic model of the reaction, it is necessary to calculate the activation energies $E_i$ and pre-exponential factors $k_i^0$ of all stages of the chemical reaction.  There are two formulations of the problems of searching for kinetic parameter data $E$ and $k^0$. The first one is to solve the inverse problem of selecting the kinetic parameters included in the equation (\ref{eq:arren}), which during the solution allow us to calculate all the reaction rate constants $k_i$. Then, with the found rate constants of the reaction stages, the system of differential equations (\ref{eq:one}) -- (\ref{eq:twelve}) is solved, then the calculated concentrations are compared with the corresponding experimental data. Mathematically, this problem has the following formulation: it is necessary to minimize the following objective function:
 
 \begin{equation}
   F_1 = \sum_{i=1}^I \sum_{j=1}^J \sum_{k=1}^K \left| c_{ijk}^{exp} - c_{ijk}^{calc} \right| \longrightarrow \min,
   \label{eq:objective_func1}
 \end{equation}
-where $c_{ijk}^{exp}$ and $c_{ijk}^{calc}$ are the experimental and calculated values
-of $k$-th observed component at $i$-th experiment, respectively, $I$ is the the number of observed temperatures for the reaction, ($I = 4$ in this case), $K$ is the number of experiments conducted at one temperature ($K = 3$), $M$ is the number of observed components of the reaction ($M = 2$ in this case).
+where $c_{ijk}^{exp}$ and $c_{ijk}^{calc}$ are the experimental and calculated values of $k$-th observed component at $i$-th experiment, respectively, $I$ is the the number of observed temperatures for the reaction, ($I = 4$ in this case), $K$ is the number of experiments conducted at one temperature ($K = 3$), $M$ is the number of observed components of the reaction ($M = 2$ in this case).
 
-Вторая постановка обратной задачи химической кинетики подразумевает поиск констант скоростей стадии $k_i$, входящих в систему (\ref{eq:one}) -- (\ref{eq:twelve}), отдельно для каждой температуры, далее на основе уравнения Аррениуса (\ref{eq:arren}) с помощью метода наименьших квадратов происходит расчет энергий активации $E_i$ и пред-экспоненциальных множителей $k_i^0$. Математически, данная постановка задачи совпадает с уравнением (\ref{eq:objective_func1}) за исключением первого суммирования по температурам:
+The second formulation of the inverse problem of chemical kinetics implies the search for the rate constants of the stages $k_i$ included in the system (\ref{eq:one})~--~(\ref{eq:twelve}), separately for each temperature, then on the basis of the Arrhenius equation~(\ref{eq:arren}), the activation energies $E_i$ and the pre-exponential multipliers $k_i^0$ are calculated using the least squares method. Mathematically, this statement of the problem coincides with the equation (\ref{eq:objective_func1}), except for the first summation by temperatures:
 
 \begin{equation}
-  F_2 = \sum_{j=1}^J \sum_{k=1}^K \left| c_{ijk}^{exp} - c_{ijk}^{calc} \right| \longrightarrow \min
+  F_2 = \sum_{j=1}^J \sum_{k=1}^K \left| c_{ijk}^{exp} - c_{ijk}^{calc} \right| \longrightarrow \min.
   \label{eq:objective_func2} 
 \end{equation}
 
-Таким образом, обе постановки задачи (\ref{eq:objective_func1}) и (\ref{eq:objective_func2}) являются задачами оптимизации и в следующем разделе будет описан метод, который был использован для решения данных задач минимизации.
+Thus, both formulations of the problem (\ref{eq:objective_func1}) and (\ref{eq:objective_func2}) are optimization problems and the next section will describe the method that was used to solve these minimization problems.
 
 \section{Parallel Algorithm for Solving Global Optimization Problems }\label{Sec_GSA}
 
@@ -267,17 +269,17 @@ It was confirmed by the results of experiments described in the next section.
 
 \section{Numerical Experiments}\label{Sec_Exp}
 
-Согласно постановкам задач (\ref{eq:objective_func1}) и (\ref{eq:objective_func2}) в данной работе были проводились соответсвующие расчеты.
+According to the problem statements (\ref{eq:objective_func1}) and (\ref{eq:objective_func2}), the corresponding calculations were carried out in this work.
 %ННГУ
 To carry out the numerical experiments, UNN supercomputer Lobachevsky was used (CentOS 7.2, SLURM, two CPU Intel Sandy Bridge E5-2660 2.2 GHz and 64 Gb RAM on the node). The asynchronous global optimization algorithm was implemented using C++ (GCC 5.5.0 and Intel MPI were used); the objective function values were computed using Python 3.9.
 
-\subsection{Поиск энергий активации и пред-экспоненциальных множителей реакции}
+\subsection{Search for activation energies and pre-exponential multipliers of the reaction}
 
-Сначала решалась задача поиска энергий активации и пред-экспоненциальных множителей всех стадий реакции. Количество оптимизируемых параметров равно 30, по два параметра на каждую из пятнадцати стадий реакции. Для энергий активации был установлен диапазон поиска $0 \leq E_i \leq 100$ kJ / mol, для пред-экспонециальных множителей -- $0 \leq E_i \leq 10^{12}$ исходя из физико-химических соображений. Однако, исходя из жесткости системы дифференциальных уравнений (\ref{eq:one}) и (\ref{eq:twelve}) решение не было найдено в таком широком диапазоне, это связано со слишком высокой степенью пред-экспоненциальных множителей, входящих в уравнение Аррениуса. Поэтому в процессе расчетов производилось уменьшение значения верхней границы пред-экспоненциальных множителей и решение было получено при верхней границе $10^5$. Найденные кинетические параметры представлены в таблице~\ref{table_res1}. 
+First, the problem of searching for activation energies and pre-exponential multipliers of all reaction stages was solved. The number of optimized parameters is 30, which is two parameters for each of the fifteen reaction stages. For activation energies, the search range was set to $0 \leq E_i \leq 100$ kJ/mol, and $0 \leq E_i \leq 10^{12}$ for pre-exponential multipliers based on physicochemical considerations. However, based on the stiffness of the system of differential equations (\ref{eq:one}) and (\ref{eq:twelve}), no solution was found in such a wide range, this is due to the too high degree of pre-exponential multipliers included in the Arrhenius equation. Therefore, during the calculations, the value of the upper bound of the pre-exponential multipliers was reduced and the solution was obtained at the upper bounds of $10^5$. The kinetic parameters found are presented in the table~\ref{table_res1}.
 
 \begin{table}
 \label{table_res1}
-\caption{Calculated kinetic patameters}
+\caption{Calculated rate constants of reaction}
 \begin{center}
 \begin{tabular}{cccccccc}
 \hline
@@ -315,21 +317,21 @@ Asynchronous & 4.8   &   1.1     &   3.6       \\
 The results have shown that both parallel algorithms had demonstrated a moderate speedup but had found better solutions than the sequential method. At that, the asynchronous algorithm had found a better solution than synchronous one. This explains also a smaller speedup of the asynchronous algorithm as compared with the synchronous one since the asynchronous method had executed more trials in the course of search for the optimal kinetic parameters of the problem.
 
 %Часть УГНТУ
-С помощью полученных кинетических параметров была решена прямая задача химической кинетики. Однако, рассчитанные кинетические кривые плохо описали экспериментальные данные, что подтверждает рисунок \ref{fig:res1}. Видно, что характер рассчитанной кривой не совпадает с экспериментальной зависимостью.
+With the help of the obtained kinetic parameters, the direct problem of chemical kinetics was solved. However, the calculated kinetic curves poorly described the experimental data, which is confirmed by the figure \ref{fig:res1}. It can be seen that the character of the calculated curve does not match the experimental dependence.
 
 \begin{figure}
 \begin{center}
   \includegraphics[width=0.7\linewidth]{res1.jpg}
-  \caption{Concentration profiles of key components when calculating the activation energies and pre-exponential reaction multipliers. Temperature: 276.2 K. Symbols, experimental data; line, calculated values.}
+  \caption{Concentration profiles of key components when calculating the activation energies and pre-exponential reaction multipliers according to the problem statement~\ref{eq:objective_func1}. Temperature: 276.2 K. Symbols, experimental data; line, calculated values.}
   \label{fig:res1}  
 \end{center}
 \end{figure}
 
-Поэтому было решено провести расчеты согласно второй формулировке задачи (\ref{eq:objective_func2}), а именно вычислить константу каждой стадии реакции по отдельности, затем согласно зависимости Аррениуса найти кинетические параметры $E_i$ и $k_i^0$.
+Therefore, it was decided to carry out calculations according to the second formulation of the problem (\ref{eq:objective_func2}), namely, to calculate the constants of each reaction stage separately, then, according to the Arrhenius dependence, find the kinetic parameters $E_i$ and $k_i^0$.
 
-\subsection{Поиск констант скоростей отдельно по каждой температуре}
+\subsection{Searching for rate constants separately for each temperature}
 
-Далее решалась задача поиска констант $k_i$ скоростей стадии реакции, входящих в систему  (\ref{eq:one}) -- (\ref{eq:twelve}). Для каждой из температур были рассчитаны константы (таблица \ref{table_res2}).
+Next, the problem of finding constants $k_i$ of the reaction stages included in the system (\ref{eq:one}) -- (\ref{eq:twelve}) was solved. Velocity constants were calculated for each of the temperatures (table \ref{table_res2}).
 
 \begin{table}
 \label{table_res2}
@@ -389,21 +391,20 @@ Nodes  & Minimum  & Time (h.) & Speedup \\
 \end{tabular}\end{center}\end{table}
 
 %Часть УГНТУ
-C найденными константами решалась прямая задача химической кинетики, результаты сравнения с экспериментальными данными представлены на рисунке \ref{fig:res2} (представлен эксперимент при температуре 276.2 K). Видим, что на этот раз описание данных оказалось достаточно точным.
+The direct problem of chemical kinetics was solved with the found rate constants, the results of comparison with experimental data are shown in Figure \ref{fig:res2} (an experiment at a temperature of 276.2 K is presented). We see that this time the description of the data turned out to be rather accurate.
 
 \begin{figure}
 \begin{center}
   \includegraphics[width=0.7\linewidth]{res2.jpg}
-  \caption{Concentration profiles of key components when calculating the rate constants. Temperature: 276.2 K. Symbols, experimental data; line, calculated values.}
+  \caption{Concentration profiles of key components when calculating the rate constants according to the problem statement~\ref{eq:objective_func2}. Temperature: 276.2 K. Symbols, experimental data; line, calculated values.}
   \label{fig:res2}  
 \end{center}
 \end{figure}
 
-Рассчитав константы скоростей для различных значений температур, можно вычислить параметры $E_i$ и $k_i^0$. Так, например, для первой стадии реакции $E_1 = 24.65$ kJ/mol, $k_1^0 = 6.85 \cdot 10^4$ min$^{-1}$, для третьей стадии $E_3 = 75.57$ kJ/mol, $k_3^0 = 2.62 \cdot 10^{14}$ kg $\cdot$mol$^{-1}\cdot$min$^{-1}$.
+After calculating the rate constants for different temperature values, it is possible to calculate the parameters $E_i$ и $k_i^0$. So, for example, for the first stage of the reaction $E_1 = 24.65$ kJ/mol, $k_1^0 = 6.85 \cdot 10^4$ min$^{-1}$, for the third stage $E_3 = 75.57$ kJ/mol, $k_3^0 = 2.62 \cdot 10^{14}$ kg $\cdot$mol$^{-1}\cdot$min$^{-1}$. However, for some stages, the parameter values were fairly high $k^0$, namely for the second stage $k_2^0 = 8.52 \cdot 10^{25}$ min$^{-1}$, for the seventh stage $k_7^0 = 2.82 \cdot 10^{26}$ kg mol$^{-2}$ min$^{-2}$. Therefore, in future works, the constants corresponding to these kinetic parameters will be recalculated.
 
 \section{Conclusions and Future Work}
-Таким образом, в статье описан поиск кинетических параметров промышленной химической реакции алкилирования изобутана олефинами в присутствии серной кислоты. Произведен поиск констант скоростей всех стадий реакции, а также энергий активации и пред-экспоненциальных множителей. Метод оптимизации позволил найти досточно точное описание экспериментальных данных. В будущем планируется использовать данный метод и распараллеливание для поиска оптимальных условий проведения реакции алкилирования с использованием разработанной кинетической модели.
-
+Thus, the article describes the search for kinetic parameters of the industrial chemical reaction of isobutane alkylation with olefins in the presence of sulfuric acid. A search was made for the rate constants of all reaction stages, as well as activation energies and pre-exponential multipliers have been calculated. The optimization method allowed us to find a fairly accurate description of the experimental data. In the future, it is planned to use this method and parallelization to eliminate high values of the pre-exponential reaction multipliers and to search for optimal conditions for the alkylation reaction using the developed kinetic model.
 
 \medskip
 
