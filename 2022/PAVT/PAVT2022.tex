@@ -21,7 +21,7 @@
 \usepackage{amssymb}
 \usepackage{cite}
 
-\usepackage[russian]{babel}
+%\usepackage[russian]{babel}
 
 % to typeset URLs, URIs, and DOIs
 \usepackage{url}
@@ -48,6 +48,8 @@ Leniza Enikeeva$^{2,3}$\orcidID{0000-0003-4219-4870}
 Konstantin Barkalov$^4$ \letter \orcidID{0000-0001-5273-2471}
 \and
 Ilya Lebedev$^4$\orcidID{0000-0002-8736-0652} 
+\and
+Dmitry Silenko$^4$ 
 }
 
 %
@@ -68,7 +70,7 @@ Ilya Lebedev$^4$\orcidID{0000-0002-8736-0652}
 
 \begin{abstract}
 
-The paper considers the application of parallel computing technology to the simulation of catalytic chemical reaction, which is widely used in the modern automobile industry to produce gasoline with high octane number. As a chemical reaction, the process of alkylation of isobutane with mixed C4 olefins catalyzed by sulfuric acid is assumed. To simulate a chemical process, it is necessary to develop a kinetic model of the process, that is, to determine the kinetic parameters. To do this, the inverse problem of chemical kinetics is solved, which predicts the values of kinetic parameters based on laboratory data. From a mathematical point of view, the inverse problem of chemical kinetics is a global optimization problem. A parallel information-statistical global search algorithm was used to solve it. The use of the parallel algorithm has significantly reduced the search time to find the optimum. The found optimal parameters of the model made it possible to adequately simulate the process of alkylation of isobutane with mixed C4 olefins catalyzed by sulfuric acid.
+The paper considers the application of parallel computing technology to the simulation of catalytic chemical reaction, which is widely used in the modern automobile industry to produce gasoline with high octane number. As a chemical reaction, the process of alkylation of isobutane with mixed C4 olefins catalyzed by sulfuric acid is assumed. To simulate a chemical process, it is necessary to develop a kinetic model of the process, that is, to determine the kinetic parameters. To do this, the inverse problem of chemical kinetics is solved, which predicts the values of kinetic parameters based on laboratory data. From a mathematical point of view, the inverse problem of chemical kinetics is a global optimization problem. A parallel asynchronous information-statistical global search algorithm was used to solve it. The use of the asynchronous algorithm has significantly reduced the search time to find the optimum. The found optimal parameters of the model made it possible to adequately simulate the process of alkylation of isobutane with mixed C4 olefins catalyzed by sulfuric acid.
 
 %обновить ключевые слова
 \keywords{Global optimization $\cdot$ Multiextremal functions $\cdot$ Parallel computing $\cdot$ Chemical kinetics $\cdot$ Inverse problems }
@@ -77,10 +79,11 @@ The paper considers the application of parallel computing technology to the simu
 \section{Introduction}
 
 %Часть УГНТУ
-Currently, there is a tendency to improve the environmental characteristics of automobile fuel while maintaining a high octane number. Sulfuric acid alkylation of isobutane with olefins makes it possible to obtain a high-octane component of gasoline with a minimum content of aromatic hydrocarbons. The alkylate, which is produced by the alkylation of isobutane with C3 -- C5 olefins in the presence of strong acid, has the advantages of high octane number, low vapor pressure, and zero content of olefins and aromatics that allow it to be a desirable blending component for high-quality gasoline. Alkylates will continue to act as a desirable blending component for high-quality gasoline as the quality of gasoline continues to increase [ссылка на китайскую статью]. Therefore, it is a significant process of the modern refinery [ссылка на catalyst]. To optimize the chemical process in industry, it is necessary to first develop its model, which in this case means building a mathematical model of the chemical process and then its kinetic model, that is, numerically calculate the kinetic constants of the reaction. 
+Currently, there is a tendency to improve the environmental characteristics of automobile fuel while maintaining a high octane number. Sulfuric acid alkylation of isobutane with olefins makes it possible to obtain a high-octane component of gasoline with a minimum content of aromatic hydrocarbons. The alkylate, which is produced by the alkylation of isobutane with C3 -- C5 olefins in the presence of strong acid, has the advantages of high octane number, low vapor pressure, and zero content of olefins and aromatics that allow it to be a desirable blending component for high-quality gasoline. Alkylates will continue to act as a desirable blending component for high-quality gasoline as the quality of gasoline continues to increase \cite{cao2019}. Therefore, it is a significant process of the modern refinery. To optimize the chemical process in industry, it is necessary to first develop its model, which in this case means building a mathematical model of the chemical process and then its kinetic model, that is, numerically calculate the kinetic constants of the reaction. 
+
 
 %Стыковочный абзац
-As a rule, it is impossible to find out the kinetic constants of the reactions analytically. Therefore, there is a need in the development and application of numerical methods for finding the kinetic constants (see, e.g., []). In this case, the quality criteria of the solution found (objective function) haven't an explicitt analytical description but allows an algorithmic representation and requires considerable computaton resources. Moreover, in the inverse problems of chemical kinetics the objective function can be multiextremal essentially, i.e. can have many local extrema along with the global one. 
+As a rule, it is impossible to find out the kinetic constants of the reactions analytically. Therefore, there is a need in the development and application of numerical methods for finding the kinetic constants (see, e.g., \cite{Zaynullin2020,Enikeeva2020,Koledina2019,Enikeev2020,uskovfibrous,enikeeva2021,en13133393}). In this case, the quality criteria of the solution found (objective function) haven't an explicitt analytical description but allows an algorithmic representation and requires considerable computaton resources. Moreover, in the inverse problems of chemical kinetics the objective function can be multiextremal essentially, i.e. can have many local extrema along with the global one. 
 
 %Часть ННГУ
 The numerical methods for solving such multiextremal problems (global optimization methods) differ significantly from the local search ones (see, e.g., \cite{Sergeyev2017,PaulaviciusZilinskas2014}). As a rule, the local optimization methods cannot escape a local extremum attractione region and don't find the global optimum. At the same time, the use of the model parameters corresponding to the local solution found may appear to be insufficient since the global solution may provide a considerable advantage as compared to the local ones. 
@@ -92,12 +95,12 @@ The possibility to construct deterministic global search methods different from 
 
 An assumption on limited relative variations of the objective function values is one of natural assumptions of a problem. Such an assumption is related to the ratio of the function increment to respective increment of its argument, which is usually limited by some threshold defined by a limited energy of variations in the simulated system. In this case the functions are known as Lipschitz ones and the problem itself is called the Lipschitz global optimization problem. 
 
-This paper presents the results of application of parallel Lipschitz optimization methods for solving the inverse problems of chemical kinetics. The main part of the paper has the following structure. The description of the mathematical model of the investigated chemical reaction is presented in Section 2. The formal statement of the Lipschitz global optimization problems and the asynchronous parallel algorithm for solving these ones are described in Section 3. The results of the numerical solving the inverse problem of chemical kinetics are discussed in Section 5.
+This paper presents the results of application of parallel Lipschitz optimization methods for solving the inverse problems of chemical kinetics. The main part of the paper has the following structure. The description of the mathematical model of the investigated chemical reaction is presented in Section \ref{Sec_math_mod}. The formal statement of the Lipschitz global optimization problems and the asynchronous parallel algorithm for solving these ones are described in Section \ref{Sec_GSA}. The results of the numerical solving the inverse problem of chemical kinetics are discussed in Section \ref{Sec_Exp}.
 
 \section{Problem Statement}\label{Sec_math_mod}
 %Содержательная постановка задачи
 
-Let us consider a mathematical model of the isobutane alkylation reaction with olefins in the presence of sulfuric acid, which is a system of ordinary nonlinear differential equations (\ref{eq:one}) -- (\ref{eq:twelve}).
+Let us consider a mathematical model of the isobutane alkylation reaction with olefins in the presence of sulfuric acid, which is a system of ordinary nonlinear differential equations (\ref{eq:one})--(\ref{eq:twelve}).
 
 \begin{gather}
   \frac{dc_1}{dt} = -k_1c_1 + k_2c_3 - k_3c_1c_3 - k_7c_1c_2c_4 - k_{11}c_1 + k_{14}c_{11} \label{eq:one} \\
@@ -115,9 +118,9 @@ Let us consider a mathematical model of the isobutane alkylation reaction with o
 \end{gather}
 
 The initial conditions are $t = 0, c_1 = c_1^0; c_2=c_2^0; c_3 = 0; c_4 = 0; c_5= 0; c_6 = 0; c_7 = 0; c_8 = 0; c_9 = 0; c_{10} = 0; c_{11}=c_{11}^0; c_{12} = c_{12}^0$.
-The corresponding species in eqs (\ref{eq:one}) -- (\ref{eq:twelve}) are 1, iC4H8; 2, iC4, 3, iC4+; 4, TMPs+; 5, DMHs+; 6, TMPs; 7, DMHs; 8, HEs; 9, iCx+; 10, iCy=; 11, 2-C4H8; 12, 1-C4H8.
+The corresponding species in eqs (\ref{eq:one})--(\ref{eq:twelve}) are 1, iC4H8; 2, iC4, 3, iC4+; 4, TMPs+; 5, DMHs+; 6, TMPs; 7, DMHs; 8, HEs; 9, iCx+; 10, iCy=; 11, 2-C4H8; 12, 1-C4H8.
 
-As experimental data, information is taken from the article [], which represent a change in the concentrations of reaction components over time at different temperatures; as an example of experimental data at a temperature of 276.2 K, the data in the table \ref{table1} are presented.
+As experimental data, information is taken from the article \cite{cao2019}, which represent a change in the concentrations of reaction components over time at different temperatures; as an example of experimental data at a temperature of 276.2 K, the data in the table \ref{table1} are presented.
 
 \begin{table}
 \label{table1}
@@ -134,23 +137,23 @@ TMP & 0.54 & 0.65 & 0.69 & 0.69 & 0.7 & 0.705 \\[2pt]
 \end{center}
 \end{table}
 
-Thus, solving the system (\ref{eq:one}) -- (\ref{eq:twelve}) with the corresponding initial data, we will get a change in the calculated concentrations of the reaction components over time.
+Thus, solving the system (\ref{eq:one})--(\ref{eq:twelve}) with the corresponding initial data, we will get a change in the calculated concentrations of the reaction components over time.
 
-However, it is necessary to take into account the fact that the reaction rate constants $k_1$, $k_2$, ..., $k_{15}$ included in the equations (\ref{eq:one}) -- (\ref{eq:twelve}) are parameters depending on the reaction temperature, and this dependence is the Arrhenius equation and has the following form:
+However, it is necessary to take into account the fact that the reaction rate constants $k_1, k_2, ..., k_{15}$ included in the equations (\ref{eq:one})--(\ref{eq:twelve}) are parameters depending on the reaction temperature, and this dependence is the Arrhenius equation and has the following form:
 
 \begin{equation}
   k_i (T) = k_i^0 \exp \left(- \dfrac{E_i}{RT} \right),
   \label{eq:arren}
 \end{equation}
-where $k_i(T)$ is a constant of $i$-th stage of reation rate, $k_i^0$ is a pre-exponential factor of $i$-th reation stage, $E_i$ is an activation energy, J/mol, $R$ is the universal gas constant, J $\cdot$ (K$\cdot$mol), $T$ is the temperature, K. Thus, in order to fully develop the kinetic model of the reaction, it is necessary to calculate the activation energies $E_i$ and pre-exponential factors $k_i^0$ of all stages of the chemical reaction.  There are two formulations of the problems of searching for kinetic parameter data $E$ and $k^0$. The first one is to solve the inverse problem of selecting the kinetic parameters included in the equation (\ref{eq:arren}), which during the solution allow us to calculate all the reaction rate constants $k_i$. Then, with the found rate constants of the reaction stages, the system of differential equations (\ref{eq:one}) -- (\ref{eq:twelve}) is solved, then the calculated concentrations are compared with the corresponding experimental data. Mathematically, this problem has the following formulation: it is necessary to minimize the following objective function:
+where $k_i(T)$ is a constant of $i$-th stage of reation rate, $k_i^0$ is a pre-exponential factor of $i$-th reation stage, $E_i$ is an activation energy, J/mol, $R$ is the universal gas constant, J $\cdot$ (K$\cdot$mol), $T$ is the temperature, K. Thus, in order to fully develop the kinetic model of the reaction, it is necessary to calculate the activation energies $E_i$ and pre-exponential factors $k_i^0$ of all stages of the chemical reaction.  There are two formulations of the problems of searching for kinetic parameter data $E$ and $k^0$. The first one is to solve the inverse problem of selecting the kinetic parameters included in the equation (\ref{eq:arren}), which during the solution allow us to calculate all the reaction rate constants $k_i$. Then, with the found rate constants of the reaction stages, the system of differential equations (\ref{eq:one})--(\ref{eq:twelve}) is solved, then the calculated concentrations are compared with the corresponding experimental data. Mathematically, this problem has the following formulation: it is necessary to minimize the following objective function:
 
 \begin{equation}
   F_1 = \sum_{i=1}^I \sum_{j=1}^J \sum_{k=1}^K \left| c_{ijk}^{exp} - c_{ijk}^{calc} \right| \longrightarrow \min,
   \label{eq:objective_func1}
 \end{equation}
-where $c_{ijk}^{exp}$ and $c_{ijk}^{calc}$ are the experimental and calculated values of $k$-th observed component at $i$-th experiment, respectively, $I$ is the the number of observed temperatures for the reaction, ($I = 4$ in this case), $K$ is the number of experiments conducted at one temperature ($K = 3$), $M$ is the number of observed components of the reaction ($M = 2$ in this case).
+where $c_{ijk}^{exp}$ and $c_{ijk}^{calc}$ are the experimental and calculated values of $k$-th observed component at $i$-th experiment, respectively, $I$ is the the number of observed temperatures for the reaction, ($I = 4$ in this case), $K$ is the number of experiments conducted at one temperature ($K = 3$), $M$ is the number of observed components of the reaction ($M = 2$).
 
-The second formulation of the inverse problem of chemical kinetics implies the search for the rate constants of the stages $k_i$ included in the system (\ref{eq:one})~--~(\ref{eq:twelve}), separately for each temperature, then on the basis of the Arrhenius equation~(\ref{eq:arren}), the activation energies $E_i$ and the pre-exponential multipliers $k_i^0$ are calculated using the least squares method. Mathematically, this statement of the problem coincides with the equation (\ref{eq:objective_func1}), except for the first summation by temperatures:
+The second formulation of the inverse problem of chemical kinetics implies the search for the rate constants of the stages $k_i$ included in the system (\ref{eq:one})--(\ref{eq:twelve}), separately for each temperature, then on the basis of the Arrhenius equation~(\ref{eq:arren}), the activation energies $E_i$ and the pre-exponential multipliers $k_i^0$ are calculated using the least squares method. Mathematically, this statement of the problem coincides with the equation (\ref{eq:objective_func1}), except for the first summation by temperatures:
 
 \begin{equation}
   F_2 = \sum_{j=1}^J \sum_{k=1}^K \left| c_{ijk}^{exp} - c_{ijk}^{calc} \right| \longrightarrow \min.
@@ -298,7 +301,7 @@ $2.60\cdot10^2$ & $3.95\cdot10^4$ & $3.24\cdot10^4$ & $1.73\cdot10$ & $3.43$ & $
 %ННГУ
 To evaluate the efficiency of the implemented optimization method, the results obtained using the sequential algorithm, the parallel synchronous, and the parallel asynchronous ones with the use of 8 nodes when solving the problem in the above statement were compared.  
 The minimum values of the objective function found by respective methods, the times of solving the problem (in hours), and the values of speedup in time are presented in Table \ref{table_30D}. 
-During the experiments the parameter of the method $r=3.0$ from (\ref{R}) and the accuracy  $\epsilon = 10^{-2}\left\|b-a\right\|$ in the termination condition were used. Once the global search method achieves the preset accuracy, the solution was refined by Hook-Jeeves local method \cite{HookJeeves} with the accuracy $\epsilon = 10^{-4}\left\|b-a\right\|$.
+During the experiments the parameter of the method $r=3.0$ from (\ref{R}) and the accuracy  $\epsilon = 10^{-3}\left\|b-a\right\|$ in the termination condition were used. Once the global search method achieves the preset accuracy, the solution was refined by Hook-Jeeves local method \cite{HookJeeves} with the accuracy $\epsilon = 10^{-5}\left\|b-a\right\|$.
 
 \begin{table}
 \caption{Indicators achieved when solving the problem with 30 parameters}
@@ -317,7 +320,7 @@ Asynchronous & 4.8   &   1.1     &   3.6       \\
 The results have shown that both parallel algorithms had demonstrated a moderate speedup but had found better solutions than the sequential method. At that, the asynchronous algorithm had found a better solution than synchronous one. This explains also a smaller speedup of the asynchronous algorithm as compared with the synchronous one since the asynchronous method had executed more trials in the course of search for the optimal kinetic parameters of the problem.
 
 %Часть УГНТУ
-With the help of the obtained kinetic parameters, the direct problem of chemical kinetics was solved. However, the calculated kinetic curves poorly described the experimental data, which is confirmed by the figure \ref{fig:res1}. It can be seen that the character of the calculated curve does not match the experimental dependence.
+With the help of the obtained kinetic parameters, the direct problem of chemical kinetics was solved. However, the calculated kinetic curves poorly described the experimental data, which is confirmed by Fig. \ref{fig:res1}. It can be seen that the character of the calculated curve does not match the experimental dependence.
 
 \begin{figure}
 \begin{center}
@@ -331,11 +334,10 @@ Therefore, it was decided to carry out calculations according to the second form
 
 \subsection{Searching for rate constants separately for each temperature}
 
-Next, the problem of finding constants $k_i$ of the reaction stages included in the system (\ref{eq:one}) -- (\ref{eq:twelve}) was solved. Velocity constants were calculated for each of the temperatures (table \ref{table_res2}).
+Next, the problem of finding constants $k_i$ of the reaction stages included in the system (\ref{eq:one})--(\ref{eq:twelve}) was solved. Velocity constants were calculated for each of the temperatures (Table \ref{table_res2}).
 
-\begin{table}
-\label{table_res2}
-\caption{Calculated rate constants}
+\begin{table}[ht]
+\caption{Calculated rate constants}\label{table_res2}
 \begin{center}
 \begin{tabular}{cccccccc}
 \hline
@@ -391,7 +393,7 @@ Nodes  & Minimum  & Time (h.) & Speedup \\
 \end{tabular}\end{center}\end{table}
 
 %Часть УГНТУ
-The direct problem of chemical kinetics was solved with the found rate constants, the results of comparison with experimental data are shown in Figure \ref{fig:res2} (an experiment at a temperature of 276.2 K is presented). We see that this time the description of the data turned out to be rather accurate.
+The direct problem of chemical kinetics was solved with the found rate constants, the results of comparison with experimental data are shown in Fig. \ref{fig:res2} (an experiment at a temperature of 276.2 K is presented). We see that this time the description of the data turned out to be rather accurate.
 
 \begin{figure}
 \begin{center}
@@ -401,14 +403,14 @@ The direct problem of chemical kinetics was solved with the found rate constants
 \end{center}
 \end{figure}
 
-After calculating the rate constants for different temperature values, it is possible to calculate the parameters $E_i$ и $k_i^0$. So, for example, for the first stage of the reaction $E_1 = 24.65$ kJ/mol, $k_1^0 = 6.85 \cdot 10^4$ min$^{-1}$, for the third stage $E_3 = 75.57$ kJ/mol, $k_3^0 = 2.62 \cdot 10^{14}$ kg $\cdot$mol$^{-1}\cdot$min$^{-1}$. However, for some stages, the parameter values were fairly high $k^0$, namely for the second stage $k_2^0 = 8.52 \cdot 10^{25}$ min$^{-1}$, for the seventh stage $k_7^0 = 2.82 \cdot 10^{26}$ kg mol$^{-2}$ min$^{-2}$. Therefore, in future works, the constants corresponding to these kinetic parameters will be recalculated.
+After calculating the rate constants for different temperature values, it is possible to calculate the parameters $E_i$ and $k_i^0$. So, for example, for the first stage of the reaction $E_1 = 24.65$ kJ/mol, $k_1^0 = 6.85 \cdot 10^4$ min$^{-1}$, for the third stage $E_3 = 75.57$ kJ/mol, $k_3^0 = 2.62 \cdot 10^{14}$ kg $\cdot$mol$^{-1}\cdot$min$^{-1}$. However, for some stages, the parameter values were fairly high $k^0$, namely for the second stage $k_2^0 = 8.52 \cdot 10^{25}$ min$^{-1}$, for the seventh stage $k_7^0 = 2.82 \cdot 10^{26}$ kg mol$^{-2}$ min$^{-2}$. Therefore, in future works, the constants corresponding to these kinetic parameters will be recalculated.
 
 \section{Conclusions and Future Work}
 Thus, the article describes the search for kinetic parameters of the industrial chemical reaction of isobutane alkylation with olefins in the presence of sulfuric acid. A search was made for the rate constants of all reaction stages, as well as activation energies and pre-exponential multipliers have been calculated. The optimization method allowed us to find a fairly accurate description of the experimental data. In the future, it is planned to use this method and parallelization to eliminate high values of the pre-exponential reaction multipliers and to search for optimal conditions for the alkylation reaction using the developed kinetic model.
 
 \medskip
 
-\textbf{Acknowledgments}. This study was supported by the Russian Science Foundation, project No.\,21-11-00204 and by RFBR, project No.\,19-37-60014.
+\textbf{Acknowledgments}. This study was supported by the Russian Science Foundation, project No.\,21-11-00204, and by RFBR, project No.\,19-37-60014.
 
 %
 % ---- Bibliography ----
