@@ -74,16 +74,74 @@ For optimization of convolutions a wide spectrum of algorithms can be used in de
 Among other methods of solving MCO problems it is necessary to pay attention to the important class of metaheuristic nature-inspired algorithms. Many of them are nature-inspired, i.e.,  are  based on modeling physical processes (for example, simulated annealing \cite{Locatelli2002,Aarts2014}) or mainly behavior of biological agents including evolutionary \cite{Price2005,Coello2007} and as their part genetic algorithms \cite{Ruiz2015,Deb2002,Zitzler2001} and particle swarm methods modeling the swarming intelligence of bees, fireflies, birds, ants, etc. \cite{Mostaghim2007,Nebro2009,Durillo2010}.
 
 Consideration of different approaches to solving MCO problems and a relevant references can be found, for example, in monographs and papers \cite{Miettinen1999,Ehrgott2005,Zhou2011,Nedjah2015,Pardalos2017}.
-In this paper we consider multiextremal black-box MCO problems and propose a new scheme of solving these problems. This scheme is based on maximum convolution, dimensionality reduction by means of Peano curves, information-statistical global optimization algorithm used for the first time in MCO problems. Moreover, in the framework of the scheme the information already obtained in the course of solving scalar subproblems of convolution optimization can be utilized for solving a new convolution subproblem. Briefly, the way is as follows. Before beginning the optimization of a new convolution we have at our disposal values of criteria computed already and now can recalculate them to values of the current convolution taking into account this values as initial information for optimization algorithm. This procedure accelerates significantly the optimization process.
+In this paper we consider multiextremal black-box MCO problems and propose a new scheme of solving these problems. This scheme is based on maximum convolution, dimensionality reduction by means of Peano curves, information-statistical global optimization algorithm used for the first time in MCO problems. Moreover, in the framework of the scheme the information already obtained in the course of solving scalar subproblems of convolution optimization can be utilized for solving a new convolution subproblem. Briefly, the way is as follows. Before beginning the optimization of a new convolution we have at our disposal values of criteria computed already and now can recalculate them to values of the current convolution taking into account these values as initial information for optimization algorithm. This procedure accelerates significantly the optimization process.
 
 The quality of the proposed MCO method is experimentally studied on several multidimensional multiextremal test problems. Comparison with known evolutionary algorithms (2 particle swarm methods and 3 genetic algorithms have been taken) on the base of the hypervolume index \cite{Evtushenko2014,Zilinskas2015} reflecting quality of Pareto set estimation demonstrates qualitative results of the proposed method.
 
 The rest of the paper is organized in the following manner. Section 2 considers the statement of the MCO problem to be studied. Section 3 is devoted to the description of the global search algorithm applied for scalar optimization of convolutions and the scheme of joint analyzing the family of ones. Section 4 contains results of computational experiments. The last Section concludes the paper.
 
 
-\section{Problem statement}
+\section{MCO problem statement}
 
-References test \cite{Strongin2000,Grishagin2018}
+The model of decision making to be considered hereinafter as the MCO problem consists in the following.
+
+Let $w_i(x), 1 \leq i \leq k,$ be real-valued functions depending on vector of arguments $x=(x_1,...,x_N)$  and defined over the hyperparallelepiped 
+\begin{equation}\label{Q}
+Q = \left\{x \in R^N : a_j \leq x_j \leq b_j, 1 \leq i \leq N \right\}
+\end{equation}
+in $N$-dimensional Euclidean space $R^N$. These functions reflect objectives of decision making and it is considered that the less the function value, the better the result of achieving this objective.
+
+The problem of multicriterial optimization is formulated as minimizing over the domain (\ref{Q}) the vector function
+\begin{equation}\label{W}
+W(x) = \left(w_1(x), ..., w_k(x)\right).
+\end{equation}
+
+This problem can be symbolically written as
+\begin{equation}\label{problem}
+W(x) \rightarrow \min , \; x \in Q.
+\end{equation}
+
+In terminology of decision making the vector function $W(x)$  is called \textit{vector criterion} of the problem, functions $w_i(x), 1 \leq i \leq k,$ are \textit{partial criteria} or \textit{objective functions}, $Q$ is the domain of feasible decisions or just the \textit{feasible domain} and points $x \in Q$ are \textit{feasible decisions}.
+
+As a rule, each criterion attains its minimum at a point different from minimum points of other criteria, i.e., it is impossible to find out the decision $x^*$   providing in the region $Q$ minimum values for all the partial criteria simultaneously. This situation generates the contradictoriness of criteria, when decreasing one criterion leads to the growth of the other, and complicates the notion of optimal decision (solution to the problem (\ref{problem})).
+
+Traditionally, optimal decisions in the problem (\ref{problem}) are defined on the base of Pareto optimality concept. To complete this item, let us give the known classical definitions concerning this concept.
+
+\begin{definition} 
+Let $x,z \in Q$. Vector $x$ is said to \textit{dominate} vector $z$ ($x \succ z$) if $w_i(x) \leq w_i(z), \; 1 \leq i \leq k,$ and there exists a number $p, \; 1 \leq p \leq k,$  such that $w_p(x) < w_p(z)$.
+\end{definition}
+\begin{definition} 
+A decision vector $x^* \in Q$ is a \textit{Pareto optimal point} if in the domain $Q$ there is no vector $z \neq x^*$ dominating $x^*$.
+\end{definition}
+\begin{definition} 
+The set of all Pareto optimal points (Pareto set $P$) is the \textit{Pareto optimal solution} to the MCO problem (\ref{problem}).
+\end{definition}
+\begin{definition} 
+The set $F=W(P)=\left\{W(x):x \in P\right\}$  is called the \textit{Pareto front} of the problem (\ref{problem}).
+\end{definition}
+
+As mentioned in Introduction, one way of building the Pareto set consists in reducing the multiobjective problem to a family of single-criteria, or scalar optimization problems and solving them by methods of mathematical programming.  The global minimum point of a problem from this family will be a Pareto optimal point under corresponding assumptions. This approach can be realized by means of applying a convolution of the vector criterion (\ref{W}), for example, the maximum convolution
+\begin{equation}\label{conv}
+\Gamma(\lambda,x) = \max_{1 \leq i \leq k}{\lambda_i w_i(x)},
+\end{equation}
+where coefficients $\lambda_i, \; 1 \leq i \leq k,$ (weights of criteria) satisfy the conditions
+\begin{equation}\label{lambda}
+\lambda_i \geq 0, \; 1 \leq i \leq k, \; \sum_{i=1}^k{\lambda_i} = 1.
+\end{equation}
+
+If
+\begin{equation}\label{positive}
+w_i(x) > 0, \; 1 \leq i \leq k,
+\end{equation}
+in the domain (\ref{Q}), then global solution to the problem
+\begin{equation}\label{conv_problem}
+\Gamma(\lambda,x) + \gamma \sum_{i=1}^k{\lambda_i w_i(x)} \rightarrow \min, \; x \in Q,
+\end{equation}
+with a sufficiently small parameter $\gamma > 0$ is a Pareto optimal point of the initial MCO problem (\ref{problem}) \cite{Wierzbicki} [Wierzbicki, Krasnoshekov]. The positiveness of criteria is not restrictive requirement because it is possible to transform easily the MCO problem with non-positive criteria to the form (\ref{positive}) without loss of Pareto solution.
+
+In the case of multiextremal criteria the problem (\ref{conv_problem}) is multiextremal as well and it is necessary to use global optimization algorithms for its solving. Many references to such the algorithms can be found in monographs \cite{Strongin2000,Pinter1996,Zhigljavsky2008,Sergeyev2013,PaulaviciusZilinskas2014,Sergeyev2017}. For solving multiextremal problems the information-statistical algorithms \cite{Strongin2000,Sergeyev2013} are among of the most efficient.
+
+In the next section we describe an information-statistical algorithm with accelerated convergence and its application to searching for Pareto optimal solutions in multiextremal MCO problems.
 
 \section{Algorithm}
 
