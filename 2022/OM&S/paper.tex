@@ -209,6 +209,89 @@ The description of ALR can be presented in the following manner.
 Let in the optimization problem the term ``trial'' denote the computation of objective function value at a point of the feasible domain. 
 
 
+According to ARL applied to solving the problem (\ref{problem_fi}) its first $l \geq 2$  trials are executed at arbitrary points $t^1, \dots, t^l$ of the interval $[\alpha, \beta]$ including points $\alpha$ and $\beta$, and the function values $\nu^1, \dots, \nu^l$ are evaluated at these points, i.e., $\nu^s=\varphi(t^s)$, $1 \leq j \leq l$.
+
+In order to choose a point $t^{n+1}$ of a new $(n+1)$-th trial after completing $n \geq l$ trials it is necessary to implement the following actions.
+
+1. The points $t^1, \dots, t^n$ of completed trials and boundary points of the search interval $[\alpha, \beta]$ are ordered in increasing order and renumbered by subscripts, i.e.,
+
+\begin{equation}\label{eq:15}
+t_1 = \alpha < t_1 < \dots < t_{n-1} < t_n = \beta.
+\end{equation}
+
+The values $\nu_s = \varphi(t_s)$ are juxtaposed to the points  $t_s$, $1 \leq s \leq n$.
+
+2. A real values $R(q)$ are assigned to all the intervals $(t_{q-1}, t_q)$, $2 \leq q \leq n$, formed by neighboring points from (\ref{eq:15}). $R(q)$ is called \textit{the characteristic} of the interval $(t_{q-1}, t_q)$ and is computed in accordance with the following rule.
+
+If number of completed trials $2 \leq n \leq J$, where $J$ is a predefined number, then 
+\begin{equation}\label{eq:16}
+R(q) = B(q),
+\end{equation}
+otherwise, when $n > J$,
+\begin{equation}\label{eq:17}
+R(q) = B(q)\left( \sqrt{(\nu_q - \varphi^*(n))(\nu_{q-1} - \varphi^*(n))} +M(1.5)^{-\sigma}\right)^{-1}.
+\end{equation}
+
+Here
+\begin{equation}\label{eq:18}
+\begin{matrix}
+B(q) = m (t_s - t_{s-1})^{1/N} + (\nu_q - \nu_{q-1})^2 / (m (t_s - t_{s-1})^{1/N}) -2(\nu_{q-1} + \nu_q), \\
+\varphi^*(n) = \min_{1\leq j \leq n} {\varphi(t^j)}
+\end{matrix}
+\end{equation}
+is minimal computed value of the objective function $\varphi(t)$ at trial points,
+
+\begin{equation}\label{eq:19}
+M = \max_{2 \leq  s \leq n} { \frac{|\nu_s - \nu_{s-1}|}{(t_s - t_{s-1})^{1/N}} }
+\end{equation}
+
+is underestimation of the H{\"o}lder constant obtained according to the trial results,
+\begin{equation}\label{eq:20}
+m = 
+\begin{cases}
+\begin{matrix}
+rM, & M>0, \\
+1, & M= 0,
+\end{matrix}
+\end{cases}
+\end{equation}
+
+is improved estimation of the H{\"o}lder constant due to method's parameter $r>1$, $\sigma$ is some integer parameter that influences the speed of convergence to the global minimum.
+
+3. Among all intervals, the interval   with the highest characteristic is selected
+\begin{equation}\label{eq:21}
+R(p) = \max_{2 \leq s \leq n} {R(s)}
+\end{equation}
+
+4. The new $(n+1)$-th trial is performed at the point
+\begin{equation}\label{eq:22}
+t^{n+1} = \frac{t_p-t_{p-1}}{2} - sign(\nu_p-\nu_{p-1}) \left( \frac{|\nu_p-\nu_{p-1}|}{M} \right)^N \frac{1}{2r} 
+\end{equation}
+the value $\nu^{n+1} = \varphi(t^{n+1})$ is computed and the iteration number $n$ is increased by 1.
+
+The method ALR described above is a modification of the base information-statistical algorithm [Strongin+Sergeyev, Sergeyev+Strongin] for minimization functions satisfying the H{\"o}lder condition. The modification consists in introducing new characteristics (\ref{eq:17}) after initial stage of the search to improve the method's speedup on account of increasing values of characteristics for intervals containing current record (\ref{eq:18}). 
+
+Like its prototype, ARL can apply as the stopping condition the inequality
+\begin{equation}\label{eq:23}
+(t_p-t_{p-1})^{1/N} < \varepsilon
+\end{equation}
+i.e., completes the search when the length of the interval with maximal characteristic (\ref{eq:21}) becomes less than the predefined accuracy $\varepsilon > 0$.
+
+The sufficient condition of convergence to global minima in the problem (\ref{problem_fi}) with the objective function under H{\"o}lder property with constant $H$ is
+\begin{equation}\label{eq:24}
+m > 2^{2 - 1 / N}H.
+\end{equation}
+
+If $\varphi(t) = f(x(t)) $ where $x(t)$ is the Peano-type curve and $f(x)$ meets (\ref{lip_1}), then $H=2L\sqrt{N+3}$ and the sufficient condition takes the form 
+\begin{equation}\label{eq:25}
+m > 2^{3 - 1 / N}L\sqrt{N+3}.
+\end{equation}
+
+Finalizing the proposed general scheme  let us describe a procedure  of successive solving the problems of the family $S$ being scalar problems (\ref{conv_problem}) for different weight vectors $\lambda = (\lambda_1, \dots,\lambda_k)$ (\ref{lambda}).
+
+
+
+
 
 Solving the first problem from $S$ we reduce it to the univariate problem (\ref{problem_fi}) that is solved by the univariate method ALR. This method carries out 2 first iterations at boundary points and the next trials are executed in accordance with the points 1--4 of the algorithm's description up to stopping condition to be met.
 
