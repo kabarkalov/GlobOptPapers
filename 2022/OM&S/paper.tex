@@ -135,7 +135,7 @@ w_i(x) > 0, \; 1 \leq i \leq k,
 \end{equation}
 in the domain (\ref{Q}), then global solution to the problem
 \begin{equation}\label{conv_problem}
-\Gamma(\lambda,x) + \gamma \sum_{i=1}^k{\lambda_i w_i(x)} \rightarrow \min, \; x \in Q,
+\Phi_\lambda(x) = \Gamma(\lambda,x) + \gamma \sum_{i=1}^k{\lambda_i w_i(x)} \rightarrow \min, \; x \in Q,
 \end{equation}
 with a sufficiently small parameter $\gamma > 0$ is a Pareto optimal point of the initial MCO problem (\ref{problem}) \cite{Wierzbicki} [Wierzbicki, Krasnoshekov]. The positiveness of criteria is not restrictive requirement because it is possible to transform easily the MCO problem with non-positive criteria to the form (\ref{positive}) without loss of Pareto solution.
 
@@ -143,7 +143,87 @@ In the case of multiextremal criteria the problem (\ref{conv_problem}) is multie
 
 In the next section we describe an information-statistical algorithm with accelerated convergence and its application to searching for Pareto optimal solutions in multiextremal MCO problems.
 
-\section{Algorithm}
+\section{Computational scheme for multiextremal multiobjective optimization}
+
+In this section we consider the MCO problem under additional assumption according to which the criteria $w_i(x), \; 1 \leq i \leq k,$ are black-box functions and satisfy in the domain $Q$ the Lipschitz condition
+\begin{equation}\label{lip}
+\left| w_i(x) - w_i(y)\right| \leq L_i \left\| x-y \right\|, \; x,y, \in Q, \; 1 \leq i \leq k,
+\end{equation}
+with corresponding Lipchitz constants $L_i > 0$ that are, as a rule, unknown. Here $\left\|*\right\|$   denotes the Euclidean norm in $R^N$.
+
+The Lipschitzian functions are, in general case, multiextremal. If we consider the convolution (\ref{conv}) aggregating multiextremal criteria it will be multiextremal as well.
+
+In the computational scheme proposed in the paper we consider a family $S$ of scalar problems (\ref{conv_problem}) that are solved jointly and take into account the information obtained in the course of already completed optimizations. For this purpose in the region of weight coefficients determined by the conditions (\ref{lambda}) a uniform grid is built and the family $S$ consists of the problems (\ref{conv_problem}) with coefficients $\lambda$ corresponding the nodes of the grid.
+
+For solving the problems of the family a global optimization technique based on reducing the multidimensional problem (\ref{conv_problem}) to an equivalent univariate subproblem [Strongin+Sergeyev, Pintér, Zhigljavsky+, Sergeyev+ Strongin, Paulavičius+, Sergeyev+ Kvasov]  in combination with one-dimensional information algorithm with accelerated convergence.
+
+Let us consider this technique in more detail.
+
+To simplify the description of the technique let us present the problems (\ref{conv_problem}) in the following unified form
+\begin{equation}\label{problem_f}
+f(x) \rightarrow \min, \; x \in Q,
+\end{equation}
+where 
+\[
+f(x) = \max_{1 \leq i \leq k}{\lambda_i w_i(x)} + \gamma \sum_{i=1}^k{\lambda_i w_i(x)}
+\]
+and $f(x)$ meets the Lipschitz condition 
+\begin{equation}\label{lip_1}
+\left| f(x) - f(y)\right| \leq L \left\| x-y \right\|, \; x,y, \in Q,
+\end{equation}
+with the constant $L>0$.
+
+It is known as a fundamental fact that $N$-dimensional hyperparallelepiped (\ref{Q}) and the interval $[0,1]$ of the real axis are the equipotent sets and the interval $[0,1]$ can be mapped onto the parallelepiped (\ref{Q}) unambiguously and continuously. Such mappings are called \textit{Peano-type curves} or \textit{evolvents}.
+
+
+Let $x(t), \; t \in [0,1]$  be a Peano-type curve, and the function  $f(x)$ from (\ref{problem_f}) be continuous. As
+\[
+Q =\left\{x(t) : t \in [0,1]\right\},
+\]
+$f(x)$ and $x(t)$ are continuous, then
+\[
+\min_{x \in Q} f(x) = \min_{t \in [0,1]}f(x(t)),
+\]
+i.e., solving the multidimensional problem (\ref{problem_f}) can be reduced to the minimization of the one-dimensional function $f(x(t))$.
+
+However, in the case when the function $f(x)$ is Lipschitzian this property is not valid for the reduced function. The function $f(x(t))$ will satisfy the H{\"o}lder condition
+\begin{equation}\label{holder}
+\left|f(x(t'))-f(x(t''))\right| \leq H \left|t'-t''\right|^{1/N}, \; t',t'' \in [0,1],
+\end{equation}
+with a H{\"o}lder constant $H>0$ \cite{Strongin2000,Sergeyev2013}.
+
+If the function $f(x)$ satisfies the Lipschitz condition (\ref{lip_1}) then $H=2L\sqrt{N+3}$.
+
+As a consequence, minimization of the function $f(x(t))$  requires the use of special algorithms oriented at functions with property (\ref{holder}).
+
+In the proposed scheme for solving reduced univariate minimization problem we apply modified information-statistical algorithm \cite{Strongin2000} with local refinements (ALR) accelerating convergence to global optimum of functions that satisfy the H{\"o}lder condition.
+
+Before description of this algorithm let us follow again the path of simplification and formulate the general one-dimensional optimization problem as
+\begin{equation}\label{problem_fi}
+\varphi(t) \rightarrow \min, \; t \in [\alpha,\beta].
+\end{equation}
+In our consideration $\varphi(t) = f(x(t))$, $[\alpha,\beta] = [0,1]$ and $\varphi(t)$  meets the H{\"o}lder condition with the constant $H$.
+
+The description of ALR can be presented in the following manner.
+
+Let in the optimization problem the term ``trial'' denote the computation of objective function value at a point of the feasible domain. 
+
+
+
+Solving the first problem from $S$ we reduce it to the univariate problem (\ref{problem_fi}) that is solved by the univariate method ALR. This method carries out 2 first iterations at boundary points and the next trials are executed in accordance with the points 1--4 of the algorithm's description up to stopping condition to be met.
+
+In the course of optimization the algorithm builds the trial points $t^1,...,t^n$ which correspond to the points $x^1 = x(t^1),...,x^n=x(t^n)$ in the domain $Q$ . At these points the values $v^j = \Phi_\lambda(x^j), \; 1 \leq j \leq n,$ of the function $\Phi_\lambda(x)$ from (\ref{conv_problem}) are computed as values $\varphi(t^j)$ of the function $\varphi_t$  minimized by ALR.
+
+In turn, obtaining the values $\Phi_\lambda(x^j)$  is implemented through the computation of criteria values $a_s^j = w_s(x^j), \; 1 \leq s \leq k, \; 1 \leq j \leq n,$  that can be considered as components of the matrix $A(k \times n)$ containing \textit{a posteriori information} about the problem.
+
+This information can be used for decreasing the number of trials during solving the problem (\ref{conv_problem}) with other weight vector $\lambda$. Indeed, if we take the weight vector $\mu = (\mu_1,...,\mu_k) \neq \lambda$, it is easy on the base of matrix $A$ to calculate values $\Phi_\mu(x^j), \; 1 \leq j \leq n,$ at points $x^1 = x(t^1),...,x^n=x(t^n)$, i.e. values $\varphi(t^1),...,\varphi(t^n)$ of the function $\varphi(t)$ in the problem (\ref{problem_fi}) being the reduced problem (\ref{conv_problem}) with weight vector $\mu$. But in this case in ALR we can take points $t^1,...,t^n$ as points of initial trials in which values $ \varphi(t^j) = \Phi_\mu(x^j), \; 1 \leq j \leq n,$ have been already computed and continue optimization following the rules 1--4 of the algorithm. In the course of continuation, ALR will generate new points $t^q$ in which the values $\Phi_\mu(x(t^j))$, and, therefore, values $w_s(x(t^j)), \; 1 \leq s \leq k,$ will be evaluated. The latters can be added to the matrix $A$ and be taken into account in the same manner for solving other problems (\ref{conv_problem}). 
+
+The proposed scheme of utilizing a posteriori information allows one to decrease significantly the total number of criteria computation when joint optimizing problems of the family $S$. On the whole, the given approach is useful  if the time spent to calculate the criteria at one point is significantly higher than the time taken by the algorithm for implementation of the trial at that point, i.e., it is oriented at time consuming MCO problems.
+ 
+The efficiency of the described general scheme is estimated in the next section in comparison with several evolutionary methods. 
+
+
+
 
 \section{Numerical experiments}
 
@@ -162,3 +242,4 @@ This work was supported by the Russian Science Foundation, project No. 21-11-002
 \bibliography{bibliography}
 
 \end{document}
++
