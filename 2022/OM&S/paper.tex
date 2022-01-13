@@ -36,10 +36,10 @@
 
 %\articletype{ARTICLE TEMPLATE}% Specify the article type or omit as appropriate
 
-\title{A fast algorithm for finding efficient decisions in multi-objective problems with black-box multiextremal functions}
+\title{A fast algorithm for finding efficient solutions in multi-objective problems with black-box multiextremal criteria}
 
 \author{
-\name{Konstantin Barkalov, Vladimir Grishagin and Evgeny Kozinov\thanks{CONTACT Evgeny Kozinov. Email: evgeny.kozinov@itmm.unn.ru}}
+\name{Konstantin Barkalov, Vladimir Grishagin and Evgeny Kozinov\thanks{CONTACT Konstantin Barkalov. Email: konstantin.barkalov@itmm.unn.ru}}
 \affil{Software Department, Lobachevsky State University, Nizhni Novgorod, Russia}
 }
 
@@ -269,7 +269,8 @@ the value $v^{n+1} = \varphi(t^{n+1})$ is computed and the iteration number $n$ 
 \end{enumerate}
 
 
-The method ALR described above is a modification of the base information-statistical algorithm \cite{Strongin2000,Sergeyev2013} for minimization functions satisfying the H{\"o}lder condition. The modification consists in introducing new characteristics (\ref{eq:17}) after initial stage of the search to improve the method's speedup on account of increasing values of characteristics for intervals containing current record (\ref{eq:18}). 
+The method ALR described above is a modification of the basic information-statistical algorithm \cite{Strongin2000,Sergeyev2013} for minimization functions satisfying the H{\"o}lder condition. The modification consists in introducing new characteristics (\ref{eq:17}) after initial stage of the search to improve the method's speedup on account of increasing values of characteristics for intervals containing current record (\ref{eq:18}). 
+\textcolor[rgb]{1,0,0}{Actually, the second term in (\ref{eq:17}) will have the largest value equal to $(1.5)^{\sigma}$ only for those intervals for which the equality $v_q = \varphi^*(n)$ or $v_{q-1} = \varphi^*(n)$ holds, i.e. for the intervals with the boundary points correspond to the current record $\varphi^*(n)$.}
 
 Like its prototype, ARL can apply as the stopping condition the inequality
 \begin{equation}\label{eq:23}
@@ -286,6 +287,8 @@ If $\varphi(t) = f(x(t)) $ where $x(t)$ is the Peano-type curve and $f(x)$ meets
 \begin{equation}\label{eq:25}
 m > 2^{3 - 1 / N}L\sqrt{N+3}.
 \end{equation}
+
+\textcolor[rgb]{1,0,0}{The complete convergence theory of the information-statistical algorithm is given in \cite{Strongin2000,Sergeyev2013}.}
 
 Finalizing the proposed general scheme  let us describe a procedure  of successive solving the problems of the family $S$ which are scalar problems (\ref{conv_problem}) for different weight vectors $\lambda = (\lambda_1, \dots,\lambda_k)$ (\ref{lambda}). This procedure will be called Reduced Algorithm with Local Refinements and Data Accumulation (RALR-DA).
 
@@ -324,7 +327,7 @@ was considered as the feasible one.
 Each problem was solved by all the methods including the grid technique and corresponding HVs were determined.  Metaheuristic methods because of their stochastic nature sometimes realize unsuccessful runs. In order to estimate better their efficiency each of these methods carried out 10 launches when solving a separate MCO problem and the average result was taken into account.
 
 During all experiments the method ALR was used with parameters $r=5.6$, $\sigma = 18$, $T=3$. 
-\textcolor[rgb]{1,0,0}{The use of $T=3$ corresponds to alternation of one ``local'' iteration and two ``global'' iterations.}
+\textcolor[rgb]{1,0,0}{The use of $T=3$ corresponds to alternation of one ``local'' iteration and two ``global'' iterations, that can be interpreted as a combination of local refinement and global updating of the current optimizer.}
 Accuracy $\varepsilon$ from the stopping condition (\ref{eq:23}) was $0.05$ in bi-criteria problems and $0.01$ in 4-criteria ones.
 
 For correct comparison of the algorithms (except grid method, of course) their parameters influencing the stopping condition were chosen to provide approximately the same number of trials. After the completion of solving all the group problems, HVs of each method were averaged.
@@ -337,7 +340,7 @@ In the first experiment 100 two-dimensional bi-criteria problems have been taken
 \caption{Contour plots of 2-dimensional convolution.}\label{fig1} 
 \end{figure}
 
-\textcolor[rgb]{1,0,0}{The Pareto front in one of test problems is shown in Fig.~\ref{fig2a} and Fig.~\ref{fig2b}. Here Fig.~\ref{fig2a} corresponds the Pareto front computed on the uniform grid with the step 0.05 in the search domain whereas Fig.~\ref{fig2b} shows the Pareto front computed by RALR-DA. In the last case it is required only 350 trials to obtain the solution with the same accuracy.}
+\textcolor[rgb]{1,0,0}{The Pareto front in one of test problems is shown in Fig.~\ref{fig2a} and Fig.~\ref{fig2b}. Here Fig.~\ref{fig2a} corresponds to the Pareto front computed on the uniform grid with the step 0.05 in the search domain whereas Fig.~\ref{fig2b} shows the Pareto front computed by RALR-DA. In the last case it is required only 608 trials to obtain the solution with the same accuracy.}
 
 \begin{figure}
 \centering
@@ -409,6 +412,17 @@ Like  the  previous experiments, the results are presented in Tab.~\ref{tab3} an
 As it can be seen from the presented experiments, the proposed method demonstrates the best results among all methods involved in evaluation of their effectiveness based on HV index. Moreover, the efficiency of RALR-DA is close to the best one estimated on a dense uniform grid.
 
 As for metaheuristic algorithms, their results differ in different experiments.  For example, in 4-dimensional bi-criteria case the method SPEA is the best among nature-inspired algorithms, but it is the worst in 2-dimensional problems with 2 criteria. On the whole, as the most stable metaheuristic method, the algorithm OMOPSO can be recognized.
+
+\section{Conclusion}
+
+In the paper the multidimensional problems of multicriteria (multiobjective) optimization with black-box time-consuming criteria satisfying the Lipschitz condition are considered. These assumptions lead to significant complexity of the problems under investigation and require the development of special efficient numerical methods for their solving. For this goal in the paper a new algorithm is proposed and its computational scheme is described. The algorithm is based on reducing the MCO problem to a family of single-criterion (scalar) optimization problems generating Pareto-optimal solutions via building parameterized convolutions. In turn, each multidimensional scalar problem is reduced to a univariate one by means of Peano curves that map the multidimensional feasible domain into the real axis. Under Lipschitz condition for criteria the objective functions of the reduced one-dimensional problems satisfy the H{\"o}lder condition and for solving these problems it is necessary to apply specialized global optimization methods. As such method we propose a new algorithm that combines in its decision rule iteration with ``local'' and ``global'' goals. Global iterations provide the convergence to the global optimum and the local ones accelerate the search. Moreover, while solving the univariate problems generated by the family of convolutions the proposed algorithm is able to take into account the criteria values computed already in the course of solving the univariate problems completed earlier. This feature reduces significantly number of trials (calculations of criteria values): the later a problem is solved, the less new criteria computations are produced.
+
+The quality of the proposed algorithm is studied in experiment on 3 representative sets of multiextremal MCO problems of different dimensions and criteria number in comparison with 5 particle swarm and genetic methods. As a criterion of methods' efficiency the hypervolume index estimating the quality of Pareto set approximation is taken. Among all competitors the proposed algorithm demonstrates the best results.
+
+As the directions of further development of the current research it would be interesting to investigate the possibilities of applying other schemes of dimensionality reduction, for example,
+\textcolor[rgb]{1,0,0}{the nested optimization scheme \cite{Grishagin2016,Grishagin2018}, the diagonal \cite{Sergeyev2015,Sergeyev2017} or the simplicial \cite{Zilinskas2011,PaulaviciusZilinskas2014} partitions methods}
+in the framework of the general approach used in the paper. Moreover, the prospective way is to develop parallel versions of the proposed general scheme oriented at powerful supercomputer systems.
+
 
 
 \section*{Disclosure statement}
