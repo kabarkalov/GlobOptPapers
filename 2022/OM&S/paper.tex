@@ -36,18 +36,18 @@
 
 %\articletype{ARTICLE TEMPLATE}% Specify the article type or omit as appropriate
 
-\title{A fast algorithm for finding efficient solutions in multi-objective problems with black-box multiextremal criteria}
+\title{An accelerated algorithm for finding efficient solutions in multiobjective problems with black-box multiextremal criteria}
 
 \author{
 \name{Konstantin Barkalov, Vladimir Grishagin and Evgeny Kozinov\thanks{CONTACT Konstantin Barkalov. Email: konstantin.barkalov@itmm.unn.ru}}
-\affil{Software Department, Lobachevsky State University, Nizhni Novgorod, Russia}
+\affil{Institute of Information Technology, Mathematics and Mechanics, Lobachevsky State University, 23 Gagarin ave., 603022 Nizhny Novgorod, Russia}
 }
 
 \maketitle
 
 \begin{abstract}
-The paper is devoted to consideration of multiextremal black-box MCO problems with time-consuming criteria and proposes a new computational algorithm for solving such problems. This algorithm is based on combination of convolution approach, dimensionality reduction, and information-statistical global optimization algorithm. For approximating the Pareto set a family of maximum convolutions is considered generating problems of scalar multiextremal optimization. The latters are reduced by means of Peano mappings to the equivalent problems of univariate optimization that are solved by a modification of the information-statistical global optimization method. This method applies the technique of local refinements and uses in the course of current univariate optimization the information about criteria that was obtained when solving completed optimization problems. These features allow one to accelerate the search of global solution.  
-The efficiency of the proposed MCO algorithm is experimentally estimated on representative classes of multidimensional multiextremal test problems. Comparison with 5 nature-inspired particle swarm and genetic algorithms on the base of the hypervolume index reflecting quality of Pareto set evaluation demonstrates qualitative results of the proposed method.
+The paper is devoted to consideration of multiextremal multicriteria black-box problems with time-consuming criteria and proposes a new computational algorithm for solving such problems. This algorithm is based on combination of convolution approach, dimensionality reduction, and information-statistical global optimization algorithm. For approximating the Pareto set a family of maximum convolutions is considered generating problems of scalar multiextremal optimization. The latters are reduced by means of Peano mappings to the equivalent problems of univariate optimization that are solved by an accelerated information-statistical global optimization method. This method applies the technique of local refinements and uses in the course of current univariate optimization the information about criteria that was obtained when solving completed optimization problems. These features allow one to accelerate the search of global solution.  
+The efficiency of the proposed algorithm is experimentally estimated on representative classes of multidimensional multiextremal test problems. Comparison with 5 nature-inspired particle swarm and genetic algorithms on the base of the hypervolume index reflecting quality of Pareto set evaluation demonstrates qualitative results of the proposed method.
 \end{abstract}
 
 \begin{keywords}
@@ -57,16 +57,16 @@ Multi-objective optimization; global optimization; dimensionality reduction; sea
 
 \section{Introduction}
 
-In the field of mathematical modeling the intelligent decision-making processes, the problems of multicriterial optimization (MCO) present a wide class of models that are rich and interesting from a theoretical point of view and very important in real applications \cite{Marler2009,Hillermeier2005}. Multicriterial problems describe decision-making situations with multiple goals which are considered as functional criteria to be optimized.
+In the field of mathematical modeling the intelligent decision-making processes, the problems of multicriteria optimization (MCO) present a wide class of models that are rich and interesting from a theoretical point of view and very important in real applications \cite{Marler2009,Hillermeier2005}. Multicriteria problems describe decision-making situations with multiple goals which are considered as functional criteria to be optimized.
 
 In general case, there exist three key factors that determine the complexity of analyzing these models. The crucial feature corresponds to the typical case where criteria are contradictory: increasing one criterion leads to decreasing the other. Such inconsistent behavior generates the necessity of introducing a compromise in the joint analysis of criteria and consideration of a set of compromised (partial) solutions as a complete solution of a multiobjective problem (Pareto set), see, e.g., \cite{Collette2004,Ehrgott2005}.
 The second complexity factor is associated with the dimensionality or number of varied parameters of the problem because increasing the problem dimension leads to significant growth of computational cost. 
 
-Finally, the last factor is the multiextremality of criteria \cite{Pardalos2017}. First of all, multiextremal criteria can generate complicated Pareto sets consisting, for example, of several disconnected parts. Moreover, the combination of such factors as multiextremality and greater dimension leads to significant computational complexity of the problem because the computational cost increases exponentially when dimension grows. From this point of view the multiextremal problems are the most complicated ones in multicriterial optimization and this MCO class is the subject of interest in the given paper. 
+Finally, the last factor is the multiextremality of criteria \cite{Pardalos2017}. First of all, multiextremal criteria can generate complicated Pareto sets consisting, for example, of several disconnected parts. Moreover, the combination of such factors as multiextremality and greater dimension leads to significant computational complexity of the problem because the computational cost increases exponentially when dimension grows. From this point of view the multiextremal problems are the most complicated ones in multicriteria optimization and this MCO class is the subject of interest in the given paper. 
 
 The simplest way to build an approximation of the Pareto set consist in immersion in the feasible domain of problem's parameters a uniform grid (deterministic or random) and selection of all non-dominated nodes of the grid. Unfortunately, this universal approach is too costly because it requires in the worst case pairwise comparison of all the grid nodes and does not take into account the properties of the problem for reducing the computational costs.
 
-Another idea applies a parameterization scheme for the criteria of the problem and reduces a MCO problem to a family of single-criterion (scalar) optimization problems being problems of mathematical programming which can be solved by corresponding well-developed optimization methods \cite{Collette2004,Ehrgott2005}. In this scheme a non-negative coefficient (weight) is assigned to each criterion which reflects numerically an ``importance'' of the criterion and on the base of such weighted criteria a scalar function (convolution) is built and minimized. Under appropriate choice of convolution the solution of the built scalar optimization problem is a partial solution of the initial multicriterial problem. Changing weights we can obtain different Pareto points. 
+Another idea applies a parameterization scheme for the criteria of the problem and reduces a MCO problem to a family of single-criterion (scalar) optimization problems being problems of mathematical programming which can be solved by corresponding well-developed optimization methods \cite{Collette2004,Ehrgott2005}. In this scheme a non-negative coefficient (weight) is assigned to each criterion which reflects numerically an ``importance'' of the criterion and on the base of such weighted criteria a scalar function (convolution) is built and minimized. Under appropriate choice of convolution the solution of the built scalar optimization problem is a partial solution of the initial multicriteria problem. Changing weights we can obtain different Pareto points. 
 
 There exist various convolution functions but weighted sum function (linear convolution) and maximum from weighted criteria (maximum convolution) are most commonly used. The latter is more universal because it enables to build completely the Pareto set taking all the possible combinations of weights, whereas the linear convolution can lose Pareto points in non-convex case (in particular, if criteria are multiextremal).
 
@@ -92,7 +92,7 @@ Q = \left\{x \in R^N : a_j \leq x_j \leq b_j, 1 \leq i \leq N \right\}
 \end{equation}
 in $N$-dimensional Euclidean space $R^N$. These functions reflect objectives of decision making and it is considered that the less the function value, the better the result of achieving this objective.
 
-The problem of multicriterial optimization is formulated as minimizing over the domain (\ref{Q}) the vector function
+The problem of multicriteria optimization is formulated as minimizing over the domain (\ref{Q}) the vector function
 \begin{equation}\label{W}
 W(x) = \left(w_1(x), ..., w_k(x)\right).
 \end{equation}
@@ -129,7 +129,6 @@ where coefficients $\lambda_i, \; 1 \leq i \leq k,$ (weights of criteria) satisf
 \begin{equation}\label{lambda}
 \lambda_i \geq 0, \; 1 \leq i \leq k, \; \sum_{i=1}^k{\lambda_i} = 1.
 \end{equation}
-
 If
 \begin{equation}\label{positive}
 w_i(x) > 0, \; 1 \leq i \leq k,
@@ -138,7 +137,7 @@ in the domain (\ref{Q}), then global solution to the problem
 \begin{equation}\label{conv_problem}
 \Phi_\lambda(x) = \Gamma(\lambda,x) + \gamma \sum_{i=1}^k{\lambda_i w_i(x)} \rightarrow \min, \; x \in Q,
 \end{equation}
-with a sufficiently small parameter $\gamma > 0$ is a Pareto optimal point of the initial MCO problem (\ref{problem}) \cite{Wierzbicki} [Wierzbicki, Krasnoshekov]. The positiveness of criteria is not restrictive requirement because it is possible to transform easily the MCO problem with non-positive criteria to the form (\ref{positive}) without loss of Pareto solution.
+with a sufficiently small parameter $\gamma > 0$ is a Pareto optimal point of the initial MCO problem (\ref{problem}) \cite{Wierzbicki,Marler2004}. The positiveness of criteria is not restrictive requirement because it is possible to transform easily the MCO problem with non-positive criteria to the form (\ref{positive}) without loss of Pareto solution.
 
 In the case of multiextremal criteria the problem (\ref{conv_problem}) is multiextremal as well and it is necessary to use global optimization algorithms for its solving. Many references to such the algorithms can be found in monographs \cite{Strongin2000,Pinter1996,Zhigljavsky2008,Sergeyev2013,PaulaviciusZilinskas2014,Sergeyev2017}. For solving multiextremal problems the information-statistical algorithms \cite{Strongin2000,Sergeyev2013} are among of the most efficient.
 
@@ -194,10 +193,9 @@ However, in the case when the function $f(x)$ is Lipschitzian this property is n
 with a H{\"o}lder constant $H>0$ \cite{Strongin2000,Sergeyev2013}.
 
 If the function $f(x)$ satisfies the Lipschitz condition (\ref{lip_1}) then $H=2L\sqrt{N+3}$.
-
 As a consequence, minimization of the function $f(x(t))$  requires the use of special algorithms oriented at functions with property (\ref{holder}).
 
-In the proposed scheme for solving reduced univariate minimization problem we apply modified information-statistical algorithm \cite{Strongin2000} with local refinements (ALR) accelerating convergence to global optimum of functions that satisfy the H{\"o}lder condition.
+In the proposed scheme for solving reduced univariate minimization problem we apply modified information-statistical Algorithm \cite{Strongin2000} with Local Refinements (ALR) accelerating convergence to global optimum of functions that satisfy the H{\"o}lder condition.
 
 Before description of this algorithm let us follow again the path of simplification and formulate the general one-dimensional optimization problem as
 \begin{equation}\label{problem_fi}
@@ -262,7 +260,7 @@ R(p) = \max_{2 \leq s \leq n} {R(s)}.
 \item
 The new $(n+1)$-th trial is performed at the point
 \begin{equation}\label{eq:22}
-t^{n+1} = \frac{t_p-t_{p-1}}{2} - sign(v_p-v_{p-1}) \left( \frac{|v_p-v_{p-1}|}{M} \right)^N \frac{1}{2r} 
+t^{n+1} = \frac{t_p-t_{p-1}}{2} - sign(v_p-v_{p-1}) \left( \frac{|v_p-v_{p-1}|}{M} \right)^N \frac{1}{2r},
 \end{equation}
 the value $v^{n+1} = \varphi(t^{n+1})$ is computed and the iteration number $n$ is increased by 1.
 
@@ -270,7 +268,7 @@ the value $v^{n+1} = \varphi(t^{n+1})$ is computed and the iteration number $n$ 
 
 
 The method ALR described above is a modification of the basic information-statistical algorithm \cite{Strongin2000,Sergeyev2013} for minimization functions satisfying the H{\"o}lder condition. The modification consists in introducing new characteristics (\ref{eq:17}) after initial stage of the search to improve the method's speedup on account of increasing values of characteristics for intervals containing current record (\ref{eq:18}). 
-\textcolor[rgb]{1,0,0}{Actually, the second term in (\ref{eq:17}) will have the largest value equal to $(1.5)^{\sigma}$ only for those intervals for which the equality $v_q = \varphi^*(n)$ or $v_{q-1} = \varphi^*(n)$ holds, i.e. for the intervals with the boundary points correspond to the current record $\varphi^*(n)$.}
+Actually, the second term in (\ref{eq:17}) will have the largest value equal to $(1.5)^{\sigma}$ only for those intervals for which the equality $v_q = \varphi^*(n)$ or $v_{q-1} = \varphi^*(n)$ holds, i.e., for the intervals with the boundary points one of which coincides with the current record $\varphi^*(n)$.
 
 Like its prototype, ARL can apply as the stopping condition the inequality
 \begin{equation}\label{eq:23}
@@ -288,7 +286,7 @@ If $\varphi(t) = f(x(t)) $ where $x(t)$ is the Peano-type curve and $f(x)$ meets
 m > 2^{3 - 1 / N}L\sqrt{N+3}.
 \end{equation}
 
-\textcolor[rgb]{1,0,0}{The complete convergence theory of the information-statistical algorithm is given in \cite{Strongin2000,Sergeyev2013}.}
+The complete convergence theory of the information-statistical algorithms is given in \cite{Strongin2000,Sergeyev2013}.
 
 Finalizing the proposed general scheme  let us describe a procedure  of successive solving the problems of the family $S$ which are scalar problems (\ref{conv_problem}) for different weight vectors $\lambda = (\lambda_1, \dots,\lambda_k)$ (\ref{lambda}). This procedure will be called Reduced Algorithm with Local Refinements and Data Accumulation (RALR-DA).
 
@@ -327,7 +325,7 @@ was considered as the feasible one.
 Each problem was solved by all the methods including the grid technique and corresponding HVs were determined.  Metaheuristic methods because of their stochastic nature sometimes realize unsuccessful runs. In order to estimate better their efficiency each of these methods carried out 10 launches when solving a separate MCO problem and the average result was taken into account.
 
 During all experiments the method ALR was used with parameters $r=5.6$, $\sigma = 18$, $T=3$. 
-\textcolor[rgb]{1,0,0}{The use of $T=3$ corresponds to alternation of one ``local'' iteration and two ``global'' iterations, that can be interpreted as a combination of local refinement and global updating of the current optimizer.}
+The use of $T=3$ corresponds to alternation of one ``local'' iteration and two ``global'' iterations, that can be interpreted as a combination of local refinement and global updating of the current optimizer.
 Accuracy $\varepsilon$ from the stopping condition (\ref{eq:23}) was $0.05$ in bi-criteria problems and $0.01$ in 4-criteria ones.
 
 For correct comparison of the algorithms (except grid method, of course) their parameters influencing the stopping condition were chosen to provide approximately the same number of trials. After the completion of solving all the group problems, HVs of each method were averaged.
@@ -340,7 +338,7 @@ In the first experiment 100 two-dimensional bi-criteria problems have been taken
 \caption{Contour plots of 2-dimensional convolution.}\label{fig1} 
 \end{figure}
 
-\textcolor[rgb]{1,0,0}{The Pareto front in one of test problems is shown in Fig.~\ref{fig2a} and Fig.~\ref{fig2b}. Here Fig.~\ref{fig2a} corresponds to the Pareto front computed on the uniform grid with the step 0.05 in the search domain whereas Fig.~\ref{fig2b} shows the Pareto front computed by RALR-DA. In the last case it is required only 608 trials to obtain the solution with the same accuracy.}
+The Pareto front in one of test problems is shown in Fig.~\ref{fig2a} and Fig.~\ref{fig2b}. Here Fig.~\ref{fig2a} corresponds to the Pareto front computed on the uniform grid with the step 0.05 in the search domain whereas Fig.~\ref{fig2b} shows the Pareto front computed by RALR-DA.
 
 \begin{figure}
 \centering
@@ -355,7 +353,7 @@ In the first experiment 100 two-dimensional bi-criteria problems have been taken
 \end{figure}
 
 
-\textcolor[rgb]{1,0,0}{The averaged HV indices obtained while solving the two-dimensional bi-criteria problems are presented} in Tab.~\ref{tab1} and Fig.~\ref{fig3} where ``Pareto'' corresponds to the estimation obtained by the grid method.
+The averaged HV indices obtained while solving the two-dimensional bi-criteria problems are presented in Tab.~\ref{tab1} and Fig.~\ref{fig3} where ``Pareto'' corresponds to the estimation obtained by the grid method.
 
 \begin{table}
 \tbl{Results of the experiment with bi-criteria MCO problems of dimension 2.}
@@ -395,7 +393,7 @@ The third collection of test problems consisted of 10 two-dimensional MCO benchm
 Like  the  previous experiments, the results are presented in Tab.~\ref{tab3} and Fig.~\ref{fig5}.
 
 \begin{table}
-\tbl{Results of testing bi-criteria 4-dimensional MCO problems.}
+\tbl{Results of testing 2-dimensional MCO problems with 4 criteria.}
 {\begin{tabular}{ccccccc} \toprule
  Pareto & RALR-DA & OMOPSO & SPEA2 & SMPSO & IBEA & NSGAII   \\ \midrule
   23.89 & 23.52 & 22.87 & 22.80 & 22.53 & 20.68 & 19.82 \\ \bottomrule
@@ -420,7 +418,7 @@ In the paper the multidimensional problems of multicriteria (multiobjective) opt
 The quality of the proposed algorithm is studied in experiment on 3 representative sets of multiextremal MCO problems of different dimensions and criteria number in comparison with 5 particle swarm and genetic methods. As a criterion of methods' efficiency the hypervolume index estimating the quality of Pareto set approximation is taken. Among all competitors the proposed algorithm demonstrates the best results.
 
 As the directions of further development of the current research it would be interesting to investigate the possibilities of applying other schemes of dimensionality reduction, for example,
-\textcolor[rgb]{1,0,0}{the nested optimization scheme \cite{Grishagin2016,Grishagin2018}, the diagonal \cite{Sergeyev2015,Sergeyev2017} or the simplicial \cite{Zilinskas2011,PaulaviciusZilinskas2014} partitions methods}
+the nested optimization scheme \cite{Grishagin2016,Grishagin2018}, the diagonal \cite{Sergeyev2015,Sergeyev2017} or simplicial \cite{Zilinskas2011,PaulaviciusZilinskas2014} partition methods
 in the framework of the general approach used in the paper. Moreover, the prospective way is to develop parallel versions of the proposed general scheme oriented at powerful supercomputer systems.
 
 
