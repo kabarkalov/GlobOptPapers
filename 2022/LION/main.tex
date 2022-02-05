@@ -33,19 +33,49 @@ Evgeny Kozinov\orcidID{0000-0001-6776-0096}}
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-The abstract should briefly summarize the contents of the paper in
-15--250 words.
+The paper considers a new approach to solving multicriterial optimization problems on the base of criteria scalarization, dimensionality reduction via Peano curves and efficient global search algorithm. The novelty of the approach consists in application of machine learning methods combined with utilizing a posteriori information for acceleration of the search. Effectiveness of the proposed approach has been demonstrated by means of solving a set of multiextremal multicriterial optimization problems.
 
-\keywords{First keyword  \and Second keyword \and Another keyword.}
+\keywords{Multicriterial Problems \and Global Optimization \and Machine Learning \and Logistic Regression.}
 \end{abstract}
 %
 %
 %
-\section{First Section}
-\subsection{A Subsection Sample}
-Please note that the first paragraph of a section or subsection is
-not indented. The first paragraph that follows a table, figure,
-equation etc. does not need an indent, either.
+\section{Introduction}
+Methods of machine learning (ML) are powerful tools that are applied in many fields of applications. In particular, the ML methods are successfully used for solving complicated problems of computational mathematics. One of such problem classes to which ML can be applied is the class of multicriterial optimization (MCO) models. In this case, ML is used, as a rule, in combination with metaheuristic algorithms \textbf{[links], [Sergeev, Kvasov]} that in the case of multiextremal criteria lose in efficiency to deterministic methods.
+
+Among the most qualitative deterministic methods for solving problems of considered class the information-statistical global search algorithm \cite{Strongin2000,Sergeyev2013} can be considered. This method proposed initially for solving scalar problems was successfully extended to MCO models \cite{GergelKozinovAPI2016,Gergel2018}.
+
+The paper reflects results of a new research direction connected with utilizing ML methods for acceleration of the global search algorithm in the case of its application to MCO problems. The proposed approach is based on building a number of separation planes in the criteria space to segregate the Pareto set and accelerate the process of its construction. The efficiency of the approach is estimated experimentally compared to several other MCO methods.
+
+
+\section{Problem statement}
+
+The MCO problem to be considered is formulated as follows:
+\begin{equation}
+f(y)=(f_1 (y),f_2 (y),\dots ,f_s (y)) \to \min, y\in D,
+\label{eq:1}
+\end{equation}
+\begin{equation}
+D=\{ y \in R^N: a_i \leq y_i \leq b_i,1 \leq i \leq N,a,b \in R \}.
+\label{eq:2}
+\end{equation}
+where $f_i (y)$, $1 \leq i \leq s$, are  criteria, $y=(y_1,y_2, \dots,y_N)$ is a vector of independent variables, $N$ is the dimension of the problem. The criteria $f_i (y)$, $1 \leq i \leq s$, are supposed to be multiextremal, to be given as a ``black-box'' functions and to satisfy the Lipschitz condition
+\begin{equation}
+|f_i (y')-f_i (y'')| \leq L_i \|y'-y''\|,y',y'' \in D, 1 \leq i \leq s,
+\label{eq:3}
+\end{equation}
+where $L_i>0$, $1 \leq i \leq s$, are a priori unknown Lipschitz constants.
+
+Any effective (Pareto-optimal) variant  in which it is impossible to reduce the values of all criteria $f_i (y)$, $1 \leq i \leq s$, at once by choosing another option   can be considered as a partial solution to the MCO problem. In practice, various scalarization techniques are often used to find effective solutions \cite{Ehrgott2005,Pardalos2017,Marler2004,GergelKozinov2020}. The present study uses the minimax convolution of partial criteria that possesses good theoretical properties
+\begin{equation}
+\min{f(y)} \to \min_{y\in D}{\max_{1 \leq i \leq s}{(f_i (y) \lambda_i )}} ,
+\label{eq:4}
+\end{equation}
+where $\lambda_i \geq 0$, $1 \leq i \leq s$, are numerical indicators of the significance of each criterion. 
+
+In general case, the entire set of Pareto-optimal variants is taken as a complete solution to the MCO problem. For the numerical building of an approximation of the Pareto set a number of scalar optimization problems (\ref{eq:4}) are solved with different coefficients $\lambda_i \geq 0$, $1 \leq i \leq s$.
+
+
 
 1 \cite{Miettinen1999}
 2 \cite{Ehrgott2005}
