@@ -7,6 +7,7 @@
 \usepackage{graphicx}
 \usepackage{color}
 \usepackage{hyperref}
+\usepackage{ulem}
 
 \usepackage{amsmath}
 
@@ -19,9 +20,9 @@
 
 \begin{document}
 %
-\title{ML-based approach for accelerating global search algorithm for solving multicriteria problems\thanks{Supported by organization x.}}
+\title{ML-based approach for accelerating global search algorithm for solving multicriteria problems\thanks{This study was supported by the Russian Science Foundation, project No 21-11-00204.}}
 %
-%\titlerunning{Abbreviated paper title}
+\titlerunning{ML-based approach for accelerating global search algorithm}
 % If the paper title is too long for the running head, you can set
 % an abbreviated paper title here
 %
@@ -46,11 +47,11 @@ The paper considers a new approach to solving multicriterial optimization proble
 %
 %
 \section{Introduction}
-\textcolor[rgb]{1,0,0}{Machine learning (ML) methods are powerful tools that are applied in many areas of research.}
+Machine learning (ML) methods are powerful tools that are applied in many areas of research.
 In particular, the ML methods are successfully used for solving complicated problems of computational mathematics. One of such problem classes to which ML can be applied is the class of multicriterial optimization (MCO) models. 
 In this case, ML is used, as a rule, in combination with metaheuristic algorithms \cite{Subraveti2019} that in the case of multiextremal criteria lose in efficiency to deterministic methods \cite{Kvasov2018,Sergeyev2018}.
 
-Among the most qualitative deterministic methods for solving \textcolor[rgb]{1,0,0}{these problems} the information-statistical global search algorithm \cite{Sergeyev2013,Strongin2000} can be considered. This method proposed initially for solving scalar problems was successfully extended to MCO models \cite{GergelKozinovAPI2016,Gergel2018}.
+Among the most qualitative deterministic methods for solving these problems the information-statistical global search algorithm \cite{Sergeyev2013,Strongin2000} can be considered. This method proposed initially for solving scalar problems was successfully extended to MCO models \cite{GergelKozinovAPI2016,Gergel2018}.
 
 The paper reflects results of a new research direction connected with utilizing ML methods for acceleration of the global search algorithm in the case of its application to MCO problems. The proposed approach is based on building a number of separation planes in the criteria space to segregate the Pareto set and accelerate the process of its construction. The efficiency of the approach is estimated experimentally compared to several other MCO methods.
 
@@ -58,14 +59,10 @@ The paper reflects results of a new research direction connected with utilizing 
 \section{Problem statement}
 
 The MCO problem to be considered is formulated as follows:
-\begin{equation}
-f(y)=(f_1 (y),f_2 (y),\dots ,f_s (y)) \to \min, \; y\in D,
-\label{eq:1}
-\end{equation}
-\begin{equation}
-D=\left\{ y \in R^N: a_i \leq y_i \leq b_i, \; 1 \leq i \leq N, \; a,b \in R \right\}.
-\label{eq:2}
-\end{equation}
+\begin{gather}
+f(y)=(f_1 (y),f_2 (y),\dots ,f_s (y)) \to \min, \; y\in D,  \label{eq:1} \\ 
+D=\left\{ y \in R^N: a_i \leq y_i \leq b_i, \; 1 \leq i \leq N, \; a,b \in R \right\}.\label{eq:2} 
+\end{gather}
 where $f_i (y)$, $1 \leq i \leq s$, are  criteria, $y=(y_1,y_2, \dots,y_N)$ is a vector of independent variables, $N$ is the dimension of the problem. The criteria $f_i (y)$, $1 \leq i \leq s$, are supposed to be multiextremal, to be given as a ``black-box'' functions and to satisfy the Lipschitz condition
 \begin{equation}
 |f_i (y')-f_i (y'')| \leq L_i \|y'-y''\|, \; y',y'' \in D, \; 1 \leq i \leq s,
@@ -73,16 +70,16 @@ where $f_i (y)$, $1 \leq i \leq s$, are  criteria, $y=(y_1,y_2, \dots,y_N)$ is a
 \end{equation}
 where $L_i>0$, $1 \leq i \leq s$, are a priori unknown Lipschitz constants.
 
-Any effective (Pareto-optimal) variant  in which it is impossible to reduce the values of all criteria $f_i (y)$, $1 \leq i \leq s$, at once by choosing another option   can be considered as a partial solution to the MCO problem. In practice, various scalarization techniques are often used to find effective solutions \cite{Ehrgott2005,Pardalos2017,Marler2004,GergelKozinov2020}. The present study uses the minimax convolution of partial criteria that possesses good theoretical properties
+Any effective (Pareto-optimal) variant  in which it is impossible to reduce the values of all criteria $f_i (y)$, $1 \leq i \leq s$, at once by choosing another option   can be considered as a partial solution to the MCO problem. In practice, various scalarization techniques are often used to find effective solutions \cite{Ehrgott2005,GergelKozinov2020,Marler2004,Pardalos2017}. The present study uses the minimax convolution of partial criteria that possesses good theoretical properties
 \begin{equation}
 \min{f(y)} \to \min_{y\in D}{\max_{1 \leq i \leq s}{(f_i (y) \lambda_i )}} ,
 \label{eq:4}
 \end{equation}
 where $\lambda_i \geq 0$, $1 \leq i \leq s$, $\sum_{i=1}^s{\lambda_i}=1$, are numerical indicators of the significance of each criterion. 
 
-In general case, the entire set of Pareto-optimal variants is taken as a complete solution to the MCO problem. For the numerical building of an approximation of the Pareto set a number of scalar optimization problems (\ref{eq:4}) are solved with different coefficients $\lambda_i \geq 0$, $1 \leq i \leq s$, uniformly distributed
+In general case, the entire set of Pareto-optimal variants is taken as a complete solution to the MCO problem. For the numerical building of an approximation of the Pareto set a number of scalar optimization problems (\ref{eq:4}) are solved with different coefficients $\lambda_i \geq 0$, $1 \leq i \leq s$, distributed uniformly.
 %in the space of ones.
-\textcolor[rgb]{1,0,0}{in $[0,1]$.}
+%\textcolor[rgb]{1,0,0}{in $[0,1]$.}
 
 \section{General computational scheme}
 
@@ -121,18 +118,26 @@ $R_{ags}(i)$ is calculated in accordance with the expression from the global sea
 
 Calculation of $R_{PS}(i)$ is based on machine learning methods. When solving the first global search problem (\ref{eq:4}), the value of $R_{PS}(i)$ is assumed to be zero. To solve each subsequent scalar problem (\ref{eq:4}), $R_{PS}(i)$ is calculated as follows.
 
-In the course of Pareto set assessment all trial points are partitioned into two classes. This bipartition is based on belonging to the Pareto set. For these classes, a separation hyperplane is constructed in the domain of criteria values using the logistic regression \cite{Yu2011}. Examples of separated planes are shown in Fig.~\ref{fig:1}. During the choice of a new trial point, the distances of all obtained criteria values from the separated plane are calculated and the value of $R_{PS}(i)$ is built depending on these distances. 
+In the course of Pareto set assessment all trial points are partitioned into two classes. This bipartition is based on belonging to the Pareto set. For these classes, a separation hyperplane is constructed in the domain of criteria values using the logistic regression \cite{Yu2011}. Examples of separating planes are shown in Fig.~\ref{fig:1}. During the choice of a new trial point, the distances of all obtained criteria values from the separating plane are calculated and the value of $R_{PS}(i)$ is built depending on these distances. 
 
 \begin{figure}[ht]
-\includegraphics[width=0.8\textwidth]{fig1.png}
-\caption{Separated hyperplanes in the criteria space} \label{fig:1}
+\center
+%\includegraphics[width=0.9\textwidth]{fig1.png}
+\begin{minipage}{0.45\linewidth}
+\center{\includegraphics[width=0.9\linewidth]{fig1a.png}}
+\end{minipage}
+\begin{minipage}{0.45\linewidth}
+\center{\includegraphics[width=0.9\linewidth]{fig1b.png}}
+\end{minipage}
+
+\caption{Separating hyperplanes in the criteria space} \label{fig:1}
 \end{figure}
 
-Hereinafter the algorithm taking into account distances to separated hyperplane and accumulated information will be called ML\_MGSA.
+Hereinafter the algorithm taking into account distances to separating hyperplane and accumulated information will be called ML\_MGSA.
 
 \section{Results of computational experiments}
 
-Computational testing was carried out on the supercomputer ``Lobachevsky'' of Nizhny Novgorod State University in the environment of the Globalizer software system \cite{globalizerSystem}. 
+Computational testing was carried out on the``Lobachevsky'' supercomputer of Nizhny Novgorod State University in the environment of the Globalizer software system \cite{globalizerSystem}. 
 
 The first series of experiments was performed to compare the algorithm ML\_MGSA with a number of widely known multiobjective optimization algorithms using a test two-criterion problem \cite{Evtushenko2014}
 
@@ -143,7 +148,10 @@ f_1 (y) = (y_1-1) y_2^2+1, \; f_2 (y) = y_2, \; 0\leq y_1, y_2 \leq 1.
 
 In these experiments, a numerical approximation of the Pareto set was built. The quality of approximation is estimated by such indicators as the hypervolume index (HV) and distribution uniformity index (DU) \cite{Evtushenko2014,Zilinskas2015}. In the framework of the experiment 5 algorithms of multicriterial optimization were compared: the Monte-Carlo (MC) method, the genetic algorithm SEMO \cite{PISA2003}, the Non-uniform coverage (NUC) method \cite{Evtushenko2014}, the bi-objective Lipschitz optimization (BLO) method \cite{Zilinskas2015} and algorithm ML\_MGSA, proposed in this article. 
   
-ML\_MGSA solved 25 problems (\ref{eq:4}) with different convolution coefficients $\lambda$, uniformly distributed in the field of their variation. The results of the conducted experiments are shown in Table \ref{tab:1} where ML\_MGSA with $\alpha=0$ corresponds to the version without machine learning.
+ML\_MGSA solved 25 problems (\ref{eq:4}) with different convolution coefficients $\lambda$, distributed uniformly.
+%in the field of their variation.
+The results of the conducted experiments are shown in Table \ref{tab:1} where ML\_MGSA with $\alpha=0$ corresponds to the version without machine learning.
+As it follows from the results presented in Table \ref{tab:1}, ML\_MGSA demonstrates the better quality compared to other methods.
 
 \begin{table}
 \caption{Efficiency of the multicriterial algorithms compared}
@@ -158,7 +166,6 @@ DU index (the less the better) & 1.277 & 1.116 & 0.210 & 0.175 & 0.101          
 \end{tabular}
 \end{table}
 
-As it follows from the results presented in Table \ref{tab:1}, ML\_MGSA demonstrates the better quality compared to other methods.
 
 In the second group of experiments 100 bi-criteria MCO problems have been solved. As the criteria the multiextremal functions
 
@@ -172,7 +179,9 @@ a_{ij}(y_1, y_2) = \sin(\pi i y_1) \sin(\pi j y_2), b_{ij}(y_1, y_2) = \cos(\pi 
 \end{equation}
 $0 \leq y_1,y_2 \leq 1$, have been taken where parameters $-1 \leq A_{ij},B_{ij},C_{ij},D_{ij} \leq 1$ are the independent random numbers distributed uniformly \cite{Gergel2019_2,Grishagin2015_2}.
 
-In order to estimate efficiency of machine learning procedure in ML\_MGSA, this method tested in 2 variants: with ($\alpha>0$) and without ($\alpha=0$) machine learning. Each multicriterial problem was reduced to 50 scalar problems (\ref{eq:4}) with different weight coefficients $\lambda$ distributed uniformly. Other algorithm's parameters were the same. The averaged results can be found in Table \ref{tab:2}.
+In order to estimate efficiency of machine learning procedure in ML\_MGSA, this method tested in 2 variants: with ($\alpha>0$) and without ($\alpha=0$)
+\sout{machine learning} \textcolor[rgb]{1,0,0}{use of separating planes in the criteria space}. 
+Each multicriterial problem was reduced to 50 scalar problems (\ref{eq:4}) with different weight coefficients $\lambda$, distributed uniformly. Other algorithm's parameters were the same. The averaged results can be found in Table \ref{tab:2}.
 
 \begin{table}
 \caption{Efficiency of the multicriterial algorithms compared}
@@ -188,22 +197,6 @@ Reducing the number of iterations & 1                & 2.9     \\  \hline
 \end{table}
 
 As shown in the table, embedding the machine learning into the global search algorithm results in a significant reduction of the number of trials (almost 3 times) with maintaining close values of indicators HV and DU.
-
-%1 \cite{Miettinen1999}
-%2 \cite{Ehrgott2005}
-%3 \cite{Pardalos2017}
-%4 \cite{Strongin2000}
-%5 \cite{Sergeyev2013}
-%6 \cite{GergelKozinovAPI2016}
-%7 \cite{Gergel2018}
-%8 \cite{Marler2004}
-%9 \cite{GergelKozinov2020}
-%10 \cite{Yu2011}
-%11 \cite{globalizerSystem}
-%12 \cite{Evtushenko2014}
-%13 \cite{Zilinskas2015}
-%14 \cite{PISA2003}
-
 
 %
 % ---- Bibliography ----
