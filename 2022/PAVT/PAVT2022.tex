@@ -20,6 +20,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{cite}
+\usepackage{color}
 
 %\usepackage[russian]{babel}
 
@@ -145,7 +146,7 @@ However, it is necessary to take into account the fact that the reaction rate co
   k_i (T) = k_i^0 \exp \left(- \dfrac{E_i}{RT} \right),
   \label{eq:arren}
 \end{equation}
-where $k_i(T)$ is a constant of $i$-th stage of reation rate, $k_i^0$ is a pre-exponential factor of $i$-th reation stage, $E_i$ is an activation energy, J/mol, $R$ is the universal gas constant, J $\cdot$ (K$\cdot$mol), $T$ is the temperature, K. Thus, in order to fully develop the kinetic model of the reaction, it is necessary to calculate the activation energies $E_i$ and pre-exponential factors $k_i^0$ of all stages of the chemical reaction.  There are two formulations of the problems of searching for kinetic parameter data $E$ and $k^0$. The first one is to solve the inverse problem of selecting the kinetic parameters included in the equation (\ref{eq:arren}), which during the solution allow us to calculate all the reaction rate constants $k_i$. Then, with the found rate constants of the reaction stages, the system of differential equations (\ref{eq:one})--(\ref{eq:twelve}) is solved, then the calculated concentrations are compared with the corresponding experimental data. Mathematically, this problem has the following formulation: it is necessary to minimize the following objective function:
+where $k_i(T)$ is a constant of $i$-th stage of reation rate, $k_i^0$ is a pre-exponential factor of $i$-th reation stage, $E_i$ is an activation energy, J/mol, $R$ is the universal gas constant, J $\cdot$ (K$\cdot$mol), $T$ is the temperature, K. Thus, in order to fully develop the kinetic model of the reaction, it is necessary to calculate the activation energies $E_i$ and pre-exponential factors $k_i^0$ of all stages of the chemical reaction.  There are two formulations of the problems of searching for kinetic parameter data $E$ and $k^0$. The first one is to solve the inverse problem of selecting the kinetic parameters included in the equation (\ref{eq:arren}), which during the solution allow us to calculate all the reaction rate constants $k_i$. Then, with the found rate constants of the reaction stages, the system of differential equations (\ref{eq:one})--(\ref{eq:twelve}) is solved, then the calculated concentrations are compared with the corresponding experimental data. Mathematically, this problem has the following formulation: it is necessary to minimize the following objective function
 
 \begin{equation}
   F_1 = \sum_{i=1}^I \sum_{j=1}^J \sum_{k=1}^K \left| c_{ijk}^{exp} - c_{ijk}^{calc} \right| \longrightarrow \min,
@@ -166,7 +167,10 @@ Thus, both formulations of the problem (\ref{eq:objective_func1}) and (\ref{eq:o
 
 \subsection{Global Optimization Problem}
 
-As it has been already mentioned above, from the formal point of view, we consider the inverse problem of chemical kinetics as Lipschitz global optimization problem. In the general form, a problem of the class specified above can be formulated mathematically as 
+\textcolor[rgb]{1,0,0}{As it has been already mentioned above, from the formal point of view we consider the inverse problem of chemical kinetics as a global optimization problem. 
+In the specific problem under consideration, the values of the objective function are calculated by solving stiff ODE system (\ref{eq:one})--(\ref{eq:twelve}). Since the right parts of the system are continuous functions with bounded derivatives, then theoretically its solution will also be continuous and bounded. Therefore, the discrepancy (\ref{eq:objective_func2}) will satisfy the Lipschitz condition with a priori unknown constant.}
+
+In the general form, a problem of the class specified above can be formulated mathematically as 
 follows:
 \begin{gather}
  \varphi^* = \varphi(y^\ast)=\min{\left\{\varphi(y):y\in D\right\}}, \label{problemN}\\
@@ -201,6 +205,9 @@ with the H{\"o}lder constant $H$ linked to the Lipschitz constant $L$ by the rel
 The issues of the numerical construction of various approximations of the Peano-Hilbert curve were considered in \cite{Strongin2000,Sergeyev2013}.
 
 So far, a search trial at some point $x'\in[0,1]$ will include first the construction of the image $y'=y(x')$ and then the computing the value of the function $z'=\varphi(y')$.
+
+%Данный комментарий можно и не включать...
+%Note that the presence of rapidly decreasing components in the solution of the stiff ODE system (\ref{eq:one})--(\ref{eq:twelve}) can lead to the fact that in different subdomains the objective function can have different local Lipschitz constants. This problem will affect the convergence of any of the global optimization methods. To take it into account, a number of approaches have been proposed related to local tuning of global optimization methods (see, e.g., \cite{Barkalov2021,Strongin2020}).
 
 \subsection{Parallel Asynchronous Global Search Algorithm}
 
@@ -275,6 +282,7 @@ It was confirmed by the results of experiments described in the next section.
 According to the problem statements (\ref{eq:objective_func1}) and (\ref{eq:objective_func2}), the corresponding calculations were carried out in this work.
 %ННГУ
 To carry out the numerical experiments, UNN supercomputer Lobachevsky was used (CentOS 7.2, SLURM, two CPU Intel Sandy Bridge E5-2660 2.2 GHz and 64 Gb RAM on the node). The asynchronous global optimization algorithm was implemented using C++ (GCC 5.5.0 and Intel MPI were used); the objective function values were computed using Python 3.9.
+\textcolor[rgb]{1,0,0}{The accuracy of solving the ODE system (\ref{eq:one})--(\ref{eq:twelve}) was set small enough so that the final error of the solution was much less than the accuracy of the stopping criterion of the optimization method and did not affect the method used.}
 
 \subsection{Search for activation energies and pre-exponential multipliers of the reaction}
 
@@ -376,6 +384,8 @@ Asynchronous & 0.35   &   0.2     &   16.6       \\
 \end{tabular}\end{center}\end{table}
 
 The results have shown that all algorithms had found good solutions (in the values of the objective function). At that, the asynchronous algorithm had demonstrated two times higher speedup than the synchronous one. A good speedup of the asynchronous algorithm remains at a greater number of nodes as well, the results of its work are presented in Table \ref{tab_parall}.
+
+\textcolor[rgb]{1,0,0}{Note that when solving the global optimization problem, the number of iterations of the parallel algorithm (and hence its speedup) depends significantly on the estimation of the Lipschitz constant of the objective function. The constant is adaptively estimated during the work of the algorithm and may vary depending on the accumulated search information. With a correct estimate of the Lipschitz constant the method can converge to a global optimum point faster than in the case of its incorrect estimate. This explains the effect of superlinear speedup observed in experiments.}
 
 \begin{table}
 \caption{Speedup of the asynchronous parallel algorithm}
