@@ -132,12 +132,12 @@ The paper considers a time-efficient implementation of the k-nearest neighborhoo
 
 \section{Introduction}
 
-Currently, machine learning (ML) methods are being used successfully to solve a wide range of problems in various application areas. One example of a class of problems where ML has demonstrated its effectiveness are the tasks of identifying the main properties of the phenomena, which are characterized by their stochastic nature or the presence of hidden parameters \cite{Golovenkin2020, Gonoskov2019, Kastalskiy2021}.
+Currently, machine learning (ML) methods are being used successfully to solve a wide range of problems in various application areas. One example of a class of problems where ML has demonstrated its effectiveness are the tasks of identifying the main properties of the phenomena, which are characterized by their stochastic nature or the presence of hidden parameters \cite{Golovenkin2020,Gonoskov2019,Kastalskiy2021}.
 
-In many cases, solving application problems comes down to the problem of classification, i.e. assigning the object under study to one of the available classes. One of the well-known classification methods is the kNN (k-nearest neighbourhood) method. Although the earliest papers related to this method appeared more than $50$ years ago \cite{Cover1967, Cover1968}, theoretical studies of various aspects of using kNN are still going on [Gorban, Pestov]. This is not to mention hundreds of publications in which this method is used to solve applied classification problems. Over many years of use, kNN has established itself as a simple and reliable method that yields acceptable results when solving many different problems. 
+In many cases, solving application problems comes down to the problem of classification, i.e. assigning the object under study to one of the available classes. One of the well-known classification methods is the kNN (k-nearest neighbourhood) method. Although the earliest papers related to this method appeared more than $50$ years ago \cite{Cover1967, Cover1968}, theoretical studies of various aspects of using kNN are still going on \cite{Pestov2013,Mirkes2020}. This is not to mention hundreds of publications in which this method is used to solve applied classification problems. Over many years of use, kNN has established itself as a simple and reliable method that yields acceptable results when solving many different problems. 
 
 Among the undoubted merits of kNN is its ``explainability'', since the decision about whether a test object belongs to one class or another is clearly explained by similar properties of the test object and its nearest (in some metric) neighbours.
-Along with the study of the method's theoretical properties, the issue of its effective implementation is also investigated. Thus, direct implementation of the method by using the  ``brute-force'' approach has computational complexity $O(n)$, where $n$ is the number of objects. Fast algorithms, which have computational complexity $O(log(n))$, use complex data structures of kd-tree type [kdtree-1,2] \cite{Bentley1975MultidimensionalBS}.
+Along with the study of the method's theoretical properties, the issue of its effective implementation is also investigated. Thus, direct implementation of the method by using the  ``brute-force'' approach has computational complexity $O(n)$, where $n$ is the number of objects. Fast algorithms, which have computational complexity $O(log(n))$, use complex data structures of kd-tree type \cite{Bentley1975MultidimensionalBS}.
 
 One approach to accelerating the kNN algorithm is to use dimensionality reduction methods involving space-filling curves (Peano-Hilbert curves) \cite{Liao2001, Schubert2015FastAS}. In this paper, we develop this approach further and propose an algorithm that employs multiple space-filling curves and is faster (with comparable quality) compared to the algorithm using kd-trees. A specific method for constructing multiple Peano curves is outlined, and statements are given about the preservation of object proximity information in the course of dimensionality reduction. Comparison with known kNN implementations (in particular, those using kd-trees) was performed using test and real-life data with small dimensionality, i.e., just those data for which kd-trees show the best performance in terms of speed.
 
@@ -307,15 +307,13 @@ i.e. $g_0(y) \leq 0$, if $y \in D$, and $g_0(y) > 0$ if otherwise. Hence, any po
 y = y^l(x^l), \; x^l \in [0, 1], \; 0 \leq l \leq L.
 \end{equation} 
 
-By using multiple mappings $y^l(x), \; 0 \leq l \leq L$, the following relationship between neighborhoods on one-dimensional scales and neighborhoods in the original multidimensional domain is defined.
+By using multiple mappings $y^l(x), \; 0 \leq l \leq L$, the following relationship between neighbourhoods on one-dimensional scales and neighbourhoods in the original multidimensional domain is defined.
 
 \textbf{Theorem 1.} Let $y^*$ be an arbitrary point from the domain $D$ belonging to the interval with endpoints $y^\prime, y^{\prime\prime} \in D$, which differ in the values of the only coordinate, and let
-
 \begin{equation}
 |y_j^\prime - y^{\prime\prime}_j| \leq 2^{-p}, \; y^\prime_i = y^{\prime\prime}_i = y_i^*, \; 1 \leq i \leq N, i \ne j,
 \end{equation} 
 where $p$ is an integer, $1 \leq p \leq L-1$, and $j$ is the number of coordinate whose values for points $y^*, y^\prime, y^{\prime\prime}$ are different. Then there exists at least one correspondence $y^l(x), 0 \leq l \leq L$, and preimages $x^*, x^\prime, x^{\prime\prime} \in [0, 1]$ such that
-
 \begin{equation}
  y^* = y^l(x^*), y^\prime = y^l(x^\prime), y^{\prime\prime} = y^l(x^{\prime\prime}), \\
 \max \{ |x^\prime - x^*|, |x^{\prime\prime} - x^*|, |x^\prime - x^{\prime\prime}| \} \leq 2^{-pN}.
@@ -342,20 +340,17 @@ As an illustration, Figure \ref{fig2} shows a family of space-filling curves in 
 The scheme of implementation of the kNN algorithm using multiple Peano curves will look as follows.
 
 For every object $\omega_i$ a set of its preimages on different one-dimensional scales is assigned 
-
 \begin{equation}
 \omega_i \rightarrow \{ x_i^0, x_i^1, ..., x_i^L \}
 \end{equation} 
 where $l, \; 0 \leq l \leq L$, is the number of the one-dimensional interval.
 
 The degree of proximity of a test object to one of the known objects can be expressed in terms of the distance on the $l$-th scale.
-
 \begin{equation}
 d_i^n = |x_i^n - x^{*n}|
 \end{equation} 
 
 Thus, the distance $d(\omega_i,\omega_j)$ between two objects $\omega_i$ and $\omega_j$ on a one-dimensional scale will correspond to the minimum distance among all the mappings. If we find the minimum distance among all these distances, we get the nearest neighbour
-
 \begin{equation}
 d_{min} = \min \{ d_i^n \} = \min \{ |x_i^n - x^{*n}| \}.
 \end{equation} 
@@ -377,7 +372,7 @@ To run Algorithms A and B, we need to compute the preimages $\{x_i^0, x_i^1, ...
 
 The input data for kNN are the values of object features imported into the program from external files. A text label indicating the class to which the object belongs is read with each such object.
 
-The input data of the algorithm also includes the feature vector $y^*$ corresponding to the test object $\omega^*$.
+The input data of the algorithm also includes the feature vector $y^*$ corresponding to the test object $\omega^*$.\\
 
 %\\[12pt]
 \underline{Procedure A}
@@ -423,14 +418,6 @@ GSA-DT         & 49   & 43  &  35   \\
 
 
 
-\end{paracol}
-
-
-\begin{paracol}{2}
-\linenumbers
-\switchcolumn
-
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -454,7 +441,7 @@ GSA-DT         & 49   & 43  &  35   \\
 % \supplementary{The following are available at \linksupplementary{s1}, Figure S1: title, Table S1: title, Video S1: title. A supporting video article is available at doi: link.} 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\authorcontributions{Conceptualization and methodology, K.B.; software and validation, A.S., A.Sh.; formal analysis, K.B.; investigation, A.S.; data curation, A.Sh.; writing --- original draft preparation, K.B.; writing- -- review and editing, K.B.; visualization, A.S.; funding acquisition, K.B. All authors have read and agreed to the published version of the manuscript.}
+\authorcontributions{Conceptualization and methodology, K.B.; software and validation, A.S., A.Sh.; formal analysis, K.B.; investigation, A.S.; data curation, A.Sh.; writing --- original draft preparation, K.B.; writing --- review and editing, K.B.; visualization, A.S.; funding acquisition, K.B. All authors have read and agreed to the published version of the manuscript.}
 
 \funding{This research was funded by the Ministry of Science and Higher Education of the Russian Federation, agreement number 075-15-2020-808.}
 
