@@ -119,7 +119,7 @@ The paper considers a time-efficient implementation of the k-nearest neighborhoo
 }
 
 % Keywords
-\keyword{space-filling curves} 
+\keyword{machine learning, kNN, dimensionality reduction, multiple space-filling curves} 
 
 % The fields PACS, MSC, and JEL may be left empty or commented out if not applicable
 %\PACS{J0101}
@@ -169,13 +169,13 @@ In the practical implementation of kNN, an important indicator is the estimate o
 
 \begin{itemize}
 \item Brute force method. It is based on calculating all distances from the test object to other objects of the class and determining the smallest value. This method has complexity $O(n)$, where $n$ is the number of objects.
-\item KD-Tree method. It is based on a special kind of binary tree, where each node represents a point in the multidimensional space. The search procedure has complexity $O(log n)$.
-\item Ball-Tree method. It is yet another kind of tree structure, which has logarithmic complexity. This method is applicable to problems that have a large dimensionality.
+\item KD-tree method. It is based on a special kind of binary tree, where each node represents a point in the multidimensional space. The search procedure has complexity $O(log(n))$.
+\item Ball-tree method. It is yet another kind of tree structure, which has logarithmic complexity. This method is applicable to problems that have a large dimensionality.
 \end{itemize}
 
 The main drawback of the brute force method is the unacceptable running time and the rapid growth of the computation volume as the number of objects increases. This method can be applied when the number of objects is relatively small and the dimension of $y$ is small, and when the ``curse of dimensionality'' is not yet in full effect.
 
-For KD-Tree, the main drawback is that it slows down when the number of objects grows, which is caused by increasing complexity of the internal tree structure. However, KD-trees have proven to be a good solution for problems with small dimensionality, which will be considered in this study.
+For kd-tree, the main drawback is that it slows down when the number of objects grows, which is caused by increasing complexity of the internal tree structure. However, kd-trees have proven to be a good solution for problems with small dimensionality, which will be considered in this study.
 
 As it was mentioned, the computational cost of searching for nearest objects increases with increasing dimensionality, both in the case of exhaustive search for all distances and when using tree structures. One mechanism for speeding up the search is dimensionality reduction, by reducing the problem of searching in a multidimensional space to the search in a one-dimensional space (over an interval). This is possible through the use of space-filling curves (Peano-Hilbert curves) that fill the multidimensional space. Such curves are used, for example, in global optimization \cite{Lera2015,Lera2018,Strongin2018,Gergel2021}, in numerical approximation of solutions to systems of nonlinear inequalities \cite{Lera2021}, in image processing \cite{Liang2008,Costa2012,Herrero2015}, etc.
 
@@ -183,7 +183,7 @@ An algorithm based on data curves can offer some advantages over tree-based algo
 
 Note that in practical classification tasks, different features can have different scales, which can significantly distort the real distance between objects. Therefore it will be assumed that prior to applying kNN data scaling has been performed 
 \begin{equation}
-y_j \equiv \frac{y_j - y_{min}} {y_{max} - y_{min}} - \frac{1} {2}.
+y_j = \frac{y_j - y_{min}} {y_{max} - y_{min}} - \frac{1} {2}.
 \end{equation} 
 
 Thus, the variation domain for all feature values will form a unit hypercube
@@ -197,17 +197,17 @@ The $1/2$ hypercube offset  has been made for the convenience of further labelli
 Let us briefly describe a general scheme for constructing a space-filling curve. We will consider here Hilbert's scheme for constructing such a curve.
 
 
-1. Divide hypercube $D$ with edge length of $1$ by coordinate hyperplanes into $2^N$ hypercubes of the first partition (with edge length of $1/2$).
+1. Divide hypercube $D$ form (\ref{D}) with edge length of $1$ by coordinate hyperplanes into $2^N$ hypercubes of the first partition (with edge length of $1/2$).
 
 Then divide every hypercube of the first partition into $2^N$  hypercubes of the second partition (with edge length of $1/4$) by hyperplanes parallel to coordinate hyperplanes and passing through midpoints of hypercube edges orthogonal to them.
 
 By continuing the above process, i.e. by sequentially partitioning each subcube of the current partition into $2^N$ of the next partition, we can construct hypercubes of any $M$-th partition with edge length of $(1/2)^M$. The total number of subcubes of the $M$-th partition will be equal to $2^{NM}$.
 
-2. Now divide the segment $[0, 1]$ into $2^N$ equal parts, divide  each of them also into $2^N$ equal parts and so on. Denote the subinterval of the $M$-th partition by $d(M,v)$ , where $v$ is the coordinate of the left boundary point of the subinterval. Obviously, the length of the subinterval $d(M,v)$ will be equal to $2^{-NM}$. We will assume that the left boundary point belongs to the subinterval and the right boundary point does not. The only exception is the subinterval whose right boundary point is $1$, in which case it also belongs to the subinterval.
+2. Now divide the segment $[0, 1]$ into $2^N$ equal parts, divide  each of them also into $2^N$ equal parts and so on. Denote the subinterval of the $M$-th partition by $d(M,v)$, where $v$ is the coordinate of the left boundary point of the subinterval. Obviously, the length of the subinterval $d(M,v)$ will be equal to $2^{-NM}$. We will assume that the left boundary point belongs to the subinterval and the right boundary point does not. The only exception is the subinterval whose right boundary point is $1$, in which case it also belongs to the subinterval.
 
 3. Establish a one-to-one correspondence between subintervals and subcubes of the $M$-th partition. We denote by $D(M,v)$ a subcube corresponding to the subinterval $d(M,v)$. This correspondence should satisfy the following requirements.
 
-Condition 1. $D(M+1,v^\prime) \in D(M,v^{\prime\prime}) \;\: i.f.f. \;\:  d(M+1,v^\prime) \in d(M,v^{\prime\prime})$.
+Condition 1. $D(M+1,v^\prime) \in D(M,v^{\prime\prime})$ i.f.f. $d(M+1,v^\prime) \in d(M,v^{\prime\prime})$.
 
 Condition 2. Two subintervals $d(M,v^\prime)$ and $d(M,v^{\prime\prime})$ share a common endpoint i.f.f. the corresponding subcubes $D(M,v^\prime)$ and $D(M,v^{\prime\prime})$  are  contiguous, i.e. share a common edge.
 
@@ -215,7 +215,7 @@ Condition 3.  If $x \in d(M,v)$ then $y(x) \in D(M,v), M \geq 1$.
 
 Note that the centre  $y^c(x)$ of the $M$-th partition subcube containing point $y(x)$ can be regarded as an approximation to $y(x)$ with the accuracy of $\varepsilon = 2^{-(M+1)}$, i.e.
 \begin{equation}
-\max_{1 \leq j \leq N} y_j^c(x)-y_j(x) \leq \varepsilon = 2^{-(M+1)}.
+\max_{1 \leq j \leq N} \left| y_j^c(x)-y_j(x) \right| \leq \varepsilon = 2^{-(M+1)}.
 \end{equation} 
 
 The function $y^c(x)$ maps a uniform grid with step $2^{-NM}$, constructed in the interval $[0,1]$, onto a uniform grid with step $2^{-M}$, constructed in the hypercube $D$. A constructive way of establishing such a correspondence is described and theoretically justified in \cite{Strongin2000, Sergeyev2013}.
@@ -270,7 +270,7 @@ instead of a single curve $y(x)$. We will construct the family of curves as foll
 \begin{equation}\label{hypercubes}
 D_i = \{ y \in R^N: -2^{-1} \leq y_i + 2^{-l} \leq 3 \cdot 2^{-1},  1 \leq i \leq N \}, \; 0 \leq l \leq L,
 \end{equation} 
-where the hypercube $D_{l+1}$ is obtained by "shifting" the hypercube $D_l$ along the main diagonal by step $2^{-l}$ for each coordinate.
+where the hypercube $D_{l+1}$ is obtained by shifting the hypercube $D_l$ along the main diagonal by step $2^{-l}$ for each coordinate.
 
 Let a Peano curve type mapping $y^0(x)$ map the interval $[0,1]$ onto the hypercube $D_0$ of (\ref{hypercubes}), i.e.
 \begin{equation}\label{hypercubeD0}
@@ -281,9 +281,12 @@ Any subcube of the $M$-th partition of the hypercube $D_0$ will have an edge of 
 \begin{equation}\label{maps}
 y_i^l(x) = y_i^{l-1}(x) + 2^{-l}, \; 1 \leq i \leq N, \; 1 \leq l \leq L,
 \end{equation} 
-map the interval $[0,1]$ onto the corresponding hypercubes  $D_l, \; 1 \leq l \leq L$ (the broken line in the figure shows the image of the interval $[0,1]$, which is obtained by using the evolvent $y^0(x), x \in [0,1]$).
+map the interval $[0,1]$ onto the corresponding hypercubes  $D_l, \; 1 \leq l \leq L$ (the broken line in Fig.~\ref{fig2} shows the image of the interval $[0,1]$, which is obtained by using the evolvent $y^0(x), x \in [0,1]$).
 
-For any subcube $D_0(M,v)$ of the $M$-th partition of the hypercube $D_0$, there will exist a subcube $D_l(M,v)$ of the $M$-th partition of the hypercube $D_l$, and $D_l(M,v)$ can be obtained by shifting $D_0(M,v)$ along the main diagonal by the distance of $2^{-1}+2^{-2}+...+2^{-l}$. 
+For any subcube $D_0(M,v)$ of the $M$-th partition of the hypercube $D_0$, there will exist a subcube $D_l(M,v)$ of the $M$-th partition of the hypercube $D_l$, and $D_l(M,v)$ can be obtained by shifting $D_0(M,v)$ along the main diagonal by the distance of 
+\[
+2^{-1}+2^{-2}+...+2^{-l}.
+\] 
 
 It follows from formulae (\ref{hypercubeD0}) and (\ref{maps}) that if an interval $d(M,v)$ is mapped onto the subcube $D_0(M,v)$, then there exists a family of subcubes
 \begin{equation}
@@ -291,7 +294,7 @@ D_l(M,v) = y^l(d(M,v)), 1 \leq l \leq L,
 \end{equation} 
 connected with the corresponding subintervals $d_l(M,v_l) \subset [0,1]$, where $d(M,v) = d_0(M,v_0), v_0 = v$, such that 
 \begin{equation}
-D_l(M,v) = y^l(d_l(M,v)), 1 \leq l \leq L,
+D_l(M,v) = y^l(d_l(M,v)), 1 \leq l \leq L.
 \end{equation} 
 
 Since the hypercube $D$ from (\ref{D}) belongs to the common part of the family of hypercubes (\ref{hypercubes}) (the boundary of the hypercube $D$ is highlighted in Fig.~\ref{fig2}), then, by introducing an additional function 
@@ -323,7 +326,7 @@ where $p$ is an integer, $1 \leq p \leq L-1$, and $j$ is the number of coordinat
 
 The proof of this theorem is given in \cite{Strongin2000}.
 
-As an illustration, Figure \ref{fig2} shows a family of space-filling curves in extended domains $D_l$, where a square with a dark border highlights the hypercube $D$ belonging to each extended domain. The dots indicate proximate objects in the domain $D$, the distance between which will vary depending on the one-dimensional scale used. The effect of maintaining distance proximity on one of the scales is clearly visible. For example, objects marked with green dots will be far away on the first two one-dimensional scales and close to each other on the third one. Objects marked in blue will be far away on the first and third scales and close to each other on the second scale. 
+As an illustration, Fig. \ref{fig2} shows a family of space-filling curves in extended domains $D_l$, where a square with a dark border highlights the hypercube $D$ belonging to each extended domain. The dots indicate proximate objects in the domain $D$, the distance between which will vary depending on the one-dimensional scale used. The effect of maintaining distance proximity on one of the scales is clearly visible. For example, objects marked with green dots will be far away on the first two one-dimensional scales and close to each other on the third one. Objects marked in blue will be far away on the first and third scales and close to each other on the second scale. 
 
 \end{paracol}
 
@@ -345,17 +348,18 @@ For every object $\omega_i$ a set of its preimages on different one-dimensional 
 \end{equation} 
 where $l, \; 0 \leq l \leq L$, is the number of the one-dimensional interval.
 
-The degree of proximity of a test object to one of the known objects can be expressed in terms of the distance on the $l$-th scale.
+The degree of proximity of a test object to one of the known objects can be expressed in terms of the distance
 \begin{equation}
-d_i^n = |x_i^n - x^{*n}|
+d_i^l = |x_i^l - x^{*l}|
 \end{equation} 
+on the $l$-th scale.
 
 Thus, the distance $d(\omega_i,\omega_j)$ between two objects $\omega_i$ and $\omega_j$ on a one-dimensional scale will correspond to the minimum distance among all the mappings. If we find the minimum distance among all these distances, we get the nearest neighbour
 \begin{equation}
-d_{min} = \min \{ d_i^n \} = \min \{ |x_i^n - x^{*n}| \}.
+d_{min} = \min \{ d_i^l \} = \min \{ |x_i^l - x^{*l}| \}.
 \end{equation} 
 
-Next, the search procedure needs to be run as many times as there are nearest neighbours to be identified. The main problem is that an object previously found on one scale can be found again, including on another scale. This requires either removing the values of x found objects from all scales or searching for $K$ nearest neighbours within each scale and then merging the results.
+Next, the search procedure needs to be run as many times as there are nearest neighbours to be identified. The main problem is that an object previously found on one scale can be found again, including on another scale. This requires either removing the values of $x$ found objects from all scales or searching for $K$ nearest neighbours within each scale and then merging the results.
 
 
 \section{Special features of the implementation of the kNN method using multiple space-filling curves}
