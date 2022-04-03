@@ -130,6 +130,7 @@ The paper considers a time-efficient implementation of the k-nearest neighborhoo
 \begin{document}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
 Currently, machine learning (ML) methods are being used successfully to solve a wide range of problems in various application areas. One example of a class of problems where ML has demonstrated its effectiveness are the tasks of identifying the main properties of the phenomena, which are characterized by their stochastic nature or the presence of hidden parameters \cite{Golovenkin2020,Gonoskov2019,Kastalskiy2021}.
@@ -144,6 +145,7 @@ One approach to accelerating the kNN algorithm is to use dimensionality reductio
 The paper is organized as follows. Section 2 describes the scheme for constructing a Peano-Hilbert curve approximation (evolvent) and the kNN method, which uses the evolvent to reduce the dimensionality of the data. The fundamental drawbacks of this dimensionality reduction method are noted. Section 3 proposes a way to overcome the drawbacks mentioned, based on the use of multiple evolvents. A theoretical statement is formulated about preserving some proximity information in the multidimensional space on one of the one-dimensional scales. A kNN scheme using multiple evolvents is presented. Section 4 contains experimental results comparing different implementations of kNN using synthetic and real-life data. Section 5 concludes the paper.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Problem Statement}
 
 In this study, the classification problem will be understood as the problem of assigning an object $\omega$  to one of the predetermined classes based on its features. We will assume that each of the objects $\omega$ is represented as a feature vector 
@@ -192,6 +194,7 @@ D = \{ y \in R^N: -1/2 \leq y_j \leq 1/2,  1 \leq j \leq N \}.
 \end{equation} 
 The $1/2$ hypercube offset  has been made for the convenience of further labelling.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Dimensionality reduction using space-filling curves}
 
 Let us briefly describe a general scheme for constructing a space-filling curve. We will consider here Hilbert's scheme for constructing such a curve.
@@ -260,6 +263,7 @@ Indeed, the point $x \in [0,1]$ on the one-dimensional scale has only left and r
 
 This property makes dimensionality reduction using a single Peano curve practically inapplicable. To overcome this drawback, various approaches have been proposed, for example, the simultaneous use of two or more space-filling curves of different types \cite{Scott1999}, data shifting \cite{Liao2001}. In the following section, we propose a constructive way to preserve some information on object proximity during dimensionality reduction, based on the use of multiple same-type evolvents.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Constructing a family of Peano curves}
 
 Consider a family of Peano curves
@@ -367,6 +371,7 @@ we get the nearest neighbour.
 Next, the search procedure needs to be run as many times as there are nearest neighbours to be identified. The main problem is that an object previously found on one scale can be found again, including on another scale. This requires either removing the values of $x$ found objects from all scales or searching for $K$ nearest neighbours within each scale and then merging the results.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Special features of the implementation of the kNN method using multiple space-filling curves}
 
 The procedure of finding $K$ nearest neighbours using multiple space-filling curves was implemented in two ways. The first of them (denoted hereafter as Algorithm A) involves searching for $K$ neighbours on each scale and then merging the results and selecting $K$ neighbours from all scales. The peculiarity of this algorithm is that there is no procedure to remove the objects found from the scales.
@@ -406,31 +411,233 @@ The input data of the algorithm also includes the feature vector $y^*$ correspon
 \end{itemize}
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experimental Results}
 
+Let us compare the kNN method that uses multiple evolvents (hereafter referred to as kNN-ME) with the kNN method using KD-tree (hereafter referred to as kNN-KD) \cite{Hou2018} to handle multidimensional data.
 
-\begin{specialtable}[H] 
-	\caption{The average number of tests when minimizing Shekel test functions (the number of unsolved problems is indicated in parentheses)}\label{table:average_Shekel}
-	\center
-\begin{tabular}{cccc}
-\toprule
-        & \textbf{$\epsilon = 10^{-4}$} & \textbf{$\epsilon = 10^{-3}$} & \textbf{$\epsilon = 10^{-2}$} \\
-\midrule													
-DIRECT         & 64(1) &  34(6)   & 20(17)    \\
-GSA            & 106  & 53  &  31   \\ 
-GSA-DT         & 49   & 43  &  35   \\
+The study was performed using several datasets, both randomly generated for testing and real-world  datasets from the database [https://archive.ics.uci.edu/ml/index.php]:
 
-\bottomrule
-\end{tabular}
-\end{specialtable}
+\textbf{DS-Random-1} - a set of random data generated using the random module of the Python NumPy library. The data has a uniform distribution and contains values on an interval from 0 to 1.
 
+\textbf{DS-Random-2} - a set of random data generated by the scikit-learn library (version 1.0.2) function \texttt{sklearn.datasets.make\_classification}.
 
+\textbf{DS-SkinSegmentation} - a dataset of dimension 3 (RGB values) to distinguish human skin colour from other objects in images \cite{ds-1}.
 
+\textbf{DS-CarEvaluation} - a dataset of dimension 6, representing data from a car valuation model based on the values of 6 features \cite{ds-2}.
 
+Two kinds of studies were carried out:
+\begin{itemize}
+\item The time required to find K nearest "neighbours" for a test object was measured;
+\item The accuracy of recognition of test objects was studied, based on the analysis as to whether their neighbours belong to certain classes.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Test infrastructure}
+
+The computational experiments were performed on the following test infrastructure (Table \ref{tab:t1}).
+\begin{table}[h]
+	\centering
+    \caption{Test infrastructure}\label{tab:t1}
+	\begin{tabular}{|l|l|}
+		\hline
+		CPU & Intel Core i3-7100 (3.9 HHz) \\
+		\hline
+		RAM & 8 GB \\ 
+		\hline
+		Operating system & Windows 10 \\
+		\hline
+		Compiler & Intel(R) oneAPI DPC++/C++ Compiler, Version 2022.0.0 \\
+		\hline
+	\end{tabular}
+\end{table}  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Investigation of neighbour search times using test datasets}
+
+Several datasets were synthesized to examine the search time for neighbours. First, DS-Random-1 and DS-Random-2 sets consisting of 100000 and 10000 objects, respectively, were generated.
+
+When generating DS-Random-1, the standard random module from the Python NumPy library was used. The data dimension $N$ varied from 2 to 4; the generated data had a uniform distribution on $[0, 1]$.
+
+To generate the DS-Random-2 set, the \texttt{sklearn.datasets.make\_classification} function from the scikit-learn library (version 1.0.2) was used with the following parameters: 
+
+\begin{itemize}
+\item \texttt{n\_samples} = 10000 (number of objects),
+\item \texttt{n\_features} =  $N$ (dimensionality),
+\item \texttt{n\_redundant} = 0 (number of redundant features),
+\item \texttt{n\_informative} = $N - 1$  (number of informative features),
+\item \texttt{n\_clusters\_per\_class} = 1 (number of clusters per class of objects generated).
+\end{itemize}
+  
+The running times used by the different methods (kNN-ME, procedure A, kNN-ME, procedure B, kNN-KD) for DS-Random-1 and DS-Random-2 datasets with $N = 2$ are shown in Fig. \ref{fig3}. The abscissa axis represents the number of nearest neighbours that the algorithm is searching for, the ordinate axis represents the running time of the method.
+
+\begin{figure}
+\widefigure
+\includegraphics[width=1.0\linewidth]{fig3.png}
+\caption{Running times of the algorithms with $N = 2$\label{fig3}}
+\end{figure}  
+
+Running times of the methods for nearest neighbours search with $N = 3, 4$ are given in Figs. \ref{fig4}, \ref{fig5} respectively.
+
+\begin{figure}
+\widefigure
+\includegraphics[width=1.0\linewidth]{fig4.png}
+\caption{Running times of the algorithms with $N = 3$\label{fig4}}
+\end{figure}  
+
+\begin{figure}
+\widefigure
+\includegraphics[width=1.0\linewidth]{fig5.png}
+\caption{Running times of the algorithms with $N = 4$\label{fig5}}
+\end{figure}  
+
+All the methods considered show a small variation in running time when switching from one dimension to another. The number of objects being processed slightly increases the search time, and there is also a quasi-linear increase in time as the number of neighbours identified increases. All these results are in good agreement with theoretical estimates of the time complexity of the methods under study.
+
+On the whole, the experimental results show that the kNN-ME method based on search without removal (procedure A) works on average 2 times faster than the method that involves removal of elements found   (procedure B). Therefore, we will work with the kNN-ME(A) when investigating classification accuracy. In fact, both variants of the kNN-ME method are 5-7 times faster (depending on the dataset) than the kNN-KD method.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Investigation of neighbour search times on real-world data}
+
+Let us consider the DS-Skin set taken from the collection \cite{ds-1}. The objects in the set belong to two classes: the first class represents points in RGB colour space that belong to human skin images; the second class represents colour coordinates that do not belong to such images.
+
+The number of objects of the first class is about 17000, the number of objects of the second class is 43000. The total number of objects examined is 60000.
+
+\begin{figure}[h]
+\widefigure
+\includegraphics[width=0.5\linewidth]{fig6.png}
+\caption{Comparison of neighbour search times when determining the colour of an image point\label{fig6}}
+\end{figure}
+
+The results of performance comparison of the methods on real-world data are qualitatively similar to those obtained by comparison on test data. The kNN-ME method (implementation A) is 1.5 times faster than implementation B, and both implementations are at least 5 times faster than the kNN-KD method.
+
+The performance of kNN-ME and kNN-KD methods was also tested using a real-world dataset \cite{ds-2}. There are 4 classes of objects in this dataset of dimension $N = 6$. One particular feature of the dataset is the fact that the number of objects belonging to each of the 4 classes differs widely (Table \ref{tab:t2}).
+
+\begin{table}[h]
+	\centering
+    \caption{Classes in the CarEvoluation set}\label{tab:t2}
+	\begin{tabular}{|c|c|}
+		\hline
+		Object class & Number of objects in class \\
+		\hline
+		1 & 1400 \\ 
+		\hline
+		2 & 400 \\
+		\hline
+		3 & 70 \\
+		\hline
+		4 & 65 \\
+		\hline
+	\end{tabular}
+\end{table}  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Investigation of classification accuracy}
+
+According to the general idea of the kNN method, after finding $K$ nearest neighbours to the test object, an attempt is made to determine the class of the test object. The more neighbours belong to a certain class, the higher the probability that the test object belongs to the same class. We will choose an odd number of neighbours, so as to avoid a situation when the nearest objects in equal numbers belong to different classes.
+
+Unfortunately, determining the class of the test object is prone to error. Errors may occur because of the "location" of the object under test on the hypercube edge in immediate proximity to objects of another class. Figure \ref{fig7} shows an example of a random test set where some objects of one class are surrounded by objects of an "alien" class.
+
+\begin{figure}[h]
+\widefigure
+\includegraphics[width=0.5\linewidth]{fig7.png}
+\caption{"Surrounded by aliens"\label{fig7}}
+\end{figure}
+
+DS-Random-2 with $N = 2, 3, 4$ and DS-Skin were used as datasets. The experiment to recognise the class of test objects was carried out as follows.
+
+\begin{itemize}
+\item The source dataset was divided into two samples: a training sample and a test sample. The test sample size was 10\% of the initial number of objects.
+\item $K$ neighbours were searched for each object in the test sample.
+\item The class of an object under test was determined from the set of neighbours found.
+\item The recognition result was checked against the known test object class and an error was recorded if there was a discrepancy with the result. The errors were summed up for the whole test sample.
+\end{itemize}
+
+To divide the source dataset into a training sample and a test sample, we used the \texttt{sklearn.model\_selection.train\_test\_split} function from the scikit-learn library (version 1.0.2).
+
+The results of investigating recognition errors on the synthetically generated random datasets (DS-Random-2) are given in Table \ref{tab:t3}. The numerical values in the table show the percentage of recorded recognition errors.
+
+\begin{table}[h]
+    \caption{Percentage of errors in DS-Random-2 recognition}\label{tab:t3}
+	%\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+	\begin{tabular} {|p{0,8cm}|p{1,2cm}|p{0,8cm}|p{0,8cm}|p{1,2cm}|p{0,8cm}|p{0,8cm}|p{1,2cm}|p{0,8cm}|p{0,8cm}|}
+\hline
+K & KDTree (N=2) & A (N=2) & B N=2) & KDTree (N=3) & A (N=3) & B (N=3) & KDTree (N=4) & A (N=4) & B (N=4) \\
+\hline
+5 & 5 & 5 & 5 & 11 & 12 & 12 & 6 & 8 & 8 \\
+\hline
+15 & 4 & 6 & 6 & 10 & 11 & 11 & 10 & 9 & 9 \\
+\hline
+25 & 5 & 7 & 7 & 10 & 11 & 11 & 7 & 9 & 9 \\
+\hline
+35 & 6 & 6 & 6 & 11 & 13 & 13 & 7 & 10 & 10 \\
+\hline
+45 & 7 & 6 & 6 & 10 & 13 & 13 & 7 & 10 & 10 \\
+\hline
+	\end{tabular}
+\end{table}  
+
+Based on the results of the experiment with random sets, we can conclude that the kNN-ME method has a recognition accuracy close to that of kNN-KD. The error rates of the methods differ, on average, by no more than 2-3\%.
+
+It should be noted that both kNN-ME and kNN-KD demonstrated high error rates, which can be explained by the fact that when generating random data, numerous objects at the class boundaries are generated that are classified incorrectly.
+
+The results of measuring the recognition accuracy on the real-world DS-Skin dataset show that on real-world data both methods show the same percentage of misclassification. The specific error percentages obtained with different numbers of neighbours K are shown in Table \ref{tab:t4}.
+
+\begin{table}[h]
+    \centering
+    \caption{Percentage of DS-Skin recognition errors}\label{tab:t4}
+	%\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+	\begin{tabular} {|p{1cm}|p{1,2cm}|p{1cm}|p{1cm}|}
+\hline
+K & KDTree (N=3) & A (N=3) & B (N=3) \\
+\hline
+5 & 0.5 & 0.5 & 0.5 \\
+\hline
+15 & 0.5 & 0.5 & 0.5 \\
+\hline
+25 & 0.5 & 0.5 & 0.5 \\
+\hline
+35 & 1 & 1 & 1 \\
+\hline
+45 & 1 & 1 & 1 \\
+\hline
+	\end{tabular}
+\end{table}  
+
+Let us consider the results of determining the class of objects in the CarEvaluation set. For objects of classes 1 and 2, we generated test samples containing 20 objects, and for classes 3 and 4, samples containing 5 objects were generated. The kNN-ME and kNN-KD methods showed almost identical results: objects from the first two classes were identified with an average error not exceeding 5\%, while objects of classes 3, 4 were identified with an average error of 15\%. The average recognition error rates for all classes are shown in Table \ref{tab:t5}.
+
+\begin{table}[h]
+    \centering
+    \caption{Average error rate (in percent) for DS-CarEvoluation recognition}\label{tab:t5}
+	%\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+	\begin{tabular} {|p{1cm}|p{1,2cm}|p{1cm}|p{1cm}|}
+\hline
+K & KDTree (N=6) & A (N=6) & B (N=6) \\
+\hline
+5 & 8 & 11 & 11 \\
+\hline
+7 & 9 & 10 & 10 \\
+\hline
+9 & 8 & 10 & 10 \\
+\hline
+11 & 10 & 11 & 10 \\
+\hline
+13 & 9 & 11 & 11 \\
+\hline
+	\end{tabular}
+\end{table}  
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusions and Future Work}
+\section{Conclusions}
+
+The paper considers a classical machine learning method, the k nearest neighbour (kNN) method, which is widely used in machine learning practice and has been proven to perform very well because of its "explainability" (the decision to select an object class can be clearly explained). The results of practical implementation of one of kNN acceleration approaches based on dimensionality reduction using space-filling curves are presented.
+
+An implementation of the kNN algorithm that uses multiple space-filling curves to better transfer the metric properties of multidimensional space to one-dimensional scales is proposed. Theoretical statements are presented about the preservation of the proximity property of objects in multidimensional space and on one of one-dimensional scales when dimensionality reduction is performed.
+
+The software implementation of the kNN method using multiple evolvents (kNN-ME) shows 5-7 times faster performance compared to the algorithm using kd-trees (kNN-KD). The comparison was conducted on test and real-world data sets of different size and dimensionality. 
+
+Both algorithms demonstrate comparable performance, measured as the percentage of misclassification of objects from the test sample. The number of neighbours in the classification was varied from 5 to 100. When applied to the synthesized random data both kNN-ME and kNN-KD show a classification error rate of approximately 10\%, while with real-world data both methods show an error rate of about 1\%.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
