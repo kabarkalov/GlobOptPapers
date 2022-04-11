@@ -115,7 +115,7 @@ $^{1}$ \quad Department of Mathematical Software and Supercomputing Technologies
 
 % Abstract (Do not insert blank lines, i.e. \\) 
 \abstract{
-The paper considers a time-efficient implementation of the k-nearest neighborhood (kNN) algorithm. A well-known approach for accelerating the kNN algorithm is to utilize dimensionality reduction methods based on the use of space-filling curves. In this paper, we take this approach further and propose an algorithm that employs multiple space-filling curves and is faster (with comparable quality) compared to the kNN algorithm which uses kd-trees to determine the nearest neighbors. A specific method for constructing multiple Peano curves is outlined, and statements are given about the preservation of object proximity information in the course of dimensionality reduction. An experimental comparison with known kNN implementations using kd-trees was performed using test and real-life data.
+The paper considers a time-efficient implementation of the $k$ nearest neighbours (kNN) algorithm. A well-known approach for accelerating the kNN algorithm is to utilize dimensionality reduction methods based on the use of space-filling curves. In this paper, we take this approach further and propose an algorithm that employs multiple space-filling curves and is faster (with comparable quality) compared to the kNN algorithm which uses kd-trees to determine the nearest neighbors. A specific method for constructing multiple Peano curves is outlined, and statements are given about the preservation of object proximity information in the course of dimensionality reduction. An experimental comparison with known kNN implementations using kd-trees was performed using test and real-life data.
 }
 
 % Keywords
@@ -135,28 +135,27 @@ The paper considers a time-efficient implementation of the k-nearest neighborhoo
 
 Currently, machine learning (ML) methods are being used successfully to solve a wide range of problems in various application areas. One example of a class of problems where ML has demonstrated its effectiveness are the tasks of identifying the main properties of the phenomena, which are characterized by their stochastic nature or the presence of hidden parameters \cite{Golovenkin2020,Gonoskov2019,Kastalskiy2021}.
 
-In many cases, solving application problems comes down to the problem of classification, i.e. assigning the object under study to one of the available classes. One of the well-known classification methods is the kNN (k-nearest neighbourhood) method. Although the earliest papers related to this method appeared more than $50$ years ago \cite{Cover1967, Cover1968}, theoretical studies of various aspects of using kNN are still going on \cite{Pestov2013,Mirkes2020}. This is not to mention hundreds of publications in which this method is used to solve applied classification problems. Over many years of use, kNN has established itself as a simple and reliable method that yields acceptable results when solving many different problems. 
+In many cases, solving application problems comes down to the problem of classification, i.e. assigning the object under study to one of the available classes. One of the well-known classification methods is the kNN ($k$ nearest neighbours) method. Although the earliest papers related to this method appeared more than $50$ years ago \cite{Cover1967, Cover1968}, theoretical studies of various aspects of using kNN are still going on \cite{Pestov2013,Mirkes2020}. This is not to mention hundreds of publications in which this method is used to solve applied classification problems. Over many years of use, kNN has established itself as a simple and reliable method that yields acceptable results when solving many different problems. 
 
 Among the undoubted merits of kNN is its ``explainability'', since the decision about whether a test object belongs to one class or another is clearly explained by similar properties of the test object and its nearest (in some metric) neighbours.
 Along with the study of the method's theoretical properties, the issue of its effective implementation is also investigated. Thus, direct implementation of the method by using the  ``brute-force'' approach has computational complexity $O(n)$, where $n$ is the number of objects. Fast algorithms, which have computational complexity $O(log(n))$, use complex data structures of kd-tree type \cite{Bentley1975MultidimensionalBS}.
 
 One approach to accelerating the kNN algorithm is to use dimensionality reduction methods involving space-filling curves (Peano-Hilbert curves) \cite{Liao2001, Schubert2015FastAS}. In this paper, we develop this approach further and propose an algorithm that employs multiple space-filling curves and is faster (with comparable quality) compared to the algorithm using kd-trees. A specific method for constructing multiple Peano curves is outlined, and statements are given about the preservation of object proximity information in the course of dimensionality reduction. Comparison with known kNN implementations (in particular, those using kd-trees) was performed using test and real-life data with small dimensionality, i.e., just those data for which kd-trees show the best performance in terms of speed.
 
-The paper is organized as follows. Section 2 describes the scheme for constructing a Peano-Hilbert curve approximation (evolvent) and the kNN method, which uses the evolvent to reduce the dimensionality of the data. The fundamental drawbacks of this dimensionality reduction method are noted. Section 3 proposes a way to overcome the drawbacks mentioned, based on the use of multiple evolvents. A theoretical statement is formulated about preserving some proximity information in the multidimensional space on one of the one-dimensional scales. A kNN scheme using multiple evolvents is presented. Section 4 contains experimental results comparing different implementations of kNN using synthetic and real-life data. Section 5 concludes the paper.
+The paper is organized as follows. Section \ref{ps} contains the problem statement and description of the kNN method. Section \ref{Peano} describes the scheme for constructing a Peano-Hilbert curve approximation (evolvent) and the kNN method, which uses the evolvent to reduce the dimensionality of the data. The fundamental drawbacks of this dimensionality reduction method are noted. Section \ref{MPeano} proposes a way to overcome the drawbacks mentioned, based on the use of multiple evolvents. A theoretical statement is formulated about preserving some proximity information in the multidimensional space on one of the one-dimensional scales. A kNN scheme using multiple evolvents is presented in Section \ref{knnme}. Section \ref{results} contains experimental results comparing different implementations of kNN using synthetic and real-life data. Section \ref{conclusions} concludes the paper.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Problem Statement}
+\section{Problem Statement}\label{ps}
 
 In this study, the classification problem will be understood as the problem of assigning an object $\omega$  to one of the predetermined classes based on its features. We will assume that each of the objects $\omega$ is represented as a feature vector 
 \begin{equation}
 y = (y_1, y_2, ..., y_N) \in R^N,
 \end{equation} 
 where the value of the $j$-th vector coordinate corresponds to the numerical value of the $j$-th feature of the object $\omega$.
-
 We will also assume that there is already some number of objects exactly classified (a test sample), i.e. for each object we know which class it belongs to.
 
-The $k$ nearest neighbours (kNN) method is based on the following simple rule: an object is considered to belong to the class to which most of its nearest neighbours belong. Here, "neighbours" refers to objects that are close (in one sense or another) to the one being studied.
+The $k$ nearest neighbours (kNN) method is based on the following simple rule: an object is considered to belong to the class to which most of its nearest neighbours belong. Here, ``neighbours'' refers to objects that are close (in one sense or another) to the one being studied.
 Note that in order to apply this method, some metric $L(\omega_i, \omega_j)$, i.e. the distance function, should be introduced in the feature space of objects. As a rule, the Euclidean distance is employed here, although other metrics may also be used \cite{Mirkes2020}.
 
 The general scheme of object classification using kNN can be formulated as follows:
@@ -195,7 +194,7 @@ D = \{ y \in R^N: -1/2 \leq y_j \leq 1/2,  1 \leq j \leq N \}.
 The $1/2$ hypercube offset  has been made for the convenience of further labelling.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Dimensionality reduction using space-filling curves}
+\section{Dimensionality reduction using space-filling curves}\label{Peano}
 
 Let us briefly describe a general scheme for constructing a space-filling curve. We will consider here Hilbert's scheme for constructing such a curve.
 
@@ -248,7 +247,7 @@ x^1(\omega^1) \leq x^2(\omega^2) \leq ... \leq x^S(\omega^S).
 
 Since the corresponding object preimages $x_i \in [0,1]$ are ordered, the closest object can be found using a fast binary search algorithm.
 
-When $K$ neighbours need to be found, this search procedure can be repeated $K$ times. In this case it is necessary to exclude previously found items from the search. This can be done by excluding $x_i$ from the set being searched or by comparing the found $x_i$ with the previously found ones to find a match. For example, one possible implementation of searching for $K$ nearest neighbours could be as follows: in relation to $x^*$, we look for the nearest values to the left and right on the one-dimensional scale, choose the minimum one and continue searching sideways until exactly K neighbours are found.
+When $K$ neighbours need to be found, this search procedure can be repeated $K$ times. In this case it is necessary to exclude previously found items from the search. This can be done by excluding $x_i$ from the set being searched or by comparing the found $x_i$ with the previously found ones to find a match. For example, one possible implementation of searching for $K$ nearest neighbours could be as follows: in relation to $x^*$, we look for the nearest values to the left and right on the one-dimensional scale, choose the minimum one and continue searching sideways until exactly $K$ neighbours are found.
 
 One obvious drawback of using the Peano curve in the kNN method is the loss of much of the information about the proximity of objects in multidimensional space when constructing their preimages on the one-dimensional scale. 
 
@@ -264,7 +263,7 @@ Indeed, the point $x \in [0,1]$ on the one-dimensional scale has only left and r
 This property makes dimensionality reduction using a single Peano curve practically inapplicable. To overcome this drawback, various approaches have been proposed, for example, the simultaneous use of two or more space-filling curves of different types \cite{Scott1999}, data shifting \cite{Liao2001}. In the following section, we propose a constructive way to preserve some information on object proximity during dimensionality reduction, based on the use of multiple same-type evolvents.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Constructing a family of Peano curves}
+\section{Constructing a family of Peano curves}\label{MPeano}
 
 Consider a family of Peano curves
 \begin{equation}
@@ -344,8 +343,9 @@ As an illustration, Fig. \ref{fig2} shows a family of space-filling curves in ex
 \linenumbers
 \switchcolumn
 
-The scheme of implementation of the kNN algorithm using multiple Peano curves will look as follows.
+\section{Implementation features of the kNN method using multiple space-filling curves}\label{knnme}
 
+The scheme of implementation of the kNN algorithm using multiple Peano curves will look as follows.
 For every object $\omega_i$ a set of its preimages on different one-dimensional scales is assigned 
 \begin{equation}
 \omega_i \rightarrow \{ x_i^0, x_i^1, ..., x_i^L \}
@@ -372,7 +372,7 @@ Next, the search procedure needs to be run as many times as there are nearest ne
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Special features of the implementation of the kNN method using multiple space-filling curves}
+%\subsection{Implementation features of the kNN method using multiple space-filling curves}
 
 The procedure of finding $K$ nearest neighbours using multiple space-filling curves was implemented in two ways. The first of them (denoted hereafter as Algorithm A) involves searching for $K$ neighbours on each scale and then merging the results and selecting $K$ neighbours from all scales. The peculiarity of this algorithm is that there is no procedure to remove the objects found from the scales.
 
@@ -412,11 +412,11 @@ The input data of the algorithm also includes the feature vector $y^*$ correspon
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Experimental Results}
+\section{Experimental Results}\label{results}
 
 Let us compare the kNN method that uses multiple evolvents (hereafter referred to as kNN-ME) with the kNN method using KD-tree (hereafter referred to as kNN-KD) \cite{Hou2018} to handle multidimensional data.
 
-The study was performed using several datasets, both randomly generated for testing and real-world  datasets from the database [https://archive.ics.uci.edu/ml/index.php]:
+The study was performed using several datasets, both randomly generated for testing and real-world  datasets from the database \url{https://archive.ics.uci.edu/ml/index.php}:
 \begin{enumerate}
 \item
 \textbf{DS-Random-1} -- a set of random data generated using the random module of the Python NumPy library. The data has a uniform distribution and contains values on an interval from 0 to 1.
@@ -433,7 +433,7 @@ The study was performed using several datasets, both randomly generated for test
 
 Two kinds of studies were carried out:
 \begin{itemize}
-\item The time required to find K nearest neighbours for a test object was measured;
+\item The time required to find $K$ nearest neighbours for a test object was measured;
 \item The accuracy of recognition of test objects was studied, based on the analysis as to whether their neighbours belong to certain classes.
 \end{itemize}
 
@@ -534,7 +534,7 @@ The performance of kNN-ME and kNN-KD methods was also tested using a real-world 
 \end{tabular}
 \end{specialtable}
 
-The time required to find K nearest neighbours on the CarEvoluation dataset is shown in Fig.~\ref{fig6a}. In this experiment, the number of evolvents used simultaneously was 7. 
+The time required to find $K$ nearest neighbours on the CarEvoluation dataset is shown in Fig.~\ref{fig6a}. In this experiment, the number of evolvents used simultaneously was 7. 
 \begin{figure}
 \widefigure
 \includegraphics[width=0.5\linewidth]{fig6a.pdf}
@@ -573,7 +573,7 @@ The results of investigating recognition errors on the synthetically generated r
 	\center
 	\begin{tabular}{ccccccccc}
 \toprule
-K & \multicolumn{2}{c}{ $N=2$ } & & \multicolumn{2}{c}{$N=3$} & & \multicolumn{2}{c}{$N=4$} \\
+$K$ & \multicolumn{2}{c}{ $N=2$ } & & \multicolumn{2}{c}{$N=3$} & & \multicolumn{2}{c}{$N=4$} \\
 		\noalign{\smallskip} \cline{2-3} \cline{5-6} \cline{8-9} \noalign{\smallskip}
   & kNN-KD & kNN-ME & & kNN-KD & kNN-ME & & kNN-KD & kNN-ME \\
 \midrule													
@@ -590,14 +590,14 @@ Based on the results of the experiment with random sets, we can conclude that th
 
 It should be noted that both kNN-ME and kNN-KD demonstrated high error rates, which can be explained by the fact that when generating random data, numerous objects at the class boundaries are generated that are classified incorrectly.
 
-The results of measuring the recognition accuracy on the real-world DS-Skin dataset show that on real-world data both methods show the same percentage of misclassification. The specific error percentages obtained with different numbers of neighbours K are shown in Table \ref{tab:t4}.
+The results of measuring the recognition accuracy on the real-world DS-Skin dataset show that on real-world data both methods show the same percentage of misclassification. The specific error percentages obtained with different numbers of neighbours $K$ are shown in Table \ref{tab:t4}.
 
 \begin{specialtable}[H] 
   \caption{Percentage of DS-Skin recognition errors, $N=3$}\label{tab:t4}
 	\center
 \begin{tabular}{ccc}
 \toprule
-K & kNN-KD & kNN-ME \\
+$K$ & kNN-KD & kNN-ME \\
 \midrule													
 5 & 0.5 & 0.5 \\
 15 & 0.5 & 0.5 \\
@@ -615,7 +615,7 @@ Let us consider the results of determining the class of objects in the CarEvalua
 	\center
 \begin{tabular}{ccc}
 \toprule
-K & kNN-KD & kNN-ME \\
+$K$ & kNN-KD & kNN-ME \\
 \midrule													
 5 & 8 & 11 \\
 7 & 9 & 10 \\
@@ -627,9 +627,9 @@ K & kNN-KD & kNN-ME \\
 \end{specialtable}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusions}
+\section{Conclusions}\label{conclusions}
 
-The paper considers a classical machine learning method, the k nearest neighbour (kNN) method, which is widely used in machine learning practice and has been proven to perform very well because of its ``explainability'' (the decision  regarding the choice of an object class can be clearly explained). The results of practical implementation of one of kNN acceleration approaches based on dimensionality reduction using space-filling curves are presented.
+The paper considers a classical machine learning method, the $k$ nearest neighbours (kNN) method, which is widely used in machine learning practice and has been proven to perform very well because of its ``explainability'' (the decision  regarding the choice of an object class can be clearly explained). The results of practical implementation of one of kNN acceleration approaches based on dimensionality reduction using space-filling curves are presented.
 
 An implementation of the kNN algorithm that uses multiple space-filling curves to better transfer the metric properties of multidimensional space to one-dimensional scales is proposed. Theoretical statements are presented about the preservation of the proximity property of objects in multidimensional space and on one of one-dimensional scales when dimensionality reduction is performed.
 
@@ -664,7 +664,7 @@ Both algorithms demonstrate comparable performance, measured as the percentage o
 
 \informedconsent{Not applicable.}
 
-\dataavailability{The data analyzed in this study are openly available at https:// .}
+\dataavailability{The data analyzed in this study are openly available at\\ \url{https://archive.ics.uci.edu/ml/index.php}.}
 
 %\acknowledgments{In this section you can acknowledge any support given which is not covered by the author contribution or funding sections. This may include administrative and technical support, or donations in kind (e.g., materials used for experiments).}
 
