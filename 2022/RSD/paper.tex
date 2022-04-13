@@ -48,7 +48,7 @@ Denis Karchkov \orcidID{0000-0002-4164-5927}
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-The paper presents the results of investigation of efficiency of the parallelization of a global optimum search algorithm. Two stages of solving the problem were distinguished: the search of a rough approximation to the global solution and its local refining. The novelty of the parallel algorithm considered in the present pa-per consists in the parallelization of the whole computational process – both at the global search stage and at the one of the local refining of the solution found. The theoretical estimates of the algorithm parallelization efficiency are presented. The computational experiments were carried out. The results of the ones confirmed the theoretical conclusions.
+The paper presents the results of investigation of efficiency of the parallelization of a global optimum search algorithm. Two stages of solving the problem were distinguished: the search of a rough approximation to the global solution and its local refining. The novelty of the parallel algorithm considered in the present pa-per consists in the parallelization of the whole computational process -- both at the global search stage and at the one of the local refining of the solution found. The theoretical estimates of the algorithm parallelization efficiency are presented. The computational experiments were carried out. The results of the ones confirmed the theoretical conclusions.
 
 \keywords{First keyword  \and Second keyword \and Another keyword.}
 \end{abstract}
@@ -59,22 +59,23 @@ The paper presents the results of investigation of efficiency of the paralleliza
 
 The paper is devoted to the investigation of the parallel algorithms for solving complex optimization problems arising in various fields of science and technology. Several examples of such problems are presented in the review \cite{Pinter2006}.
 
-As a rule, the objective function $\varphi(y)$ in such problems is a ``black-box''-one, i.e. it is defined not by a formula but as a software-implemented algorithm for computing its values at the points of the search domain $D$. In this case, the analytical methods for the search of the exact problem solution is $y^{*} \in D$, and its numerical solving is reduced to the construction of an approximate solution $y_k^* \in D, \|y^{*} - y_k^*\| \leq \varepsilon$, where $\varepsilon > 0$ is a predefined precision. Hereafter, the process of computing the objective function at some point will be called a search trial.
+As a rule, the objective function $\varphi(y)$ in such problems is a ``black-box'' function, i.e. it is defined not by a formula but as a software-implemented algorithm for computing its values at the points of the search domain $D$. In this case, the analytical methods for the search of the exact problem solution $y^{*}  \in D$ are not applicable, and its numerical solving is reduced to the construction of an approximate solution $y_k^* \in D, \|y^{*} - y_k^*\| \leq \varepsilon$, where $\varepsilon > 0$ is a predefined accuracy. Hereafter, the process of computing the objective function at some point will be called a \textit{search trial}.
 
 The problem of search for the values of the parameters of complex mathematical models from the experimental data is a typical example of a global optimization problem with a ``black-box'' objective function. Among such problems, there are, for example, the inverse problems of chemical kinetics \cite{Akhmadullina2017,Nurislamova2016}. The number of parameters in such models can be several tens that requires using the efficient parallel global optimization algorithms for solving these ones.
 
 From the viewpoint of mathematics, the inverse problem is a global optimization one, i.e. the problem of search for the global minimizer of a function on some set. Formally, the point $y^{*} \in D$ is called the global minimizer for the function $\varphi(y)$ on the set $D$ if for all $y \in D$ the inequality $\varphi(y^{*}) \leq \varphi(y)$ holds.
 
-The solution of a global optimization problem always implies performing the search trials at the nodes of some grid (uniform, random, or adaptive one) in the search domain. The number of nodes in the grid increases exponentially with increasing dimensionality of the problem being solved. At the same time, to find the local extremum, the function values are computed in the nodes constituting not a grid but some trajectory starting from the initial guess point and ending at the solution point. 
+The solution of a global optimization problem always implies performing the search trials at the nodes of some grid (uniform, random, or adaptive one) in the search domain. The number of the grid nodes increases exponentially with increasing dimensionality of the problem being solved. At the same time, to find the local extremum, the function values are computed in the nodes constituting not a grid but some trajectory starting from the initial  point and ending at the solution point. 
 
-Formally, the point $y^{\prime} \in D$ is called the local minimizer for a function on the set $D$ if there exists such a number $\varepsilon > 0$ that for all $y \in D$ such that $\|y - y^{\prime}\| < \varepsilon$, the inequality $\varphi(y^{\prime}) \leq \varphi(y)$ holds. Since one needs to explore not the whole search domain $D$ to find a local minimizer, and, on the other hand, the descend trajectory is, generally speaking, a one-dimension object, the computational costs for the local optimization methods are smaller essentially than the ones for the global search.
+Formally, the point $y^{\prime} \in D$ is called the local minimizer for a function on the set $D$ if there exists such a number $\varepsilon > 0$ that for all $y \in D$ such that $\|y - y^{\prime}\| < \varepsilon$, the inequality $\varphi(y^{\prime}) \leq \varphi(y)$ holds. Since one needs to explore not the whole search domain $D$ to find a local minimizer, and the descend trajectory is, generally speaking, a one-dimension object, the computational costs for the local optimization methods are essentially smaller than the ones for the global search.
 One can say that the local minimum search problem consists in finding the local minimizer $y^{*}(y^{0})$ for given initial guess point $y^{0} \in D$, which falls into the attraction region of $y^{*}$.
 
-There are many cases requiring the search for the local optimal solutions. One of such cases arises when an estimate of the globally-optimal solution $y_k^*$ is obtained with a non-satisfactory precision at some $k^{th}$ iteration of the global optimization method. In this case, one can find a locally–optimal solution $y_{loc}^*$, (corresponding to the initial guess point $y_k^*$) with a high precision. The local minimum $y_{loc}^*$ found depends, generally speaking, on $y_k^*$, i.e. $y_{loc}^*(y_k^*)$ will be more precise solution of the global optimization problem.
+There are many cases requiring the search for the local optimum. One of such cases arises when an estimate of the global solution $y_k^*$ is obtained with a non-satisfactory accuracy at some $k^{th}$ iteration of the global optimization method. In this case one can find a local optimizer $y_{loc}^*$, which corresponds to the starting point $y_k^*$, with a high accuracy. The local minimum $y_{loc}^*$ found depends, generally speaking, on $y_k^*$, i.e. $y_{loc}^*(y_k^*)$ will be more precise solution of the global optimization problem.
 
-As a rule, the computational costs for the local refining of the solution is smaller essentially than the costs, which would be necessary for the multiextremal optimization procedures to achieve the same precision as the local method can ensure. How-ever, in the case of using the parallel global optimization algorithm (at the first stage) and sequential local method (at the second stage), the work times of these ones can become comparable. However, the parallelization efficiency would be low.
+As a rule, the computational costs for the local refining of the solution is essentially smaller than the costs, which would be necessary for the multiextremal optimization procedures to achieve the same precision as the local method can ensure. However, in the case of using the parallel global optimization algorithm (at the first stage) and sequential local method (at the second stage) the work times of these ones can become comparable and the parallelization efficiency would be low.
 
-The novelty of the parallel algorithm considered in the present paper consists in the parallelization of the whole computing process – both at the global search stage and at the one of the local refining of the solution found. This approach can be relevant for the problems, which the objective functions are gully-wise with a weak multiextremality. In such problems, the stage of searching the rough approximation of the global solution and the one of its local refining are comparable in the computation costs. For example, in the work \cite{Gubaydullin2021} the global search stage only was parallelized; the local refining was made with a sequential algorithm.
+The novelty of the parallel algorithm considered in the present paper consists in the parallelization of the whole computing process -- both at the global search stage and at the stage of the local refining of the solution found. This approach can be relevant for the problems whose objective functions are flat valleys with a weak multiextremality. In such problems, the phase of searching the rough approximation of the global solution and the phase of its local refining are comparable in the computation costs.
+For example, in the work \cite{Gubaydullin2021} the global search stage only was parallelized; the local refining was made with a sequential algorithm.
 
 The main part of the paper has the following structure. In Section 2, the global optimization problem statement is presented and the properties of the objective function allowing developing the efficient global minimum search algorithms are described. In Section 3, the scheme of the parallel global optimization algorithm is presented and the theoretical estimates of its speedup are given. In Section 4, two local optimization methods (BFGS method and Hooke-Jeeves one) are considered, which can be applied for refining the solution found. Possible parallelization schemes for these methods are discussed. Section 5 contains the results of the computational experiments conducted using both the test problems and the applied ones. Section 6 concludes the paper.
 
@@ -82,13 +83,13 @@ The main part of the paper has the following structure. In Section 2, the global
 
 Let us consider a problem of searching the global minimum of an $N$-dimensional function $\varphi(y)$ in a hyperinterval $D$
 \begin{gather}
-\varphi(y^*) = \min{\{ \varphi(y):y \in D \}} \label{problemN} \\ 
+\varphi(y^*) = \min{\{ \varphi(y):y \in D \}}, \label{problemN} \\ 
 D = \{ y \in R^{N}: a_i \leq y_i \leq b_i, 1 \leq i \leq N \}. \label{D}
 \end{gather}
 
-The main assumption, which the algorithm considered are based on is the fulfillment of Lipschitz condition for the function $\varphi(y)$, i.e.
+The main assumption, which the algorithm considered are based on, is the fulfillment of Lipschitz condition for the function $\varphi(y)$, i.e.
 \begin{equation} \label{lip_ref}
-\mid \varphi(y_1) - \varphi(y_2) \mid \leq L\|y_1 - y_2\|, y_1, y_2 \in D, 0 < L < \infty.
+\left| \varphi(y_1) - \varphi(y_2) \right| \leq L\|y_1 - y_2\|, \; y_1, y_2 \in D, \; 0 < L < \infty.
 \end{equation}
 
 Note that the Lipschitz constant $L$ featuring the rate of variation of the function is not known \textit{a priori}. This assumption is true for a wide class of problems and is typical of many optimization techniques (see, e.g., \cite{Evtushenko2013,Jones2009,Paulavicius2014}).
@@ -99,15 +100,15 @@ The known approaches to solving the Lipschitz global optimization problems are b
 \{ y \in R^{N}: -2^{-1} \leq y_i \leq 2^{-1}, 1 \leq i \leq N\} = \{y(x): 0 \leq x \leq 1 \}.
 \end{equation}
 
-In the theory, the Peano-Hilbert curve is a limiting object. Therefore, one needs to construct an approximation to the theoretical curve for the practical application. The issues of numerical construction of such approximation (also called \textit{evolvents}) for given dimensionality with given precision were considered in \cite{Sergeyev2013}.
+In the theory, the Peano-Hilbert curve is a limit object. Therefore, one needs to construct an approximation to the theoretical curve for the practical application. The issues of numerical construction of such approximation (also called \textit{evolvents}) for given dimensionality with given precision were considered in \cite{Sergeyev2013}.
 
-The use of the space-filling curves allows reducing the multidimensional problem \ref{problemN} to a one-dimensional problem 
+The use of the space-filling curves allows reducing the multidimensional problem \ref{problemN} to a one-dimensional problem and applying the efficient one-dimensional optimization methods to solve it, i.e. 
 \begin{equation} \label{problem_ref}
-\varphi(y^*) = \varphi(y(x^*)) = \min{\{ \varphi(y(x)): x \in [0, 1] \}}
+\varphi(y^*) = \varphi(y(x^*)) = \min{\{ \varphi(y(x)): x \in [0, 1] \}}.
 \end{equation}
-and applying the efficient one-dimensional optimization methods to solve this one. Keeping the property of limited relative differences of the objective function is an important property of using the mappings of this kind. If the function $\varphi(y)$ in the domain $D$ satisfies Lipschitz condition, the function $\varphi(y(x))$ in the interval $[0,1]$ will satisfy uniform H{\"o}lder condition
-\begin{equation} \label{hölder_ref}
-\mid \varphi(y(x_1)) - \varphi(y(x_2)) \mid \leq H {\mid x_1 - x_2 \mid}^{1/N}, x_1, x_2 \in [0,1],
+Keeping the property of limited relative differences of the objective function is an important property of using the evolvents. If the function $\varphi(y)$ in the domain $D$ satisfies the Lipschitz condition, the function $\varphi(y(x))$ in the interval $[0,1]$ will satisfy the uniform H{\"o}lder condition
+\begin{equation} \label{holder_ref}
+\left| \varphi(y(x_1)) - \varphi(y(x_2)) \right| \leq H {\left| x_1 - x_2 \right|}^{1/N}, \; x_1, x_2 \in [0,1],
 \end{equation}
 where H{\"o}lder constant $H$ is related to Lipschitz constant $L$ by the relation $H = 2L\sqrt{N+3}$. Therefore, without liming the generality, one can consider the minimization of the one-dimensional function 
 \begin{equation} \label{minim_fun_ref}
@@ -115,19 +116,20 @@ f(x) = \varphi(y(x)), x \in [0,1],
 \end{equation}
 satisfying H{\"o}lder condition.
 
-The algorithm of solving this problem being considered implies the construction of a series of points $x_k$, which the values of the objective function  $z_k = f(x_k)$ are computed in. We will divide the solving of the problem into two stages. At the first stage, the search of a rough approximation to the global minimum point will be per-formed using the global search algorithm. At the second stage, a local refining of the solution found will be conducted with a high precision. The methods applied at the first stage and at the second one are described in Section 3 and Section 4, respectively.
+The algorithm of solving this problem being considered implies the construction of a series of points $x^k$, which the values of the objective function  $f(x^k) = \varphi(y(x^k))$ are computed in. We will divide the solving of the problem into two stages. At the first stage, the search of a rough approximation to the global minimum point will be performed using the global search algorithm. At the second stage, a local refining of the solution found will be conducted with a high precision. The methods applied at the first stage and at the second one are described in Section \ref{sec:global} and Section \ref{sec:local}, respectively.
 
-\section{Parallel global search algorithm}
+\section{Parallel global search algorithm}\label{sec:global}
 \subsection{Computational scheme of the algorithm}
 
-We will consider the class of problems, in which the time of executing a single search trial doesn’t depend on the point of the trial execution. In this case, one can use the synchronous parallelization scheme, which implies $P$ trials to be performed in parallel and synchronously within single method iteration. In this case, total number of trials executed after $n$ parallel iterations will be $k=nP$.
+We will consider the class of problems, in which the time of executing a single search trial doesn’t depend on the trial point. In this case, one can use the synchronous parallelization scheme, which implies $p$ trials to be carried out in parallel and synchronously within single method iteration. In this case, total number of trials executed after $n$ parallel iterations will be $k=n \cdot p$.
 
-The first iteration of the method is performed in a special way. At this one, the trials are performed at the boundary points $x^0 = 0$ and $x^1 = 1$ as well as at $(P-2)$ arbitrary different internal points $x^2, x^3, ..., x^P$ in the interval $[0,1]$.
+The first iteration of the method is performed in a special way. The trials are performed at the boundary points $x^0 = 0$ and $x^1 = 1$ as well as at $(p-2)$ arbitrary different internal points $x^2, x^3, ..., x^{p-1}$ in the interval $[0,1]$.
 
 At the second iteration and at all the next ones, the following operations are performed.
 
 Step 1. Renumber the points of the previous trials $\{x^0,...,x^k\}$ by the lower indices in the order of increasing the coordinate values, i.e. 
 $$ 0 = x_0 < x_1 < ... < x_k = 1.$$
+
 Step 2. Calculate the magnitudes 
 \begin{equation}\label{M}
 \mu = \max\limits_{1 \leq i \leq k} \frac{\mid z_i - z_{i-1} \mid}{\Delta_i}, \;\;
@@ -136,7 +138,7 @@ M = \left\{ \begin{array}{ll}
                 1, & \textrm{$\mu = 0$},
   \end{array} \right.
 \end{equation}
-where $z_i = f(y(x_i)),$  $\Delta_i = {(x_i - x_{i-1})}^{1/N}$, and $r > 1$ is a predefined parameter of the method.
+where $z_i = f(y(x_i)),$  $\Delta_i = {(x_i - x_{i-1})}^{1/N}$, and $r > 1$ is a predefined number (reliability parameter of the method).
 
 Step 3. For each interval $(x_{i-1}, x_i)$, $1 \leq i \leq k,$ compute the \textit{characteristic} according to the formula
 \begin{equation}\label{R}
@@ -147,26 +149,28 @@ Step 4. Arrange the characteristics $R(i)$, $1 \leq i \leq k,$ in the decreasing
 \begin{equation} \label{OrderedR}
  R(t_1) \geq R(t_2) \geq ... \geq R(t_{k-1}) \geq R(t_{k+1}) 
 \end{equation}
-and select $P$ largest characteristics with the interval indices $t_j$, $1 \leq j \leq P$.
+and select $p$ largest characteristics with the interval indices $t_j$, $1 \leq j \leq p$.
 
-Step 5. Perform new trials at the points $x^{k+j}$, $1 \leq j \leq P$ computed by the formulae
-$$ x^{k+1} = \frac{x_{t_j} + x_{t_j - 1}}{2} - sign(z_{t_j} - z_{t_j - 1}) \frac{1}{2r} {\Bigg[\frac{\mid z_{t_j} - z_{t_j - 1} \mid}{\mu}\Bigg]}^{N}.$$
+Step 5. Carry out new trials in parallel at the points $x^{k+j}$, $1 \leq j \leq p$, computed by the formulae
+$$ x^{k+j} = \frac{x_{t_j} + x_{t_j - 1}}{2} - sign(z_{t_j} - z_{t_j - 1}) \frac{1}{2r} {\Bigg[\frac{\left| z_{t_j} - z_{t_j - 1} \right|}{\mu}\Bigg]}^{N}.$$
 Put the results of the trials performed into the information database of the algorithm.
 
-Step 6. Check the stopping criterion $\Delta_{t_j} \leq \varepsilon$, where $t_j$ are from Step 4 and $\varepsilon > 0$ is the predefined precision. 
+Step 6. Check the stopping criterion $\Delta_{t_j} \leq \varepsilon$, where $t_j$ are from Step 4 and $\varepsilon > 0$ is the predefined accuracy. 
 After completing the algorithm work, take as the estimate of the solution of the problem \ref{problemN} 
-$$ f_k^* = \min\limits_{1 \leq i \leq k} f(x^i), x_k^* = \arg \min\limits_{1 \leq i \leq k} f(x^i).$$
+$$ f_k^* = \min\limits_{1 \leq i \leq k} f(x^i), \; x_k^* = \arg \min\limits_{1 \leq i \leq k} f(x^i).$$
 
-The theoretical substantiation of the algorithm presented here see in more details in \cite{Strongin2000}. Here, note briefly that the characteristics of the intervals (\ref{R}) used in the algorithm can be considered as a quantitative measure how particular interval is promising from the viewpoint of finding the global minimum inside this one. The inequalities (\ref{OrderedR}) arrange the intervals according to the characteristics on the ones, and the trials are performed in parallel in p most promising intervals.
+The theoretical substantiation of the algorithm presented here see in more details in \cite{Strongin2000}. Here, note briefly that the characteristics of the intervals (\ref{R}) used in the algorithm can be considered as a quantitative measure how particular interval is promising from the viewpoint of finding the global minimum inside it. The inequalities (\ref{OrderedR}) arrange the intervals according to their characteristics, and the trials are performed in parallel in $p$ most promising intervals.
 
 \subsection{Theoretical estimates of the speedup of the parallel algorithm}
-Let us describe (according to \cite{Strongin2000}) the theoretical properties of the parallel algorithm featuring its speedup. In the problems being solved, the time of executing a single search trial exceeds the time of processing its results essentially. Therefore, the speedup in the number of trials is the key characteristic of the efficiency of the parallel global search algorithm
-\begin{equation} \label{par_trl_ref}
-s(p) = \frac{k(1)p}{k(p)},
-\end{equation}
-where $k(1)$ is the number of trials executed by the sequential method and $k(p)$ is the number of trials executed by the parallel method employing $p$ parallel processes.
 
-Obviously, the quantities of trials $n(p)$ for the algorithms with different degrees of parallelization $p$ will differ from each other. Indeed, the sequential algorithm has the full information obtained at the previous $k$ iterations when selecting the point $x^{k+1}$ of the next $(k+1)^{th}$ trial. The parallel algorithm selects not one but $p$ points $x^{k+j}$, $1 \leq j \leq p,$ on the base of the same information at the $(k+1)^{th}$ iteration. It means that the selection of the points $x^{k+j}$ is performed without the information on the trial results at the points $x^{k+i}$, $1 \leq i < j$. Only the first point $x^{k+1}$ will match to the point selected by the sequential algorithm. The points of other trials, in general, may not match the ones generated by the sequential algorithm. Therefore, we will call such trials redundant and the quantity
+Let us describe (according to \cite{Strongin2000}) the theoretical properties of the parallel algorithm featuring its speedup. In the problems being solved, the time of executing a single search trial essentially exceeds the time of processing its result. Therefore, the speedup in the number of trials 
+\begin{equation} \label{par_trl_ref}
+s(p) = \frac{n(1)p}{n(p)}
+\end{equation}
+is the key characteristic of the efficiency of the parallel global search algorithm.
+Here $n(1)$ is the number of trials executed by the sequential method and $n(p)$ is the number of trials executed by the parallel method employing $p$ parallel processes.
+
+Obviously, the quantities of trials $n(p)$ for the algorithms with different degrees of parallelization $p$ will differ from each other. Indeed, the sequential algorithm has the full information obtained at the previous $k$ iterations when selecting the point $x^{k+1}$ of the next $(k+1)^{th}$ trial. The parallel algorithm selects not one but $p$ points $x^{k+j}$, $1 \leq j \leq p,$ on the base of the same information. It means that the selection of the points $x^{k+j}$ is performed without the information on the trial results at the points $x^{k+i}$, $1 \leq i < j$. Only the first point $x^{k+1}$ will match to the point selected by the sequential algorithm. The points of other trials, in general, may not match the ones generated by the sequential algorithm. Therefore, we will call such trials redundant and the quantity
 \begin{displaymath}
 \lambda(p) = \left\{ \begin{array}{ll}
                 (n(p) - n(1)) / n(p), & \textrm{$n(p) > n(1)$}\\
@@ -191,30 +195,30 @@ Let us denote the series of trials generated by the sequential algorithm and by 
             \end{equation}
         where
             \begin{equation} \label{third_s_ref}
-                \{x^1,...,x^{q(l)}\} \subset \{x^k\}, \{y^1,...,y^{q(l)}\}\subset \{y^k\}.
+                \{x^1,...,x^{q(l)}\} \subset \{x^k\}, \{y^1,...,y^{q(l)}\}\subset \{y^m\}.
             \end{equation}
-        \item There exist a point $t^n \in \{y^m\}$, $n < q(l)$ such as $x^{\prime} \leq y^n \leq x^*$ or $x^* \leq y^n \leq x^{\prime}$.
+        \item There exist a point $t^n \in \{y^m\}$, $n < q(l)$, such as $x^{\prime} \leq y^n \leq x^*$ or $x^* \leq y^n \leq x^{\prime}$.
         \item For the quantity $M$ from (\ref{M}), the inequality is fulfilled 
             \begin{equation} \label{fourth_s_ref}
-                M > 2^{2 - 1/N} H.
+                M > 2^{2 - 1/N} H,
             \end{equation}
         where $H$ is H{\"o}lder constant of the objective one-dimensional function.
     \end{enumerate}
 
 Then, the parallel algorithm at $p=2$ will be non-redundant (i.e. $s(2)=2$, $\lambda(2)=0$) as long as the condition is fulfilled 
 \begin{equation} \label{p_two_ref}
-    (x_{t_j} - x_{t_j - 1})^{1/N} > \frac{4\delta}{M - 2^{2 - 1/N} H}, j=1,2.
+    (x_{t_j} - x_{t_j - 1})^{1/N} > \frac{4\delta}{M - 2^{2 - 1/N} H},
 \end{equation}
 where $t_j$ is defined according to Step 4 of the algorithm.
 
 \textbf{Consequence}. Let the objective function $f(x)$ have $Q$ points of local minima $\{x_1^{\prime},...,x_Q^{\prime}\}$, which the condition \eqref{first_s_ref} is fulfilled for, and let there exist the trial points $y^{n_i}$, $1 \leq i \leq Q$ such as 
 \begin{gather} 
-    y^{n_i} \in \{y^1,...y^{q(l)}\}, \label{conseq_range_ref} \\ 
-    \alpha_i \leq y^{n_i} \leq \alpha_{i+1}, \alpha_i, \alpha_{i+1} \in \{x^*, x_1^{\prime},...,x_Q^{\prime}\}, 1 \leq i \leq Q. \label{conseq_ref}
+    y^{n_i} \in \{y^1,...y^{q(l)}\}, \nonumber \\ 
+    \alpha_i \leq y^{n_i} \leq \alpha_{i+1}, \; \alpha_i, \alpha_{i+1} \in \{x^*, x_1^{\prime},...,x_Q^{\prime}\}, 1 \leq i \leq Q. \nonumber
 \end{gather}
-Then, if the conditions of theorem are fulfilled, the parallel algorithm with the parallelization degree $Q+1$ will be non-redundant (i.e. $s(Q+1)=Q+1, \lambda(Q+1)=0$) until the condition \eqref{p_two_ref} is fulfilled.
+Then, if the conditions of theorem are fulfilled, the parallel algorithm with the parallelization degree $Q+1$ will be non-redundant (i.e. $s(Q+1)=Q+1, \; \lambda(Q+1)=0$) until the condition \eqref{p_two_ref} is fulfilled.
 
-The consequence from Theorem plays a special role in solving the multidimen-sional problems reduced to the one-dimensional ones using the Peano-like evolvent $y(x)$. The evolvent $y(x)$, being an approximation to the Peano curve, has the effect of «splitting» of the global minimum point $y^* \in D$ into several (up to $2^N$) preimages in the interval [0,1]. Applying the parallel algorithm to minimize the reduced one-dimensional function, one can expect a zero redundancy at the parallelization degree up to $2^N+1$.
+The consequence from theorem plays a special role in solving the multidimensional problems reduced to the one-dimensional ones using the evolvent $y(x)$. The evolvent $y(x)$, being an approximation to the Peano curve, has the effect of ``splitting'' of the global minimum point $y^* \in D$ into several (up to $2^N$) preimages in the interval [0,1]. Applying the parallel algorithm to minimize the reduced one-dimensional function, one can expect a zero redundancy at the parallelization degree up to $2^N+1$.
 
 Now, let us consider the case when after the stage of the search for the rough approximation to the global solution, the stage of its local refinement is performed. Assume that the fraction of the search trials necessary for the local refinement of the solution makes $\alpha$ of total number of trials. Then, according to Amdahl's law, the overall speedup $S(p)$, which can be obtained by parallelization into $p$ processes, cannot exceed the quantity 
 $$ S(p) = {\Big(\alpha + \frac{1-\alpha}{p}\Big)}^{-1}.$$
@@ -295,7 +299,7 @@ Finally, upon obtaining a value $\varphi(t^{k+1}) \geq \varphi(t^k)$ at Step 3, 
 
 Parallel computing of many objective function values at once is the operation, which can be performed in parallel efficiently in the application of the optimization methods. The local optimization methods are the iteration ones, therefore, the parallelization can be organized within a single iteration only.
 
-For example, in Hooke-Jeeves method one can parallelize the construction of configuration i. e. parallelize the loop at the second step of the algorithm. In this loop, one may not compute the function values at the points $\bar{y} + he^i$ or $\bar{y} - he^i$ immedeatedly but may store the coordinates of the ones in the buffer, and upon accumulating $P$ points compute the function values at these ones in parallel. Afterwards, the accumulated information is analyzed and the coordinates of the point $\bar{y}$ are changed. This operation is repeated until all $N$ coordinates $\bar{y}$ are computed.
+For example, in Hooke-Jeeves method one can parallelize the construction of configuration i. e. parallelize the loop at the second step of the algorithm. In this loop, one may not compute the function values at the points $\bar{y} + he^i$ or $\bar{y} - he^i$ immedeatedly but may store the coordinates of the ones in the buffer, and upon accumulating $p$ points compute the function values at these ones in parallel. Afterwards, the accumulated information is analyzed and the coordinates of the point $\bar{y}$ are changed. This operation is repeated until all $N$ coordinates $\bar{y}$ are computed.
 
 The main work of the quasi-Newton L-BFGS-B method in every iteration is spent for the computing of the function gradient. When solving the problems with the ``black box'' functions, the analytical calculation of the gradient is impossible. The numerical estimate of the gradient using the finite difference formulae implies multiple computing of the objective function values.
 
@@ -533,7 +537,7 @@ F = \sum_{i=1}^{M} \sum_{j=1}^{N} \mid x_{ij}^{calc} - x_{ij}^{exp}\mid \rightar
 \]
 where $x_{ij}^{calc}$ and $x_{ij}^{exp}$ are the calculated values of concentrations of the components and the ones measured experimentally, respectively; $M$ is the number of measurement points, and $N$ is the number of substances participating in the reaction. The complete problem statement is given in \cite{PAVT}. Here, we note only that the number of the unknown parameters (i.e. the dimensionality of the optimization problem being solved) was 15, and we will consider this one as an optimization problem with a complex ``black-box'' objective function only.
 
-To solve the problem stated, the synchronous parallelization scheme (using MPI) was employed. The number of processes P to compute the function values varied from 1 up to 15. Also, there was an additional managing process, which processed the accumulated search information. In the stopping criteria of the method, the value $\varepsilon=0.01$ was used, the reliability parameter of the method was set as $r = 3$. After the work of GSA, a parallel local method was started to refine the result found, the precision of the local method was set to $10^{-4}$, the limitation on the number of trials was $10^4$. 
+To solve the problem stated, the synchronous parallelization scheme (using MPI) was employed. The number of processes $p$ to compute the function values varied from 1 up to 15. Also, there was an additional managing process, which processed the accumulated search information. In the stopping criteria of the method, the value $\varepsilon=0.01$ was used, the reliability parameter of the method was set as $r = 3$. After the work of GSA, a parallel local method was started to refine the result found, the precision of the local method was set to $10^{-4}$, the limitation on the number of trials was $10^4$. 
 
 Table XX presents the total time of solving four problems corresponding to four different temperature regimes.
 \begin{table}[ht]
