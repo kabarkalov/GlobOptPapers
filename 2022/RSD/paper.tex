@@ -74,7 +74,7 @@ There are many cases requiring the search for the local optimum. One of such cas
 
 As a rule, the computational costs for the local refining of the solution is essentially smaller than the costs, which would be necessary for the multiextremal optimization procedures to achieve the same precision as the local method can ensure. However, in the case of using the parallel global optimization algorithm (at the first stage) and sequential local method (at the second stage) the work times of these ones can become comparable and the parallelization efficiency would be low.
 
-The novelty of the parallel algorithm considered in the present paper consists in the parallelization of the whole computing process -- both at the global search stage and at the stage of the local refining of the solution found. This approach can be relevant for the problems whose objective functions are flat valleys with a weak multiextremality. In such problems, the phase of searching the rough approximation of the global solution and the phase of its local refining are comparable in the computation costs.
+The novelty of the parallel algorithm considered in the present paper consists in the parallelization of the whole computing process -- both at the global search stage and at the stage of the local refining of the solution found. This approach can be relevant for the problems whose objective functions are ravine-type with a weak multiextremality. In such problems, the phase of searching the rough approximation of the global solution and the phase of its local refining are comparable in the computation costs.
 For example, in the work \cite{Gubaydullin2021} the global search stage only was parallelized; the local refining was made with a sequential algorithm.
 
 The main part of the paper has the following structure. In Section 2, the global optimization problem statement is presented and the properties of the objective function allowing developing the efficient global minimum search algorithms are described. In Section 3, the scheme of the parallel global optimization algorithm is presented and the theoretical estimates of its speedup are given. In Section 4, two local optimization methods (BFGS method and Hooke-Jeeves one) are considered, which can be applied for refining the solution found. Possible parallelization schemes for these methods are discussed. Section 5 contains the results of the computational experiments conducted using both the test problems and the applied ones. Section 6 concludes the paper.
@@ -320,7 +320,7 @@ The first series of experiments was carried out with the local optimization algo
     D = \{ y \in R^N: -25 \leq y_j \leq 25, 1 \leq j \leq N \}. \nonumber
 \end{gather}
 
-Fig. XX presents the averaged numbers of iterations, which Hooke-Jeeves and BFGS methods executed for minimization of Rosenbrock function with the dimensionalities from 2 to 30. Fig. XX presents corresponding speedups in iterations. The number of parallel trials $p$ varied from 1 to 16.
+Fig.~\ref{fig:RosenbrocNT} presents the averaged numbers of iterations, which Hooke-Jeeves and BFGS methods executed for minimization of Rosenbrock function with the dimensionalities from 2 to 30. Fig.~\ref{fig:RosenbrocSpeedup} presents corresponding speedups in iterations. The number of parallel trials $p$ varied from 1 to 16.
 
 %\begin{table}[ht]
 %	\caption{Number of trials executed by Hooke-Jeeves method}
@@ -420,15 +420,15 @@ Fig. XX presents the averaged numbers of iterations, which Hooke-Jeeves and BFGS
 
 \begin{figure}
 \begin{center}
-  \includegraphics[width=1.0\linewidth]{RosenbrocNT.jpg}
-  \caption{Number of trials executed on the Rosenbrock function}
+  \includegraphics[width=1.0\linewidth]{RosenbrocNT.pdf}
+  \caption{Number of trials (in thousands) executed on the Rosenbrock function}
   \label{fig:RosenbrocNT}  
 \end{center}
 \end{figure}
 
 \begin{figure}
 \begin{center}
-  \includegraphics[width=1.0\linewidth]{RosenbrocSpeedup.jpg}
+  \includegraphics[width=1.0\linewidth]{RosenbrocSpeedup.pdf}
   \caption{Speedup on the Rosenbrock function}
   \label{fig:RosenbrocSpeedup}  
 \end{center}
@@ -446,7 +446,7 @@ When using GSA, the parameter $r=4.5$ was selected for class Simple, and $r=5.6$
 
 The number of iterations for the local methods was limited to $10^4$, the precision of the local methods was set to $10^{-4}$. First, the problems were solved by the global search method with the parameters specified above. Then, a local method was started from the optimal point found to find the minimum more precisely.
 
-Table XX presents the averaged number of iterations, which GSA required to solve the problem. Fig. presents the numbers of trials executed by Hooke-Jeeves and L-BFGS-B local methods. Fig. XX presents the speedups achieved when solving the problem as a whole.
+Table~\ref{tab:5} presents the averaged number of iterations, which GSA required to solve the problem. Fig.~\ref{fig:GKLSNT} presents the numbers of trials executed by Hooke-Jeeves and L-BFGS-B local methods. Fig.~\ref{fig:GKLSSpeedup} presents the speedups achieved when solving the problem as a whole.
 
 \begin{table}[ht]
 	\caption{Averaged number of iterations for GSA algorithm}
@@ -540,7 +540,7 @@ Table XX presents the averaged number of iterations, which GSA required to solve
 
 \begin{figure}
 \begin{center}
-  \includegraphics[width=1.0\linewidth]{GKLSNT.jpg}
+  \includegraphics[width=1.0\linewidth]{GKLSNT.pdf}
   \caption{Number of trials executed on the GKLS function}
   \label{fig:GKLSNT}  
 \end{center}
@@ -548,7 +548,7 @@ Table XX presents the averaged number of iterations, which GSA required to solve
 
 \begin{figure}
 \begin{center}
-  \includegraphics[width=1.0\linewidth]{GKLSSpeedup.jpg}
+  \includegraphics[width=1.0\linewidth]{GKLSSpeedup.pdf}
   \caption{Speedup on the GKLS function}
   \label{fig:GKLSSpeedup}  
 \end{center}
@@ -565,7 +565,7 @@ F = \sum_{i=1}^{M} \sum_{j=1}^{N} \left| x_{ij}^{calc} - x_{ij}^{exp} \right| \r
 \]
 where $x_{ij}^{calc}$ and $x_{ij}^{exp}$ are the calculated values of concentrations of the components and the ones measured experimentally, respectively; $M$ is the number of measurement points, and $N$ is the number of substances participating in the reaction. The complete problem statement is given in \cite{Uskov2020}. Here we note only that the number of the unknown parameters (i.e. the dimensionality of the optimization problem being solved) was 15, and we will consider this one as an optimization problem with a complex ``black-box'' objective function only.
 
-To solve the problem stated, the synchronous parallelization scheme (using MPI) was employed. The number of processes $p$ to compute the function values varied from 1 up to 15. Also, there was an additional managing process, which processed the accumulated search information. In the stopping criteria of the method the value $\varepsilon=0.01$ was used and the reliability parameter of the method was set as $r = 3$. After the work of GSA, a parallel local method was started to refine the result found. The precision of the local method was set to $10^{-4}$ and the limitation on the number of trials was $10^4$. 
+To solve the problem stated, the synchronous parallelization scheme (using MPI) was employed. The number of processes to compute the function values was $p=15$. Also, there was an additional managing process, which processed the accumulated search information. In the stopping criteria of the method the value $\varepsilon=0.01$ was used and the reliability parameter of the method was set as $r = 3$. After the work of GSA, a parallel local method was started to refine the result found. The precision of the local method was set to $10^{-4}$ and the limitation on the number of trials was $10^4$. 
 
 %Table XX presents the total time of solving four problems corresponding to four different temperature regimes.
 %
@@ -583,12 +583,26 @@ To solve the problem stated, the synchronous parallelization scheme (using MPI) 
 		%L-BFGS-B & 2571.7  & 1096.4  & 720.3  \\
 		%\hline
 	%\end{tabular}
+%\begin{table}[ht]
+%	\caption{Averaged time of solving the problem, sec.}
+%	\label{tab:11}
+%	\center
+%		\begin{tabular}{|c|c|c|c|}
+%		\hline
+%		%\noalign{\smallskip}
+%		Method & P = 1 & P = 3 &  P = 15 \\
+%		\hline 
+%		Hooke-Jeeves & 2386.4 & 1053.1 & 713.1  \\
+%		\hline
+%		L-BFGS-B & 2571.7  & 1096.4  & 720.3  \\
+%		\hline
+%	\end{tabular}
 %\end{table}
 
 Table \ref{tab:12} presents the results of solving the optimization problem: the running time of parallel GSA without the run of a local method (column GSA), with a sequential local method (column GSA-l) and with a parallel local method run on 15 processes (column GSA-pl).
 
 \begin{table}[ht]
-	\caption{Time of solving the problem using a local method}
+	\caption{Time of solving the applied problem, sec.}
 	\label{tab:12}
 	\center
 		\begin{tabular}{|c|c|c|c|}
@@ -603,7 +617,24 @@ Table \ref{tab:12} presents the results of solving the optimization problem: the
 	\end{tabular}
 \end{table}
 
-Concluding general results, one can say that the use of local methods at the final stage of search allows solving the optimization problems with higher precision. In many cases, it is enough to use sequential local methods. However, for the problems with complex gully structure of the objective function require parallelizing the whole search process including the local stage as well. In the present work, two local optimization algorithms with the parallelization variants for shared memory as well as for distributed one are described. As the experiments have shown, the methods for parallelizing the local methods (at the final stage of global search) proposed demonstrated good results in solving both the test optimization problems and the applied ones. 
+%\begin{table}
+	%\caption{Time of solving the problem}
+	%\label{tab:last}
+	%\center
+	%\begin{tabular}{llllllll}
+		%\hline\noalign{\smallskip}
+		%$p$ & \multicolumn{3}{l}{ Total time of solving four problems } & & \multicolumn{3}{l}{One of the temperature regimes only} \\
+		%\noalign{\smallskip} \cline{2-4} \cline{6-8} \noalign{\smallskip}
+		 %& P = 1 & P = 3 &  P = 15 & & GSA & GSA-l & GSA-pl  \\
+		%\noalign{\smallskip} \hline \noalign{\smallskip}
+		%Hooke-Jeeves & 2386.4 & 1053.1 & 713.1 & & 158.1 & 299.8  & 177.4  \\
+		%L-BFGS-B & 2571.7  & 1096.4  & 720.3 & & 158.1  & 252.5  & 165.6  \\
+%
+		%\noalign{\smallskip}\hline
+	%\end{tabular}
+%\end{table}
+
+Concluding the results, one can say that the use of local methods at the final stage of search allows solving the optimization problems with higher precision. In many cases, it is enough to use sequential local methods. However, the problems with ravine-type objective function require parallelizing the whole search process including the local stage as well. In the present work, two local optimization algorithms with the parallelization variants for shared memory as well as for distributed one are described. As the experiments have shown, the methods for parallelizing the local methods (at the final stage of global search) proposed demonstrated good results in solving both the test optimization problems and the applied ones. 
 
 \subsubsection{Acknowledgements} This study was supported by the Russian Science Foundation, project No.\,21-11-00204.
 
