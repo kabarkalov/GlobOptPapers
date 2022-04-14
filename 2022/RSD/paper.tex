@@ -121,7 +121,7 @@ The algorithm of solving this problem being considered implies the construction 
 \section{Parallel global search algorithm}\label{sec:global}
 \subsection{Computational scheme of the algorithm}
 
-We will consider the class of problems, in which the time of executing a single search trial doesn’t depend on the trial point. In this case, one can use the synchronous parallelization scheme, which implies $p$ trials to be carried out in parallel and synchronously within single method iteration. In this case, total number of trials executed after $n$ parallel iterations will be $k=n \cdot p$.
+We will consider the class of problems, in which the time of executing a single search trial doesn't depend on the trial point. In this case, one can use the synchronous parallelization scheme, which implies $p$ trials to be carried out in parallel and synchronously within single method iteration. In this case, total number of trials executed after $n$ parallel iterations will be $k=n \cdot p$.
 
 The first iteration of the method is performed in a special way. The trials are performed at the boundary points $x^0 = 0$ and $x^1 = 1$ as well as at $(p-2)$ arbitrary different internal points $x^2, x^3, ..., x^{p-1}$ in the interval $[0,1]$.
 
@@ -159,7 +159,7 @@ Step 6. Check the stopping criterion $\Delta_{t_j} \leq \varepsilon$, where $t_j
 After completing the algorithm work, take as the estimate of the solution of the problem \ref{problemN} 
 $$ f_k^* = \min\limits_{1 \leq i \leq k} f(x^i), \; x_k^* = \arg \min\limits_{1 \leq i \leq k} f(x^i).$$
 
-The theoretical substantiation of the algorithm presented here see in more details in \cite{Strongin2000}. Here, note briefly that the characteristics of the intervals (\ref{R}) used in the algorithm can be considered as a quantitative measure how particular interval is promising from the viewpoint of finding the global minimum inside it. The inequalities (\ref{OrderedR}) arrange the intervals according to their characteristics, and the trials are performed in parallel in $p$ most promising intervals.
+The theoretical substantiation of the presented algorithm (denoted hereafter as \textit{global search algorithm} or GSA) see in more details in \cite{Strongin2000}. Note briefly that the characteristics of the intervals (\ref{R}) used in the algorithm can be considered as a quantitative measure how particular interval is promising from the viewpoint of finding the global minimum inside it. The inequalities (\ref{OrderedR}) arrange the intervals according to their characteristics, and the trials are performed in parallel in $p$ most promising intervals.
 
 \subsection{Theoretical estimates of the speedup of the parallel algorithm}
 
@@ -228,7 +228,7 @@ This relation will be true if one assumes the non-redundant parallelization of t
 \section{Local optimization methods}\label{sec:local}
 \subsection{BFGS method}
 
-BFGS (Broyden-Fletcher-Goldfarb-Shanno) method (see \cite{Nocedal}) belongs to the class of quasi-Newton methods using the values of the function $\varphi(y^k)$ and of its gradient $\nabla \varphi(y^k)$ to organize the search. In this method, the function $\varphi(y)$ is assumed to have the properties of the quadratic function that corresponds to the existence of a symmetric matrix of the second derivatives (Hessian) $\nabla^2 \varphi(y)$.
+BFGS (Broyden-Fletcher-Goldfarb-Shanno) method (see, e.g., \cite{Nocedal}) belongs to the class of quasi-Newton methods using the values of the function $\varphi(y^k)$ and of its gradient $\nabla \varphi(y^k)$ to organize the search. In this method, the function $\varphi(y)$ is assumed to have the properties of the quadratic function that corresponds to the existence of a symmetric matrix of the second derivatives (Hessian) $\nabla^2 \varphi(y)$.
 
 The basic idea for all quasi-Newton methods consists in the construction of an approximation of the actual Hessian $\nabla^2 \varphi(y^k)$ at every step of the algorithm using a special matrix $B^k$ followed by selection of the descent direction $d^k$ as a solution of the system
 $$ B^k d^k = -\nabla \varphi(y^k) \leftrightarrow d^k = -H^k \nabla \varphi(y^k),$$
@@ -270,7 +270,7 @@ Step 5. Compute the Hessian $H^{k+1}$;
 Step 6. Stop, if the condition $\|\nabla \varphi(y^k)\| < \varepsilon$ is fulfilled.
 
 \subsection{Hooke-Jeeves method}
-Hooke-Jeeves method (see, e.g., \cite{Himmelblau}) is the first-order one, i.e. it needs only the function values for the work. In this method, the search for the minimum at every step is performed as a result of a shift along some sample direction (step by a sample), which is constructed and then corrected as a result of special trial coordinate translations called \textit{constructing a configuration}.
+Hooke-Jeeves method (see, e.g., \cite{Kelley}) is the first-order one, i.e. it needs only the function values for the work. In this method, the search for the minimum at every step is performed as a result of a shift along some sample direction (step by a sample), which is constructed and then corrected as a result of special trial coordinate translations called \textit{constructing a configuration}.
 
 Constructing a configuration from a point $y$ is performed by a mapping of $y$ into a point $\bar{y} = F(y)$, where $F$ is an operator of constructing a configuration. It is constructed so that the direction $(\bar{y} - y)$ is that of the decreasing of the function $\varphi$ in the nearness of $y$. To describe the operator $F$, let us introduce the following notations: $e^i$ is the $i^{th}$ unit coordinate vector and $h$ is the parameter determining the magnitude of the coordinate translation. Then, the transition from $y$ to $\bar{y}$ (i.e. the algorithm of constricting the configuration $\bar{y} = F(y)$) is performed according to the following rules.
 
@@ -311,6 +311,7 @@ So far, in the L-BFGS-B algorithm, one can parallelize the computing of gradient
 The general scheme of the parallel computing for all the local methods employed is presented in Fig. \#. The objective function values can be computed on a single node using shared memory (OpenMP), on a cluster with distributed memory (MPI), or on accelerator using CUDA.
 
 \section{Results of numerical experiments}
+
 The numerical experiments were carried out on Lobachevsky supercomputer. Each supercomputer node was a two-processor one (two Intel Sandy Bridge E5-2660 2.2 GHz, 64 Gb RAM). All methods considered in the above sections were implemented using Globalizer software \cite{globalizerSystem} (development language – C++). Intel C++ 17.0.0 compiler was used to assembly the system.
 
 The first series of experiments was carried out with the local optimization algorithms only. Rosenbrock function is a classical test function for the local search methods 
@@ -319,7 +320,7 @@ The first series of experiments was carried out with the local optimization algo
     D = \{ y \in R^N: -25 \leq y_j \leq 25, 1 \leq j \leq N \}. \nonumber
 \end{gather}
 
-Tables XX and XX present the averaged numbers of iterations, which Hooke-Jeeves and BFGS methods executed for minimization of Rosenbrock function with the dimensionalities from 2 to 30. Tables XX and XX present corresponding speedups in iterations. The number of searches varied from 1 to 16. 
+Fig. XX presents the averaged numbers of iterations, which Hooke-Jeeves and BFGS methods executed for minimization of Rosenbrock function with the dimensionalities from 2 to 30. Fig. XX presents corresponding speedups in iterations. The number of parallel trials $p$ varied from 1 to 16.
 
 %\begin{table}[ht]
 %	\caption{Number of trials executed by Hooke-Jeeves method}
@@ -434,18 +435,21 @@ Tables XX and XX present the averaged numbers of iterations, which Hooke-Jeeves 
 \end{figure}
 
 
-The results demonstrated the methods of parallelization of the local optimization algorithms described in Section \ref{sec:local} to show good results for the test function. At that, for the problems with low dimensionality (less than 30) Hooke-Jeeves method suited better. However, starting from the dimensionality of 30, L-BFGS-B method begins to execute fewer trials. Also, because of some features of parallelization, Hooke-Jeeves method executes more and more computations of the objective function with in-creasing number of threads, whereas L-BFGS-B always performs the same number of trials. It is explained by the parallelization of the computing of gradient in L-BFGS-B so that the number of computations of the objective function is the same regardless to the number of threads while in Hooke-Jeeves method the algorithm itself is parallelized so that not all the points, at which the trials were executed earlier in the parallel algorithm match the trajectory of the sequential method.
+The results demonstrated the methods of parallelization of the local optimization algorithms described in Section \ref{sec:local} to show good results for the test function. At that, for the problems with low dimensionality (less than 30) Hooke-Jeeves method suited better. However, starting from the dimensionality of 30, L-BFGS-B method begins to execute fewer trials. Also, because of some features of parallelization, Hooke-Jeeves method executes more and more trials with increasing number of threads, whereas L-BFGS-B always performs the same number of trials. It is explained by the parallelization of the computing of gradient in L-BFGS-B so that the number of computations of the objective function is the same regardless to the number of threads while in Hooke-Jeeves method the algorithm itself is parallelized so that not all the points, at which the trials were executed earlier in the parallel algorithm match the trajectory of the sequential method.
 
-Next, the experiments, which the global search algorithms as well as the local methods have been employed in, were carried out. In \cite{Gaviano2003} GKLS (this abbreviation consists of the first letters of the authors’ names) generator was described. This generator allows generating the multiextremal optimization problems with the properties known \textit{a priori}: the number of local minima, the sizes of the attraction regions of the ones, the global minima points, the objective function value at this point, etc. The test problems generated by this generator are featured by a small time of computing the objective function values.
+Next, the experiments, which the global search algorithms as well as the local methods have been employed in, were carried out. In \cite{Gaviano2003} GKLS (this abbreviation consists of the first letters of the authors' names) generator was described. This generator allows generating the multiextremal optimization problems with the properties known \textit{a priori}: the number of local minima, the sizes of the attraction regions of the ones, the global minima points, the objective function value at this point, etc. The test problems generated by this generator are featured by a small time of computing the objective function values.
 
-The global minimum $y^*$ was considered to be found if the algorithm generates a trial point $y^k$ in the $\delta$-nearness of the global minimum, i.e. $\|y^k -y^*\| \leq \delta$. At that, the nearness size was selected (according to \cite{7}) as $\delta = \| b - a \|\sqrt[N]{\Delta}$. Here $N$ is the dimensionality of the problem being solved, $a$ and $b$ are the boundaries of the search domain $D$, the parameter $\Delta = 10^{-6}$ for $N = 4$ and $\Delta = 10^{-7}$ for $N = 5$. When using AGS method, the parameter $r=4.5$ was selected for class Simple, and $r=5.6$ for class Hard; the parameter of the construction of the Peano curve was fixed to be $m=10$. The maximum allowed number of iterations was $K_{max}= 5\cdot10^6$.
+The global minimum $y^*$ was considered to be found if the algorithm generates a trial point $y^k$ near the global minimum, i.e. $\|y^k -y^*\| \leq \delta$. 
+We use $\delta = 0.06$ for $N=4$ and $\delta = 0.08$ for $N=5$.
+%At that, the nearness size was selected (according to \cite{7}) as $\delta = \| b - a \|\sqrt[N]{\Delta}$. Here $N$ is the dimensionality of the problem being solved, $a$ and $b$ are the boundaries of the search domain $D$, the parameter $\Delta = 10^{-6}$ for $N = 4$ and $\Delta = 10^{-7}$ for $N = 5$. 
+When using GSA, the parameter $r=4.5$ was selected for class Simple, and $r=5.6$ for class Hard; the parameter of the construction of the Peano curve was fixed to be $m=10$. The maximum allowed number of iterations was $K_{max}= 5\cdot10^6$.
 
 The number of iterations for the local methods was limited to $10^4$, the precision of the local methods was set to $10^{-4}$. First, the problems were solved by the global search method with the parameters specified above. Then, a local method was started from the optimal point found to find the minimum more precisely.
 
-Table XX presents the averaged number of iterations, which AGS required to solve the problem. Tables XX and XX present the numbers of trials executed by Hooke-Jeeves and BFGS local methods. Tables XX and XX present the speedups achieved when solving the problem as a whole.
+Table XX presents the averaged number of iterations, which GSA required to solve the problem. Fig. presents the numbers of trials executed by Hooke-Jeeves and L-BFGS-B local methods. Fig. XX presents the speedups achieved when solving the problem as a whole.
 
 \begin{table}[ht]
-	\caption{Averaged number of iterations for AGS algorithm}
+	\caption{Averaged number of iterations for GSA algorithm}
 	\label{tab:5}
 	\center
 	\begin{tabular}{|c|c|c|c|c|c|c|}
@@ -553,35 +557,35 @@ Table XX presents the averaged number of iterations, which AGS required to solve
 
 The local methods required less number of trials to refine the solution as compared to the global search method. As a result, the contributions of the local methods into total time of solving the problem were not very large. At that, L-BFGS-B method made much less computations of the objective function.
 
-Within the framework of the last experiment, an applied optimization problem was solved. This problem arose when solving the inverse problem of chemical kinetics.
+Within the last experiment an applied optimization problem was solved. This problem arose when solving the inverse problem of chemical kinetics.
 
 The reaction investigated and respective experimental data are described in \cite{Uskov2020}. The mathematical model of the chemical kinetics problem comprises a system of differential equations, which describes the variations of the concentrations of substances in time according to the rates of the reaction stages. According to this model, one can formulate an optimization problem, which defines the objective function as a sum of absolute deviations of the calculated concentrations from the ones measured experimentally:
 \[
-F = \sum_{i=1}^{M} \sum_{j=1}^{N} \mid x_{ij}^{calc} - x_{ij}^{exp}\mid \rightarrow \min,
+F = \sum_{i=1}^{M} \sum_{j=1}^{N} \left| x_{ij}^{calc} - x_{ij}^{exp} \right| \rightarrow \min,
 \]
-where $x_{ij}^{calc}$ and $x_{ij}^{exp}$ are the calculated values of concentrations of the components and the ones measured experimentally, respectively; $M$ is the number of measurement points, and $N$ is the number of substances participating in the reaction. The complete problem statement is given in \cite{PAVT}. Here, we note only that the number of the unknown parameters (i.e. the dimensionality of the optimization problem being solved) was 15, and we will consider this one as an optimization problem with a complex ``black-box'' objective function only.
+where $x_{ij}^{calc}$ and $x_{ij}^{exp}$ are the calculated values of concentrations of the components and the ones measured experimentally, respectively; $M$ is the number of measurement points, and $N$ is the number of substances participating in the reaction. The complete problem statement is given in \cite{Uskov2020}. Here we note only that the number of the unknown parameters (i.e. the dimensionality of the optimization problem being solved) was 15, and we will consider this one as an optimization problem with a complex ``black-box'' objective function only.
 
-To solve the problem stated, the synchronous parallelization scheme (using MPI) was employed. The number of processes $p$ to compute the function values varied from 1 up to 15. Also, there was an additional managing process, which processed the accumulated search information. In the stopping criteria of the method, the value $\varepsilon=0.01$ was used, the reliability parameter of the method was set as $r = 3$. After the work of GSA, a parallel local method was started to refine the result found, the precision of the local method was set to $10^{-4}$, the limitation on the number of trials was $10^4$. 
+To solve the problem stated, the synchronous parallelization scheme (using MPI) was employed. The number of processes $p$ to compute the function values varied from 1 up to 15. Also, there was an additional managing process, which processed the accumulated search information. In the stopping criteria of the method the value $\varepsilon=0.01$ was used and the reliability parameter of the method was set as $r = 3$. After the work of GSA, a parallel local method was started to refine the result found. The precision of the local method was set to $10^{-4}$ and the limitation on the number of trials was $10^4$. 
 
-Table XX presents the total time of solving four problems corresponding to four different temperature regimes.
+%Table XX presents the total time of solving four problems corresponding to four different temperature regimes.
+%
+%\begin{table}[ht]
+	%\caption{Averaged time of solving the problem, sec.}
+	%\label{tab:11}
+	%\center
+		%\begin{tabular}{|c|c|c|c|}
+		%\hline
+		%%\noalign{\smallskip}
+		%Method & P = 1 & P = 3 &  P = 15 \\
+		%\hline 
+		%Hooke-Jeeves & 2386.4 & 1053.1 & 713.1  \\
+		%\hline
+		%L-BFGS-B & 2571.7  & 1096.4  & 720.3  \\
+		%\hline
+	%\end{tabular}
+%\end{table}
 
-\begin{table}[ht]
-	\caption{Averaged time of solving the problem, sec.}
-	\label{tab:11}
-	\center
-		\begin{tabular}{|c|c|c|c|}
-		\hline
-		%\noalign{\smallskip}
-		Method & P = 1 & P = 3 &  P = 15 \\
-		\hline 
-		Hooke-Jeeves & 2386.4 & 1053.1 & 713.1  \\
-		\hline
-		L-BFGS-B & 2571.7  & 1096.4  & 720.3  \\
-		\hline
-	\end{tabular}
-\end{table}
-
-Table XX presents the data for one of the temperature regimes only (that corresponds to a single optimization problem): the time of solving without the run of a local method (Column GSA), using a sequential local method (Column GSA-l), and using a parallel local method run on 15 processes (GSA-pl).
+Table \ref{tab:12} presents the results of solving the optimization problem: the running time of parallel GSA without the run of a local method (column GSA), with a sequential local method (column GSA-l) and with a parallel local method run on 15 processes (column GSA-pl).
 
 \begin{table}[ht]
 	\caption{Time of solving the problem using a local method}
