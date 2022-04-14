@@ -228,47 +228,49 @@ This relation will be true if one assumes the non-redundant parallelization of t
 \section{Local optimization methods}\label{sec:local}
 \subsection{BFGS method}
 
-BFGS (Broyden-Fletcher-Goldfarb-Shanno) method (see \cite{Nocedal}) belongs to the class of quasi-Newton methods using the values of the function $f(x^k)$ and of its gradient $\nabla f(x^k)$ to organize the search. In this method, the function f is assumed to have the properties of the quadratic model that corresponds to the existence of a symmetric matrix of the second derivatives (Hessian) of the function $\nabla^2 f(x^k)$.
+BFGS (Broyden-Fletcher-Goldfarb-Shanno) method (see \cite{Nocedal}) belongs to the class of quasi-Newton methods using the values of the function $\varphi(y^k)$ and of its gradient $\nabla \varphi(y^k)$ to organize the search. In this method, the function $\varphi(y)$ is assumed to have the properties of the quadratic function that corresponds to the existence of a symmetric matrix of the second derivatives (Hessian) $\nabla^2 \varphi(y)$.
 
-The basic idea for all quasi-Newton methods consists in the construction of an approximation of the actual Hessian $\nabla^2 f(x^k)$ at every step of the algorithm using a special matrix $B^k$ followed by selection of the descent direction $d^k$ as a solution of the following system:
-$$ B^k d^k = -\nabla f(x^k) \leftrightarrow d^k = -H^k \nabla f(x^k),$$
-where $H^k={(B^k)}^{-1}$.
+The basic idea for all quasi-Newton methods consists in the construction of an approximation of the actual Hessian $\nabla^2 \varphi(y^k)$ at every step of the algorithm using a special matrix $B^k$ followed by selection of the descent direction $d^k$ as a solution of the system
+$$ B^k d^k = -\nabla \varphi(y^k) \leftrightarrow d^k = -H^k \nabla \varphi(y^k),$$
+where $H^k=\left(B^k\right)^{-1}$.
 
-After obtaining the direction, a step is performed from current point $x^k$:
-$$ x^{k+1}=x^k+ \alpha_k d^k,$$
+After obtaining the direction, a step is performed from current point $y^k$:
+$$ y^{k+1}=y^k+ \alpha_k d^k,$$
 where $\alpha_k>0$ is the adjustable step length.
 
-Assuming $B^0=E$, the Hessian approximation is recalculated by the formula $B^{k+1}= B^k+ U^k$ where $U^k$ are the corrections represented in the form of a matrix of the rank 1. The small rank of the corrections $U^k$ is necessary for efficient procedure of calculating the inverse matrix $H^{k+1}=(B^{k+1})^{-1}=(B^k+ U^k)^{-1}$.
+Assuming $B^0=E$, the Hessian approximation is recalculated by the formula $B^{k+1}= B^k+ U^k$, where $U^k$ are the corrections represented in the form of a matrix of the rank 1. The small rank of the corrections $U^k$ is necessary for efficient procedure of calculating the inverse matrix $H^{k+1}=(B^{k+1})^{-1}=(B^k+ U^k)^{-1}$.
 
-The main requirement to forming the corrections $U^k$ of particular form is the secant equation $B^{k+1} (x^{k+1} - x^k )= \nabla f(x^{k+1})- \nabla f(x^k)$, which is performed for all quasi-Newton methods. For more precise determination of the matrix $B^{k+1}$, it is necessary to impose additional requirements on the Hessian approximation. The set of such requirements is determined by BFGS rule. Assume:
-$$ s_k = x^{k+1} - x^k,$$
-$$ y_k = \nabla f(x^{k+1})- \nabla f(x^k).$$
+The main requirement to forming the corrections $U^k$ of particular form is the secant equation $B^{k+1} (y^{k+1} - y^k )= \nabla \varphi(y^{k+1})- \nabla \varphi(y^k)$, which is performed for all quasi-Newton methods. For more precise determination of the matrix $B^{k+1}$, it is necessary to impose additional requirements on the Hessian approximation. The set of such requirements is determined by BFGS rule. Assume
+\begin{gather}
+s_k = y^{k+1} - y^k, \nonumber \\
+z^k = \nabla \varphi(y^{k+1})- \nabla \varphi(y^k). \nonumber
+\end{gather}
 
 Then, the BFGS recalculation scheme takes the following form:
-$$ B^{k+1} = B^k - \frac{B^k s_k s_k^T B^k}{s_k^T B^k s_k} + \frac{y^k (y^k)^{T}}{(y^k)^{T} s_k},$$
-$$ H^{k+1} = (E - \rho_k s_k (y^k)^{T}) H^k (E - \rho_k y^k s_k^T) + \rho_k s_k s_k^T,$$
+$$ B^{k+1} = B^k - \frac{B^k s_k s_k^T B^k}{s_k^T B^k s_k} + \frac{z^k (z^k)^{T}}{(z^k)^{T} s_k},$$
+$$ H^{k+1} = (E - \rho_k s_k (z^k)^{T}) H^k (E - \rho_k z^k s_k^T) + \rho_k s_k s_k^T,$$
 where $\rho_k = 1/((y^k)^{T} s_k)$.
 
-For the systems with limited memory, a modification of BFGS method – the limited BFGS in the limited space (L-BFGS-B) is used. The modified method stores the history of $\aleph^k = ((s_{k-i}, y^{k-i}))_i^l$ of the last $l$ vectors $s_k$ and $y^k$. From the history, the approximate form of the matrix $H^k$ is restored.
+For the systems with limited memory, a modification of BFGS method -- the limited BFGS in the limited space (L-BFGS-B) is used. The modified method stores the history $\aleph^k = ((s_{k-i}, z^{k-i}))_i^l$ of the last $l$ vectors $s_k$ and $z^k$. From the history, the approximate form of the matrix $H^k$ is restored.
 
-The algorithm of the BFGS method can be represented by a sequence of the fol-lowing commands:
+The algorithm of the BFGS method can be represented by a sequence of the following steps.
 
-Step 0. Initialize the starting point $x^0$. Set the precision $\varepsilon > 0$;
+Step 0. Initialize the starting point $y^0$. Set the precision $\varepsilon > 0$;
 
-Step 1. Determine the initial approximation $H^0$ (eithe by the unitary matrix $E$ or by $\nabla^2 f$ at the point $x^0$;
+Step 1. Determine the initial approximation $H^0$ (either by the unit matrix $E$ or by $\nabla^2 \varphi(y^0)$;
 
-Step 2. Determine the search direction: $d^k = -H^k \nabla f^k$;
+Step 2. Determine the search direction: $d^k = -H^k \nabla \varphi(y^k)$;
 
-Step 3. Compute $x^{k+1} = x^k + \alpha_k d^k$;
+Step 3. Compute $y^{k+1} = y^k + \alpha_k d^k$;
 
-Step 4. Determine the vectors $s_k$ and $y^k$;
+Step 4. Determine the vectors $s_k$ and $z^k$;
 
 Step 5. Compute the Hessian $H^{k+1}$;
 
-Step 6. Stop, if the condition $\|\nabla f^k\| < \varepsilon$ is fulfilled.
+Step 6. Stop, if the condition $\|\nabla \varphi(y^k)\| < \varepsilon$ is fulfilled.
 
 \subsection{Hooke-Jeeves method}
-Hooke-Jeeves method (see, e.g., \cite{Himmelblau}) is the first-order one, i.e. it needs only the function values for the work. In this method, the search for the minimum at every step is performed as a result of a shift along some sample direction (step by a sample), which is constructed and then corrected as a result of special trial coordinate translations called constructing a configuration.
+Hooke-Jeeves method (see, e.g., \cite{Himmelblau}) is the first-order one, i.e. it needs only the function values for the work. In this method, the search for the minimum at every step is performed as a result of a shift along some sample direction (step by a sample), which is constructed and then corrected as a result of special trial coordinate translations called \textit{constructing a configuration}.
 
 Constructing a configuration from a point $y$ is performed by a mapping of $y$ into a point $\bar{y} = F(y)$, where $F$ is an operator of constructing a configuration. It is constructed so that the direction $(\bar{y} - y)$ is that of the decreasing of the function $\varphi$ in the nearness of $y$. To describe the operator $F$, let us introduce the following notations: $e^i$ is the $i^{th}$ unit coordinate vector and $h$ is the parameter determining the magnitude of the coordinate translation. Then, the transition from $y$ to $\bar{y}$ (i.e. the algorithm of constricting the configuration $\bar{y} = F(y)$) is performed according to the following rules.
 
@@ -280,7 +282,7 @@ if $\varphi(\bar{y} + he^i) < \varphi(\bar{y})$ then set $\bar{y} = \bar{y} + he
 
 Next, the step-by-step description of the whole method is given.
 
-Step 0. Set the starting point $t^0$, the parameter of the method $\varepsilon > 0$, the parameter of constructing the configuration $h\gg\varepsilon$, and the parameter of the increasing of the step $\alpha=2$.
+Step 0. Set the starting point $t^0$, the parameter of the method $\varepsilon > 0$, the parameter of constructing the configuration $h\gg\varepsilon$, and the parameter $\alpha=2$ of the increasing of the step, e.g. $\alpha=2$.
 
 Step 1. Set $y^1  = t^0, k = 0$.
 
@@ -288,7 +290,7 @@ Step 2. Construct a configuration $t^{k+1} = F(y^{k +1})$.
 
 Step 3. If $\varphi(t^{k+1}) < \varphi(t^{k})$ then $k:=k+1$ and go to Step 4, else if $h \leq \varepsilon$, stop the search, if $h > \varepsilon$ then further actions depend on the  way how the point $y^{k+1}$ was constructed: whether the configuration was constructed using the step by sample (in this case, $k > 0$) or it was constructed from the point $t^0$(in this case, $k=0$). If $k=0$, cut $h$ in half ($h=h/2$) and go to Step 1. If $k>0$, set $t^0 = t^k, k=0$ and also go to Step 1.
 
-Step 4. Perform the step by example $y^{k+1} = t^k + \alpha (t^k - t^{k-1})$ and go to Step 2.
+Step 4. Perform the step by direction $y^{k+1} = t^k + \alpha (t^k - t^{k-1})$ and go to Step 2.
 
 The meaning of the actions performed within the steps 2, 3, and 4 can be explained as follows. 
 Step 4 was introduced in order to enable the method to increase the shift magnitude within a single iteration rapidly in the case when the point $t^k$ is located far away from the solution. At that, prior to make $y^{k+1}$ current point of the iteration, a configuration is constructed from the point $y^{k+1}$. By these means, in the case of obtaining a point with $\varphi(t^{k+1})< \varphi(t^k)$, the next step by sample, in general, will be performed in a changed direction (relative to previous one) that allows adapting the method to variations in the function relief.
@@ -297,15 +299,16 @@ Finally, upon obtaining a value $\varphi(t^{k+1}) \geq \varphi(t^k)$ at Step 3, 
 
 \subsection{Parallelization of the local optimization methods}
 
-Parallel computing of many objective function values at once is the operation, which can be performed in parallel efficiently in the application of the optimization methods. The local optimization methods are the iteration ones, therefore, the parallelization can be organized within a single iteration only.
+Parallel computing of many objective function values at once is the operation, which can be performed efficiently in the optimization methods. The local optimization methods are the iteration ones, therefore, the parallelization can be organized within a single iteration only.
 
-For example, in Hooke-Jeeves method one can parallelize the construction of configuration i. e. parallelize the loop at the second step of the algorithm. In this loop, one may not compute the function values at the points $\bar{y} + he^i$ or $\bar{y} - he^i$ immedeatedly but may store the coordinates of the ones in the buffer, and upon accumulating $p$ points compute the function values at these ones in parallel. Afterwards, the accumulated information is analyzed and the coordinates of the point $\bar{y}$ are changed. This operation is repeated until all $N$ coordinates $\bar{y}$ are computed.
+For example, in Hooke-Jeeves method one can parallelize the construction of configuration, i.e. parallelize the loop at the second step of the algorithm. In this loop, one may not compute the function values at the points $\bar{y} + he^i$ or $\bar{y} - he^i$ immediately but may store the coordinates of the ones in the buffer, and upon accumulating $p$ points compute the function values at these ones in parallel. Next, the accumulated information is analyzed and the coordinates of the point $\bar{y}$ are changed. This operation is repeated until all $N$ coordinates $\bar{y}$ are computed.
 
-The main work of the quasi-Newton L-BFGS-B method in every iteration is spent for the computing of the function gradient. When solving the problems with the ``black box'' functions, the analytical calculation of the gradient is impossible. The numerical estimate of the gradient using the finite difference formulae implies multiple computing of the objective function values.
+The main work of the quasi-Newton L-BFGS-B method at every iteration is spent for the computing of the function gradient. When solving the problems with the ``black box'' functions, the analytical calculation of the gradient is impossible. The numerical estimate of the gradient using the finite difference formulae implies multiple computing of the objective function values.
 
-So far, in the L-BFGS-B algorithm, one can parallelize the computing of gradient at the second step of the algorithm. To do so, one needs to store all points, which the computing of the function values for the numerical estimate of the gradient are necessary in into an intermediate buffer, and then compute the function values at the points stored earlier in parallel. At the final stage, the gradient vector is formed thus completing its estimate.
+So far, in the L-BFGS-B algorithm, one can parallelize the computing of gradient at the second step of the algorithm. To do so, one needs to store all points, in which the computing of the function values for the gradient estimate are required, into an intermediate buffer, and then compute the function values at these points in parallel.
+%At the final stage, the gradient vector is formed thus completing its estimate.
 
-The general scheme of organizing the parallel computations for all the local methods employed is presented in Fig. \#. The objective function values can be computed on a single node using shared memory (OpenMP), on a cluster with distributed memory (MPI), or on a graphical accelerator using CUDA.
+The general scheme of the parallel computing for all the local methods employed is presented in Fig. \#. The objective function values can be computed on a single node using shared memory (OpenMP), on a cluster with distributed memory (MPI), or on accelerator using CUDA.
 
 \section{Results of numerical experiments}
 The numerical experiments were carried out on Lobachevsky supercomputer. Each supercomputer node was a two-processor one (two Intel Sandy Bridge E5-2660 2.2 GHz, 64 Gb RAM). All methods considered in the above sections were implemented using Globalizer software \cite{globalizerSystem} (development language – C++). Intel C++ 17.0.0 compiler was used to assembly the system.
