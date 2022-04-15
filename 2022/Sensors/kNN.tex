@@ -97,7 +97,7 @@
 
 % Affiliations / Addresses (Add [1] after \address if there is only one affiliation.)
 \address[1]{%
-$^{1}$ \quad Department of Mathematical Software and Supercomputing Technologies, Lobachevsky University, 603950 Nizhny Novgorod, Russia; anton.shtanyuk@itmm.unn.ru (A.Sh.), sysoyev@vmk.unn.ru (A.S.)}
+$^{1}$ \quad Department of Mathematical Software and Supercomputing Technologies, Lobachevsky University, 603950 Nizhny Novgorod, Russia; anton.shtanyuk@itmm.unn.ru (A.Sh.), alexander.sysoyev@itmm.unn.ru (A.S.)}
 %$^{2}$ \quad Affiliation 2; e-mail@e-mail.com}
 
 % Contact information of the corresponding author
@@ -115,7 +115,7 @@ $^{1}$ \quad Department of Mathematical Software and Supercomputing Technologies
 
 % Abstract (Do not insert blank lines, i.e. \\) 
 \abstract{
-The paper considers a time-efficient implementation of the $k$ nearest neighbours (kNN) algorithm. A well-known approach for accelerating the kNN algorithm is to utilize dimensionality reduction methods based on the use of space-filling curves. In this paper, we take this approach further and propose an algorithm that employs multiple space-filling curves and is faster (with comparable quality) compared to the kNN algorithm which uses kd-trees to determine the nearest neighbors. A specific method for constructing multiple Peano curves is outlined, and statements are given about the preservation of object proximity information in the course of dimensionality reduction. An experimental comparison with known kNN implementations using kd-trees was performed using test and real-life data.
+The paper considers a time-efficient implementation of the $k$ nearest neighbours (kNN) algorithm. A well-known approach for accelerating the kNN algorithm is to utilize dimensionality reduction methods based on the use of space-filling curves. In this paper, we take this approach further and propose an algorithm that employs multiple space-filling curves and is faster (with comparable quality) compared to the kNN algorithm which uses kd-trees to determine the nearest neighbours. A specific method for constructing multiple Peano curves is outlined, and statements are given about the preservation of object proximity information in the course of dimensionality reduction. An experimental comparison with known kNN implementations using kd-trees was performed using test and real-life data.
 }
 
 % Keywords
@@ -133,7 +133,7 @@ The paper considers a time-efficient implementation of the $k$ nearest neighbour
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-Currently, machine learning (ML) methods are being used successfully to solve a wide range of problems in various application areas. One example of a class of problems where ML has demonstrated its effectiveness are the tasks of identifying the main properties of the phenomena, which are characterized by their stochastic nature or the presence of hidden parameters \cite{Golovenkin2020,Gonoskov2019,Kastalskiy2021}.
+Currently, machine learning (ML) methods are being used successfully to solve a wide range of problems in various application areas. One example of a class of problems where ML has demonstrated its effectiveness are the tasks of identifying the main properties of the phenomena, which are characterized by their stochastic nature or the presence of hidden parameters \cite{Golovenkin2020,Gonoskov2019,Kastalskiy2021}. 
 
 In many cases, solving application problems comes down to the problem of classification, i.e. assigning the object under study to one of the available classes. One of the well-known classification methods is the kNN ($k$ nearest neighbours) method. Although the earliest papers related to this method appeared more than $50$ years ago \cite{Cover1967, Cover1968}, theoretical studies of various aspects of using kNN are still going on \cite{Pestov2013,Mirkes2020}. This is not to mention hundreds of publications in which this method is used to solve applied classification problems. Over many years of use, kNN has established itself as a simple and reliable method that yields acceptable results when solving many different problems. 
 
@@ -225,25 +225,25 @@ The function $y^c(x)$ maps a uniform grid with step $2^{-NM}$, constructed in th
 Using the Peano-Hilbert curve, one can propose the following scheme for implementing the kNN algorithm.
 
 Let $\omega_i, 1 \leq i \leq S$, be the $i$-th object from the set of objects correlated with class $C_j$. Previously, a feature vector $y = (y_1, y_2, ..., y_N) \in R^N$, corresponding to each object under consideration was defined, i.e. 
-\begin{equation}
-\omega_i \leftrightarrow y = (y_{i1}, y_{i2}, ..., y_{iN})
-\end{equation} 
+\[
+\omega_i \leftrightarrow y = (y_{i1}, y_{i2}, ..., y_{iN}).
+\] 
 
 Using the Peano curve, each object is assigned the value of $x_i$, i.e.
-\begin{equation}
+\[
 \omega_i \leftrightarrow x_i, \; y(x_i) = (y_{i1}, y_{i2}, ..., y_{iN}).
-\end{equation} 
+\] 
 
 Consider a test object $\omega^*$, to which the value $x^*$ is assigned. The degree of proximity of the test object $\omega^*$ to one of the objects $\omega_i$ is determined based on the distance on the one-dimensional scale $d_i = |x_i - x^* |$.
 Thus, the closest object to the test object has the following property:
-\begin{equation}
+\[
 d_{min} = \min \{ d_i: 1 \leq i \leq S \}.
-\end{equation} 
+\] 
 
 The operation of the algorithm to determine the nearest neighbour of the test object involves two phases: data preparation and the search itself. Data preparation consists of calculating the correspondence $\omega_i \rightarrow x_i$ for each input object, including the test object, and ordering the objects by the value of $x$.
-\begin{equation}
+\[
 x^1(\omega^1) \leq x^2(\omega^2) \leq ... \leq x^S(\omega^S).
-\end{equation} 
+\] 
 
 Since the corresponding object preimages $x_i \in [0,1]$ are ordered, the closest object can be found using a fast binary search algorithm.
 
@@ -251,12 +251,12 @@ When $K$ neighbours need to be found, this search procedure can be repeated $K$ 
 
 One obvious drawback of using the Peano curve in the kNN method is the loss of much of the information about the proximity of objects in multidimensional space when constructing their preimages on the one-dimensional scale. 
 
-Indeed, the point $x \in [0,1]$ on the one-dimensional scale has only left and right neighbours, whereas its corresponding object $y(x) \in R^N$ can have neighbours along $N$ coordinate directions. As a result, when using Peano curve type mappings, close objects $y^\prime$, $y^{\prime\prime}$ in the $N$-dimensional space can have their quite distant corresponding preimages $x^\prime$, $x^{\prime\prime}$ on the interval $[0,1]$. In Fig. 1 the green dots show two objects that are close in the two-dimensional space, while their preimages on the one-dimensional scale are far away from each other. The blue dots correspond to two objects, the distance between which is retained when changing to the one-dimensional scale.
+Indeed, the point $x \in [0,1]$ on the one-dimensional scale has only left and right neighbours, whereas its corresponding object $y(x) \in R^N$ can have neighbours along $N$ coordinate directions. As a result, when using Peano curve type mappings, close objects $y^\prime$, $y^{\prime\prime}$ in the $N$-dimensional space can have their quite distant corresponding preimages $x^\prime$, $x^{\prime\prime}$ on the interval $[0,1]$. In Figure~\ref{fig:Peano} the green dots show two objects that are close in the two-dimensional space, while their preimages on the one-dimensional scale are far away from each other. The blue dots correspond to two objects, the distance between which is retained when changing to the one-dimensional scale.
 
 \begin{figure}
 \center
 \includegraphics[width=0.5\linewidth]{fig1.png}
-\caption{Peano curve}
+\caption{Peano curve}\label{fig:Peano}
 \label{fig1}
 \end{figure}   
 
@@ -284,7 +284,7 @@ Any subcube of the $M$-th partition of the hypercube $D_0$ will have an edge of 
 \begin{equation}\label{maps}
 y_i^l(x) = y_i^{l-1}(x) + 2^{-l}, \; 1 \leq i \leq N, \; 1 \leq l \leq L,
 \end{equation} 
-map the interval $[0,1]$ onto the corresponding hypercubes  $D_l, \; 1 \leq l \leq L$ (the broken line in Fig.~\ref{fig2} shows the image of the interval $[0,1]$, which is obtained by using the evolvent $y^0(x), x \in [0,1]$).
+map the interval $[0,1]$ onto the corresponding hypercubes  $D_l, \; 1 \leq l \leq L$ (the broken line in Figure~\ref{fig2} shows the image of the interval $[0,1]$, which is obtained by using the evolvent $y^0(x), x \in [0,1]$).
 
 For any subcube $D_0(M,v)$ of the $M$-th partition of the hypercube $D_0$, there will exist a subcube $D_l(M,v)$ of the $M$-th partition of the hypercube $D_l$, and $D_l(M,v)$ can be obtained by shifting $D_0(M,v)$ along the main diagonal by the distance of 
 \[
@@ -292,44 +292,44 @@ For any subcube $D_0(M,v)$ of the $M$-th partition of the hypercube $D_0$, there
 \] 
 
 It follows from formulae (\ref{hypercubeD0}) and (\ref{maps}) that if an interval $d(M,v)$ is mapped onto the subcube $D_0(M,v)$, then there exists a family of subcubes
-\begin{equation}
+\[
 D_l(M,v) = y^l(d(M,v)), 1 \leq l \leq L,
-\end{equation} 
+\]
 connected with the corresponding subintervals $d_l(M,v_l) \subset [0,1]$, where $d(M,v) = d_0(M,v_0), v_0 = v$, such that 
-\begin{equation}
+\[
 D_l(M,v) = y^l(d_l(M,v)), 1 \leq l \leq L.
-\end{equation} 
+\] 
 
-Since the hypercube $D$ from (\ref{D}) belongs to the common part of the family of hypercubes (\ref{hypercubes}) (the boundary of the hypercube $D$ is highlighted in Fig.~\ref{fig2}), then, by introducing an additional function 
-\begin{equation}
+Since the hypercube $D$ from (\ref{D}) belongs to the common part of the family of hypercubes (\ref{hypercubes}) (the boundary of the hypercube $D$ is highlighted in Figure~\ref{fig2}), then, by introducing an additional function 
+\[
 g_0(y) = \max \{ |y_i|-2^{-1}: \; 1 \leq i \leq N \},
-\end{equation} 
+\] 
 the original hypercube $D$ can be represented as
-\begin{equation}
+\[
 D = \{y^l(x): x \in [0,1], \; g_0(y^l(x)) \leq 0 \}, \; 0 \leq l \leq L,
-\end{equation} 
+\] 
 i.e. $g_0(y) \leq 0$, if $y \in D$, and $g_0(y) > 0$ if otherwise. Hence, any point $y \in D$ has its preimage $x^l \in [0,1]$ at every mapping $y^l(x), \; 0 \leq l \leq L$, i.e.
-\begin{equation}
+\[
 y = y^l(x^l), \; x^l \in [0, 1], \; 0 \leq l \leq L.
-\end{equation} 
+\] 
 
 By using multiple mappings $y^l(x), \; 0 \leq l \leq L$, the following relationship between neighbourhoods on one-dimensional scales and neighbourhoods in the original multidimensional domain is defined.
 
 \textbf{Theorem 1.} Let $y^*$ be an arbitrary point from the domain $D$ belonging to the interval with endpoints $y^\prime, y^{\prime\prime} \in D$, which differ in the values of the only coordinate, and let
-\begin{equation}
+\[
 |y_j^\prime - y^{\prime\prime}_j| \leq 2^{-p}, \; y^\prime_i = y^{\prime\prime}_i = y_i^*, \; 1 \leq i \leq N, i \ne j,
-\end{equation} 
+\] 
 where $p$ is an integer, $1 \leq p \leq L-1$, and $j$ is the number of coordinate whose values for points $y^*, y^\prime, y^{\prime\prime}$ are different. Then there exists at least one correspondence $y^l(x), 0 \leq l \leq L$, and preimages $x^*, x^\prime, x^{\prime\prime} \in [0, 1]$ such that
-\begin{equation}
+\[
  y^* = y^l(x^*), y^\prime = y^l(x^\prime), y^{\prime\prime} = y^l(x^{\prime\prime}), \\
 \max \{ |x^\prime - x^*|, |x^{\prime\prime} - x^*|, |x^\prime - x^{\prime\prime}| \} \leq 2^{-pN}.
-\end{equation} 
+\] 
 
-\textbf{Remark}. The conditions of the theorem distinguish a specific neighborhood of the point $y^*$. This neighborhood comprises only such neighbours of this point which can be obtained by  shifting $y^*$ parallel to one of the coordinate axes by a distance not exceeding $2^{-p}$. By varying the value of $j, 1 \leq j \leq N$, under the conditions of the theorem, one can identify the nearest neighbours of point $y^*$ along $N$ coordinate directions. According to the statement, the proximity of points in the $N$-dimensional space in a particular direction will be reflected by the proximity of their preimages on one of the one-dimensional segments. In this case, the corresponding one-dimensional intervals can be different for different directions.
+\textbf{Remark}. The conditions of the theorem distinguish a specific neighbourhood of the point $y^*$. This neighbourhood comprises only such neighbours of this point which can be obtained by  shifting $y^*$ parallel to one of the coordinate axes by a distance not exceeding $2^{-p}$. By varying the value of $j, 1 \leq j \leq N$, under the conditions of the theorem, one can identify the nearest neighbours of point $y^*$ along $N$ coordinate directions. According to the statement, the proximity of points in the $N$-dimensional space in a particular direction will be reflected by the proximity of their preimages on one of the one-dimensional segments. In this case, the corresponding one-dimensional intervals can be different for different directions.
 
 The proof of this theorem is given in \cite{Strongin2000}.
 
-As an illustration, Fig. \ref{fig2} shows a family of space-filling curves in extended domains $D_l$, where a square with a dark border highlights the hypercube $D$ belonging to each extended domain. The dots indicate proximate objects in the domain $D$, the distance between which will vary depending on the one-dimensional scale used. The effect of maintaining distance proximity on one of the scales is clearly visible. For example, objects marked with green dots will be far away on the first two one-dimensional scales and close to each other on the third one. Objects marked in blue will be far away on the first and third scales and close to each other on the second scale. 
+As an illustration, Figure~\ref{fig2} shows a family of space-filling curves in extended domains $D_l$, where a square with a dark border highlights the hypercube $D$ belonging to each extended domain. The dots indicate proximate objects in the domain $D$, the distance between which will vary depending on the one-dimensional scale used. The effect of maintaining distance proximity on one of the scales is clearly visible. For example, objects marked with green dots will be far away on the first two one-dimensional scales and close to each other on the third one. Objects marked in blue will be far away on the first and third scales and close to each other on the second scale. 
 
 \end{paracol}
 
@@ -347,15 +347,15 @@ As an illustration, Fig. \ref{fig2} shows a family of space-filling curves in ex
 
 The scheme of implementation of the kNN algorithm using multiple Peano curves will look as follows.
 For every object $\omega_i$ a set of its preimages on different one-dimensional scales is assigned 
-\begin{equation}
-\omega_i \rightarrow \{ x_i^0, x_i^1, ..., x_i^L \}
-\end{equation} 
+\[
+\omega_i \rightarrow \{ x_i^0, x_i^1, ..., x_i^L \},
+\] 
 where $l, \; 0 \leq l \leq L$, is the number of the one-dimensional interval.
 
 The degree of proximity of a test object $\omega^*$ to one of the known objects $\omega_i$ can be expressed in terms of the distance
-\begin{equation}
+\[
 d_i^l = |x_i^l - x^{*l}|
-\end{equation} 
+\]
 on the $l$-th scale.
 
 Thus, the distance $d(\omega_i,\omega^*)$ between two objects $\omega_i$ and $\omega^*$ on a one-dimensional scale will correspond to the minimum distance among all the mappings 
@@ -363,9 +363,9 @@ Thus, the distance $d(\omega_i,\omega^*)$ between two objects $\omega_i$ and $\o
 d(\omega_i,\omega^*) = \min_{0\leq l\leq L} d_i^l = \min_{0\leq l\leq L}  |x_i^l - x^{*l}| .
 \]
 If we find the minimum distance
-\begin{equation}
+\[
 d_{min} = \min_{1\leq i\leq n} d(\omega_i,\omega^*) ,
-\end{equation} 
+\]
 we get the nearest neighbour.
 
 Next, the search procedure needs to be run as many times as there are nearest neighbours to be identified. The main problem is that an object previously found on one scale can be found again, including on another scale. This requires either removing the values of $x$ found objects from all scales or searching for $K$ nearest neighbours within each scale and then merging the results.
@@ -462,21 +462,21 @@ The computational experiments were performed on the following test infrastructur
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Investigation of neighbour search times using test datasets}
 
-Several datasets were synthesized to examine the search time for neighbours. First, DS-Random-1 and DS-Random-2 sets consisting of 100000 and 10000 objects, respectively, were generated.
+Several datasets were synthesized to examine the search time for neighbours. First, DS-Random-1 and DS-Random-2 sets consisting of $100\;000$ and $10\;000$ objects, respectively, were generated.
 
 When generating DS-Random-1, the standard random module from the Python NumPy library was used. The data dimension $N$ varied from 2 to 4; the generated data had a uniform distribution on $[0, 1]$.
 
 To generate the DS-Random-2 set, the \texttt{sklearn.datasets.make\_classification} function from the scikit-learn library (version 1.0.2) was used with the following parameters: 
 
 \begin{itemize}
-\item \texttt{n\_samples} = 10000 (number of objects),
+\item \texttt{n\_samples} = $10\;000$ (number of objects),
 \item \texttt{n\_features} =  $N$ (dimensionality),
 \item \texttt{n\_redundant} = 0 (number of redundant features),
 \item \texttt{n\_informative} = $N - 1$  (number of informative features),
 \item \texttt{n\_clusters\_per\_class} = 1 (number of clusters per class of objects generated).
 \end{itemize}
   
-The running times used by the different methods (kNN-ME, procedure A, kNN-ME, procedure B, kNN-KD) for DS-Random-1 and DS-Random-2 datasets with $N = 2$ are shown in Fig. \ref{fig3}. The abscissa axis represents the number of nearest neighbours that the algorithm is searching for, the ordinate axis represents the running time of the method.
+The running times used by the different methods (kNN-ME, procedure A, kNN-ME, procedure B, kNN-KD) for DS-Random-1 and DS-Random-2 datasets with $N = 2$ are shown in Figure~\ref{fig3}. The abscissa axis represents the number of nearest neighbours that the algorithm is searching for, the ordinate axis represents the running time of the method.
 
 \begin{figure}
 \widefigure
@@ -484,7 +484,7 @@ The running times used by the different methods (kNN-ME, procedure A, kNN-ME, pr
 \caption{Running times of the algorithms with $N = 2$\label{fig3}}
 \end{figure}  
 
-Running times of the methods for nearest neighbours search with $N = 3, 4$ are given in Figs. \ref{fig4}, \ref{fig5} respectively.
+Running times of the methods for nearest neighbours search with $N = 3, 4$ are given in Figures \ref{fig4}, \ref{fig5} respectively.
 
 \begin{figure}
 \widefigure
@@ -507,7 +507,7 @@ On the whole, the experimental results show that the kNN-ME method based on sear
 
 Let us consider the DS-Skin set taken from the collection \cite{ds-1}. The objects in the set belong to two classes: the first class represents points in RGB colour space that belong to human skin images; the second class represents colour coordinates that do not belong to such images.
 
-The number of objects of the first class is about 17000, the number of objects of the second class is 43000. The total number of objects examined is 60000.
+The number of objects of the first class is about $17\;000$, the number of objects of the second class is $43\;000$. The total number of objects examined is $60\;000$.
 
 \begin{figure}[h]
 \widefigure
@@ -534,7 +534,7 @@ The performance of kNN-ME and kNN-KD methods was also tested using a real-world 
 \end{tabular}
 \end{specialtable}
 
-The time required to find $K$ nearest neighbours on the CarEvoluation dataset is shown in Fig.~\ref{fig6a}. In this experiment, the number of evolvents used simultaneously was 7. 
+The time required to find $K$ nearest neighbours on the CarEvoluation dataset is shown in Figure~\ref{fig6a}. In this experiment, the number of evolvents used simultaneously was 7. 
 \begin{figure}
 \widefigure
 \includegraphics[width=0.5\linewidth]{fig6a.pdf}
