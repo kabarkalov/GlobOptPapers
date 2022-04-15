@@ -77,9 +77,10 @@ As a rule, the computational costs for the local refining of the solution is ess
 The novelty of the parallel algorithm considered in the present paper consists in the parallelization of the whole computing process -- both at the global search stage and at the stage of the local refining of the solution found. This approach can be relevant for the problems whose objective functions are ravine-type with a weak multiextremality. In such problems, the phase of searching the rough approximation of the global solution and the phase of its local refining are comparable in the computation costs.
 For example, in the work \cite{Gubaydullin2021} the global search stage only was parallelized; the local refining was made with a sequential algorithm.
 
-The main part of the paper has the following structure. In Section 2, the global optimization problem statement is presented and the properties of the objective function allowing developing the efficient global minimum search algorithms are described. In Section 3, the scheme of the parallel global optimization algorithm is presented and the theoretical estimates of its speedup are given. In Section 4, two local optimization methods (BFGS method and Hooke-Jeeves one) are considered, which can be applied for refining the solution found. Possible parallelization schemes for these methods are discussed. Section 5 contains the results of the computational experiments conducted using both the test problems and the applied ones. Section 6 concludes the paper.
+The main part of the paper has the following structure. In Section \ref{sec:problem}, the global optimization problem statement is presented and the properties of the objective function allowing developing the efficient global minimum search algorithms are described. In Section \ref{sec:global}, the scheme of the parallel global optimization algorithm is presented and the theoretical estimates of its speedup are given. In Section \ref{sec:local}, two local optimization methods (BFGS method and Hooke-Jeeves one) are considered, which can be applied for refining the solution found. Possible parallelization schemes for these methods are discussed. Section \ref{sec:results} contains the results of the computational experiments conducted using both the test problems and the applied ones.
+% Section 6 concludes the paper.
 
-\section{Global optimization problem statement}
+\section{Global optimization problem statement}\label{sec:problem}
 
 Let us consider a problem of searching the global minimum of an $N$-dimensional function $\varphi(y)$ in a hyperinterval $D$
 \begin{gather}
@@ -100,19 +101,19 @@ The known approaches to solving the Lipschitz global optimization problems are b
 \{ y \in R^{N}: -2^{-1} \leq y_i \leq 2^{-1}, 1 \leq i \leq N\} = \{y(x): 0 \leq x \leq 1 \}.
 \end{equation}
 
-In the theory, the Peano-Hilbert curve is a limit object. Therefore, one needs to construct an approximation to the theoretical curve for the practical application. The issues of numerical construction of such approximation (also called \textit{evolvents}) for given dimensionality with given precision were considered in \cite{Sergeyev2013}.
+In theory, the Peano-Hilbert curve is a limit object. Therefore, one needs to construct an approximation to the theoretical curve for the practical application. The issues of numerical construction of such approximation (also called \textit{evolvents}) for given dimensionality with given precision were considered in \cite{Sergeyev2013}.
 
-The use of the space-filling curves allows reducing the multidimensional problem \ref{problemN} to a one-dimensional problem and applying the efficient one-dimensional optimization methods to solve it, i.e. 
+The use of the space-filling curves allows reducing the multidimensional problem (\ref{problemN}) to a one-dimensional problem and applying the efficient one-dimensional optimization methods to solve it, i.e. 
 \begin{equation} \label{problem_ref}
 \varphi(y^*) = \varphi(y(x^*)) = \min{\{ \varphi(y(x)): x \in [0, 1] \}}.
 \end{equation}
-Keeping the property of limited relative differences of the objective function is an important property of using the evolvents. If the function $\varphi(y)$ in the domain $D$ satisfies the Lipschitz condition, the function $\varphi(y(x))$ in the interval $[0,1]$ will satisfy the uniform H{\"o}lder condition
+Keeping the property of limited relative differences of the objective function is an important feature of the evolvents. If the function $\varphi(y)$ in the domain $D$ satisfies the Lipschitz condition, the function $\varphi(y(x))$ in the interval $[0,1]$ will satisfy the H{\"o}lder condition
 \begin{equation} \label{holder_ref}
 \left| \varphi(y(x_1)) - \varphi(y(x_2)) \right| \leq H {\left| x_1 - x_2 \right|}^{1/N}, \; x_1, x_2 \in [0,1],
 \end{equation}
 where H{\"o}lder constant $H$ is related to Lipschitz constant $L$ by the relation $H = 2L\sqrt{N+3}$. Therefore, without liming the generality, one can consider the minimization of the one-dimensional function 
 \begin{equation} \label{minim_fun_ref}
-f(x) = \varphi(y(x)), x \in [0,1],
+f(x) = \varphi(y(x)), \; x \in [0,1],
 \end{equation}
 satisfying H{\"o}lder condition.
 
@@ -151,21 +152,21 @@ Step 4. Arrange the characteristics $R(i)$, $1 \leq i \leq k,$ in the decreasing
 \end{equation}
 and select $p$ largest characteristics with the interval indices $t_j$, $1 \leq j \leq p$.
 
-Step 5. Carry out new trials in parallel at the points $x^{k+j}$, $1 \leq j \leq p$, computed by the formulae
+Step 5. Carry out new trials in parallel at the points $x^{k+j}$, $1 \leq j \leq p$, computed by the formula
 $$ x^{k+j} = \frac{x_{t_j} + x_{t_j - 1}}{2} - sign(z_{t_j} - z_{t_j - 1}) \frac{1}{2r} {\Bigg[\frac{\left| z_{t_j} - z_{t_j - 1} \right|}{\mu}\Bigg]}^{N}.$$
 Put the results of the trials performed into the information database of the algorithm.
 
 Step 6. Check the stopping criterion $\Delta_{t_j} \leq \varepsilon$, where $t_j$ are from Step 4 and $\varepsilon > 0$ is the predefined accuracy. 
-After completing the algorithm work, take as the estimate of the solution of the problem \ref{problemN} 
+After completing the algorithm work, take as the estimate of the solution of the problem (\ref{problemN})
 $$ f_k^* = \min\limits_{1 \leq i \leq k} f(x^i), \; x_k^* = \arg \min\limits_{1 \leq i \leq k} f(x^i).$$
 
-The theoretical substantiation of the presented algorithm (denoted hereafter as \textit{global search algorithm} or GSA) see in more details in \cite{Strongin2000}. Note briefly that the characteristics of the intervals (\ref{R}) used in the algorithm can be considered as a quantitative measure how particular interval is promising from the viewpoint of finding the global minimum inside it. The inequalities (\ref{OrderedR}) arrange the intervals according to their characteristics, and the trials are performed in parallel in $p$ most promising intervals.
+The theoretical basis of the presented algorithm (denoted hereafter as \textit{global search algorithm} or GSA) see in more details in \cite{Strongin2000}. Note briefly that the characteristics of the intervals (\ref{R}) used in the algorithm can be considered as a quantitative measure how particular interval is promising from the viewpoint of finding the global minimum inside it. The inequalities (\ref{OrderedR}) arrange the intervals according to their characteristics, and the trials are performed in parallel in $p$ most promising intervals.
 
 \subsection{Theoretical estimates of the speedup of the parallel algorithm}
 
 Let us describe (according to \cite{Strongin2000}) the theoretical properties of the parallel algorithm featuring its speedup. In the problems being solved, the time of executing a single search trial essentially exceeds the time of processing its result. Therefore, the speedup in the number of trials 
 \begin{equation} \label{par_trl_ref}
-s(p) = \frac{n(1)p}{n(p)}
+s(p) = \frac{n(1) \cdot p}{n(p)}
 \end{equation}
 is the key characteristic of the efficiency of the parallel global search algorithm.
 Here $n(1)$ is the number of trials executed by the sequential method and $n(p)$ is the number of trials executed by the parallel method employing $p$ parallel processes.
@@ -211,16 +212,16 @@ Then, the parallel algorithm at $p=2$ will be non-redundant (i.e. $s(2)=2$, $\la
 \end{equation}
 where $t_j$ is defined according to Step 4 of the algorithm.
 
-\textbf{Consequence}. Let the objective function $f(x)$ have $Q$ points of local minima $\{x_1^{\prime},...,x_Q^{\prime}\}$, which the condition \eqref{first_s_ref} is fulfilled for, and let there exist the trial points $y^{n_i}$, $1 \leq i \leq Q$ such as 
+\textbf{Consequence}. Let the objective function $f(x)$ have $Q$ points of local minima $\{x_1^{\prime},...,x_Q^{\prime}\}$, which the condition \eqref{first_s_ref} is fulfilled for, and let there exist the trial points $y^{n_i}$, $1 \leq i \leq Q,$ such that 
 \begin{gather} 
     y^{n_i} \in \{y^1,...y^{q(l)}\}, \nonumber \\ 
     \alpha_i \leq y^{n_i} \leq \alpha_{i+1}, \; \alpha_i, \alpha_{i+1} \in \{x^*, x_1^{\prime},...,x_Q^{\prime}\}, 1 \leq i \leq Q. \nonumber
 \end{gather}
 Then, if the conditions of theorem are fulfilled, the parallel algorithm with the parallelization degree $Q+1$ will be non-redundant (i.e. $s(Q+1)=Q+1, \; \lambda(Q+1)=0$) until the condition \eqref{p_two_ref} is fulfilled.
 
-The consequence from theorem plays a special role in solving the multidimensional problems reduced to the one-dimensional ones using the evolvent $y(x)$. The evolvent $y(x)$, being an approximation to the Peano curve, has the effect of ``splitting'' of the global minimum point $y^* \in D$ into several (up to $2^N$) preimages in the interval [0,1]. Applying the parallel algorithm to minimize the reduced one-dimensional function, one can expect a zero redundancy at the parallelization degree up to $2^N+1$.
+The consequence from the theorem plays a special role in solving the multidimensional problems reduced to the one-dimensional ones using the evolvent $y(x)$. The evolvent $y(x)$, being an approximation to the Peano curve, has the effect of ``splitting'' of the global minimum point $y^* \in D$ into several (up to $2^N$) preimages in the interval [0,1]. Applying the parallel algorithm to minimize the reduced one-dimensional function, one can expect a zero redundancy at the parallelization degree up to $2^N+1$.
 
-Now, let us consider the case when after the stage of the search for the rough approximation to the global solution, the stage of its local refinement is performed. Assume that the fraction of the search trials necessary for the local refinement of the solution makes $\alpha$ of total number of trials. Then, according to Amdahl's law, the overall speedup $S(p)$, which can be obtained by parallelization into $p$ processes, cannot exceed the quantity 
+Now, let us consider the case when, after the stage of the search for the rough approximation to the global solution, the stage of its local refinement is performed. Assume that the fraction of the search trials necessary for the local refinement of the solution makes $\alpha$ of total number of trials. Then, according to Amdahl's law, the overall speedup $S(p)$, which can be obtained by parallelization into $p$ processes, cannot exceed the quantity 
 $$ S(p) = {\Big(\alpha + \frac{1-\alpha}{p}\Big)}^{-1}.$$
 
 This relation will be true if one assumes the non-redundant parallelization of the global search stage. The increase in the efficiency of the parallel algorithm will be limited by the fraction of trials at the stage of the local refinement of the solution. So far, to increase the efficiency of parallelization (especially in the case of a large number of processes employed), one needs to parallelize not only the global search but the local one as well. Two particular local methods applicable to the optimization problems with the ``black-box'' type functions as well as the methods of parallelization of these ones will be considered in the next section.
@@ -308,15 +309,16 @@ The main work of the quasi-Newton L-BFGS-B method at every iteration is spent fo
 So far, in the L-BFGS-B algorithm, one can parallelize the computing of gradient at the second step of the algorithm. To do so, one needs to store all points, in which the computing of the function values for the gradient estimate are required, into an intermediate buffer, and then compute the function values at these points in parallel.
 %At the final stage, the gradient vector is formed thus completing its estimate.
 
-The general scheme of the parallel computing for all the local methods employed is presented in Fig. \#. The objective function values can be computed on a single node using shared memory (OpenMP), on a cluster with distributed memory (MPI), or on accelerator using CUDA.
+%The general scheme of the parallel computing for all the local methods employed is presented in Fig. \#. The objective function values can be computed on a single node using shared memory (OpenMP), on a cluster with distributed memory (MPI), or on accelerator using CUDA.
+Thus, in both considered local methods the parallelization scheme will be generally the same. The vector of objective function values can be computed in parallel on a single node using shared memory (OpenMP), on a cluster with distributed memory (MPI), or on accelerator using CUDA.
 
-\section{Results of numerical experiments}
+\section{Results of numerical experiments}\label{sec:results}
 
 The numerical experiments were carried out on Lobachevsky supercomputer. Each supercomputer node was a two-processor one (two Intel Sandy Bridge E5-2660 2.2 GHz, 64 Gb RAM). All methods considered in the above sections were implemented using Globalizer software \cite{globalizerSystem} (development language – C++). Intel C++ 17.0.0 compiler was used to assembly the system.
 
 The first series of experiments was carried out with the local optimization algorithms only. Rosenbrock function is a classical test function for the local search methods 
 \begin{gather}
-    \varphi(y) = \sum_{i=1}^{N-1} \left((1-y_i)^2 + 100(y_{i+1} - y_i^2)^2\right) \nonumber \\
+    \varphi(y) = \sum_{i=1}^{N-1} \left[(1-y_i)^2 + 100(y_{i+1} - y_i^2)^2\right], \nonumber \\
     D = \{ y \in R^N: -25 \leq y_j \leq 25, 1 \leq j \leq N \}. \nonumber
 \end{gather}
 
@@ -454,13 +456,13 @@ Table~\ref{tab:5} presents the averaged number of iterations, which GSA required
 	\center
 	\begin{tabular}{|c|c|c|c|c|c|c|}
 		\hline
-		N & Problem class & P = 1 & P = 2 & P = 4 & P = 8 & P = 16 \\
+		$N$ & Problem class & $p=1$ & $p=2$ & $p=4$ & $p=8$ & $p=16$ \\
 		\hline 
-		    \multirow{2}{*}{4} & hard & 36528 & 18651 & 9854 & 4808 & 2260 \\ \cline{2-7}
-		                       & simple & 9995 & 5199 & 2706 & 1333 & 630 \\
+		    \multirow{2}{*}{4} & Hard & 36528 & 18651 & 9854 & 4808 & 2260 \\ \cline{2-7}
+		                       & Simple & 9995 & 5199 & 2706 & 1333 & 630 \\
 		\hline
-		    \multirow{2}{*}{5} & hard & 266420 & 149109 & 90894 & 39873 & 22206 \\ \cline{2-7}
-		                       & simple & 29853 & 12913 & 7296 & 3618 & 2220 \\
+		    \multirow{2}{*}{5} & Hard & 266420 & 149109 & 90894 & 39873 & 22206 \\ \cline{2-7}
+		                       & Simple & 29853 & 12913 & 7296 & 3618 & 2220 \\
 		\hline
 	\end{tabular}
 \end{table}
