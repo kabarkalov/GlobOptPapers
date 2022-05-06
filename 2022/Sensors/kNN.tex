@@ -180,7 +180,7 @@ For kd-tree, the main drawback is that it slows down when the number of objects 
 As it was mentioned, the computational cost of searching for nearest objects increases with increasing dimensionality, both in the case of exhaustive search for all distances and when using tree structures. One mechanism for speeding up the search is dimensionality reduction, by reducing the problem of searching in a multidimensional space to the search in a one-dimensional space (over an interval). This is possible through the use of space-filling curves (Peano-Hilbert curves) that fill the multidimensional space. Such curves are used, for example, in global optimization \cite{Lera2015,Lera2018,Strongin2018,Gergel2021}, in numerical approximation of solutions to systems of nonlinear inequalities \cite{Lera2021}, in image processing \cite{Liang2008,Costa2012,Herrero2015}, etc.
 
 %Баркалов
-Отметим, что кроме space-filling curves cуществуют и другие схожие кривые, например, area-filling curves \cite{Nasso2022}. Однако широкое практическое применение получили именно Peano-Hilbert curves в силуv относительной простоты построения и наличия ряда полезных свойств, основные из которых будут отмечены в Section \ref{Peano} и Section \ref{MPeano}.
+Отметим, что кроме space-filling curves cуществуют и другие схожие кривые, например, area-filling curves \cite{Nasso2022}. Однако широкое практическое применение получили именно Peano-Hilbert curves в силу относительной простоты построения и наличия ряда полезных свойств, основные из которых будут отмечены в Section \ref{Peano} и Section \ref{MPeano}.
 
 
 An algorithm based on data curves can offer some advantages over tree-based algorithms by reducing the search time. Neighbour detection for test objects includes two phases: building and initialising the data structures (build step) and performing a search or query (query step). In most cases, the build phase occurs only once, while queries are repeated many times and can significantly affect the overall speed of the classification algorithm. 
@@ -218,11 +218,13 @@ Condition 2. Two subintervals $d(M,v^\prime)$ and $d(M,v^{\prime\prime})$ share 
 Condition 3.  If $x \in d(M,v)$ then $y(x) \in D(M,v), M \geq 1$.  
 
 Note that the centre  $y^c(x)$ of the $M$-th partition subcube containing point $y(x)$ can be regarded as an approximation to $y(x)$ with the accuracy of $\varepsilon = 2^{-(M+1)}$, i.e.
-\begin{equation}
+\begin{equation}\label{prec}
 \max_{1 \leq j \leq N} \left| y_j^c(x)-y_j(x) \right| \leq \varepsilon = 2^{-(M+1)}.
 \end{equation} 
 
-The function $y^c(x)$ maps a uniform grid with step $2^{-NM}$, constructed in the interval $[0,1]$, onto a uniform grid with step $2^{-M}$, constructed in the hypercube $D$. A constructive way of establishing such a correspondence is described and theoretically justified in \cite{Strongin2000, Sergeyev2013}.
+The function $y^c(x)$ maps a uniform grid with step $2^{-NM}$, constructed in the interval $[0,1]$, onto a uniform grid with step $2^{-M}$, constructed in the hypercube $D$. A constructive way of establishing such a correspondence is described and theoretically justified in \cite{Strongin2000, Sergeyev2013}. 
+%Баркалов
+Алгоритмическая сложность вычисления значения функции $y^c(x)$ зависит от размерности $N$, от уровня разбиения $M$ и составляется величину $O(M\cdot N)$.
 
 Using the Peano-Hilbert curve, one can propose the following scheme for implementing the kNN algorithm.
 
@@ -268,7 +270,7 @@ This property makes dimensionality reduction using a single Peano curve practica
 \section{Constructing a family of Peano curves}\label{MPeano}
 
 Consider a family of Peano curves
-\begin{equation}
+\begin{equation}\label{EvSet}
 Y_L(x)=\{ y^0(x), y^1(x), ..., y^L(x) \}
 \end{equation} 
 instead of a single curve $y(x)$. We will construct the family of curves as follows. Let us introduce a family of hypercubes
@@ -314,13 +316,15 @@ i.e. $g_0(y) \leq 0$, if $y \in D$, and $g_0(y) > 0$ if otherwise. Hence, any po
 \[
 y = y^l(x^l), \; x^l \in [0, 1], \; 0 \leq l \leq L.
 \] 
+%Баркалов
+Алгоритмическая сложность вычисления всех прообразов $x^l \in [0, 1], \; 0 \leq l \leq L,$ зависит от размерности $N$, от уровня разбиения $M$, числа отображений $L$ и составляется величину $O(M\cdot N \cdot L)$.
 
 By using multiple mappings $y^l(x), \; 0 \leq l \leq L$, the following relationship between neighbourhoods on one-dimensional scales and neighbourhoods in the original multidimensional domain is defined.
 
 \textbf{Theorem 1.} Let $y^*$ be an arbitrary point from the domain $D$ belonging to the interval with endpoints $y^\prime, y^{\prime\prime} \in D$, which differ in the values of the only coordinate, and let
-\[
+\begin{equation}\label{y_prime}
 |y_j^\prime - y^{\prime\prime}_j| \leq 2^{-p}, \; y^\prime_i = y^{\prime\prime}_i = y_i^*, \; 1 \leq i \leq N, i \ne j,
-\] 
+\end{equation} 
 where $p$ is an integer, $1 \leq p \leq L-1$, and $j$ is the number of coordinate whose values for points $y^*, y^\prime, y^{\prime\prime}$ are different. Then there exists at least one correspondence $y^l(x), 0 \leq l \leq L$, and preimages $x^*, x^\prime, x^{\prime\prime} \in [0, 1]$ such that
 \[
  y^* = y^l(x^*), y^\prime = y^l(x^\prime), y^{\prime\prime} = y^l(x^{\prime\prime}), \\
@@ -344,6 +348,14 @@ As an illustration, Figure~\ref{fig2} shows a family of space-filling curves in 
 \begin{paracol}{2}
 \linenumbers
 \switchcolumn
+
+%Баркалов
+Как было сказано выше, вместо теоретической Hilbert curve $y(x)$ на практике используется evolvent $y^c(x)$, которая является приближением к $y(x)$ с точностью порядка $2^{-(M+1)}$, определяемой соотношением (\ref{prec}). При этом параметр $M$ может выбираться для каждой решаемой задачи индивидуально, исходя из точности представления исходных данных.
+Например, данные в  DS-Skin dataset (Section \ref{RealData}) представляют собой координаты пикселей изображения с разрешением 256 на 256. При отображении данных на стандартный гиперкуб $D$ from (\ref{D}) расстояние по координате между двумя точками не может быть меньше $1/256$. Использование параметра $M=10$ для построения evolvent будет достаточным в этом случае. 
+В случае же присвоения численных значений небольшому числу categorical features (как это было сделано для CarEvaluation dataset, see Section \ref{RealData}) расстояние по координате между объектами будет большое, значение параметра $M$ можно снизить (в экспериментах использовалось значение $M=7$).
+
+Максимальное число одновременно используемых отображений в множестве $Y_L(x)$ from (\ref{EvSet}) также будет определяться точностью исходных данных, от которой зависит точность построения разверток $y^i(x)$.
+Будем счистать, что каждое из отображений $y^i(x)$ построено с использованием одного и того же значения $M$. Тогда значение $L$ должно удовлетворять неравенству $L \leq M$. В противном случае точки $y' = y^l(x'),\; y''=y^l(x'')$ из условия (\ref{y_prime}) будут соответствовать центру одного и того же подкуба при $p>M$, т.е. будет выполняться равенство $y' = y''$  что приведет к нарушению условий Теоремы 1. 
 
 \section{Implementation features of the kNN method using multiple space-filling curves}\label{knnme}
 
@@ -505,7 +517,7 @@ All the methods considered show a small variation in running time when switching
 On the whole, the experimental results show that the kNN-ME method based on search without removal (procedure A) works on average 2 times faster than the method that involves removal of elements found (procedure B). In fact, both variants of the kNN-ME method are 5-7 times faster (depending on the dataset) than the kNN-KD method.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Investigation of neighbour search times on real-world data}
+\subsection{Investigation of neighbour search times on real-world data}\label{RealData}
 
 Let us consider the DS-Skin set taken from the collection \cite{ds-1}. The objects in the set belong to two classes: the first class represents points in RGB colour space that belong to human skin images; the second class represents colour coordinates that do not belong to such images.
 
