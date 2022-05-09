@@ -180,7 +180,7 @@ For kd-tree, the main drawback is that it slows down when the number of objects 
 As it was mentioned, the computational cost of searching for nearest objects increases with increasing dimensionality, both in the case of exhaustive search for all distances and when using tree structures. One mechanism for speeding up the search is dimensionality reduction, by reducing the problem of searching in a multidimensional space to the search in a one-dimensional space (over an interval). This is possible through the use of space-filling curves (Peano-Hilbert curves) that fill the multidimensional space. Such curves are used, for example, in global optimization \cite{Lera2015,Lera2018,Strongin2018,Gergel2021}, in numerical approximation of solutions to systems of nonlinear inequalities \cite{Lera2021}, in image processing \cite{Liang2008,Costa2012,Herrero2015}, etc.
 
 %Баркалов
-Отметим, что кроме space-filling curves cуществуют и другие схожие кривые, например, area-filling curves \cite{Nasso2022}. Однако широкое практическое применение получили именно Peano-Hilbert curves в силу относительной простоты построения и наличия ряда полезных свойств, основные из которых будут отмечены в Section \ref{Peano} и Section \ref{MPeano}.
+Отметим тажке, что кроме space-filling curves cуществуют и другие схожие кривые, например, area-filling curves \cite{Nasso2022}. Однако широкое практическое применение получили именно Peano-Hilbert curves в силу относительной простоты построения и наличия ряда полезных свойств, основные из которых будут отмечены в Section \ref{Peano} и Section \ref{MPeano}.
 
 
 An algorithm based on data curves can offer some advantages over tree-based algorithms by reducing the search time. Neighbour detection for test objects includes two phases: building and initialising the data structures (build step) and performing a search or query (query step). In most cases, the build phase occurs only once, while queries are repeated many times and can significantly affect the overall speed of the classification algorithm. 
@@ -252,6 +252,10 @@ x^1(\omega^1) \leq x^2(\omega^2) \leq ... \leq x^S(\omega^S).
 Since the corresponding object preimages $x_i \in [0,1]$ are ordered, the closest object can be found using a fast binary search algorithm.
 
 When $K$ neighbours need to be found, this search procedure can be repeated $K$ times. In this case it is necessary to exclude previously found items from the search. This can be done by excluding $x_i$ from the set being searched or by comparing the found $x_i$ with the previously found ones to find a match. For example, one possible implementation of searching for $K$ nearest neighbours could be as follows: in relation to $x^*$, we look for the nearest values to the left and right on the one-dimensional scale, choose the minimum one and continue searching sideways until exactly $K$ neighbours are found.
+
+%Штанюк
+Отметим, что метод, основанный на использовании space-filling curves, может применяться не только при работа с числовыми, но и при работе с категориальными features. Значения категориальных признаков являются дискретными, поэтому для применения данного подхода требуется сопоставить каждому дискретному значению численную величину, например, из интервала [0,1]. Конкретный способ сопоставления численных значений категориальным переменным приведен в Section \ref{RealData} (в  CarEvaluation dataset).
+%Расположение точек на отрезке [0,1] целесообразно на максимальном расстоянии друг от друга, в этом случае плотность заполняющих пространство кривых может быть уменьшена при сохранении точности обнаружения соседей.
 
 One obvious drawback of using the Peano curve in the kNN method is the loss of much of the information about the proximity of objects in multidimensional space when constructing their preimages on the one-dimensional scale. 
 
@@ -348,14 +352,6 @@ As an illustration, Figure~\ref{fig2} shows a family of space-filling curves in 
 \begin{paracol}{2}
 \linenumbers
 \switchcolumn
-
-
-%Штанюк
-Метод, основанный на пространственных кривых, может применятся при работе с категориальными переменными. Как известно, категориальные элементы образуют множество дискретных значений. Необходимо сопоставить каждому такому значению отображение на числовой отрезок, в нашем случае на [0,1]. Расположение точек-отображений целесообразно на максимальном расстоянии друг от друга, в этом случае плотность заполняющих пространство кривых может быть уменьшена при сохранении точности обнаружения соседей.
-
-Для иллюстрации этого подхода был взят CarEvaluation dataset(Section \ref{RealData}), который включет в себя несколько категориальных атрибутов. Эти атрибуты носят названия buying, maint, doors, persons, lug_boot, safety, каждому из которых соответствуют 3-4 значения \cite{ds-2}. 
-
-Отображение на числовой отрезок может быть сделано с помощью равномерной сетки. Отрезок делится на фиксированное количество равных частей, равное числу значений признаков (например 3 или 4, как в примере с CarEvaluation dataset). Далее, каждому значению переменной выбирается значение либо в середине соответствующей части отрезка, либо на одном из его концов. Если необходимо, то проводится округление значения до ближайшего разряда.
 
 %Баркалов
 Как было сказано выше, вместо теоретической Hilbert curve $y(x)$ на практике используется evolvent $y^c(x)$, которая является приближением к $y(x)$ с точностью порядка $2^{-(M+1)}$, определяемой соотношением (\ref{prec}). При этом параметр $M$ может выбираться для каждой решаемой задачи индивидуально, исходя из точности представления исходных данных.
@@ -554,6 +550,13 @@ The number of objects of the first class is about $17\;000$, the number of objec
 The results of performance comparison of the methods on real-world data are qualitatively similar to those obtained by comparison on test data. The kNN-ME method (implementation A) is 1.5 times faster than implementation B, and both implementations are at least 5 times faster than the kNN-KD method. Therefore, we will work with the kNN-ME(A) when investigating classification accuracy.
 
 The performance of kNN-ME and kNN-KD methods was also tested using a real-world dataset \cite{ds-2}. There are 4 classes of objects in this dataset of dimension $N = 6$. One particular feature of the dataset is the fact that the number of objects belonging to each of the 4 classes differs widely (Table \ref{tab:t2}).
+
+%Баркалов
+Также отметим, что данный dataset включет в себя несколько категориальных атрибутов, каждому из которых соответствуют 3-4 различных значения.
+В этом случае требуется выполнить сопоставление дискретным значениями численных характеристик.
+В качетсве численных значений при приведении эксперимента были выбраны внутренние узлы равномерной сетки, покрывающей отрезок [0,1]. 
+Число узлов сетки выбиралось равным числу значений признаков (3 или 4, соответствевнно). Далее, i-му значению категориального признака ставилось в соответствие значение в i-м узле сетки. 
+
 
 \begin{specialtable}[H] 
   \caption{Classes in the CarEvaluation set}\label{tab:t2}
