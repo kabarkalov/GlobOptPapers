@@ -49,7 +49,7 @@ The paper considers a new approach to solving multicriterial optimization proble
 \section{Introduction}
 Machine learning (ML) methods are powerful tools that are applied in many areas of research.
 In particular, the ML methods are successfully used for solving complicated problems of computational mathematics. One of such problem classes to which ML can be applied is the class of multicriterial optimization (MCO) models. 
-In this case, ML is used, as a rule, in combination with metaheuristic algorithms \cite{Subraveti2019} that in the case of multiextremal criteria lose in efficiency to deterministic methods \cite{Kvasov2018,Sergeyev2018}.
+In this case, ML is used, as a rule, in combination with metaheuristic algorithms \cite{Ma2014,Subraveti2019,Talbi2015} that in the case of multiextremal criteria lose in efficiency in comparison with deterministic methods \cite{Kvasov2018,Sergeyev2018}.
 
 Among the most qualitative deterministic methods for solving these problems the information-statistical global search algorithm \cite{Sergeyev2013,Strongin2000} can be considered. This method proposed initially for solving scalar problems was successfully extended to MCO models \cite{GergelKozinovAPI2016,Gergel2018}.
 
@@ -70,12 +70,12 @@ where $f_i (y)$, $1 \leq i \leq s$, are  criteria, $y=(y_1,y_2, \dots,y_N)$ is a
 \end{equation}
 where $L_i>0$, $1 \leq i \leq s$, are a priori unknown Lipschitz constants.
 
-Any effective (Pareto-optimal) variant  in which it is impossible to reduce the values of all criteria $f_i (y)$, $1 \leq i \leq s$, at once by choosing another option   can be considered as a partial solution to the MCO problem. In practice, various scalarization techniques are often used to find effective solutions \cite{Ehrgott2005,GergelKozinov2020,Marler2004,Pardalos2017}. The present study uses the minimax convolution of partial criteria that possesses good theoretical properties
+Any effective (Pareto-optimal) variant  in which it is impossible to reduce the values of all criteria $f_i (y)$, $1 \leq i \leq s$, at once by choosing another option   can be considered as a partial solution to the MCO problem. In practice, various scalarization techniques are often used to find effective solutions \cite{Ehrgott2005,GergelKozinov2020,Marler2004,Pardalos2017}. The present study uses the minimax convolution of partial criteria that possesses good theoretical properties and allows one to find effective points by solving the problem 
 \begin{equation}
-\min{f(y)} \to \min_{y\in D}{\max_{1 \leq i \leq s}{(f_i (y) \lambda_i )}} ,
+\max_{1 \leq i \leq s}{ \left\{ \lambda_i f_i (y) \right\} } \rightarrow \min, \; y \in D ,
 \label{eq:4}
 \end{equation}
-where $\lambda_i \geq 0$, $1 \leq i \leq s$, $\sum_{i=1}^s{\lambda_i}=1$, are numerical indicators of the significance of each criterion. 
+where $\lambda_i \geq 0$, $1 \leq i \leq s$, $\sum_{i=1}^s{\lambda_i}=1$, are numerical indicators (weights) of the significance of each criterion. 
 
 In general case, the entire set of Pareto-optimal variants is taken as a complete solution to the MCO problem. For the numerical building of an approximation of the Pareto set a number of scalar optimization problems (\ref{eq:4}) are solved with different coefficients $\lambda_i \geq 0$, $1 \leq i \leq s$, distributed uniformly.
 %in the space of ones.
@@ -83,7 +83,7 @@ In general case, the entire set of Pareto-optimal variants is taken as a complet
 
 \section{General computational scheme}
 
-In the framework of the proposed approach the information-statistical theory of global search is used for solving the scalar optimization problems (\ref{eq:4}). For problems with several variables ($N>1$) the dimensionality reduction on the base of Peano-type mappings \cite{Sergeyev2013,Strongin2000}. While solving a problem (\ref{eq:4}) the algorithm generates a sequence of trials where the term ``trial'' means evaluation of criteria at a point of the feasible domain $D$ and computation of the convolution (\ref{eq:4}) at this point. 
+In the framework of the proposed approach the information-statistical theory of global search is used for solving the scalar optimization problems (\ref{eq:4}). For problems with several variables ($N>1$) the dimensionality reduction on the base of Peano-type mappings \cite{Sergeyev2013,Strongin2000} is applied. While solving a problem (\ref{eq:4}) the algorithm generates a sequence of trials where the term ``trial'' means evaluation of criteria at a point of the feasible domain $D$ and computation of the convolution (\ref{eq:4}) at this point. 
 
 Coordinates of a new trial are chosen according to the following rules: 
 
@@ -92,7 +92,7 @@ Coordinates of a new trial are chosen according to the following rules:
   \item Partition the segment $[0,1]$ into subintervals according to the images of trials performed.
   \item For each subinterval compute a numerical value called \textit{characteristic} of this subinterval.
   \item Select the subinterval with the highest characteristic.
-  \item Place the point of new trial within the subinterval with the highest characteristic. 
+  \item Place a point of new trial within the subinterval with the highest characteristic. 
   \item Map the new trial point to the point $y \in D$ using Peano evolvent and compute the value of the function (\ref{eq:4}) at this point. 
 \end{enumerate}
 
@@ -104,7 +104,7 @@ Two techniques are used to improve the search efficiency of the Pareto area asse
 
 The first one is to jointly solve a series of global search problems from (\ref{eq:4}). The essence of the technique consists in the accumulation of search information during the optimization process and in reusing afterwards this information while solving a problem (\ref{eq:4}) with new weight coefficients $\lambda$. A detailed description of the technique can be found in \cite{GergelKozinovAPI2016,Gergel2018}.
 
-The second improvement is connected with a new method for calculating the characteristics of subintervals formed during univariate optimization on the internal $[0,1]$.
+The second improvement is connected with a new method for calculating the characteristics of subintervals formed during univariate optimization on the interval $[0,1]$.
 
 Let $R(i)$ be the characteristic of the $i$-th subinterval. This characteristic is supposed to consist of two parts:
 \begin{equation}
@@ -137,7 +137,7 @@ Hereinafter the algorithm taking into account distances to separating hyperplane
 
 \section{Results of computational experiments}
 
-Computational testing was carried out on the``Lobachevsky'' supercomputer of Nizhny Novgorod State University in the environment of the Globalizer software system \cite{globalizerSystem}. 
+Computational testing was carried out on the ``Lobachevsky'' supercomputer of Nizhny Novgorod State University in the environment of the Globalizer software system \cite{globalizerSystem}. 
 
 The first series of experiments was performed to compare the algorithm ML\_MGSA with a number of widely known multiobjective optimization algorithms using a test two-criterion problem \cite{Evtushenko2014}
 
@@ -167,7 +167,7 @@ DU index (the less the better) & 1.277 & 1.116 & 0.210 & 0.175 & 0.101          
 \end{table}
 
 
-In the second group of experiments 100 bi-criteria MCO problems have been solved. As the criteria the multiextremal functions
+In the second group of experiments 100 bi-criteria MCO problems have been solved. As the criteria, the multiextremal functions
 
 \begin{equation}
 \begin{matrix}
@@ -181,7 +181,7 @@ $0 \leq y_1,y_2 \leq 1$, have been taken where parameters $-1 \leq A_{ij},B_{ij}
 
 In order to estimate efficiency of machine learning procedure in ML\_MGSA, this method tested in 2 variants: with ($\alpha>0$) and without ($\alpha=0$)
 use of separating planes in the criteria space. 
-Each multicriterial problem was reduced to 50 scalar problems (\ref{eq:4}) with different weight coefficients $\lambda$, distributed uniformly. Other algorithm's parameters were the same. The averaged results can be found in Table \ref{tab:2} and fig. \ref{fig:2}.
+Each multicriterial problem was reduced to 50 scalar problems (\ref{eq:4}) with different weight coefficients $\lambda$, distributed uniformly. Other parameters of the algorithm were the same. The averaged results can be found in Table~\ref{tab:2}. Fig.~\ref{fig:2} additionally shows the average value of HV index depending on the number of trials.
 
 \begin{table}
 \caption{Efficiency of the multicriterial algorithms compared}
@@ -198,12 +198,11 @@ Reducing the number of iterations & 1                & 2.9     \\  \hline
 
 \begin{figure}[ht]
 \center
-
 \includegraphics[width=0.8\textwidth]{fig2.png}
 \caption{Efficiency of the multicriterial algorithms compared} \label{fig:2}
 \end{figure}
 
-As shown in the table, embedding the machine learning into the global search algorithm results in a significant reduction of the number of trials (almost 3 times) with maintaining close values of indicators HV and DU. The fig. \ref{fig:2} additionally shows the average value of HV index change depending of the number of trials.
+The results show that embedding the machine learning into the global search algorithm leads to a significant reduction of the number of trials (almost 3 times) with maintaining close values of indicators HV and DU.
 
 %
 % ---- Bibliography ----
