@@ -37,13 +37,12 @@
 %---------
 % The option pdftex is for use with pdfLaTeX. If eps figures are used, remove the option pdftex and use LaTeX and dvi2pdf.
 
-%%%% ДЛЯ РУССКОГО ТЕКСТА закомментировать потом!
+%%% ДЛЯ РУССКОГО ТЕКСТА закомментировать потом!
 %\usepackage{inputenc}
 %\usepackage[T2A,T1]{fontenc}
 %\usepackage[english,russian]{babel}
 %\usepackage{cmap}
-%%%%
-
+%%%
 
 %=================================================================
 % MDPI internal commands
@@ -180,6 +179,10 @@ For kd-tree, the main drawback is that it slows down when the number of objects 
 
 As it was mentioned, the computational cost of searching for nearest objects increases with increasing dimensionality, both in the case of exhaustive search for all distances and when using tree structures. One mechanism for speeding up the search is dimensionality reduction, by reducing the problem of searching in a multidimensional space to the search in a one-dimensional space (over an interval). This is possible through the use of space-filling curves (Peano-Hilbert curves) that fill the multidimensional space. Such curves are used, for example, in global optimization \cite{Lera2015,Lera2018,Strongin2018,Gergel2021}, in numerical approximation of solutions to systems of nonlinear inequalities \cite{Lera2021}, in image processing \cite{Liang2008,Costa2012,Herrero2015}, etc.
 
+%Баркалов
+\textcolor[rgb]{1,0,0}{We should also note that in addition to space-filling curves, there are other similar curves, such as area-filling curves \cite{Nasso2022}. However, it is the Peano-Hilbert curves that are commonly used due to the relative simplicity of their construction and a number of useful properties, of which the key ones will be discussed in Section \ref{Peano} and Section \ref{MPeano}.}
+
+
 An algorithm based on data curves can offer some advantages over tree-based algorithms by reducing the search time. Neighbour detection for test objects includes two phases: building and initialising the data structures (build step) and performing a search or query (query step). In most cases, the build phase occurs only once, while queries are repeated many times and can significantly affect the overall speed of the classification algorithm. 
 
 Note that in practical classification tasks, different features can have different scales, which can significantly distort the real distance between objects. Therefore it will be assumed that prior to applying kNN data scaling has been performed 
@@ -198,7 +201,6 @@ The $1/2$ hypercube offset  has been made for the convenience of further labelli
 
 Let us briefly describe a general scheme for constructing a space-filling curve. We will consider here Hilbert's scheme for constructing such a curve.
 
-
 1. Divide hypercube $D$ form (\ref{D}) with edge length of $1$ by coordinate hyperplanes into $2^N$ hypercubes of the first partition (with edge length of $1/2$).
 
 Then divide every hypercube of the first partition into $2^N$  hypercubes of the second partition (with edge length of $1/4$) by hyperplanes parallel to coordinate hyperplanes and passing through midpoints of hypercube edges orthogonal to them.
@@ -216,11 +218,13 @@ Condition 2. Two subintervals $d(M,v^\prime)$ and $d(M,v^{\prime\prime})$ share 
 Condition 3.  If $x \in d(M,v)$ then $y(x) \in D(M,v), M \geq 1$.  
 
 Note that the centre  $y^c(x)$ of the $M$-th partition subcube containing point $y(x)$ can be regarded as an approximation to $y(x)$ with the accuracy of $\varepsilon = 2^{-(M+1)}$, i.e.
-\begin{equation}
+\begin{equation}\label{prec}
 \max_{1 \leq j \leq N} \left| y_j^c(x)-y_j(x) \right| \leq \varepsilon = 2^{-(M+1)}.
 \end{equation} 
 
-The function $y^c(x)$ maps a uniform grid with step $2^{-NM}$, constructed in the interval $[0,1]$, onto a uniform grid with step $2^{-M}$, constructed in the hypercube $D$. A constructive way of establishing such a correspondence is described and theoretically justified in \cite{Strongin2000, Sergeyev2013}.
+The function $y^c(x)$ maps a uniform grid with step $2^{-NM}$, constructed in the interval $[0,1]$, onto a uniform grid with step $2^{-M}$, constructed in the hypercube $D$. A constructive way of establishing such a correspondence is described and theoretically justified in \cite{Strongin2000, Sergeyev2013}. 
+%Баркалов
+\textcolor[rgb]{1,0,0}{The algorithmic complexity of computing the value of the function $y^c(x)$ depends on the dimensionality $N$, on the partitioning level $M$ and is $O(M\cdot N)$.}
 
 Using the Peano-Hilbert curve, one can propose the following scheme for implementing the kNN algorithm.
 
@@ -249,6 +253,11 @@ Since the corresponding object preimages $x_i \in [0,1]$ are ordered, the closes
 
 When $K$ neighbours need to be found, this search procedure can be repeated $K$ times. In this case it is necessary to exclude previously found items from the search. This can be done by excluding $x_i$ from the set being searched or by comparing the found $x_i$ with the previously found ones to find a match. For example, one possible implementation of searching for $K$ nearest neighbours could be as follows: in relation to $x^*$, we look for the nearest values to the left and right on the one-dimensional scale, choose the minimum one and continue searching sideways until exactly $K$ neighbours are found.
 
+%Штанюк
+\textcolor[rgb]{1,0,0}{Note that the method based on space-filling curves can be applied not only to numerical features but also to categorical features. The values of categorical features are discrete, so this approach requires a numerical value, e.g. from the interval [0,1], to be assigned to each discrete value.
+A specific method of assigning numerical values to categorical variables is described in Section \ref{RealData} for CarEvaluation dataset.
+}%Расположение точек на отрезке [0,1] целесообразно на максимальном расстоянии друг от друга, в этом случае плотность заполняющих пространство кривых может быть уменьшена при сохранении точности обнаружения соседей.
+
 One obvious drawback of using the Peano curve in the kNN method is the loss of much of the information about the proximity of objects in multidimensional space when constructing their preimages on the one-dimensional scale. 
 
 Indeed, the point $x \in [0,1]$ on the one-dimensional scale has only left and right neighbours, whereas its corresponding object $y(x) \in R^N$ can have neighbours along $N$ coordinate directions. As a result, when using Peano curve type mappings, close objects $y^\prime$, $y^{\prime\prime}$ in the $N$-dimensional space can have their quite distant corresponding preimages $x^\prime$, $x^{\prime\prime}$ on the interval $[0,1]$. In Figure~\ref{fig:Peano} the green dots show two objects that are close in the two-dimensional space, while their preimages on the one-dimensional scale are far away from each other. The blue dots correspond to two objects, the distance between which is retained when changing to the one-dimensional scale.
@@ -266,7 +275,7 @@ This property makes dimensionality reduction using a single Peano curve practica
 \section{Constructing a family of Peano curves}\label{MPeano}
 
 Consider a family of Peano curves
-\begin{equation}
+\begin{equation}\label{EvSet}
 Y_L(x)=\{ y^0(x), y^1(x), ..., y^L(x) \}
 \end{equation} 
 instead of a single curve $y(x)$. We will construct the family of curves as follows. Let us introduce a family of hypercubes
@@ -312,13 +321,15 @@ i.e. $g_0(y) \leq 0$, if $y \in D$, and $g_0(y) > 0$ if otherwise. Hence, any po
 \[
 y = y^l(x^l), \; x^l \in [0, 1], \; 0 \leq l \leq L.
 \] 
+%Баркалов
+\textcolor[rgb]{1,0,0}{The algorithmic complexity of computing all preimages $x^l \in [0, 1], \; 0 \leq l \leq L,$ depends on the dimensionality $N$, on the partitioning level $M$, on the number of mappings $L$ and is $O(M\cdot N \cdot L)$.}
 
 By using multiple mappings $y^l(x), \; 0 \leq l \leq L$, the following relationship between neighbourhoods on one-dimensional scales and neighbourhoods in the original multidimensional domain is defined.
 
 \textbf{Theorem 1.} Let $y^*$ be an arbitrary point from the domain $D$ belonging to the interval with endpoints $y^\prime, y^{\prime\prime} \in D$, which differ in the values of the only coordinate, and let
-\[
+\begin{equation}\label{y_prime}
 |y_j^\prime - y^{\prime\prime}_j| \leq 2^{-p}, \; y^\prime_i = y^{\prime\prime}_i = y_i^*, \; 1 \leq i \leq N, i \ne j,
-\] 
+\end{equation} 
 where $p$ is an integer, $1 \leq p \leq L-1$, and $j$ is the number of coordinate whose values for points $y^*, y^\prime, y^{\prime\prime}$ are different. Then there exists at least one correspondence $y^l(x), 0 \leq l \leq L$, and preimages $x^*, x^\prime, x^{\prime\prime} \in [0, 1]$ such that
 \[
  y^* = y^l(x^*), y^\prime = y^l(x^\prime), y^{\prime\prime} = y^l(x^{\prime\prime}), \\
@@ -342,6 +353,15 @@ As an illustration, Figure~\ref{fig2} shows a family of space-filling curves in 
 \begin{paracol}{2}
 \linenumbers
 \switchcolumn
+
+%Баркалов
+\textcolor[rgb]{1,0,0}{As it was mentioned above, instead of the theoretical Hilbert curve $y(x)$, the evolvent $y^c(x)$, which is an approximation to $y(x)$ with an accuracy of the order $2^{-(M+1)}$, determined by the relation  (\ref{prec}), is used in practice. In this case, the parameter $M$ can be chosen individually for each problem to be solved, based on the accuracy of the input data representation.}
+
+\textcolor[rgb]{1,0,0}{For example, the data in the DS-Skin dataset (Section \ref{RealData}) are pixel coordinates of an image with a resolution of 256 by 256. When mapping data to the standard hypercube $D$ from (\ref{D}), the coordinate distance between two points cannot be less than $1/256$. In this case, using the parameter $M=10$ to construct the evolvent will be sufficient.
+If we assign numerical values to a small number of categorical features (as was done for the CarEvaluation dataset, see Section \ref{RealData}), the  coordinate distance between the features will be large, so the value of $M$ can be reduced (in our experiments, we used $M=7$).}
+
+\textcolor[rgb]{1,0,0}{The maximum number of simultaneous mappings in the set $Y_L(x)$ from (\ref{EvSet}) will also be determined by the accuracy of the input data, which affects the accuracy of constructing the evolvents $y^i(x)$.
+Let us assume that each of the mappings  $y^i(x)$ is constructed using the same value of $M$. Then the value of $L$ must satisfy the inequality $L < M$. Otherwise the points $y' = y^l(x'),\; y''=y^l(x'')$ from condition (\ref{y_prime}) will correspond to the centre of the same subcube with $p \geq M$, i.e. the equality  $y' = y''$ will be fulfilled, leading to violation of the conditions of Theorem 1.} 
 
 \section{Implementation features of the kNN method using multiple space-filling curves}\label{knnme}
 
@@ -382,7 +402,10 @@ Here is a more detailed description of these algorithms.
 \\[12pt]
 \textit{Data preparation}
 \\[12pt]
-To run Algorithms A and B, we need to compute the preimages $\{x_i^0, x_i^1, ..., x_i^L\}$ on one-dimensional scales for all objects $\omega_i$, and order them in ascending order. It is convenient to use RB-tree-based data structures to store ordered one-dimensional values. The number of instances of tree structures is equal to the number of scales.
+To run Algorithms A and B, we need to compute the preimages $\{x_i^0, x_i^1, ..., x_i^L\}$ on one-dimensional scales for all objects $\omega_i$, and order them in ascending order. It is convenient to use RB-tree-based data structures to store ordered one-dimensional values,
+%Сысоев
+\textcolor[rgb]{1,0,0}{where the algorithmic complexity of the search operation has the estimate $O(log(n))$. We used the container set from the standard C++ library as an implementation of the RB-tree.}
+The number of instances of tree structures is equal to the number of scales.
 
 The input data for kNN are the values of object features imported into the program from external files. A text label indicating the class to which the object belongs is read with each such object.
 
@@ -429,6 +452,13 @@ The study was performed using several datasets, both randomly generated for test
 
 \item
 \textbf{DS-CarEvaluation} -- a dataset of dimension 6, representing data from a car valuation model based on the values of 6 features \cite{ds-2}.
+
+%Штанюк
+\item
+\textcolor[rgb]{1,0,0}{\textbf{DS-WISDM} -- a dataset of dimension 3, representing accelerometer and gyroscope time-series sensor data collected from a smartphone and a smartwatch \cite{ds-3}.}
+
+
+
 \end{enumerate}
 
 Two kinds of studies were carried out:
@@ -437,7 +467,7 @@ Two kinds of studies were carried out:
 \item The accuracy of recognition of test objects was studied, based on the analysis as to whether their neighbours belong to certain classes.
 \end{itemize}
 
-We employed in our experiments the kNN-KD method from the scikit-learn library; this method was used with default settings. For our kNN-ME method, we used the evolvent density $m=12$, the number of evolvents simultaneously used was $L=10$ for datasets 1 -- 3 and $L=7$ for the last dataset.
+We employed in our experiments the kNN-KD method from the scikit-learn library; this method was used with default settings. For our kNN-ME method, we used the evolvent density $m=12$, the number of evolvents simultaneously used was $L=10$ for datasets 1 -- 3, $L=7$ for the dataset 4 and $L=8$ for the dataset 5.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\subsection{Test infrastructure}
@@ -502,8 +532,19 @@ All the methods considered show a small variation in running time when switching
 
 On the whole, the experimental results show that the kNN-ME method based on search without removal (procedure A) works on average 2 times faster than the method that involves removal of elements found (procedure B). In fact, both variants of the kNN-ME method are 5-7 times faster (depending on the dataset) than the kNN-KD method.
 
+%Сысоев
+\textcolor[rgb]{1,0,0}{The following experiment was conducted to determine the dependence of the search time for $K = 50$ neighbours with increasing number of samples for the chosen dimensionality $N = 4$. The number of samples was varied from 200 thousand to 1 million. The results presented in Figure~\ref{figN} show that the difference between procedure A and procedure B remains approximately the same, and the gain of procedure A over the kNN-KD method is about 10 times.}
+
+%Штанюк
+\begin{figure}
+\widefigure
+\includegraphics[width=0.5\linewidth]{figN.pdf}
+\caption{Running times of the algorithms with $N = 4$, $K = 50$\label{figN}}
+\end{figure}  
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Investigation of neighbour search times on real-world data}
+\subsection{Investigation of neighbour search times on real-world data}\label{RealData}
 
 Let us consider the DS-Skin set taken from the collection \cite{ds-1}. The objects in the set belong to two classes: the first class represents points in RGB colour space that belong to human skin images; the second class represents colour coordinates that do not belong to such images.
 
@@ -518,6 +559,13 @@ The number of objects of the first class is about $17\;000$, the number of objec
 The results of performance comparison of the methods on real-world data are qualitatively similar to those obtained by comparison on test data. The kNN-ME method (implementation A) is 1.5 times faster than implementation B, and both implementations are at least 5 times faster than the kNN-KD method. Therefore, we will work with the kNN-ME(A) when investigating classification accuracy.
 
 The performance of kNN-ME and kNN-KD methods was also tested using a real-world dataset \cite{ds-2}. There are 4 classes of objects in this dataset of dimension $N = 6$. One particular feature of the dataset is the fact that the number of objects belonging to each of the 4 classes differs widely (Table \ref{tab:t2}).
+
+%Баркалов
+\textcolor[rgb]{1,0,0}{Also note that this dataset will include several categorical attributes, each corresponding to 3-4 different values.
+In this case, it is necessary to assign numerical characteristics to discrete values.
+The numerical values used in the experiment were the internal nodes of a uniform grid covering the interval $[0,1]$. 
+The number of grid nodes was chosen to be equal to the number of feature values (3 or 4, respectively). Then, the $i$-th value of the categorical feature was assigned to the $i$-th node of the grid.}
+
 
 \begin{specialtable}[H] 
   \caption{Classes in the CarEvaluation set}\label{tab:t2}
@@ -538,9 +586,26 @@ The time required to find $K$ nearest neighbours on the CarEvoluation dataset is
 \begin{figure}
 \widefigure
 \includegraphics[width=0.5\linewidth]{fig6a.pdf}
-\caption{Comparison of neighbour search times for the CarEvoluation dataset\label{fig6a}}
+\caption{Comparison of neighbour search times for the CarEvaluation dataset\label{fig6a}}
 \end{figure}
 The results of the comparison on this dataset also demonstrate that the kNN-ME method is faster compared to the kNN-KD method.
+
+%Штанюк
+\textcolor[rgb]{1,0,0}{It is of interest to study the dependence of the nearest-neighbour search time on the number of such neighbours in the case of a large number of objects.  For this study, we chose the DS-WISDM dataset \cite{ds-3}. The raw accelerometer and gyroscope sensor data is collected from the smartphone and smartwatch at a rate of 20Hz. It is collected from 51 test subjects as they perform 18 activities for 3 minutes apiece. The raw accelerometer and gyroscope sensor data is collected from a smartphone and a smartwatch at a rate of 20Hz. It is collected from 51 test subjects as they perform 18 activities for 3 minutes apiece. Traditional use of this dataset involves raw data processing, which includes splitting the data into blocks of fixed size and calculating statistical characteristics for each block. Subsequently, each block is treated as an independent object with a set of inherent characteristics determining the subject's activity during a given time interval.  After such processing, the number of blocks will be substantially smaller than the original number of objects.} 
+
+\textcolor[rgb]{1,0,0}{In our study, in order to keep a large number of objects in the dataset, we did not use this traditional approach and worked with raw data. Only spatial coordinates, with no time reference, were used to determine the nearest neighbours. Before conducting the computational experiment, we removed the duplicates found in the original dataset. After that, about 7 million objects belonging to 18 classes remained in the resulting set.  Figure \ref{figW} shows the results of the nearest neighbour search in this dataset. Of our two neighbour finding procedures, kNN-ME(A) was retained as a more efficient one compared to kNN-ME(B); the number of evolvents $L = 8$ was used in this case. Similar to previous experiments, the results show that when the number of neighbours $K$ is less than $100$, the kNN-ME(A) procedure is also faster compared to the kNN-KD method.}
+
+
+%Штанюк
+\begin{figure}
+\widefigure
+\includegraphics[width=0.5\linewidth]{figW.pdf}
+\caption{Running times of the algorithms with $N = 3$, 7 million objects\label{figW}}
+\end{figure}  
+
+%Сысоев
+\textcolor[rgb]{1,0,0}{The experimental results presented above show that even with the number of objects in millions the running times of the algorithms considered in the paper remain small (within milliseconds). Therefore, the issues of parallelizing and implementing multi-threaded versions of the developed algorithms have not been considered in this paper.}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Investigation of classification accuracy}
