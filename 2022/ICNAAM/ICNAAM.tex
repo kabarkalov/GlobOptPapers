@@ -16,7 +16,7 @@
 \begin{document}
 
 % Title portion
-\title{Using Machine Learning for Subdivision of Parameters in Global Optimization Problems of Large Dimensionality}
+\title{Using Machine Learning for Separation of Parameters in Global Optimization Problems of Large Dimensionality}
 
 \author[aff1]{Konstantin Barkalov\corref{cor1}}
 \author[aff1]{Marina Usova}
@@ -37,9 +37,9 @@ The proposed approach has demonstrated its efficiency in solving several series 
 % Head 1
 \section{INTRODUCTION}
 
-At present, the global optimization methods are applied to solving various problems arising in various fields of science and technology. 
+At present, the global optimization methods are applied to solving various problems arising in various fields of science and technology \cite{Pinter2006}. 
 For example, the evaluation of the model parameters from the experimental data is a traditional field of application of the global optimization methods.
-Among these ones, there are, for example, the problems of chemical kinetics \cite{Gubaydullin2021}.
+Among these ones, there are the problems of chemical kinetics \cite{Gubaydullin2021}.
 In the problems of this kind, it is necessary to perform a search for the values of unknown model parameters, at which the modeling results are the closest to 
 the ones obtained experimentally.
 
@@ -57,7 +57,7 @@ To solve these ones, one can apply the local optimization methods having a fast 
 
 As a rule, one can't subdivide the parameters into the groups with different character of the objective function behavior in advance since the objective function in applied problems is usually defined as a black box. 
 So far, the development of the algorithm for the minimization of the essentially multiextremal functions taking into account different character of the dependence of the objective function on different groups of parameters is relevant. 
-In the present work, a special method for such a subdivision based on the analysis of the regression model of the function with respect to each variable separately has been proposed.
+In the present work, a special method for such a separation based on the analysis of the regression model of the function with respect to each variable separately has been proposed.
 To confirm the efficiency of the scheme proposed, a representative set of test problems has been solved.
 
 \section{OPTIMIZATION ALGORITHMS AND DIMENSIONALITY REDUCTION}
@@ -75,7 +75,7 @@ Let us assume the function $\varphi(y)$ to be a multiextremal one and to satisfy
 with the constant $L$ unknown {\em a priori}.
 At the same time, let us assume the dependence of the objective function on $N_1$ parameters to be multiextremal while the dependence on the rest $N_2 = N - N_1$ parameters is close to the linear or quadratic one.
 At the same time, the subdivision of the parameters is unknown. 
-In the present work, an approach to the subdivision of the problem parameters into the two specified groups is proposed.
+In the present work, an approach to the separation of the problem parameters into the two specified groups is proposed.
 The details of the method are described in the next section. 
 
 Taking into account such a specific feature of the problem can essentially reduce the computation costs of the search for the optimum. 
@@ -99,29 +99,29 @@ time-consuming operation.
 
 In the present study, we used the global search algorithm combined with the dimensionality reduction scheme based on Peano curves \cite{Sergeyev2013,Lera2021} to solve the global optimization problem (\ref{global_problem}). 
 This algorithm was demonstrated to be a powerful tool for solving complex multiextremal problems \cite{Kvasov2013,Kalyulin2017,Cavoretto2021}.
-To solve the local problem (\ref{local_problem}), we used Hooke-Jeevse pattern search method (see, e.g., \cite{Kelley}). 
+To solve the local problem (\ref{local_problem}), we used Hooke-Jeeves (pattern search) method (see, e.g., \cite{Kelley}). 
 Unlike the BFGS-type methods (see, e.g., \cite{Nocedal}), this algorithm doesn't require computing the gradient and works well under conditions of the 
 computing errors in the function values that is typical in solving the applied problems.
 
-\section{SUBDIVISION OF THE PROBLEMS PARAMETERS}
+\section{SEPARATION OF THE PROBLEMS PARAMETERS}
 
 To divide the problem parameters into the local and global ones, we propose the following sequence of operations.
 
 Step 1. Fix the reference point $\overline{y} = (\overline{y}_1, \overline{y}_2,...,\overline{y}_N)$ for the objective function $\varphi(y)$. The choice of the point is performed by one of the following methods:
 \begin{enumerate}
 \item the point is fixed according to the physical meaning of the applied problem being solved;
-\item use the solution found by the local method in $K$ iterations (in the present study, Hooke-Jeevse pattern search method was used) as the reference point.
-\item use the solution found by the global method in $K$ iterations (in the present study, the global search algorithm was used) as the reference point.
+\item use the solution found by the local method (e.g. Hooke-Jeeves method) in $K$ iterations as the reference point;
+\item use the solution found by the global method (e.g. global search algorithm) in $K$ iterations as the reference point.
 \end{enumerate}
 
-Step 2. For all components of $y_i, \; 1\leq i \leq N$, investigate the locality:
+Step 2. For all components $y_i, \; 1\leq i \leq N$, investigate the locality:
 \begin{enumerate}
-\item compute $P+1$ values of the objective function $\varphi(y)$ at the points $z_i^j = (\overline{y}_1,...,\overline{y}_{i-1},y_i^j,\overline{y}_{i+1},...,\overline{y}_N)$ where $y_i^j =  a_i + jh, \; h=(b_i-a_i)/P, \; 0\leq j \leq P$;
+\item compute $P+1$ values of the objective function $\varphi(y)$ at the points $z_i^j = (\overline{y}_1,...,\overline{y}_{i-1},y_i^j,\overline{y}_{i+1},...,\overline{y}_N)$, where \mbox{$y_i^j = a_i + jh$},  $h=(b_i-a_i)/P, \; 0\leq j \leq P$;
 \item form a set $Q$ comprising of $P+1$ pairs of the kind $\left\{y_i^j, \varphi(z_i^j)\right\} $ 
 \item construct a regression model of given power $deg$ based on the data from $Q$;
 \item compute the coefficient of determination $R^2$ and perform the classification of the $i^{\rm th}$ variable:
 \begin{itemize}
-\item if $R^2$ is greater than a predefined threshold $T$, then add the variable to the set of the local variables,
+\item if $R^2$ is greater than a predefined threshold $T$, then add the variable to the set of the local variables;
 \item else add the variable to the set of the global variables.
 \end{itemize}
 \end{enumerate}
@@ -132,7 +132,7 @@ The regression is based on the least squares method (LSM).
 The quality of the model constructed was evaluated at Step 2, Item 4 using the adjusted coefficient of determination $R^2_a$.
 This coefficient features the similarity of the regression model constructed to the objective function in the fixed section.
 The value of $R^2_a$, as a rule, falls between 0 and 1.
-A result close to 1 shows the accurasy of the model to be high.
+A result close to 1 shows the accuracy of the model to be high.
 
 The values of $K$, $deg$, and $T$ are the parameters of the method and are set by the researcher according to the properties of the problem being solved.
 The algorithm allows using the power of the regression polynomial $deg = 1$ or $deg = 2$ that allows constructing the model based on either linear or quadratic regression, respectively.
@@ -153,7 +153,7 @@ In the second set of problems (hereafter called Gr-LQ), the parameters $M_{ij}$ 
 
 In the third series of experiments (hereafter called GKLS-L), 4-dimensional functions from the GKLS class (see, for example, in \cite{Sergeyev2015,Grishagin2018}) were used as the multiextremal parts. As the local components, the local subproblems of the Gr-L series were used. The series included 20 problems.
 
-As a result of solving the Gr-L series with the preset precision of $0.01$ and the parameters of the method $K=100$, $deg=1$, and $T=0.6$, correct subdivision of he variables into the global and local ones were performed in all problems.
+As a result of solving the Gr-L series with the preset precision of $0.01$ and the parameters of the method $K=100$, $deg=1$, and $T=0.6$, correct separation of the variables into the global and local ones were performed in all problems.
 Then, all problems were solved successfully using the nested optimization scheme in appropriate time and number of iterations.
 However, the solving of the complicated series Gr-LQ with the use of the linear regression didn't give good results because of the presence of the parabolic-type variables, for which the percentages of similarity to the linear model were extremely low.
 In this connection, other parameters of the method $K=100$, $deg=2$ (the quadratic regression), and $T=0.95$ were selected to conduct the experiments.
