@@ -37,15 +37,15 @@ The proposed approach has demonstrated its efficiency in solving several series 
 % Head 1
 \section{INTRODUCTION}
 
-At present, the global optimization methods are applied to solving various problems arising in various fields of science and technology \cite{Pinter2006}. 
+At present, the global optimization methods are applied to solving various problems arising in various fields of science and technology (see \cite{Pinter2006}). 
 For example, the evaluation of the model parameters from the experimental data is a traditional field of application of the global optimization methods.
-Among these ones, there are the problems of chemical kinetics \cite{Gubaydullin2021}.
+Among these ones, there are the problems of chemical kinetics (see \cite{Gubaydullin2021}).
 In the problems of this kind, it is necessary to perform a search for the values of unknown model parameters, at which the modeling results are the closest to 
 the ones obtained experimentally.
 
 The number of parameters, which are to be evaluated in this way, can be tens and hundreds for the chemical kinetics problems.
 The use of the deterministic global optimization methods for solving the problems of such a dimensionality is very limited because of very large computation costs of covering the search domain by the trial points.
-This holds even in the case of using the efficient algorithms (for example, \cite{Paulavicius2011,Evtushenko2009,Jones2009}) constructing the essentially nonuniform coverages. 
+This holds even in the case of using the efficient algorithms (for example, \cite{Paulavicius2011,Evtushenko2009,Jones2009,Paulavicius2020,Sergeyev2021}) constructing the essentially nonuniform coverages. 
 
 Numerous inverse problems are featured by different dependencies on different groups of parameters. 
 For example, the dependence on one group of parameters may be close to the linear one whereas the dependence on another group of parameters may have a complex multiextremal character.
@@ -97,8 +97,8 @@ The efficiency of the local optimization methods allow solving the subproblems (
 Accordingly, we can consider the problem (\ref{global_problem}) as the global optimization one where the process of computing an objective function value to be a 
 time-consuming operation. 
 
-In the present study, we used the global search algorithm combined with the dimensionality reduction scheme based on Peano curves \cite{Sergeyev2013,Lera2021} to solve the global optimization problem (\ref{global_problem}). 
-This algorithm was demonstrated to be a powerful tool for solving complex multiextremal problems \cite{Kvasov2013,Kalyulin2017,Cavoretto2021}.
+In the present study, we used the global search algorithm combined with the dimensionality reduction scheme based on Peano curves \cite{Sergeyev2013,Lera2015,Lera2021} to solve the global optimization problem (\ref{global_problem}). 
+This algorithm was demonstrated to be a powerful tool for solving complex multiextremal problems (see \cite{Kvasov2013,Gillard2016,Kalyulin2017,Cavoretto2021}).
 To solve the local problem (\ref{local_problem}), we used Hooke-Jeeves (pattern search) method (see, e.g., \cite{Kelley}). 
 Unlike the BFGS-type methods (see, e.g., \cite{Nocedal}), this algorithm doesn't require computing the gradient and works well under conditions of the 
 computing errors in the function values that is typical in solving the applied problems.
@@ -108,18 +108,18 @@ computing errors in the function values that is typical in solving the applied p
 To divide the problem parameters into the local and global ones, we propose the following sequence of operations.
 
 Step 1. Fix the reference point $\overline{y} = (\overline{y}_1, \overline{y}_2,...,\overline{y}_N)$ for the objective function $\varphi(y)$. The choice of the point is performed by one of the following methods:
-\begin{enumerate}
+\begin{itemize}
 \item the point is fixed according to the physical meaning of the applied problem being solved;
 \item use the solution found by the local method (e.g. Hooke-Jeeves method) in $K$ iterations as the reference point;
 \item use the solution found by the global method (e.g. global search algorithm) in $K$ iterations as the reference point.
-\end{enumerate}
+\end{itemize}
 
 Step 2. For all components $y_i, \; 1\leq i \leq N$, investigate the locality:
 \begin{enumerate}
-\item compute $P+1$ values of the objective function $\varphi(y)$ at the points $z_i^j = (\overline{y}_1,...,\overline{y}_{i-1},y_i^j,\overline{y}_{i+1},...,\overline{y}_N)$, where \mbox{$y_i^j = a_i + jh$},  $h=(b_i-a_i)/P, \; 0\leq j \leq P$;
-\item form a set $Q$ comprising of $P+1$ pairs of the kind $\left\{y_i^j, \varphi(z_i^j)\right\} $ 
-\item construct a regression model of given power $deg$ based on the data from $Q$;
-\item compute the coefficient of determination $R^2$ and perform the classification of the $i^{\rm th}$ variable:
+\item[2.1] compute $P+1$ values of the objective function $\varphi(y)$ at the points $z_i^j = (\overline{y}_1,...,\overline{y}_{i-1},y_i^j,\overline{y}_{i+1},...,\overline{y}_N)$, where \mbox{$y_i^j = a_i + jh$},  $h=(b_i-a_i)/P, \; 0\leq j \leq P$;
+\item[2.2] form a set $Q$ comprising of $P+1$ pairs of the kind $\left\{y_i^j, \varphi(z_i^j)\right\} $ 
+\item[2.3] construct a regression model of given power $deg$ based on the data from $Q$;
+\item[2.4] compute the coefficient of determination $R^2$ and perform the classification of the $i^{\rm th}$ variable:
 \begin{itemize}
 \item if $R^2$ is greater than a predefined threshold $T$, then add the variable to the set of the local variables;
 \item else add the variable to the set of the global variables.
@@ -173,7 +173,7 @@ The computations were carried out using a computer with CPU Intel Core i7 10750H
 The scikit-learn package from Python 3.9 was used for the constructing and analysis of the regression model. 
 The global search algorithm and nested optimization scheme were implemented using C++.
 
-\begin{table}[ht]
+\begin{table}
 	\caption{Results of solving the series of test problems}
 	\label{tab1}
 		\begin{tabular}{ l c c c c c c } \hline
