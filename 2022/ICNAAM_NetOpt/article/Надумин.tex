@@ -1,0 +1,378 @@
+% !!!!!!!!!!!!!!!!!!   ВНИМАНИЕ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% Заголовки разделов формируются при помощи команд \section{}, \subsection{}, \subsubsection{}
+% Не используйте уровень вложенности заголовков больше трех!
+% -----------------------------
+% Для оформления теорем, лемм, следствий используйте окружения 
+% Def     - Определение
+% Teor    - Теорема
+% Lem     - Лемма
+% Predl   - Предложение
+% Ass     - Утверждение
+% Cor     - Следствие
+% Example - Пример
+% -----------------------------
+% Доказательство теоремы начинается командой \proof и завершается командой \endproof
+% -----------------------------
+% Литература помещается в окружение biblio.
+
+\documentclass[11pt, oneside, a4paper]{article}
+%\usepackage[cp1251]{inputenc} % кодировка
+\usepackage[utf8]{inputenc} % кодировка
+\usepackage[english, russian]{babel} % Русские и английские переносы
+\usepackage{graphicx}          % для включения графических изображений
+\usepackage{cite}              % для корректного оформления литературы
+\usepackage{enumitem}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{mathtext}
+\usepackage{array}
+\usepackage{hyperref}
+
+
+%стилевой пакет
+\usepackage{schoolseminar2022}
+
+
+\begin{document}
+% \udk     - универсальный десятичный классификатор
+% \msc     -
+% \title   - название статьи
+% \authors - список авторов
+
+\setcounter{page}{1}
+
+\udk{519.853.4, 004.032.26}
+
+\title{Использование аппроксимации нейронными сетями при решении задач глобальной оптимизации\footnote{Работа выполнена при поддержке Министерства науки и высшего образования РФ (проект \textnumero~0729-2020-0055) и научно-образовательного математического центра <<Математика технологий будущего>> (проект \textnumero~075-02-2021-1394).}}
+
+
+\authors{Карпенко С.Н., Лебедев И.Г., Надумин Д.В.}
+\organizations{ННГУ им. Н.И. Лобачевского\\
+Институт информационных технологий, математики и механики}
+
+
+
+\abstractru{
+В работе рассматривается задача поиска глобального минимума многоэкстремальной функции. Для решения этой задачи был выбран алгоритм имитации отжига. Для ускорения процесса поиска минимума используется аппроксимация целевой функции нейросетью. Представлены результаты работы комбинированного алгоритма глобальной оптимизации, объединяющего алгоритм имитации отжига, использующего нейронную сеть для аппроксимации функций и метод Нелдера-Мида для точного решения задачи оптимизации.  В данной работе проводились эксперименты с серией двумерных функций из генератора GKLS. Результаты показывают сокращение числа вычислений целевой функции при сохранении высокой точности поиска.
+}
+
+\keywords{методы отпимизации, глобальная оптимизация, нейронные сети, машинное обучение.}
+
+
+% \section{название} - заголовок раздела первого уровня
+% \subsection{название} - заголовок раздела второго уровня
+% \subsubsection{название} - заголовок раздела третьего уровня
+% Не используйте уровень вложенности заголовков больше трех!
+% Каждый абзац текста в статье начинается командой \par или пустой
+% строкой.
+
+\bigskip
+
+\section{Введение}
+
+Нейронная сеть представляет собой математическую модель, построенную по принципу организации и функционирования биологических нейронных сетей – сетей нервных клеток живого организма. Это понятие возникло при изучении процессов, протекающих в мозге, и при попытке смоделировать эти процессы. 
+
+С точки зрения математики, обучение нейронных сетей - это многопараметрическая задача нелинейной оптимизации. С точки зрения развития вычислительной техники и программирования, нейронная сеть - способ решения проблемы эффективного параллелизма.
+
+Нейронные сети применяются для решения многих прикладных задач. Наиболее известными сферами применений нейронных сетей являются: распознавание образов и классификация, прогнозирование, аппроксимация.
+Нейронные сети могут аппроксимировать непрерывные функции. С помощью линейных операций и каскадного соединения можно из произвольного нелинейного элемента получить устройство, вычисляющее любую непрерывную функцию с некоторой наперёд заданной точностью.
+
+История нейронных сетей намного длиннее, чем принято считать. Сама идея "способной к мышлению системы" возникла еще в Древней Греции, и популярность нейронных сетей менялась с течением времени. 
+
+В 1943 году Уоррен Маккалок и Уолтер Питтс опубликовали работу «Логическое исчисление идей, относящихся к нервной деятельности» \cite{fio_bib3}. Целью данного исследования было изучение работы человеческого мозга. В 1958 году, Фрэнк Розенблатт в своем исследовании «Персептрон: вероятностная модель хранения и организации информации в головном мозге» \cite{fio_bib4} описал модель персептрона. В 1974 году, первым ученым на территории США, описавшим в своей диссертации \cite{fio_bib5} использование алгоритма обратного распространения ошибки в нейронных сетях, стал Пол Вербос, хотя развитием этой идеи занимались многие исследователи. В 1989 году, Янн Лекун опубликовал статью \cite{fio_bib6}, в которой было описано практическое использование ограничений обратного распространения ошибки и интеграция в архитектуру нейронной сети для обучения алгоритмов. 
+
+\section{Постановка задачи глобальной оптимизации}
+Задача многомерной многоэкстремальной оптимизации может быть определена как проблема поиска наименьшего значения действительной функции $\phi(y)$
+
+\begin{equation*}   %%%%%%%%
+\phi(y^*) = min\{\phi(y):y\in D\},
+\end{equation*}
+\begin{equation}   %%%%%%%%
+D = \{y \in R^N : a_i \leq y_i \leq b_i,
+1 \leq i \leq N \},
+\end{equation}
+
+где $a,b \in R$ - заданные векторы.
+
+
+Численное решение задачи (1) к построению оценки $y_k^* \in D$, отвечающей некоторому понятию близости к точке $y^*$ (например, $\parallel y^*-y_k^* \parallel \leq \epsilon$, где $\epsilon>0$ - некоторая заданная точность) на основе конечного числа $k$ вычислений оптимизируемой функции. Относительно класса рассматриваемых задач предполагается выполнение двух важных условий:
+\begin{enumerate}
+\item Предполагается, что оптимизируемая функция $\phi(y)$ может быть задана не аналитически, в виде формулы, а алгоритмически, как результат работы некоторой подпрограммы или библиотеки.
+
+\item Будем предполагать, что $\phi(y)$ удовлетворяет условию Липшица
+\begin{equation}
+|\phi(y_1)-\phi(y_2)|\leq L\parallel y_1-y_2 \parallel
+,y_1,y_2 \in D, 0<L< \infty
+\end{equation}
+\end{enumerate}
+что соответствует ограниченности изменения значений функции при ограниченной вариации аргумента. Это предположение можно интерпретировать (применительно к прикладным задачам) как отражение ограниченности мощностей, порождающих изменения в моделируемой системе.
+
+Задачи многоэкстремальной оптимизации имеют существенно более высокую трудоемкость решения по сравнению с другими типами оптимизационных задач, т.к. глобальный оптимум является интегральной характеристикой решаемой задачи и требует исследования всей области поиска. Как результат, поиск глобального оптимума сводится к построению некоторого покрытия (сетки) в области параметров, и выборе наилучшего значения функции на данной сетке. Вычислительные затраты на решение задачи растут экспоненциально с ростом размерности \cite{fio_bib7}.
+
+
+\section{Методы локальной и глобальной оптмизиации}
+\subsection{Оптимизация методом имитации отжига}
+Алгоритм имитации отжига является общим алгоритмическим методом решения задачи глобальной оптимизации. 
+
+Алгоритм основывается на имитации физического процесса, который происходит при кристаллизации вещества, в том числе при отжиге металлов.
+
+При помощи моделирования такого процесса ищется такая точка или множество точек, на котором достигается минимум некоторой числовой функции $f(x^i),x^i=(x_1,...x_n)\in X$. Решение ищется последовательным вычислением точек пространства $X$\cite{fio_bib16}. 
+
+
+Введём следующие обозначения: $X$ - множество вссех состояний системы, $x_i$-состояние на $i$-ом шаге алгоритма; $t_i$-температура на $i$-ом шаге.
+
+
+Определим три функции:
+\begin{enumerate}
+\item Функция энергии(то, что оптимизируем):   $E:X\rightarrow R$
+\item Функция изменения температуры с течением времени:  
+$T:N\rightarrow R$
+\item Функция,порождающая новое состояние:  
+$F:X\rightarrow X$
+\end{enumerate}
+На входе минимальная $t_{min} $ и начальная $t_{max}$ температуры. Задаём произвольное первое состояние $x_1$ и $t_{min}=t_{max}$.
+
+Пока $t_i>t_{min}$:
+\begin{enumerate}
+\item $x_c=F(x_{i-1})$,
+\item $\triangle E=E(x_c)-E(x_{i-1})$,
+\item Если $\triangle E \leq 0$, то $x_i=x_c$. Если $\triangle E >0$, то переход осуществляется с вероятностью $P(\triangle E)=e^{- \triangle E /t_i}$,
+\item Понижаем температуру $t_{i+1}=T(i)$.
+\end{enumerate}
+Возвращаем последнее состояние $x$. 
+\subsection{Метод Нелдера-Мида}
+Метод Нелдера-Мида является методом безусловной оптимизации \cite{fio_bib19}функции нескольких  переменных $f(x^1,...,x^n )$, не использующий градиентов функции. Суть метода заключается в последовательном перемещении и деформировании симплекса вокруг точки экстремума. Метод находит локальный экстремум и может «застрять» в одном из них. Предполагается, что серьёзных ограничений на область определения функции нет, то есть функция определена во всех встречающихся точках.
+Параметрами метода являются:
+\begin{enumerate}
+\item Коэффициент отражения $\alpha$>0, обычно выбирается равным 1.
+\item Коэффициент сжатия $\beta$>0, обычно выбирается равным 0,5.
+\item Коэффициент растяжения $\gamma$>0, обычно выбирается равным 2.
+\end{enumerate}
+\subsection{Комбинированный алгоритм глобальной оптимизации}
+Нами разработан комбинированный алгоритм глобальной оптимизации, использующий нейронную сеть для аппроксимации функций, метод имитации отжига для поиска глобального оптимума и метод Нелдера-Мида для уточнения найденного решения. 
+
+В данной работе была выбрана нейронная сеть прямого распространения (feedforward neural network)\cite{fio_bib2,fio_bib3,fio_bib4,fio_bib5,fio_bib6,fio_bib7} из библиотеки Keras\cite{fio_bib15}. 
+
+В ходе исследования параметры нейронной сети были подобраны следующим образом: 5 слоёв по 32 нейрона в каждом слое. В качестве активационной функции выбрана сигмоида. Весовые коэффициенты имеют нормальное распределение со средним равным 0 и стандартным отклонением равным 0,2, что позволяет задавать их значения от -1 до 1. Смещение нейрона (bias) инициализируется 0. В выходном слое только один нейрон. 
+
+Сам комбинированный алгоритм можно разбить на три пункта:
+\begin{enumerate}
+\item Создание обучающей выборки для нейронной сети.
+\item Обучение нейронной сети.
+\item Пока не выполнен критерий остановки, либо пока не выполнено ограничение на количество вычислений целевой функции делаем следующее:
+\begin{enumerate}
+\item Оптимизация нейросетевой аппроксимации с помощью алгоритма имитации отжига.
+\item Оптимизация целевой функции с помощью локального метода, где в качестве первоначального значения используется найденная глобальным методом точка.
+\item Если разница между найденным значением и глобальным минимумом меньше 0,01, то комбинированный алгоритм сошёлся.
+\item Иначе добавляем в обучающую выборку 10 случайных точек и найденную локальным методом точку.
+\item После чего, заново обучаем нейронную сеть и уходим на следующую итераци.
+\end{enumerate}
+\end{enumerate}
+\section{Описание программной реализации}
+Программная реализация выполнена на языке Python с помощью библиотек Numpy \cite{fio_bib12}, Matplotlib \cite{fio_bib13}, SciPy \cite{fio_bib14}, Keras \cite{fio_bib15}. 	
+
+Работа выполнялась в среде Jupyter Notebook. Программа разбита на 5 блоков:
+\begin{enumerate}
+\item Импортируются все библиотеки, в том числе пользовательские функции и генератор задач GKLS.
+\item Определена функция задания нейросети.
+\item Задаётся обучающая выборка.
+\item Задаются параметры нейросети и критерии остановки комбинированного алгоритма.
+\item Выполнение комбинированного алгоритма.
+\end{enumerate}
+
+\section{Эксперименты}
+Эксперименты проводились на компьютере со следующими характеристиками:
+\begin{enumerate}
+\item Процессор Intel Core i3-9100F, 4100 MHz.
+\item ОЗУ 16 Gb (2x8 Gb) DDR4.
+\item Видеокарта GeForce GTX 1050 2 Gb.
+\end{enumerate}
+
+
+Задача экспериментов состояла в том, чтобы уменьшить количество вычислений целевой функции.
+
+На рис.1 представлена поверхность одной из функции генератора GKLS, на рис.2 - её аппроксимация нейросетью.
+
+
+
+\begin{figure}[!h]
+	\begin{center}
+		\begin{minipage}[!h]{0.45\linewidth}
+			\includegraphics[width=1\linewidth]{figure/1.png}
+			\caption{Поверхность функции.} %% подпись к рисунку
+		\end{minipage}
+		\hfill
+		\begin{minipage}[!h]{0.45\linewidth}
+			\includegraphics[width=1\linewidth]{figure/1_approx.png}
+			\caption{Аппроксимация.}
+		\end{minipage}
+	\end{center}
+\end{figure}	
+
+Эксперименты проводились на 10-ти двумерных задачах из генератора GKLS.
+\begin{table}
+	\caption{Результаты работы имитации отжига и комбинированного алгоритма}
+	\begin{center}
+		\begin{tabular}{|m{3.8cm}|m{6cm} |m{6cm}|}
+			\hline
+			 & Среднее количество вычислений целевой функции & Точность нахождения решений\\
+			 \hline
+			 Имитация отжига & 4255,9 & $1,8 \cdot 10^{-8}$\\
+			 \hline 
+			 Комбинированный алгоритм & 293,4 & $3,3 \cdot 10^{-5}$\\
+			 \hline
+		\end{tabular}
+	\end{center}
+\end{table}
+Результаты экспериментов показывают значительное уменьшение количества вычислений целевой функции. При этом сохраняется высокая точность нахождения минимума. В дальнейшем планируются эксперименты с детерминированным алгоритмом глобального поиска вместо вероятностного алгоритма имитации отжига.
+
+
+\begin{biblio}
+\bibitem{fio_bib1}
+Мордухович Б. Ш. Методы аппроксимаций в задачах оптимизации и управления / Мордухович Б. Ш. . – М.: «Наука», 1988. – 360 c.
+
+\bibitem{fio_bib2}
+Cybenko, G. V. Approximation by Superpositions of a Sigmoidal function. Mathematics of Control Signals and Systems. — 1989. — Т. 2, № 4. — С. 303—314.
+
+\bibitem{fio_bib3}
+Warren S. McCulloch, Walter Pitts // California State University. – Режим доступа: \url{https://home.csulb.edu/~cwallis/382/readings/482/mccolloch.logical.calculus.ideas.1943.pdf}
+
+\bibitem{fio_bib4}
+F. Rosenblatt // Cornell Aeronautical Laboratory. – Режим доступа: \url{https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.335.3398&rep=rep1type=pdf}
+
+\bibitem{fio_bib5}
+Paul Werbos // National Science Foundation. – Режим доступа: \url{https://www.researchgate.net/publication/35657389_Beyond_regression_new_tools_for_prediction_and_analysis_in_the_behavioral_sciences}
+
+Y. LeCun, B. Boser // AT \& T  Bell Laboratories. – Режим доступа: \url{http://yann.lecun.com/exdb/publis/pdf/lecun-89e.pdf}
+
+\bibitem{fio_bib7}
+Гермейер Ю.Б. Введение в теорию исследования операций / Гермейер Ю.Б. – М.: «Наука», 1971. – 384 c.
+
+\bibitem{fio_bib8}
+Сухарев А. Г. Оптимальный поиск экстремума / Сухарев. А. Г. Изд. МГУ, М, 1975. 
+
+\bibitem{fio_bib9}
+Стронгин Р. Г. Численные методы в многоэкстремальных задачах / Стронгин Р. Г. – М.: «Наука»,1978. – 240 с.
+
+\bibitem{fio_bib10}
+Информационный подход к задаче поиска экстремума функций, Изв. АН СССР, Техническая кибернетка, 1 (1996), 17-26.
+
+\bibitem{fio_bib11}
+К.А. Баркалов, И.Г. Лебедев. Решение задач глобальной оптимизации 
+на графических ускорителях – ННГУ им. Н.И. Лобачевского.
+
+\bibitem{fio_bib12}
+Официальный сайт библиотеки NumPy. – Режим доступа: \url{https://numpy.org/}
+
+\bibitem{fio_bib13}
+Официальный сайт библиотеки Matplotlib. – Режим доступа: \url{https://matplotlib.org/}
+
+\bibitem{fio_bib14}
+Официальный сайт библиотеки SciPy. – Режим доступа: \url{https://scipy.org/}
+
+\bibitem{fio_bib15}
+Официальный сайт библиотеки Keras. – Режим доступа: \url{https://keras.io/}
+
+\bibitem{fio_bib16}
+Kirkpatrick, S.; Gelatt Jr,C.D.;Vecchi, M. P. (1983). "Optimization by Simulated Annealing". Science. 220 (4598): 671–680.
+
+\bibitem{fio_bib17}
+Cергеев Ю.В., Квасов Д.Е. Диагональные  методы глобальной оптимизиации. Физматлит, 2008. P. 352.
+
+\bibitem{fio_bib18}
+Gaviano M., Lera D., Kvasov D. E., Sergeyev Y. D. Software for generation of classes of test functions with known local and global minima for global optimization // ACM Transactions on Mathematical Software. 2003. Vol. 29. P. 469-480.
+
+\bibitem{fio_bib19}
+J. A. Nelder and R. Mead, Computer Journal, 1965, vol. 7, p. 308—313.
+
+
+\end{biblio}
+
+
+\newpage
+
+\msc{90C26, 82C32}
+
+\title{The using neural network approximation in global optimization problems}
+
+
+
+\authors{S.N.~Karpenko,  I.G.~Lebedev, D.V.~Nadumin}
+\organizations{N. I. Lobachevsky State University of Nizhny Novgorod\\ 	Institute of information technologies, mathematics and mechanics}
+
+% abstract is contained in the  abstract environment
+\abstracten{
+The paper considers the problem of finding the global minimum of a multi-extremal function. To speed up the process of finding the minimum, the approximation of the objective function by a neural network is used.
+The article presents the results of a combined global optimization algorithm using a neural network to approximate functions.
+
+
+The works \cite{fio_bib17,fio_bib18} describe a GKLS generator that allows generating multi-extreme optimization problems with pre-known properties: the number of local minima, the size of their areas of attraction, the point of the global minimum, the value of the function in it, etc. In this paper, experiments were carried out with a series of two-dimensional functions from the GKLS generator
+
+The work was performed in the Python programming language with Numpy, SciPy, Keras, Matplotlib libraries.
+The purpose of the experiments was to test the possibility of reducing the number of calculations of the objective function when solving the optimization problem.}
+\keywordsen{optimization methods, global optimization, neural networks, machine learning.}
+
+\begin{biblioen}
+
+\bibitem{fio_bib1}
+Mordukhovich B. S. Approximation methods in optimization and control problems / Mordukhovich B. S. - M.: "Science", 1988. – 360 p.
+
+\bibitem{fio_bib2}
+Cybenko, G. V. Approximation by Superpositions of a Sigmoidal function. Mathematics of Control Signals and Systems. — 1989. — Т. 2, № 4. — С. 303—314.
+
+\bibitem{fio_bib3}
+Warren S. McCulloch, Walter Pitts // California State University. – Режим доступа: \url{https://home.csulb.edu/~cwallis/382/readings/482/mccolloch.logical.calculus.ideas.1943.pdf}
+
+\bibitem{fio_bib4}
+F. Rosenblatt // Cornell Aeronautical Laboratory. – Режим доступа: \url{https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.335.3398&rep=rep1type=pdf}
+
+\bibitem{fio_bib5}
+Paul Werbos // National Science Foundation. – Режим доступа: \url{https://www.researchgate.net/publication/35657389_Beyond_regression_new_tools_for_prediction_and_analysis_in_the_behavioral_sciences}
+
+\bibitem{fio_bib6}
+Y. LeCun, B. Boser // AT \& T  Bell Laboratories. – Режим доступа: \url{http://yann.lecun.com/exdb/publis/pdf/lecun-89e.pdf}
+
+\bibitem{fio_bib7}
+Hermeyer Yu.B. Introduction to the theory of operations research / Hermeyer Yu.B. – M.: "Science", 1971. – 384 p.
+
+\bibitem{fio_bib8}
+Sukharev A. G. Optimal search for an extremum / Sukharev. A. G. Publishing House of Moscow State University, Moscow, 1975.
+
+\bibitem{fio_bib9}
+Strongin R. G. Numerical methods in multi–extreme problems / Strongin R. G. – M.: "Science", 1978. - 240 p.
+
+\bibitem{fio_bib10}
+Information approach to the problem of finding the extremum of functions, Izv. of the USSR Academy of Sciences, Technical Cybernetics, 1 (1996), 17-26.
+
+\bibitem{fio_bib11}
+K.A. Barkalov, I.G. Lebedev. Solving global optimization
+problems on graphics accelerators – N.I. Lobachevsky National Research University.
+
+\bibitem{fio_bib12}
+The official website of the NumPy library. – Access mode: \url{https://numpy.org /}
+
+\bibitem{fio_bib13}
+The official website of the Matplotlib library. – Access mode: \url{https://matplotlib.org /}
+
+\bibitem{fio_bib14}
+The official website of the SciPy library. – Access mode: \url{https://scipy.org /}
+
+\bibitem{fio_bib15}
+The official website of the Keras Library. – Access mode: \url{https://keras.io /}
+
+\bibitem{fio_bib16}
+Kirkpatrick, S.; Gelatt Jr,C.D.;Vecchi, M. P. (1983). "Optimization by Simulated Annealing". Science. 220 (4598): 671–680.
+
+\bibitem{fio_bib17}
+Sergeev Yu.V., Kvasov D.E. Diagonal methods of global optimization. Fizmatlit, 2008. P. 352.
+
+\bibitem{fio_bib18}
+Gaviano M., Lera D., Kvasov D. E., Sergeyev Y. D. Software for generation of classes of test functions with known local and global minima for global optimization // ACM Transactions on Mathematical Software. 2003. Vol. 29. P. 469-480.
+
+\bibitem{fio_bib19}
+J. A. Nelder and R. Mead, Computer Journal, 1965, vol. 7, p. 308—313.
+
+
+
+\end{biblioen}
+
+\end{document}
