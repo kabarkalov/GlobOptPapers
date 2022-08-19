@@ -161,24 +161,24 @@ $^{4}$ \quad Novosibirsk State University, Novosibirsk, Russia; leniza.enikeeva@
 \section{Introduction}
 
 
-%Стыковочный абзац - его надо переписать
-В сложных задачах химической кинетики найти кинетические константы реакций аналитически не представляется возможным, поэтому возникает необходимость в применеии численных методов для их поиска (см., например, [ссылки]). В этом случае критерий качества (objective function) задается в виде некоторого алгоритма, который включает в себя этап численного моделирования и, как следствие, является трудоемким. Кроме того, в обратных задачах химической кинетики целевая функция может быть существенно многоэкстремальной, т.е. иметь много локальных экстремумов наряду с глобальным. 
-
 %Часть ННГУ - начало
+
+В сложных задачах химической кинетики найти кинетические константы реакций аналитически не представляется возможным, поэтому возникает необходимость в применении численных методов для их поиска (see, e.g., [ссылки]). В этом случае критерий качества (objective function) задается в виде некоторого алгоритма, который включает в себя этап численного моделирования и, как следствие, является трудоемким. Кроме того, в обратных задачах химической кинетики целевая функция может быть существенно многоэкстремальной, т.е. иметь много локальных экстремумов наряду с глобальным. 
+
 Численные методы решения подобных многоэкстремальных задач (методы глобальной оптимизации) существенно отличаются от методов локальной оптимизации, т.к. требуют исследования всей search domain (see, e.g., \cite{PaulaviciusZilinskas2014,Sergeyev2017}). Указанные методы можно условно разделить на два класса: метаэвристические и детерминированные. Метаэвристические алгоритмы, как правило, основаны на имитации процессов, протекающих в живой природе.
 Примерами метаэвристических алгоритмов являются simulated annealing, evolution and genetic algorithms и т.д. (see, e.g., \cite{Battiti2009,Eiben2015}).
 Указанные алгоритмы входят во многие библиотеки программных средств для решения задач глобальной оптимизации (например, MATLAB Global Optimization Toolbox, Scipy.Optimize и др. ).
-В силу быстроты работы и малых требований к вычислительным ресурсам (в частности, памяти) метаэвристические алгоритмы получили широкое распространение при решении практических задач.  Однако решение задачи, найденное метаэвристическим алгоритмом, является, вообще говоря, локальным и может распологаться далеко от глобального оптимума \cite{Kvasov2018}. 
+В силу быстроты работы и малых требований к вычислительным ресурсам (в частности, памяти) метаэвристические алгоритмы получили широкое распространение при решении практических задач.  Однако решение задачи, найденное метаэвристическим алгоритмом, является, вообще говоря, локальным и может располагаться далеко от глобального оптимума \cite{Kvasov2018}. 
 
 Возможность построения детерминированных методов глобального поиска, отличающихся от brute force algorithm и метаэвристических алгоритмов, связана с наличием и учетом  априорных предположений о свойствах функций задачи. 
-Одним из естественных допущений о задаче является предположение о том, что изменение значений целевой функции ограничено изменением ее аргумента. В таком случае, как известно, функции называют липшицевыми, а саму задачу --- Lipschitz global optimization problem. Центральным направлением развития современных методов липшицевой оптимизации является разработка параллельных алгоритмов. При этом предполагается, что значения целевой функции вычисляются в результате решения какой-либо другой вычислительной задачи и требуют проведения затратного вычислительного эксперимента.
+Одним из естественных допущений о задаче является предположение о том, что изменение значений целевой функции ограничено изменением ее аргумента. В таком случае говорят, что функция удовлетворяет Lipschitz condition, а саму задачу называют Lipschitz global optimization problem. Центральным направлением развития современных методов липшицевой оптимизации является разработка параллельных алгоритмов. При этом предполагается, что значения целевой функции определяются в результате решения какой-либо другой задачи и требуют проведения затратного вычислительного эксперимента.
 
 
 В данной статье отражены результаты применения параллельных методов липшицевой оптимизации, развиваемых в работах [], к решению inverse problems of chemical kinetics. 
 Основная часть статьи имеет следующую структуру. 
-%Часть ННГУ - конец
+Описание математической модели исследуемой химической реакции приведено в Section 2. Формальная постановка задачи липшицевой глобальной оптимизации и алгоритм ее решения рассмотрены в Section 3. Здесь же изложены вопросы, связанные с техническими аспектами реализации параллельной реализации алгоритма. Результаты численного решения обратной задачи химической кинетики с использованием разработанного параллельного алгоритма обсуждаются в Section 4. Последний раздел содержит заключение и планы будущей работы.
 
-%Описание математической модели исследуемой химической реакции приведено в Section 2. Формальная постановка задачи липшицевой глобальной оптимизации приводятся в Section 3. В Section 4 кратко изложена схема разрабатываемого авторами асинхронного параллельного алгоритма для решения задач указанного класса. Результаты численного решения обратной задачи химической кинетики обсуждаются в Section 5.
+%Часть ННГУ - конец
 
 \section{Mathematical model}
 
@@ -228,7 +228,6 @@ The introduction should briefly place the study in a broad context and highlight
 
 
 %Часть ННГУ - начало
-%поправить название
 \section{Parallel Algorithm for Solving Global Optimization Problems }\label{Sec_GSA}
 
 \subsection{Постановка задачи глобальной оптимизации}
@@ -387,75 +386,6 @@ x^{k+p+1} = \frac{x_{t}+x_{t-1}}{2} - \mathrm{sign}(z_{t}-z_{t-1})\frac{1}{2r}\l
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
-
-\subsection{Figures, Tables and Schemes}
-
-All figures and tables should be cited in the main text as Figure~\ref{fig1}, Table~\ref{tab1}, Table~\ref{tab2}, etc.
-
-\begin{figure}[H]
-\includegraphics[width=10.5 cm]{Definitions/logo-mdpi}
-\caption{This is a figure. Schemes follow the same formatting. If there are multiple panels, they should be listed as: (\textbf{a}) Description of what is contained in the first panel. (\textbf{b}) Description of what is contained in the second panel. Figures should be placed in the main text near to the first time they are cited. A caption on a single line should be centered.\label{fig1}}
-\end{figure}   
-\unskip
-
-\begin{table}[H] 
-\caption{This is a table caption. Tables should be placed in the main text near to the first time they are~cited.\label{tab1}}
-\newcolumntype{C}{>{\centering\arraybackslash}X}
-\begin{tabularx}{\textwidth}{CCC}
-\toprule
-\textbf{Title 1}	& \textbf{Title 2}	& \textbf{Title 3}\\
-\midrule
-Entry 1		& Data			& Data\\
-Entry 2		& Data			& Data\\
-\bottomrule
-\end{tabularx}
-\end{table}
-\unskip
-
-\begin{table}[H]
-\caption{This is a wide table.\label{tab2}}
-	\begin{adjustwidth}{-\extralength}{0cm}
-		\newcolumntype{C}{>{\centering\arraybackslash}X}
-		\begin{tabularx}{\fulllength}{CCCC}
-			\toprule
-			\textbf{Title 1}	& \textbf{Title 2}	& \textbf{Title 3}     & \textbf{Title 4}\\
-			\midrule
-			Entry 1		& Data			& Data			& Data\\
-			Entry 2		& Data			& Data			& Data \textsuperscript{1}\\
-			\bottomrule
-		\end{tabularx}
-	\end{adjustwidth}
-	\noindent{\footnotesize{\textsuperscript{1} This is a table footnote.}}
-\end{table}
-
-
-\subsection{Formatting of Mathematical Components}
-
-This is the example 1 of equation:
-\begin{linenomath}
-\begin{equation}
-a = 1,
-\end{equation}
-\end{linenomath}
-the text following an equation need not be a new paragraph. Please punctuate equations as regular text.
-%% If the documentclass option "submit" is chosen, please insert a blank line before and after any math environment (equation and eqnarray environments). This ensures correct linenumbering. The blank line should be removed when the documentclass option is changed to "accept" because the text following an equation should not be a new paragraph.
-
-This is the example 2 of equation:
-\begin{adjustwidth}{-\extralength}{0cm}
-\begin{equation}
-a = b + c + d + e + f + g + h + i + j + k + l + m + n + o + p + q + r + s + t + u + v + w + x + y + z
-\end{equation}
-\end{adjustwidth}
-
-
-% Example of a figure that spans the whole page width. The same concept works for tables, too.
-\begin{figure}[H]
-\begin{adjustwidth}{-\extralength}{0cm}
-\centering
-\includegraphics[width=13.5cm]{Definitions/logo-mdpi}
-\end{adjustwidth}
-\caption{This is a wide figure.\label{fig2}}
-\end{figure}  
 
 
 
