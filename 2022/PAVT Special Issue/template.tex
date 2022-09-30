@@ -126,7 +126,7 @@ $^{4}$ \quad Novosibirsk State University, Novosibirsk, Russia; leniza.enikeeva@
 %\conference{} % An extended version of a conference paper
 
 % Abstract (Do not insert blank lines, i.e. \\) 
-\abstract{The article is devoted to the problem of developing a kinetic model of a complex chemical reaction using a parallel optimization method. The design of the kinetic model consists in finding the kinetic parameters of the reaction, which cannot be calculated analytically, and since the chemical reaction involves many stages, the optimization problem is multi-extreme. As a chemical reaction, the process of catalytic isomerization of the pentane-hexane fraction is considered, which is now important due to the switch of the oil refining industry to the production of gasoline corresponding to the Euro-5 standard. To solve the optimization problem, the authors have developed parallel global search algorithm and a program based on Lipschitz optimization. The kinetic parameters found made it possible to develop a mathematical model of the process, which gives good agreement with industrial data.}
+\abstract{The article is devoted to the problem of developing a kinetic model of a complex chemical reaction using a parallel optimization method. The design of the kinetic model consists in finding the kinetic parameters of the reaction, which cannot be calculated analytically, and since the chemical reaction involves many stages, the optimization problem is \textcolor[rgb]{1,0,0}{multiextremal}. As a chemical reaction, the process of catalytic isomerization of the pentane-hexane fraction is considered, which is now important due to the switch of the oil refining industry to the production of gasoline corresponding to the Euro-5 standard. To solve the optimization problem, the authors have developed parallel global search algorithm and a program based on Lipschitz optimization. The kinetic parameters found made it possible to develop a mathematical model of the process, which gives good agreement with industrial data.}
 
 % Keywords
 \keyword{kinetic model; inverse problems of chemical kinetics; mathematical modeling; catalytic isomerisation of pentane-hexane fraction; Lipschitz optimization; black-box functions; parallel computing} 
@@ -174,6 +174,7 @@ In the article \cite{enik2021} we have already reviewed this process, but in ord
 In the article \cite{enik2021}, a genetic algorithm was used to calculate kinetic parameters, and the calculation time of kinetic parameters was about 10 hours. Therefore, in order to develop a mathematical model of a new transformation scheme, the question of choosing a more effective optimization method arises.
 
 In the complex problems of chemical kinetics, kinetic constants of reactions cannot be found analytically, they can only be found using numerical methods (see, for example, \cite{Zaynullin2020,Enikeeva2020,Koledina2019}). In this case, the quality criterion (objective function) is set in the form of a certain algorithm, which includes the stage of numerical modeling, which, in turn, makes it compute-intensive. Furthermore, in the inverse problems of chemical kinetics, the objective function can be substantially multiextremal, i.e., having many local extremes along the global one. 
+\textcolor[rgb]{1,0,0}{Gradient-based optimization methods will not give a good result for such problems. On the one hand, such methods converge only to a local solution. On the other hand, in the considered problem the gradient of the objective function is not known analytically and its numerical estimate will be time-consuming operation.}
 
 Computational algorithms for solving such multiextremal problems (global optimization methods) differ vastly from local optimization techniques since they require the study of the entire search domain (see, for example, \cite{PaulaviciusZilinskas2014,Sergeyev2017}). These methods can be divided into two classes: metaheuristic and deterministic. Metaheuristic algorithms are usually based on simulations of processes occurring in the wild.
 Examples of metaheuristic algorithms are simulated annealing, evolutionary computing, etc. (see, for example, \cite{Battiti2009,Eiben2015}).
@@ -182,6 +183,7 @@ Due to the operation speed and low requirements for computing resources (in part
 
 It is also possible to construct deterministic methods of global search, which are different from brute force algorithms and metaheuristic algorithms. Such methods are associated with the presence and consideration of a priori assumptions about the problem properties. 
 One of the natural assumptions about the problem is that changing the values of an objective function is limited by changes of its argument. In this case, the function satisfies the Lipschitz condition, and the problem itself is called the Lipschitz global optimization problem. The central direction of the development of modern methods of Lipschitz optimization is the development of parallel algorithms. It is assumed that the values of the objective function are determined as a result of solving some other task and require a costly computational experiment.
+\textcolor[rgb]{1,0,0}{On many benchmarks Lipschitz global optimization methods outperform metaheuristic algorithms in terms of the number of correctly solved problems \cite{Sergeyev2018,Sovrasov2019}.}
 
 
 This paper reflects the results of applying parallel methods of Lipschitz optimization developed in \cite{Barkalov2016,Strongin2018,Sysoyev2017}, to the solution of inverse problems of chemical kinetics.  
@@ -247,8 +249,8 @@ The mathematical model involves such parameters as the raw material flow rate $F
 \begin{linenomath}
 \begin{equation}\label{eq_temper}
 \dfrac{dT}{d\tau} = \dfrac{\sum_{i=1}^I\left( \dfrac{dx_i}{d\tau} \cdot \Delta H^i_{f,T} \right) }{\sum_i^J \left(x_i C^T_{p_i} \right) },
-\end{equation}\label{eq_flow}
-\begin{equation}
+\end{equation}
+\begin{equation}\label{eq_flow}
 \dfrac{dF}{d\tau} = \sum_{i=1}^I  \dfrac{x_i}{d\tau}
 \end{equation}
 \end{linenomath}
@@ -257,18 +259,20 @@ with initial condition: at $\tau = 0$, $T(0) = T^0$, where $T$ is temperature, K
 Thus, when solving the inverse kinetic problem, the direct problem is repeatedly solved, which includes the numerical integration of equations \eqref{eq_concentrations}, \eqref{eq_temper} and \eqref{eq_flow}. After finding the numerical values of the molar flow rate $x_i$, temperature $T$ and total molar flow rate $F$, these values are compared with the corresponding industrial data obtained during the three days of operation of the catalytic isomerization unit \cite{enik2021}, which is a minimization task:
 
 \begin{linenomath}
-\begin{equation}
+\begin{equation}\label{FF}
 FF = \dfrac{\sum_{i=1}^I \left| \dfrac{y_i^{exp} - y_i^{calc}}{y_i^{exp}} \right|}{I} \rightarrow \min,
 \end{equation}
 \end{linenomath}
-
 where I is the number of observed parameters (I=19, of which 17 parameters are $x_i$, one parameter is $T$ and one parameter is $F$),  $y_{i}^{exp}$ are industrual data, $y_{i}^{calc}$ are numerical values of concentrations of reaction substances obtained by solving a direct kinetic problem. As a result of solving the inverse problem, the kinetic parameters $k^0_j$ and $E_j$ included in the Arrhenius equation \eqref{eq_rate} will be obtained. Since the number of reaction stages is 48, the kinetic model will contain 96 kinetic parameters (activation energy $E_j$ and pre-exponential multiplier $k^0_j$ for each stage), however, the authors decided to fix some of the parameters as already known for chemical reasons, so the number of optimized parameters was reduced to 24.
 
 \section{Parallel Algorithm for Solving Global Optimization Problems }\label{sec_GSA}
 
 \subsection{Statement of the global optimization problem}
 
-As stated above, from a mathematical point of view, the inverse problem of chemical kinetics can be considered a Lipschitz global optimization problem. 
+As stated above, from a mathematical point of view, the inverse problem of chemical kinetics can be considered a Lipschitz global optimization problem.
+\textcolor[rgb]{1,0,0}{This fact has has the following justification.
+We solve the ODE system (\ref{eq_concentrations})--(\ref{eq_flow}) to compute the value of the objective function (\ref{FF}). The right-hand side of the ODE system is continuous functions with bounded derivatives. Thus, the system solution will also be continuous and bounded at the bounded period of time. Therefore, the objective function (\ref{FF}) will satisfy the Lipschitz condition, but the Lipschitz constant will be a priori unknown.}
+
 In general, the problem of the specified class can be formulated as follows:
 \begin{gather}
  \phi^* = \phi(y^\ast)=\min{\left\{\phi(y):y\in D\right\}}, \label{problemN}\\
@@ -279,7 +283,9 @@ where $a,b \in R^N$ are boundaries of the search domain, and the objective funct
 \left|\phi(y_1)-\phi(y_2)\right|\leq L\left\|y_1-y_2\right\|,\; y_1,y_2 \in D.
 \end{equation}
 
-The criterion $\phi(y)$ is assumed to be multiextremal and is given in the form of some computational algorithm. The input of this algorithm is supplied with a parameter vector, and the output is the corresponding function value. Such functions are often referred to as ``black-box'' functions. It is also assumed that each calculation of the function value at the search domain point (hereinafter also referred to as trial) is a laborious operation and requires significant computational resources. As noted in the introduction, this statement of the problem fully corresponds to the inverse problem of chemical kinetics.
+The criterion $\phi(y)$ is assumed to be multiextremal and is given in the form of some computational algorithm. 
+\textcolor[rgb]{1,0,0}{This assumption is typical for many applied optimization problems (see, e.g., \cite{Kvasov2013,Kalyulin2017}).}
+The input of this algorithm is supplied with a parameter vector, and the output is the corresponding function value. Such functions are often referred to as ``black-box'' functions. It is also assumed that each calculation of the function value at the search domain point (hereinafter also referred to as trial) is a laborious operation and requires significant computational resources. As noted in the introduction, this statement of the problem fully corresponds to the inverse problem of chemical kinetics.
 
 The Lipschitz condition (\ref{Lip}) can be used to construct estimates of the function global minimum, which can serve as a foundation for designing global optimization algorithms and proving their convergence conditions (see, for example, \cite{Strongin2000}).
 
@@ -326,7 +332,7 @@ We have implemented an asynchronous paralleling scheme of the ``master/worker'' 
 Let us assume that at each iteration, the master calculates one new trial  point and transfers it for processing to the worker. At the same time, a trial performed by a worker is a much more labor-intensive operation than selection of a new point by a master, which eliminates the worker downtime. 
 In this case, the total number of trials performed by each worker  will depend on the labor intensity of the specific trial and cannot be estimated in advance.
 
-When describing a parallel algorithm, let us assume that there is one process master and $p$ workers. The upper index will indicate the serial number of the trial performed, and the lower index will be used to number the trials in ascending order of the coordinate.
+When describing a parallel algorithm, let us assume that there is one process master and $p$ workers. The \textcolor[rgb]{1,0,0}{superscript} will indicate the serial number of the trial performed, and the \textcolor[rgb]{1,0,0}{subscript} will be used to number the trials in ascending order of the coordinate.
  
 The initial iteration is carried out according to a special rule. The master process (let us assume that this is the process No 0) initiates  $p$ parallel trials at $p$ different points of the search region, two of which are boundary points, and the rest are arbitrary internal points (for example, uniformly distributed). Thus, the initial trials are carried out at the points $\{y(x^1), y(x^2), ...,y(x^p)\}$, where $x^1 = 0$, $x^p = 1$, $x^i\in(0,1), i=2,..., p-1$.
 
@@ -339,7 +345,7 @@ The remaining processes are at the stage of conducting their trials, i.e. at the
 Then the No 1 process forwards to the master process the trial results, i.e. the three values $\{x^{k+1},y^{k+1},z^{k+1}\}$.
 The master saves the results in its information base and selects a new trial point $x^{k+p+1}$ for the process No 1 in accordance with the rules described below.
 
-Step 1. Renumber he point of the set 
+Step 1. Renumber \textcolor[rgb]{1,0,0}{t}he points of the set 
 \[
 X_k = \left\{x^1, x^2,...,x^{k+p} \right\},
 \]
@@ -377,10 +383,10 @@ x^{k+p+1} = \frac{x_{t}+x_{t-1}}{2} - \mathrm{sign}(z_{t}-z_{t-1})\frac{1}{2r}\l
 
 Immediately after calculating the point $x^{k+p+1}$ of the next trial, the master appends it to the set $I_k$ and forwards it to the worker, which starts the trial at this point. 
 
-The master stops the algorithm if either the condition $\Delta_{t}<\varepsilon$ (where $t$ is number of the interval with the maximum characteristic from Step 4) or the condition $k>K_{max}$ (where $k$ is the number of trials performed) is met.
+The master stops the algorithm if either the condition $\Delta_{t}<\varepsilon$ (\textcolor[rgb]{1,0,0}{where $t$ is the number} of the interval with the maximum characteristic from Step 4) or the condition $k>K_{max}$ (where $k$ is the number of trials performed) is met.
 The real number $\varepsilon>0$ and the integer $K_{max} \geq 1$ are the algorithm parameters which correspond to the accuracy of the solution search and the maximum number of trials.
 
-The sequential global search algorithm, on the basis of which the proposed asynchronous algorithm was implemented, allows the following interpretation \cite{Molinaro2001}. Using the points of previously performed trials, it is possible to construct a minorant of the objective function, for which the value $-R(i)$, where $R(i)$ is the value of the characteristic of the interval $(x_{i-1}, x_i)$, will be the value of the minorant at the point of its minimum at the interval $(x_{i-1},x_i), 1\leq i\leq k+p$. In accordance with Step 4 of the algorithm, a new trial is carried out in the interval with the lowest value of the minorant. And in accordance with Step 5, the point of the new trial coincides with the minorant minimum point.
+The sequential global search algorithm, on the basis of which the proposed asynchronous algorithm was implemented, allows the following interpretation \cite{Molinaro2001}. Using the points of previously performed trials, it is possible to construct a minorant of the objective function, for which the value $-R(i)$, where $R(i)$ is the value of the \textcolor[rgb]{1,0,0}{characteristics} of the interval $(x_{i-1}, x_i)$, will be the value of the minorant at the point of its minimum at the interval $(x_{i-1},x_i), 1\leq i\leq k+p$. In accordance with Step 4 of the algorithm, a new trial is carried out in the interval with the lowest value of the minorant. And in accordance with Step 5, the point of the new trial coincides with the minorant minimum point.
 
 The theory of convergence and various modifications of serial and parallel algorithms are detailed in the monographs \cite{Strongin2000,Sergeyev2017}. 
 It should be noted that the asynchronous parallelization scheme described here, in contrast to the synchronous schemes used earlier in solving a number of application problems (see \cite{Kalyulin2017, Modorskii2016}), provides a full load of all the processes involved in solving problems with different labor intensity of trials at different points in the search domain.
@@ -408,7 +414,11 @@ When conducting computational experiments (see next section), the solution of th
 The asynchronous parallel global search algorithm was implemented on C++; the software was built on Intel MPI and Intel C++ compiler, version 2017.0.1. The objective function of the problem to be solved was implemented in MATLAB 2019b.
 In order to check the stability of the developed parallel program, it was launched on three different supercomputers: Lomonosov-2 (Moscow State University), Lobachevsky (University of Nizhni Novgorod), and MVS-10P (Joint Supercomputer Center of the RAS). The main part of the experiments was carried out on the Lomonosov-2 supercomputer with the following computer nodes characteristics: Intel Haswell-EP E5-2697v3 CPU (processor frequency 2.6 GHz, 14 cores), 64 GB of RAM, CentOS 7 operating system.
 
-To solve the optimization problem, a combination of the parallel global search algorithm and a local optimization method was used. In the first stage of the search, the parallel asynchronous algorithm described in Section \ref{sec_GSA} was used. 101 processes were involved in the launch, of which one process was a master and the remaining 100 were workers (calculators). The values of the method parameters were set as follows: the maximum number of trials $K_{max}=3000$, the search accuracy $\varepsilon=10^{-3}$, the reliability parameter $r=3$, the evolvent accuracy parameter $m=12$. At the second stage, the solution was refined using the pattern search method with an accuracy of $\varepsilon=10^{-4}$ and a limit on the number of trials $K_{max}=500$.
+To solve the optimization problem, a combination of the parallel global search algorithm and a local optimization method was used. In the first stage of the search, 
+\textcolor[rgb]{1,0,0}{the parallel asynchronous algorithm described in Section \ref{sec_GSA} was used. The core parallel global search algorithm is available on GitHub, \url{https://github.com/UNN-ITMM-Software/gsa_nlp_solver}.}
+101 processes were involved in the launch, of which one process was a master and the remaining 100 were workers (calculators). The values of the method parameters were set as follows: the maximum number of trials $K_{max}=3000$, the search accuracy $\varepsilon=10^{-3}$, the reliability parameter $r=3$, the evolvent accuracy parameter $m=12$. At the second stage, the solution was refined
+\textcolor[rgb]{1,0,0}{using the Hooke-Jeeves pattern search method (see, e.g., \cite{HookJeeves})}
+with an accuracy of $\varepsilon=10^{-4}$ and a limit on the number of trials $K_{max}=500$.
 The total time for solving the problem was 8109 seconds, an optimum point was found with the objective function value $\phi^* = 0.002115$. Thus, using the developed algorithm, the inverse problem of chemical kinetics was solved and the kinetic parameters of the reaction were found, which are given in the table \ref{tab_kinetics}. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -462,7 +472,7 @@ It is worth noting that the composition of the products at the outlet of the las
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \authorcontributions{Conceptualization, K.B. and I.G.; methodology, K.B. and I.G.; software, E.K., I.L. and L.E.; validation, A.F.;  resources, A.F.;  writing---original draft preparation, K.B. and A.F.; writing---review and editing, R.F. and L.E.; visualization, R.F.; supervision, I.G.. All authors have read and agreed to the published version of the manuscript.}
 
-\funding{This research was funded by RFBR, project No.\,19-37-60014 (L.E.; mathematical model), and by the Russian Science Foundation, project No.\,21-11-00204 (K.B, I.L., E.K.; parallel algorithm)}
+\funding{This research was funded by RFBR, project No.\,19-37-60014 (L.E.; mathematical model), and by the Russian Science Foundation, project No.\,21-11-00204 (K.B, I.L., E.K.; parallel global optimization algorithm)}
 
 \institutionalreview{Not applicable.}
 
