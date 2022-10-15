@@ -18,13 +18,12 @@
 \begin{document}
 %===========================  ШАПКА СТАТЬИ =================================
 \Article{О реализации параллельного алгоритма глобальной оптимизации с использованием набора инструментов Intel oneAPI
-}%Обновить перевод названия
+}
     {On implementation of the parallel global optimization algorithm with the Intel oneAPI toolkit}
     
 \Abstract{В статье рассматривается параллельный алгоритм решения задач глобальной оптимизации и обсуждается его реализация с использованием набора инструментов Intel oneAPI. Предполагается, что целевая функция задачи задана как <<черный ящик>> и удовлетворяет условию Липшица. Изложенный в статье параллельный алгоритм использует схему редукции размерности на основе кривых Пеано, которые непрерывно и однозначно отображают отрезок вещественной оси на гиперкуб.
 В качестве средства для реализации параллельного алгоритма использован инструментарий Intel oneAPI, который позволяет писать один код как для центрального процессора, так и для графических ускорителей. Приведены результаты вычислительных экспериментов, полученные при решении серии сложных задач многоэкстремальной оптимизации.}
-%обновить перевод - сейчас он для старой аннотации
-    {The paper considers the parallel global optimization algorithm ans discusses its implementation with the Intel oneAPI toolkit. We suppose that the objective function is given as a black-box and satisfies the Lipschitz condition. The parallel algorithm presented in the paper uses the scheme of dimensionality reduction employing the Peano curve, which continuously maps an interval of the real axis onto a hypercube. The Intel OneApi tools, that allows one to write the same code for both the central processor and the graphics accelerator, were used for implementation of the parallel global optimization algorithm. The results of numerical experiments obtained by solving a series of time-consuming multiextremal optimization problems are presented.}
+{The paper considers the parallel global optimization algorithm ans discusses its implementation with the Intel oneAPI toolkit. We suppose that the objective function is given as a black-box and satisfies the Lipschitz condition. The parallel algorithm presented in the paper uses the scheme of dimensionality reduction employing the Peano curve, which continuously maps an interval of the real axis onto a hypercube. The Intel OneApi tools, that allows one to write the same code for both the central processor and the graphics accelerator, were used for implementation of the parallel global optimization algorithm. The results of numerical experiments obtained by solving a series of time-consuming multiextremal optimization problems are presented.}
 
 \Keywords{глобальная оптимизация,
 многоэкстремальные функции,
@@ -40,7 +39,7 @@ graphics accelerators,
 Intel OneApi.}
 
 \Acknowledgements{Работа выполнена при поддержке программы Центра компетенций OneAPI в ННГУ, Министерства науки и высшего образования РФ (проект № 0729-2020-0055) и научно-образовательного математического центра «Математика технологий будущего» (проект № 075-02-2021-1394).}
-    {Работа выполнена при поддержке программы Центра компетенций OneAPI в ННГУ, Министерства науки и высшего образования РФ (проект № 0729-2020-0055) и научно-образовательного математического центра «Математика технологий будущего» (проект № 075-02-2021-1394).}
+{The work was supported by the oneAPI Center of Excellence, by the Ministry of Science and Higher Education of the Russian Federation (project no. 0729-2020-0055), and by the Research and Education Mathematical Center (project no. 075-02-2020-1483/1).}
 
 \Citation{Баркалов К.А., Лебедев И.Г., Силенко Я.В.
     О реализации параллельного алгоритма глобальной оптимизации с использованием набора инструментов Intel oneAPI~//
@@ -59,7 +58,7 @@ Intel OneApi.}
 \DOI{10.26089/NumMet.v??r???}% заполняет редакция
 \VOL{??}{?}
 \YEAR{2022}
-\Received{16 октября 2022 г.}{October 16, 2022}
+\Received{17 октября 2022 г.}{October 17, 2022}
 \Accepted{?? ??????? 2022 г.}{??????? ??, 2022}
 
 
@@ -117,7 +116,7 @@ Intel OneApi.}
 
 \section{Постановка задачи}
 
-Задачи поиска минимума многоэкстремальных функций часто возникают в различных областях науки, таких как химия, физика и т.д. В частности, такие задачи возникают при разработке новых лекарственных препаратов [\ref{rfa:rulit:lit1}], при поиске конфигураций новых химических соединений [\ref{rfa:rulit:lit2},\ref{rfa:rulit:lit3}]. Задачи глобальной оптимизации возникают и во многих других приложениях [\ref{rfa:rulit:lit4}]. Традиционной сферой применения методов глобальной оптимизации стала идентификация параметров математических моделей по данным экспериментов. В задачах такого вида требуется провести поиск значений неизвестных параметров модели, при которых результаты расчетов близки к результатам, полученным экспериментально [\ref{rfa:rulit:lit5}].
+Задачи поиска минимума многоэкстремальных функций часто возникают в различных областях науки --- химии, физике, биологии, и т.д. В частности, такие задачи возникают при разработке новых лекарственных препаратов [\ref{rfa:rulit:lit1}], при поиске конфигураций новых химических соединений [\ref{rfa:rulit:lit2},\ref{rfa:rulit:lit3}]. Задачи глобальной оптимизации возникают и во многих других приложениях [\ref{rfa:rulit:lit4}]. Традиционной сферой применения методов глобальной оптимизации стала идентификация параметров математических моделей по данным экспериментов. В задачах такого вида требуется провести поиск значений неизвестных параметров модели, при которых результаты расчетов близки к результатам, полученным экспериментально [\ref{rfa:rulit:lit5}].
 
 Мы будем рассматривать задачу глобальной оптимизации в следующей постановке: требуется найти глобальный минимума$y^*$ функции $\varphi(y)$ в гиперинтервале $D$, т.е. 
 \begin{equation}
@@ -125,7 +124,7 @@ Intel OneApi.}
 \varphi(y^*)=\min\{\varphi(y):y\in D\}, \; D=\{y\in R^N:a_i\leq x_i\leq{b_i}, 1\leq{i}\leq{N}\}.
 \end{equation}
 
-Будем предполагать, что информация о структурных свойствах целевой функции $\varphi(y)$ неизвестна, а сама функция задается как <<черный ящик>>, т.е. с помощью некоторого реализованного программно алгоритма вычисления ее значений. Также будем предполагать, что $\varphi(y)$ удовлетворяет Липшица 
+Будем предполагать, что информация о структуре целевой функции $\varphi(y)$ неизвестна, а сама функция задается как <<черный ящик>>, т.е. с помощью некоторого реализованного программно алгоритма вычисления ее значений. Также будем предполагать, что $\varphi(y)$ удовлетворяет Липшица 
 \begin{equation}
 \label{lip}
 |\varphi(y_1)-\varphi(y_2)|\leq L\Vert y_1-y_2\Vert,y_1,y_2\in D,0<L<\infty,
@@ -133,7 +132,7 @@ Intel OneApi.}
 причем константа Липшица $L$ априори неизвестна.
 
 Многие известные алгоритмы липшицевой глобальной оптимизации основаны на идее редукции размерности и адаптации одномерных алгоритмов для решения многомерных задач [\ref{rfa:rulit:lit6},\ref{rfa:rulit:lit7}]. 
-В данной работе мы будем использовать подход из [\ref{rfa:rulit:lit8}, \ref{rfa:rulit:lit9}], основанный на идее редукции размерности с помощью кривой Пеано  
+В данной работе мы будем использовать подход из [\ref{rfa:rulit:lit8},\ref{rfa:rulit:lit9}], основанный на идее редукции размерности с помощью кривой Пеано  
 $y(x)$, которая непрерывно и однозначно отображает отрезок вещественной оси $[0,1]$ на $N$-мерный гиперкуб:
 \begin{equation}
 \label{cube}
@@ -368,7 +367,7 @@ D=\left\{ y~\in ~{{R}^{2N}}:~{{a}_{i}}\le {{y}_{i}}\le {{b}_{i}},~1\le i\le 2N \
 
 \begin{table}[!ht]
     \centering
-            \bicaption{Число итераций ПАГП при решении интегрированной функции Растригина.}{The number of iterations of PAGP when solving the integrated Rastrigin function.}
+            \bicaption{Число итераций ПАГП при минимизации модифицированной функции Растригина.}{The number of iterations of PAGP when minimizing modified Rastrigin function.}
     \label{table1}
     \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
     \hline
@@ -381,7 +380,7 @@ D=\left\{ y~\in ~{{R}^{2N}}:~{{a}_{i}}\le {{y}_{i}}\le {{b}_{i}},~1\le i\le 2N \
 
 \begin{table}[!ht]
     \centering
-            \bicaption{Ускорение ПАГП при решении интегрированной функции Растригина} {Acceleration of GAGP in solving the integrated Rastrigin function}
+            \bicaption{Ускорение ПАГП при минимизации модифицированной функции Растригина} {Acceleration of GAGP when miminimizing modified Rastrigin function}
     \label{table2}
     \begin{tabular}{|l|l|l|l|l|l|l|l|}
     \hline
@@ -394,7 +393,7 @@ D=\left\{ y~\in ~{{R}^{2N}}:~{{a}_{i}}\le {{y}_{i}}\le {{b}_{i}},~1\le i\le 2N \
 
 Далее были проведены эксперименты на серии задач, полученных интегрированием функций из генератора GKLS. Данный генератор описан в [\ref{rfa:rulit:lit6}]. С его помощью можно порождать задачи многоэкстремальной оптимизации и варьировать их свойства: размерность, количество локальных минимумов, размеры их областей притяжения, координаты точки глобального минимума, значение функции в ней и т.д. На рис. \ref{fig:s3} изображены линии уровня двухмерной функции GKLS (слева) и модифицированной функции GKLS, полученной интегрированием четырехмерной функции по последним двум параметрам (справа).
 
-\begin{figure}
+\begin{figure}[!ht]
 \begin{center}
   \includegraphics[width=1.0\linewidth]{./pic/s3.png}
   \bicaption{Функции GKLS (слева) и модифицированной функции GKLS (справа).}{GKLS function (left) and modified GKLS function (right).}
@@ -451,6 +450,9 @@ D=\left\{ y~\in ~{{R}^{2N}}:~{{a}_{i}}\le {{y}_{i}}\le {{b}_{i}},~1\le i\le 2N \
 \rlitem{rfa:rulit:lit6}{
 \textit{Сергеев, Я.Д., Квасов Д.Е.} Диагональные методы глобальной оптимизации. М.: Физматлит, 2008.}
 
+\rlitem{rfa:rulit:lit7}{
+\textit{Paulavicius R., Zilinskas J.} Simplicial Global Optimization. Springer, New York. 2014. \doi{10.1007/978-1-4614-9093-7} }
+
 \rlitem{rfa:rulit:lit8}{
 \textit{Strongin R.G., Sergeyev Ya.D.} Global Optimization with Non-convex Constraints. Sequential and Parallel Algorithms. Kluwer Academic Publishers, 2000.}
 
@@ -475,9 +477,6 @@ D=\left\{ y~\in ~{{R}^{2N}}:~{{a}_{i}}\le {{y}_{i}}\le {{b}_{i}},~1\le i\le 2N \
 \rlitem{rfa:rulit:lit15}{
 \textit{Gergel V.P., Barkalov K.A., Sysoyev A.V.} A novel supercomputer software system for solving time-consuming global optimization problems ~// Numerical Algebra, Control and Optimization, 2018. \textbf{8}, N~1. 47--62. \doi{10.3934/naco.2018003}}
 
-
-%\rlitem{rfa:rulit:lit7}{
-%\textit{Paulavicius R., Zilinskas J, Grothey A.} Parallel branch and bound for global optimization with combination of Lipschitz bounds ~// Optimization Methods \& Software,  2011. \textbf{26}, N~3. 487--498. \doi{10.1080/10556788.2010.551537} }
 
 %\rlitem{rfa:rulit:lit6__}{
 %\textit{Захарова Е.М., Минашина И.К.} Обзор методов многомерной оптимизации. Информационные процессы, 2014. Т 14. №3. С. 256 -- 274.}
@@ -523,6 +522,9 @@ D=\left\{ y~\in ~{{R}^{2N}}:~{{a}_{i}}\le {{y}_{i}}\le {{b}_{i}},~1\le i\le 2N \
 
 \elitem{rfa:enlit:lit6}{
 \textit{Ya.D. Sergeev, D.E. Kvasov } Diagonal Global Optimization Methods  (Fizmatlit, Moscow, 2008) [in Russian]}
+
+\elitem{rfa:enlit:lit7}{
+\textit{Paulavicius R., Zilinskas J.} Simplicial Global Optimization. Springer, New York. 2014. \doi{10.1007/978-1-4614-9093-7} }
 
 \elitem{rfa:enlit:lit8}{
 \textit{R.G. Strongin, Ya.D. Sergeyev } Global Optimization with Non-convex Constraints. Sequential and Parallel Algorithms. Kluwer Academic Publishers, 2000.}
