@@ -83,17 +83,15 @@ The paper considers ...
 %Currently, there is a tendency to improve the environmental characteristics of automobile fuel while maintaining a high octane number. Sulfuric acid alkylation of isobutane with olefins makes it possible to obtain a high-octane component of gasoline with a minimum content of aromatic hydrocarbons. The alkylate, which is produced by the alkylation of isobutane with C3-C5 olefins in the presence of strong acid, has the advantages of high octane number, low vapor pressure, and zero content of olefins and aromatics that allow it to be a desirable blending component for high-quality gasoline. Alkylates will continue to act as a desirable blending component for high-quality gasoline as the quality of gasoline continues to increase [ссылка на китайскую статью]. Therefore, it is a significant process of the modern refinery [ссылка на catalyst]. To optimize the chemical process in industry, it is necessary to first develop its model, which in this case means building a mathematical model of the chemical process and then its kinetic model, that is, numerically calculate the kinetic constants of the reaction. 
 %Стыковочный абзац
 
-Так как математической моделью реакции является система дифференциальных уравнений, найти значения констант, входящих в нее, можно только численно (см., например, \cite{RSD}). Отметим, что в таких задачах целевая функция, как правило, является многоэкстремальной, т.е. имеет много локальных экстремумов наряду с глобальным. 
+
+Since the mathematical model of the chemical reaction is a system of differential equations, it is only possible to find the values of the constants in this system numerically (see, e.g., \cite{RSD}). Note that the objective function in such problems is usually multiextremal, i.e. it has many local extrema along with a global one.
 %Часть ННГУ
-Численные методы решения подобных многоэкстремальных задач (методы глобальной оптимизации) существенно отличаются от методов локального поиска (see, e.g., \cite{Sergeyev2017,PaulaviciusZilinskas2014}).  
-С алгоритмической точки зрения их можно разделить на два класса: метаэвристические и детерминированные. Метаэвристические алгоритмы, в основном, основаны на имитации процессов, протекающих в живой природе.
-Характерными примерами таких алгоритмов являются simulated annealing, evolution and genetic algorithms и т.д. (see, e.g., \cite{Battiti2009,Eiben2015}). В силу своей относительной простоты метаэвристические алгоритмы более популярны у исследователей, чем детерминированные.  Однако решение задачи, найденное метаэвристическим алгоритмом, является, вообще говоря, локальным и может располагаться далеко от глобального \cite{Kvasov2018}. 
+Numerical methods for solving such multiextremal problems (global optimization methods) differ significantly from local search methods (see, e.g., \cite{Sergeyev2017, PaulaviciusZilinskas2014}). From an algorithmic point of view, they can be divided into two classes: metaheuristic and deterministic. Metaheuristic algorithms are mainly based on the simulation of processes occurring in living nature. Typical examples of such algorithms are simulated annealing, evolution and genetic algorithms, etc. (see, e.g., \cite{Battiti2009,Eiben2015}).     Due to their relative simplicity, metaheuristic algorithms are more popular with researchers than deterministic ones.  However, the solution to a problem found by a metaheuristic algorithm is, generally speaking, local and may be well away from the global solution \cite{Kvasov2018}.
 
-Предполагая наличие некоторых дополнительных свойств целевой функции, можно построить эффективные детерминированные методы поиска глобального решения.
-Например, можно предположить, что отношение приращения функции к соответствующему приращению аргумента не может превышать некоторого порога. В таком случае функции называются липшицевыми, а сама задача -- задачей липшицевой глобальной оптимизации . 
-Данная статья продолжает цикл работ, в которых проводится исследование и модификация параллельных методов липшицевой оптимизации, предложенных в \cite{Strongin2000}, при их использовании для решения обратных задач химической кинетики. 
+Assuming some additional properties of the objective function, it is possible to construct efficient deterministic methods for finding a global solution. For example, we can assume that the ratio of the increment of the function to the corresponding increment of the argument cannot exceed some threshold. In this case, the functions are called Lipschitz functions, and the problem itself is a Lipschitz global optimization problem.
+This paper continues the series of papers where the parallel methods of Lipschitz optimization proposed in \cite{Strongin2000} are investigated and modified in their application to solving inverse problems of chemical kinetics.
 
-Основная часть статьи имеет следующую структуру. Описание математической модели исследуемой химической реакции приведено в Section 2. Формальная постановка задачи липшицевой глобальной оптимизации и общая схема поисковых алгоритмов приводятся в Section 3. В Section 4 изложена схема предлагаемого асинхронного параллельного алгоритма для решения многоэкстремальных задач. Результаты численного решения the inverse problem of chemical kinetics обсуждаются в Section 5.
+The main part of the paper is organized as follows. Section 2 describes the mathematical model of the chemical reaction under study. The formal statement of the Lipschitz global optimization problem and the general scheme of search algorithms are given in Section 3. In Section 4, a scheme of the proposed asynchronous parallel algorithm for solving multiextremal problems is presented. The results of numerical solution of the inverse problem of chemical kinetics are discussed in Section 5.
 
 
 \section{Problem Statement}\label{Sec_math_mod}
@@ -104,25 +102,22 @@ The paper considers ...
 
 \subsection{Global Optimization Problem}
 
-Как уже говорилось выше, задача идентификации значений параметров математической модели может рассматриваться как Lipschitz global optimization problem. 
-С формальной точки зрения  данная задача является задачей математического программирования вида
+As it was mentioned above, the problem of identifying mathematical model parameter values can be considered a Lipschitz global optimization problem. From the formal point of view this problem is a mathematical programming problem of the form
 \begin{gather}
  \varphi^* = \varphi(y^\ast)=\min{\left\{\varphi(y):y\in D\right\}}, \label{problemN}\\
  D=\left\{y\in R^N: a_i\leq y_i \leq b_i, \;  1\leq i \leq N\right\} \label{D},
 \end{gather}
-где $a,\; b$ есть заданные векторы, $a,b\in R^N$, $\varphi(y)$ целевая функция, которая удовлетворяет the Lipschitz condition
+where $a,\; b$ are the given vectors, and $a,b\in R^N$, $\varphi(y)$ is the objective function which satisfies the Lipschitz condition
 \begin{equation}\label{Lip}
 \left|\varphi(y_1)-\varphi(y_2)\right|\leq L\left\|y_1-y_2\right\|,\; y_1,y_2 \in D.
 \end{equation}
 
 
-Функция $\varphi(y)$ предполагается многоэкстремальной и заданной в виде ``black box'' (т.е. в виде некоторой subroutine, на вход которой подается вектор параметров, а на выходом является вычисленное значение функции). Кроме того, подразумевается, что каждое применение этой процедуры (называемое в дальнейшем search trial) является трудоемкой операцией. Такая постановка задачи полностью соответствует the inverse problem of chemical kinetics.
+The function $\varphi(y)$ is assumed to be multiextremal and is given as a ``black box'' (i.e. as some subroutine with a vector of parameters as its input and the calculated value of the function as its output). Moreover, it is assumed that each application of this procedure (hereinafter referred to as search trial) is a time-consuming operation. This formulation of the problem is fully consistent with the inverse problem of chemical kinetics.
 
-Известен ряд алгоритмов, применимых для решения задач липшицевой оптимизации. Среди них можно отметить non-uniform space covering method \cite{Evtushenko2013,Evtushenko2009}, diagonal and simplicial partitions methods \cite{Zilinskas2010,Paulavicius2011}. 
-В данной работе мы использовали global search algorithm, proposed by Strongin \cite{Strongin2000}.
-В рамках данного подхода исходная многомерная задача (\ref{problemN}) редуцируется к задаче одномерной оптимизации при помощи Peano-Hilbert curves. 
+There are several algorithms that can be applied to solve Lipschitz optimization problems. These include, among others, the non-uniform space covering method \cite{Evtushenko2013, Evtushenko2009}, diagonal and simplicial partitions methods \cite{Zilinskas2010, Paulavicius2011}. In this paper, we used the global search algorithm proposed by Strongin{Strongin2000}. Under this approach, the original multidimensional problem (\ref{problemN}) is reduced to a one-dimensional optimization problem using Peano-Hilbert curves.
 
-В самом деле, используя непрерывное однозначное отображение (Peano-Hilbert curve) $y(x)$ отрезка $[0,1]$ вещественной оси на гиперинтервал $D$ из (\ref{D}) можно свести многомерную задачу (\ref{problemN}) к одномерной задаче
+In fact, using a continuous one-to-one mapping (Peano-Hilbert curve) $y(x)$ of the segment $[0,1]$ of the real axis onto the hyperinterval $D$ from (\ref{D}), we can reduce the multidimensional problem (\ref{problemN}) to a one-dimensional problem
 \[
 \varphi(y^\ast)=\varphi(y(x^\ast))=\min{\left\{\varphi(y(x)): x\in[0,1]\right\}},
 \]
@@ -131,27 +126,26 @@ where the function $\varphi(y(x))$ will satisfy a uniform H{\"o}lder condition
 \left|\varphi(y(x_1))-\varphi(y(x_2))\right|\leq H\left|x_1-x_2\right|^{1/N}
 \]
 with $ H=2 L \sqrt{N+3}$.
-Вопросы численного построения различных аппроксимаций Peano-Hilbert curve рассмотрены в \cite{Strongin2000,Sergeyev2013}.
+The numerical construction of various approximations of the Peano-Hilbert curve is discussed in \cite{Strongin2000,Sergeyev2013}.
 
-Таким образом, search trial в некоторой точке $x'\in[0,1]$ будет включать в себя сначала the construction of the image $y'=y(x')$, и лишь затем вычисление значения функции $ z' = \varphi(y')$.
+Thus, the search trial at some point $x'\in[0,1]$ will involve first the construction of the image $y'=y(x')$, and only then the computation of the function value $ z' = \varphi(y')$.
 
 \subsection{Characteristic Algorithms}
 
 %Характеристический алгоритм
-Примененный нами алгоритм глобального поиска принадлежит классу characteristic algorithms, что существенно упрощает процесс его распараллеливания.
-Напомним, что а numerical optimization method belongs to the class of characteristical algorithms if the algorithmic scheme of this method can be described as follows.
+The global search algorithm we used belongs to the class of characteristic algorithms, which greatly simplifies the process of its parallelization. Recall that a numerical optimization method belongs to the class of characteristic algorithms if the algorithmic scheme of this method can be described as follows.
 
-At the first iteration the trials are performed at the points $x^1 = 0$ and $x^2 = 1$. Then any next $(k+1)$, $k \geq 2$, iteration og global search is executed in the following way.
+At the first iteration the trials are performed at the points $x^1 = 0$ and $x^2 = 1$. Then any next $(k+1)$, $k \geq 2$, iteration of global search is executed in the following way.
 
 \begin{enumerate}
 	\item 
-Renumber points of previous trials by increasing their $x$-coordinates (the new order is marked with subscript)
+Renumber points of the previous trials by increasing their $x$-coordinates (the new order is marked with subscript)
 \[
 0=x_0<x_2<...<x_{k}=1.
 \]
 
 	\item 
-Calculate for every interval $(x_{i-1},x_i), 1\leq i\leq k$, a value $R(i)$ called \textit{the interval characteristic}. In general case, $R(i)$ can depend on the points $x^i$ and the trial rezults $z^i=f(x^i), 1 \leq i \leq k$.
+Calculate for every interval $(x_{i-1},x_i), 1\leq i\leq k$, a value $R(i)$ called \textit{the interval characteristic}. In the general case, $R(i)$ can depend on the points $x^i$ and the trial results $z^i=f(x^i), 1 \leq i \leq k$.
 
 	\item 
 Find the interval $(x_{t-1},x_t)$ which has the largest characteristic $R(t)$, i.e.
@@ -185,7 +179,7 @@ Increase the iteration number $k=k+1$ and proceed to the next iteration.
 
 As a possible interpretation of this scheme, we can consider an interval characteristic $R(i)$ as a measure of the global minimum being within the interval
 $(x_{i-1},x_i)$.
-To construct a concrete form of the interval characteristic we can use a lower envelope (or minorant) of the function to be minimized or a mathematical expectation of function values, etc. 
+To construct a concrete form of the interval characteristic, we can use a lower envelope (or minorant) of the function to be minimized or a mathematical expectation of function values, etc. 
 Most well-known global optimization methods can be formulated in accordance with this characteristical scheme, e.g.,
 \begin{itemize}
 \item a uniform grid method with a successively reduced step;
@@ -212,42 +206,42 @@ z_k^* -\gamma (z_k^+-z_k^*),
 \]
 where $z_k^+$ and $z_k^*$ are estimates of maximum and minimum function values respectively. For the Zilinskas method $x^{k+1}$ is the point where the maximum average improvement of the current estimate of the global extremum is expected.
 
-The Strongin algorithm has been constructed in the framework of the information approach to global optimization (see Strongin (1978)). This method has an adaptive scheme to evaluate a numerical estimate of the unknown Lipschitz constant.
+The Strongin algorithm has been constructed in the framework of the information approach to global optimization (see \cite{Strongin1978})). This method has an adaptive scheme to evaluate a numerical estimate of the unknown Lipschitz constant.
 
 
 \subsection{Parallel Asynchronous Global Search Algorithm}
 
-Принадлежность Global Search Algorithm (GSA) к классу caracteristic algorithms подсказывает возможный путь его распараллеливания. 
-Как уже было отмечено, характеристика интервала $R(i)$ может рассматриваться как некоторая мера нахождения (локализации?) в нем точки глобального минимума. 
-Тогда вместо одного лучшего интервала можно выбрать сразу несколько интервалов с наибольшими характеристиками и провести в них очередные испытания параллельно.
-Более того, схема характеристических алгоритмов допускает и асинхронное распараллеливание, которое минимизирует простой процессоров в случае, если трудоемкость проведения испытаний зависит от конкретной точки области поиска. 
+As the Global Search Algorithm (GSA) belongs to the class of characteristic algorithms, this suggests a possible way to parallelize it. 
+As previously mentioned, the characteristic of the interval $R(i)$ can be regarded as some measure of finding the global minimum point in this interval. Then, instead of a single best interval, several intervals with the highest characteristics can be chosen at once and successive trials can be carried out in these intervals in parallel. Moreover, the scheme of characteristic algorithms also allows asynchronous parallelization, which minimizes downtime of processors when trial complexity depends on a particular point in the search domain. 
 
-Рассмотрим более детально асинхронный алгоритм глобального поиска. В нем реализована схема распараллеливания вида ``master/worker''. В процессе-мастере проводится накопление поисковой информации, оценка на ее основе константы Липшица для целевой функции, определение точек новых испытаний и распределение их по процессам-рабочим. Процессы-рабочие получают от мастера точки, проводят в них новые испытания и отсылают мастеру их результаты. 
+Now, let us examine the asynchronous global search algorithm in more detail. It implements a paralleling scheme of the ``master/worker'' type. The master process accumulates search information, evaluates on its basis the Lipschitz constant for the objective function, determines new trial points and distributes them to the worker processes. Worker processes receive the points from the master, perform new trials in these points and send the results to the master.
 
-При описании параллельного алгоритма будем предполагать, что в нашем распоряжении имеется $p+1$ вычислительный процесс: один мастер и $p$ рабочих.
+When describing the parallel algorithm, we assume that we have $p+1$ computational processes: one master and $p$ worker processes.
  
-В начале поиска процесс-мастер (пусть это будет процесс No 0) инициирует параллельное проведение $p$ испытаний в $p$ различных точках области поиска, две из которых являются граничными, а остальные -- внутренними, т.е. в точках $\{y(x^1), y(x^2), ...,y(x^p)\}$, где $x^1 = 0$, $x^p = 1$, $x^i\in(0,1), i=2,..., p-1$.
+At the beginning of the search, the master process (let it be process No. 0) initiates $p$ parallel  trials at $p$ different points of the search domain, two of which are boundary points and the rest are internal points, i.e. at the points $\{y(x^1), y(x^2), ...,y(x^p)\}$, where $x^1 = 0$, $x^p = 1$, $x^i\in(0,1), i=2,..., p-1$.
 
-Предположим теперь, что выполнено $k$ испытаний (в частности, $k$ может быть равно 0), и процессы-рабочие проводят испытания в точках $\{y(x^{k+1}), y(x^{k+2}), ...,y(x^{k+p})\}$. 
+Suppose now that $k$ trials have been performed (in particular, $k$ can be 0), and the worker processes perform trials at the points $\{y(x^{k+1}), y(x^{k+2}), ...,y(x^{k+p})\}$. 
 
-Если процесс-рабочий завершил проведение испытания в некоторой точке (пусть это будет точка $y(x^{k+1})$, соответствующая процессу No 1), то он пересылает процессу-мастеру результаты испытания. 
-Отметим, что в данном случае мы будем иметь set of preimages of the trial points
+If a worker process completes the trial at some point (let it be the point $y(x^{k+1})$ corresponding to process No. 1) then it sends to the master process the results of the trial. Note that in this case we will have a set of preimages of the trial points
 \[
 I_k = \left\{ x^{k+1},x^{k+2},...,x^{k+p} \right\},
 \]
-в которых испытания уже начались, но еще не завершены.
+where the trials have already started but have not yet been completed.
 
-Получив от рабочего процесса результаты испытания в точке $y(x^{k+1})$ мастер, в свою очередь, выбирает для него точку нового испытания $x^{k+p+1}$ в соответствии с правилами, которые соответствуют схеме характеристического алгоритма.
+Having received the trial results at the point $y(x^{k+1})$ from the worker process, the master in turn selects a new trial point $x^{k+p+1}$ for it according to the rules that correspond to the scheme of the characteristic algorithm.
 
-1. Перенумеровать в порядке возрастания (нижним индексом) set of preimages of the trial points 
+\begin{enumerate}
+	\item 
+Renumber the set of preimages of the trial points 
 \[
 X_k = \left\{x^1, x^2,...,x^{k+p} \right\},
 \]
-которое содержит все preimages, в которых либо проведены, либо проводятся испытания, т.е.
+containing all preimages at which the trials have either been carried out or are being carried out in ascending order (marked with subscript) , i.e.
 \[
 0=x_1<x_2<...<x_{x+p}=1.
 \]
-2. Вычислить значения 
+	\item
+Calculate the values
 \[
 M_1=\max \left\{ \frac{ \left|z_i - z_{i-1} \right|}{(x_i-x_{i-1})^{1/N}} : x_{i-1} \notin I_k, x_i \notin I_k, 2\leq i\leq k+p \right\},
 \]
@@ -257,43 +251,42 @@ M_2=\max \left\{ \frac{ \left|z_{i+1} - z_{i-1} \right|}{(x_{i+1}-x_{i-1})^{1/N}
 \[
 M=\max\{M_1,M_2\},
 \]
-где $z_i=\varphi(y(x_i))$, if $x_i \notin I_k, \; 1\leq i \leq k+p$. Значения $z_i$ в точках $x_i \in I_k$ являются неопределенными, т.к. испытания в точках $x_i \in I_k$ еще не завершены. Если значение $M$ получилось равным 0, то положить $M=1$.
+where $z_i=\varphi(y(x_i))$, if $x_i \notin I_k, \; 1\leq i \leq k+p$. The values of $z_i$ at the points $x_i \in I_k$ are undefined, as the trials at the points $x_i \in I_k$ have not yet been completed. If the value of $M$ equals 0, assume $M=1$.
 
-3. Каждому интервалу $(x_{i-1},x_i), \; x_{i-1} \notin I_k, x_i \notin I_k, \; 2\leq i\leq k+p$, поставить в соответствие число $R(i)$, которое называется характеристикой интервала и вычисляется по формуле
+	\item
+Assign to each interval $(x_{i-1},x_i), \; x_{i-1} \notin I_k, x_i \notin I_k, \; 2\leq i\leq k+p$, the number $R(i)$, which is called the interval characteristic and is calculated using the formula
 \[
 R(i)=rM\Delta_i+\frac{(z_i-z_{i-1})^2}{rM\Delta_i}-2(z_i+z_{i-1}),
 \]
-где $\Delta_i=\left(x_i-x_{i-1}\right)^{1/N}$, and $r>1$ is the reliability parameter of the method.
+where $\Delta_i=\left(x_i-x_{i-1}\right)^{1/N}$, and $r>1$ is the reliability parameter of the method.
 
-4. Выбрать интервал $[x_{t-1},x_t]$, которому соответствует максимальная характеристика, т.е.
+	\item
+Select the interval $[x_{t-1},x_t]$ to which the maximum characteristic corresponds, i.e.
 \[
 R(t) = \max \left\{ R(i): \; x_{i-1} \notin I_k, x_i \notin I_k, \; 2\leq i\leq k+p \right\}.
 \]
-
-5. Определить preimage $x^{k+p+1} \in (x_{t-1},x_t)$ точки нового испытания в соответствии с формулой
+	\item
+Determine the preimage $x^{k+p+1} \in (x_{t-1},x_t)$ of the new trial point according to the formula
 \[
 x^{k+p+1} = \frac{x_{t}+x_{t-1}}{2} - \mathrm{sign}(z_{t}-z_{t-1})\frac{1}{2r}\left[\frac{\left|z_{t}-z_{t-1}\right|}{M}\right]^N.
 \]
+\end{enumerate}
 
-Сразу после вычисления точки очередного испытания $y^{k+p+1} = y(x^{k+p+1})$ процесс-мастер добавляет ее в множество $I_k$ и пересылает процессу-рабочему, который инициирует проведение испытания в ней. 
+Immediately after calculating the next trial point $y^{k+p+1} = y(x^{k+p+1})$, the master process adds it to the set $I_k$ and forwards it to the worker process which initiates a trial at this point.
 
-Процесс-мастер завершает работу алгоритма при выполнении одного из двух условий: $\Delta_{t}<\epsilon$, $k+p>K_{max}$.
-Первое из них соответствует остановке алгоритма по точности, второе --- по числу испытаний. 
-Вещественное число $0<\epsilon<1$ и целое число $K_{max}>0$ являются параметрами алгоритма.
-
-
+The master process completes the algorithm when one of two conditions is met: $\Delta_{t}<\epsilon$, $k+p>K_{max}$.
+). The first one corresponds to stopping the algorithm by accuracy, the second one, by the number of trials. The real number $0<\epsilon<1$ and the integer $K_{max}>0$ are the algorithm parameters.
 
 \section{Numerical Experiments}\label{Sec_Exp}
 
-Предварительные эксперименты позволили оценить примерное время одного вычисления целевой функции при использовании последовательного алгоритма. Эксперименты проводились на архитектуре Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz 2.59 GHz. Среднее время вычисления целевой функции составило порядка $0.2$ сек., что характеризует задачу как вычислительно сложную. Решение задачи последовательным алгоритмом потребовало бы не менее 1 млн. испытаний и, соответственно, не менее 54 часов (оценочное значение).
-Поэтому для проведения расчетов использовался только параллельный алгоритм с критерием остановки по числу испытаний $K_{max}=10^6$. 
+In preliminary experiments, we estimated the approximate time to calculate one objective function using the sequential algorithm. The computer architecture used for the experiments was Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz 2.59 GHz. The average calculation time of the objective function was about $0.2$ sec, which characterizes the problem as being computationally complex.  Solving the problem with a sequential algorithm would require at least 1 million trials and thus at least 54 hours (as an estimate). Therefore only a parallel algorithm with a stopping criterion based on the number of trials $K_{max}=10^6$ was used for the calculations. 
 
-Численные эксперименты проводились при помощи параллельного асинхронного алгоритма, изложенного в Section 4, с использованием $160$ процессов ($159$ процессов вычисляли значения целевой функции, $1$ процесс управлял алгоритмом). Для проведения экспериментов использовался UNN supercomputer Lobachevsky (CentOS 7 Intel(R) Xeon(R) Silver 4310T CPU @ 2.30GHz RAM 64Gb). Асинхронный алгоритм глобальной оптимизации был реализован на C++ (GCC 9.5.0 and Intel MPI were used); вычисление значений целевой функции было реализовано в Python 3.9.
+Numerical experiments were performed using the parallel asynchronous algorithm outlined in Section 4, running $160$ processes: $159$ processes calculated the values of the objective function (worker processes) while $1$ master process controlled the algorithm. The Lobachevsky  supercomputer (University of Nizhni Novgorod)  (CentOS 7.2, SLURM, two Intel Sandy Bridge E5-2660 2.2 GHz CPUs and 64 Gb RAM on the node) was used for the experiments. The asynchronous global optimization algorithm was implemented in C++ (GCC 9.5.0 and Intel MPI were used); the computation of objective function values was implemented in Python 3.9.
 
 %Ускорение составило примерно $230$ раз.
-Малое время решения задачи при использовании параллельного алгоритма (примерно 14 минут на 1 задачу) позволило провести полноценное исследование зависимости решения от параметра регуляризации $\alpha$. В таблице \ref{table_1} приведены минимальные значения objective function, найденные при соответствующем значении параметра регуляризации, время решения задачи (в секундах) и time speedup по сравнению с оценкой времени решения задачи последовательным методом. При запусках были использованы параметр метода $r=4.0$ из (\ref{R}) и точность $\epsilon = 10^{-4}\left\|b-a\right\|$. После выполнения заданного числа итераций или достижения методом глобального поиска заданной точности решение уточнялось Hook-Jeeves local method \cite{HookJeeves} с точностью $\epsilon = 10^{-4}\left\|b-a\right\|$.
+The short time for solving the problem when using the parallel algorithm (approximately 14 minutes for 1 problem) allowed a thorough investigation of the dependence of the solution on the regularisation parameter $\alpha$. The table \ref{table_1} shows the minimum values of the objective function found for the corresponding value of the regularization parameter, the time for solving the problem (in seconds) and the time speedup in comparison to the estimated problem solution time when using the sequential method. The method parameter $r=4.0$ из (\ref{R}) and the accuracy $\epsilon = 10^{-4}\left\|b-a\right\|$ were used in the runs. After a given number of iterations or after reaching the specified accuracy with the global search method, the solution was refined by the Hooke-Jeeves local method \cite{HookJeeves} with an accuracy of $\epsilon = 10^{-4}\left\|b-a\right\|$.
 
-Детальное исследование области значений параметра регуляризации в окрестности $\alpha$ равного нулю (от 0.1 до 0.01 с шагом 0.01 и от 0.01 до 0.001 с шагом 0.001) выявило убывание значения минимума с уменьшением параметра $\alpha$. Лучшее решение $0.540750$ было получено при параметре регуляризации $\alpha = 0.001$.
+A detailed study of the region of the regularization parameter values in the neighborhood of $\alpha$ equal to zero (from $0.1$ to $0.01$ in steps of $0.01$ and from $0.01$ to $0.001$ in steps of $0.001$) revealed that the value of the minimum decreases with decreasing $\alpha$. The best solution of $0.54075$ was obtained with the regularisation parameter $\alpha = 0.001$.
 
 
 \begin{table}
