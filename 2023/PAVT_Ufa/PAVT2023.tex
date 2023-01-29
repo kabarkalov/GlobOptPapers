@@ -91,7 +91,7 @@ Numerical methods for solving such multiextremal problems (global optimization m
 Assuming some additional properties of the objective function, it is possible to construct efficient deterministic methods for finding a global solution. For example, we can assume that the ratio of the increment of the function to the corresponding increment of the argument cannot exceed some threshold. In this case, the functions are called Lipschitz functions, and the problem itself is a Lipschitz global optimization problem.
 This paper continues the series of papers where the parallel methods of Lipschitz optimization proposed in \cite{Strongin2000} are investigated and modified in their application to solving inverse problems of chemical kinetics.
 
-The main part of the paper is organized as follows. Section 2 describes the mathematical model of the chemical reaction under study. The formal statement of the Lipschitz global optimization problem and the general scheme of search algorithms are given in Section 3. In Section 4, a scheme of the proposed asynchronous parallel algorithm for solving multiextremal problems is presented. The results of numerical solution of the inverse problem of chemical kinetics are discussed in Section 5.
+The main part of the paper is organized as follows. Section \ref{Sec_math_mod} describes the mathematical model of the chemical reaction under study. The formal statement of the Lipschitz global optimization problem and the general scheme of search algorithms are given in Section \ref{Sec_GO_Problem}. In Section \ref{Sec_PGSA}, a scheme of the proposed asynchronous parallel algorithm for solving multiextremal problems is presented. The results of numerical solution of the inverse problem of chemical kinetics are discussed in Section \ref{Sec_Exp}.
 
 
 \section{Problem Statement}\label{Sec_math_mod}
@@ -100,14 +100,14 @@ The main part of the paper is organized as follows. Section 2 describes the math
 
 \section{Parallel Algorithm for Solving Global Optimization Problems }\label{Sec_GSA}
 
-\subsection{Global Optimization Problem}
+\subsection{Global Optimization Problem}\label{Sec_GO_Problem}
 
 As it was mentioned above, the problem of identifying mathematical model parameter values can be considered a Lipschitz global optimization problem. From the formal point of view this problem is a mathematical programming problem of the form
 \begin{gather}
  \varphi^* = \varphi(y^\ast)=\min{\left\{\varphi(y):y\in D\right\}}, \label{problemN}\\
  D=\left\{y\in R^N: a_i\leq y_i \leq b_i, \;  1\leq i \leq N\right\} \label{D},
 \end{gather}
-where $a,\; b$ are the given vectors, and $a,b\in R^N$, $\varphi(y)$ is the objective function which satisfies the Lipschitz condition
+where $a,b\in R^N$ are the given vectors and $\varphi(y)$ is the objective function which satisfies the Lipschitz condition
 \begin{equation}\label{Lip}
 \left|\varphi(y_1)-\varphi(y_2)\right|\leq L\left\|y_1-y_2\right\|,\; y_1,y_2 \in D.
 \end{equation}
@@ -115,7 +115,7 @@ where $a,\; b$ are the given vectors, and $a,b\in R^N$, $\varphi(y)$ is the obje
 
 The function $\varphi(y)$ is assumed to be multiextremal and is given as a ``black box'' (i.e. as some subroutine with a vector of parameters as its input and the calculated value of the function as its output). Moreover, it is assumed that each application of this procedure (hereinafter referred to as search trial) is a time-consuming operation. This formulation of the problem is fully consistent with the inverse problem of chemical kinetics.
 
-There are several algorithms that can be applied to solve Lipschitz optimization problems. These include, among others, the non-uniform space covering method \cite{Evtushenko2013, Evtushenko2009}, diagonal and simplicial partitions methods \cite{Zilinskas2010, Paulavicius2011}. In this paper, we used the global search algorithm proposed by Strongin{Strongin2000}. Under this approach, the original multidimensional problem (\ref{problemN}) is reduced to a one-dimensional optimization problem using Peano-Hilbert curves.
+There are several algorithms that can be applied to solve Lipschitz optimization problems. These include, among others, the non-uniform space covering method \cite{Evtushenko2013, Evtushenko2009}, diagonal and simplicial partitions methods \cite{Zilinskas2010, Paulavicius2011}. In this paper, we used the global search algorithm proposed by Strongin\cite{Strongin2000}. Under this approach, the original multidimensional problem (\ref{problemN}) is reduced to a one-dimensional optimization problem using Peano-Hilbert curves.
 
 In fact, using a continuous one-to-one mapping (Peano-Hilbert curve) $y(x)$ of the segment $[0,1]$ of the real axis onto the hyperinterval $D$ from (\ref{D}), we can reduce the multidimensional problem (\ref{problemN}) to a one-dimensional problem
 \[
@@ -206,12 +206,12 @@ z_k^* -\gamma (z_k^+-z_k^*),
 \]
 where $z_k^+$ and $z_k^*$ are estimates of maximum and minimum function values respectively. For the Zilinskas method $x^{k+1}$ is the point where the maximum average improvement of the current estimate of the global extremum is expected.
 
-The Strongin algorithm has been constructed in the framework of the information approach to global optimization (see \cite{Strongin1978})). This method has an adaptive scheme to evaluate a numerical estimate of the unknown Lipschitz constant.
+The Strongin global search algorithm has been constructed in the framework of the information approach to global optimization (see \cite{Strongin2000})). This method has an adaptive scheme to evaluate a numerical estimate of the unknown Lipschitz constant.
 
 
-\subsection{Parallel Asynchronous Global Search Algorithm}
+\subsection{Parallel Asynchronous Global Search Algorithm}\label{Sec_PGSA}
 
-As the Global Search Algorithm (GSA) belongs to the class of characteristic algorithms, this suggests a possible way to parallelize it. 
+As the global search algorithm (GSA) belongs to the class of characteristic algorithms, this suggests a possible way to parallelize it. 
 As previously mentioned, the characteristic of the interval $R(i)$ can be regarded as some measure of finding the global minimum point in this interval. Then, instead of a single best interval, several intervals with the highest characteristics can be chosen at once and successive trials can be carried out in these intervals in parallel. Moreover, the scheme of characteristic algorithms also allows asynchronous parallelization, which minimizes downtime of processors when trial complexity depends on a particular point in the search domain. 
 
 Now, let us examine the asynchronous global search algorithm in more detail. It implements a paralleling scheme of the ``master/worker'' type. The master process accumulates search information, evaluates on its basis the Lipschitz constant for the objective function, determines new trial points and distributes them to the worker processes. Worker processes receive the points from the master, perform new trials in these points and send the results to the master.
@@ -255,9 +255,9 @@ where $z_i=\varphi(y(x_i))$, if $x_i \notin I_k, \; 1\leq i \leq k+p$. The value
 
 	\item
 Assign to each interval $(x_{i-1},x_i), \; x_{i-1} \notin I_k, x_i \notin I_k, \; 2\leq i\leq k+p$, the number $R(i)$, which is called the interval characteristic and is calculated using the formula
-\[
+\begin{equation} \label{R}
 R(i)=rM\Delta_i+\frac{(z_i-z_{i-1})^2}{rM\Delta_i}-2(z_i+z_{i-1}),
-\]
+\end{equation}
 where $\Delta_i=\left(x_i-x_{i-1}\right)^{1/N}$, and $r>1$ is the reliability parameter of the method.
 
 	\item
@@ -281,41 +281,41 @@ The master process completes the algorithm when one of two conditions is met: $\
 
 In preliminary experiments, we estimated the approximate time to calculate one objective function using the sequential algorithm. The computer architecture used for the experiments was Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz 2.59 GHz. The average calculation time of the objective function was about $0.2$ sec, which characterizes the problem as being computationally complex.  Solving the problem with a sequential algorithm would require at least 1 million trials and thus at least 54 hours (as an estimate). Therefore only a parallel algorithm with a stopping criterion based on the number of trials $K_{max}=10^6$ was used for the calculations. 
 
-Numerical experiments were performed using the parallel asynchronous algorithm outlined in Section 4, running $160$ processes: $159$ processes calculated the values of the objective function (worker processes) while $1$ master process controlled the algorithm. The Lobachevsky  supercomputer (University of Nizhni Novgorod)  (CentOS 7.2, SLURM, two Intel Sandy Bridge E5-2660 2.2 GHz CPUs and 64 Gb RAM on the node) was used for the experiments. The asynchronous global optimization algorithm was implemented in C++ (GCC 9.5.0 and Intel MPI were used); the computation of objective function values was implemented in Python 3.9.
+Numerical experiments were performed using the parallel asynchronous algorithm outlined in Section \ref{Sec_PGSA}, running $160$ processes: $159$ processes calculated the values of the objective function (worker processes) while $1$ master process controlled the algorithm. The Lobachevsky  supercomputer (University of Nizhni Novgorod)  (CentOS 7.2, SLURM, two Intel Sandy Bridge E5-2660 2.2 GHz CPUs and 64 Gb RAM on the node) was used for the experiments. The asynchronous global optimization algorithm was implemented in C++ (GCC 9.5.0 and Intel MPI were used); the computation of objective function values was implemented in Python 3.9.
 
 %Ускорение составило примерно $230$ раз.
-The short time for solving the problem when using the parallel algorithm (approximately 14 minutes for 1 problem) allowed a thorough investigation of the dependence of the solution on the regularisation parameter $\alpha$. The table \ref{table_1} shows the minimum values of the objective function found for the corresponding value of the regularization parameter, the time for solving the problem (in seconds) and the time speedup in comparison to the estimated problem solution time when using the sequential method. The method parameter $r=4.0$ из (\ref{R}) and the accuracy $\epsilon = 10^{-4}\left\|b-a\right\|$ were used in the runs. After a given number of iterations or after reaching the specified accuracy with the global search method, the solution was refined by the Hooke-Jeeves local method \cite{HookJeeves} with an accuracy of $\epsilon = 10^{-4}\left\|b-a\right\|$.
+The short time for solving the problem when using the parallel algorithm (approximately 14 minutes for 1 problem) allowed a thorough investigation of the dependence of the solution on the regularisation parameter $\alpha$. The table \ref{table_1} shows the minimum values of the objective function found for the corresponding value of the regularization parameter, the time for solving the problem (in seconds) and the time speedup in comparison to the estimated problem solution time when using the sequential method. The method parameter $r=4.0$ from (\ref{R}) and the accuracy $\epsilon = 10^{-4}\left\|b-a\right\|$ were used in the runs. After a given number of iterations or after reaching the specified accuracy with the global search method, the solution was refined by the Hooke-Jeeves local method \cite{HookJeeves} with an accuracy of $\epsilon = 10^{-4}\left\|b-a\right\|$.
 
 A detailed study of the region of the regularization parameter values in the neighborhood of $\alpha$ equal to zero (from $0.1$ to $0.01$ in steps of $0.01$ and from $0.01$ to $0.001$ in steps of $0.001$) revealed that the value of the minimum decreases with decreasing $\alpha$. The best solution of $0.54075$ was obtained with the regularisation parameter $\alpha = 0.001$.
 
 
 \begin{table}
-\caption{Исследование влияния параметра регуляризации alpha на минимальное значение функции}
+\caption{Dependence of the function minimum value $\varphi^*$ on the regularization parameter $\alpha$}
 \label{table_1}
 \begin{center}
-\begin{tabular}{cccc}
+\begin{tabular}{ccc}
 \hline\noalign{\smallskip}
- Alpha      & Minimum  & Time (sec.) & Speedup \\
+ $\alpha$      & $\varphi^*$  & Time (sec.) \\
 \hline\noalign{\smallskip}
-0.1		&	0.810454	&	806.192	&	241       \\
-0.09	&	0.837868	&	828.649	&	234       \\
-0.08	&	0.808238	&	811.852	&	239       \\
-0.07	&	0.759134	&	803.626	&	242       \\
-0.06	&	0.723404	&	810.9	&	240       \\
-0.05	&	0.729415	&	804.674	&	242       \\
-0.04	&	0.736035	&	816.387	&	238       \\
-0.03	&	0.68152		&	809.185	&	240       \\
-0.02	&	0.669092	&	155.837	&	3         \\
-0.01	&	0.632944	&	825.238	&	235       \\
-0.009	&	0.63001		&	814.48	&	239       \\
-0.008	&	0.604817	&	830.448	&	234       \\
-0.007	&	0.619546	&	807.335	&	241       \\
-0.006	&	0.612614	&	834.703	&	233       \\
-0.005	&	0.615638	&	815.45	&	238       \\
-0.004	&	0.579725	&	821.421	&	237       \\
-0.003	&	0.583529	&	831.454	&	234       \\
-0.002	&	0.547907	&	850.017	&	229       \\
-0.001	&	0.54075		&	853.898	&	227       \\
+0.1		&	0.810454	&	806.192	\\
+0.09	&	0.837868	&	828.649 \\
+0.08	&	0.808238	&	811.852	\\
+0.07	&	0.759134	&	803.626 \\
+0.06	&	0.723404	&	810.9		\\
+0.05	&	0.729415	&	804.674	\\
+0.04	&	0.736035	&	816.387	\\
+0.03	&	0.68152		&	809.185	\\
+0.02	&	0.669092	&	155.837	\\
+0.01	&	0.632944	&	825.238	\\
+0.009	&	0.63001		&	814.48	\\
+0.008	&	0.604817	&	830.448	\\
+0.007	&	0.619546	&	807.335	\\
+0.006	&	0.612614	&	834.703	\\
+0.005	&	0.615638	&	815.45	\\
+0.004	&	0.579725	&	821.421	\\
+0.003	&	0.583529	&	831.454	\\
+0.002	&	0.547907	&	850.017	\\
+0.001	&	0.54075		&	853.898	\\
 \noalign{\smallskip}\hline
 \end{tabular}\end{center}\end{table}
 
