@@ -208,25 +208,7 @@ When implementing the algorithm for finding the attraction areas of the local  m
 
 In the current section, let us present a detailed description how we used the decision tree for finding  the attraction areas of the local extrema.  In the course of running GSA, it is necessary to determine whether it is worth to use current point as a  start one for the local method or not. To do so, one can check the points of adjacent trials. If among  these ones there are no points at which the function values are lower than in current one, one  can suggest that we are in the attractor of a local minimum. In this case, we can run the local method  from current point, which will rapidly converge to a local minimum of the function.  We can do it in the multidimensional space only, not in one-dimensional interval after the  dimensionality reduction.  First, the reduced function $\varphi(y(x))$ changes its properties: one local minimum in the  multidimensional space may divide into a set of minima after the dimensionality reduction.  Second, after the use of the mapping $y(x)$, we can lose the information on the mutual arrangement of  the points in the original space. The points located close to each other in the multidimensional space  may appear to be essentially separated in the one-dimensional interval.
 
-\begin{figure}[ht!] 
-	\begin{center} 
-		\begin{minipage}[h]{0.6\linewidth} 
-			\includegraphics[width=1\linewidth]{figure/fig2.png} 
-			\caption{A function from the GKLS generator before using Peano curves} %%  подпись к рисунку 
-			\label{fig:fig2} 
-		\end{minipage} 
-	\end{center} 
-\end{figure}	
 
-\begin{figure}[ht!] 
-	\begin{center} 
-		\begin{minipage}[h]{0.6\linewidth} 
-			\includegraphics[width=1\linewidth]{figure/fig2.png} 
-			\caption{A figure with a two-dimensional decision tree} %% подпись к  рисунку 
-			\label{fig:fig2_2} 
-		\end{minipage} 
-	\end{center} 
-\end{figure}
 
 
 Therefore, we will determine the attraction areas of the local extrema in the original multidimensional space. However, the determining of the adjacent points in the multidimensional space is quite expensive in terms of computing resources. To do so, we will use the decision tree. 
@@ -235,7 +217,7 @@ After completing a certain number of trials (for example, $100\ \ast\ N$), let u
 
 When considering the neighbors, it is necessary to take into account the following. If even a single  neighbor has a lower function value than current point, there is no need to run the local method. If at  even a single neighboring point the function value is the same as at the current one, this point must be also checked (i.e. to find all its neighbors and to check these ones in the same way). Only in the case when  all function values at the neighboring points are greater than at the current point, we can run the local  method.
 
-Fig. \ref{fig:fig2} presents a contour plot of an objective function and the trial points; Fig.  \ref{fig:fig2_2} presents corresponding decision tree. 
+%Fig. \ref{fig:fig2} presents a contour plot of an objective function and the trial points; Fig.  \ref{fig:fig2_2} presents corresponding decision tree. 
 
 
 
@@ -339,24 +321,23 @@ Upon computing the next trial point, the master process adds it to the set $I_k$
 
 
 
-% перевести этот раздел
+% переводить до этого раздела
 \section{Результаты экспериментов}\label{SecR}
 
 
-Вычислительные эксперименты были проведены на Lobachevsky supercomputer. На узлах суперкомпьютера установлены по два процессора Intel Sandy Bridge E5-2660 2.2 GHz, 64 Gb RAM. 
+The numerical experiments were carried out on Lobachevsky supercomputer. Each supercomputer  node had two processors Intel Sandy Bridge E5-2660 2.2 GHz, 64 Gb RAM. 
 
-В экспериментах мы использовали генератор тестовых задач GKLS, который может порождать многоэкстремальные задачи оптимизации с известными свойствами: точкой глобального минимума, количеством локальных минимумов, и т.п.
+In the experiments, we used GKLS generator of test problems, which can generate multiextremal  optimization problems with known properties: the global minimum point, the number of local minima,  etc.
 
-Для демонстрации эффективности исследуемого алгоритма глобального поиска приведем результаты его сравнения с известным методами DIRECT и DIRECTl
-В таблице \ref{tab:1} приведено среднее количество итераций, выполненных соответствующими методами при решении серии задач GKLS. Знак «>» указывает на ситуацию, когда не все задачи были решены, здесь в скобках указано количество нерешенных задач. Как видно, GSA превосходит методы DIRECT и DIRECTl по среднему числу итераций, требующихся для решения задач с одинаковой точностью.
+To demonstrate the efficiency of  investigated global search algorithm, here we present the results of  comparing this one with well known methods DIRECT and DIRECTl. Table \ref{tab:1} presents the averaged numbers of iterations executed by respective methods when  solving a series of GKLS problems. The sign «>» points to the situation when not all problems are  solved. In these cases, the numbers of non-solved problems are given in brackets. As one can see,  GSA overcomes DIRECT and DIRECTl methods in average number of iterations necessary for  solving the problems with the same precision.
 
 \begin{table}[!ht]
-    \caption{Среднее число итераций}
+    \caption{Averaged number of iterations}
     \label{tab:1}
     \centering
     \begin{tabular}{|l|l|l|l|l|}
     \hline
-        N & Problem class & DIRECT & DIRECTl & АГП  \\ \hline
+        N & Problem class & DIRECT & DIRECTl & GSA  \\ \hline
         4 & Simple & >47282 (4) & 18983 & 11953  \\ \hline
         ~ & Hard & >95708 (7) & 68754 & 25263  \\ \hline
         5 & Simple & >16057 (1) & 16758 & 15920  \\ \hline
@@ -365,37 +346,42 @@ Upon computing the next trial point, the master process adds it to the set $I_k$
 \end{table}
 
 
-Далее приведены результаты сравнения двух параллельных алгоритмов --- асинхронного global search algorithm (GSA) и его модификации с использованием decision tree для выявления областей притяжения локальных минимумов (Decision Tree). Численное сравнение проводилось на классах функций GKLS двух видов (Simple and Hard) размерности 2, 3, 4 и 5 из \cite{fio_bib19}. Критерием остановки алгоритмов служило попадание точки очередного испытания в $\varepsilon$-окрестность истинного глобального минимума. 
-В таблице сравнивается среднее количество итераций, выполненных алгоритмами при решении задач, и ускорение по времени относительно последовательного запуска. Распараллеливание  осуществлялось с применением технологии MPI, запуск производился на 8 процессах.
+%Ниже приведены результаты сравнения двух параллельных алгоритмов --- асинхронного GSA и его модификации с использованием decision tree и локального метода Хука-Дживса. Численное сравнение проводилось на классах функций Simple и Hard размерности 2, 3, 4 и 5 из \cite{fio_bib19}. Критерием остановки служило попадание точки очередного испытания trial в $\varepsilon$ окрестность истинного глобального минимума. 
+%В таблице \ref{tab:2} представлено среднее количество итераций и ускорение по времени относительно последовательного запуска. Распараллеливание  осуществлялось с применением  MPI. При этом запуск производился на 4 процессах, а следовательно, на каждой итерации вычислялось 3 точки. Значение в скобках (если оно есть) показывает количество не решенных задач. Это означает, что было достигнут максимум по числу проводимых итераций, но в окрестность глобального минимума точка так и не попала.
+
+
+Below, the results of comparing two parallel algorithms --- asynchronous global search algorithm  (GSA) and its modification using the decision tree to find the attractor areas of the local minima  (Decision Tree) are presented. The numerical comparison was performed on two classes of the GKLS  functions (Simple and Hard) of dimensionalities 2, 3, 4, and 5 from \cite{fio_bib19}. The stop  criterion for the algorithms was the falling of the next trial points into the $\varepsilon$-nearness of  true global minimum.  In Table \ref{tab:2}, the averaged numbers of iterations executed by the algorithms when solving the  problems and the values of speedup in time relative to the sequential run are compared. The  parallelization was performed using MPI technology, the run was performed on 8 processes.
+
+
 
 
 \begin{table}[h!]
-	\caption{Среднее число итераций и среднее число trial, проводимое разными алгоритмами}
+	\caption{Averaged numbers of iterations and averaged numbers of trials executed by different 
+		algorithms}
 	\label{tab:2}
 	\centering
 	\begin{tabular}{|c|c|c|c|c|c|}
 		\hline
 		
-		N & Класс задачи & \multicolumn{2}{c|}{Среднее число итераций} & \multicolumn{2}{c|}{Ускорение} \\ \hline
-		& ~ & АГПА & decision tree & АГПА & decision tree \\ \hline
-		& Simple & 3823,1   & 485,6  & 7,4   & 0,5 \\ \hline
-		2  & Hard & 787,6    & 304,2  & 13,8  & 1,0 \\ \hline
-		& Simple & 5700,5   & 720,1  & 5,6   & 0,1 \\ \hline
-		3  & Hard & 2411,9   & 634,3  & 5,0   & 0,1 \\ \hline
-		& Simple & 31101,5  & 1037,4 & 5,1   & 0,2 \\ \hline
-		4  & Hard & 10418,1  & 816,2  & 6,9   & 0,2 \\ \hline
-		& Simple & 163313,5 & 1204,2 & 4,8   & 1,0 \\ \hline
-		5  & Hard & 27524,5  & 999,4  & 4,6   & 0,2 \\ \hline
+		N & Problem class & \multicolumn{2}{c|}{Averaged number of iterations} & \multicolumn{2}{c|}{Speedup} \\ \hline
+		& ~ & GSAA & Decision tree & GSAA & Decision tree \\ \hline
+		& Simple & 3823,1   & 485,6  & 7,4   & 12,7 \\ \hline
+		2  & Hard & 787,6    & 304,2  & 13,8  & 14,9 \\ \hline
+		& Simple & 5700,5   & 720,1  & 5,6   & 14,2  \\ \hline
+		3  & Hard & 2411,9   & 634,3  & 5,0   & 5,9  \\ \hline
+		& Simple & 31101,5  & 1037,4 & 5,1   & 7,1  \\ \hline
+		4  & Hard & 10418,1  & 816,2  & 6,9   & 5,0  \\ \hline
+		& Simple & 163313,5 & 1204,2 & 4,8   & 4,1 \\ \hline
+		5  & Hard & 27524,5  & 999,4  & 4,6   & 6,3  \\ \hline
 	\end{tabular}
 \end{table}
 
-Как видно из таблицы iteration speedup достаточно велико, причем на задачах любой размерности. 
 
-Таким образом, в результате проведенной работы удалось успешно объединить алгоритм глобального поиска с методом локальной оптимизации. 
-В отличие от известных мультистартовых схем решение о запуске локального метода производится с использованием деревьев решений.
-Использование такой комбинации методов позволяет значительно ускорить работу алгоритма. 
+As one can see from Table \ref{tab:2},  the iteration speedup is large enough for the problems of any  dimensionality. 
 
-Параллельный вариант алгоритма сохраняет свойства своего последовательного прототипа, что подтверждается вычислительными экспериментами, во время которых была решена серия из нескольких сотен задач разной размерности. Предложенная нами схема позволяет использовать преимущества обоих подходов -- и распараллеливания, и быстрого поиска локальных экстремумов.
+So far, as a result of the work done, we succeeded to combine the global search algorithm with a local  optimization method.  Unlike the known multistart schemes, the decision to run the local method is made using the decision  tree. The use of such a combination of methods allows accelerating the work of algorithm considerably. 
+
+The parallel version of the algorithm preserves the properties of its sequential prototype that was  confirmed by he numerical experiments on solving a series of several hundred problems of various  dimensionalities. The scheme we proposed allows utilizing the advantages of both approaches – of the  parallelization as well as of fast search of local extrema.
 
 
 %
@@ -406,13 +392,17 @@ Upon computing the next trial point, the master process adds it to the set $I_k$
 %
 
 \bibitem{fio_bib1}
-Ferreiro A.M., Garcia J.A., Lopez-Salas J.G., Vazquez C. An efficient implementation of parallel simulated annealing algorithm in GPUs // Journal of global optimization. — 2013. — Vol. 57, No. 3. — P. 863–890.
+M. Ferreiro, J. A. Garcia, J. G. Lopez-Salas, and C. Vazquez, “An efficient implementation of parallel simulated annealing algorithm in gpus,” Journal of global optimization, vol. 57, no. 3, pp. 863–890, 2013.
 
 \bibitem{fio_bib2}
-Garcia-Martinez J.M., Garzon E.M., Ortigosa P.M. A GPU implementation of a hybrid evolutionary algorithm: GPuEGO // Journal of super-computing. — 2014. — Vol. 70, No. 2. — P. 684–695.
+J. M. Garcia-Martinez, E. M. Garzon, and P. M. Ortigosa, “A gpu implementation of a hybrid evolutionary algorithm: Gpuego,” Journal of super-computing, vol. 70, no. 2, pp. 684–695, 2014.
 
 \bibitem{fio_bib3}
-Langdon W.B. Graphics processing units and genetic programming: an overview // Soft Computing. — 2011. — Vol. 15, No 8. — P. 1657–1669.
+W. B. Langdon, “Graphics processing units and genetic programming: an overview,” Soft Computing, vol. 15, no. 8, pp. 1657–1669, 2011.
+
+
+
+
 
 \bibitem{fio_bib4}
 Евтушенко Ю.Г., Малкова В.У., Станевичюс А.А. Параллельный поиск глобального экстремума функций многих переменных // Ж. вычисл. матем. и матем. физ. — 2009. — Т. 49, №2. — С. 255–269.
@@ -426,44 +416,40 @@ Paulavicius R., Žilinskas J., Grothey A. Parallel branch and bound for global o
 \bibitem{fio_bib7}
 Глобальная оптимизация: приложения и вычислительная сложность. %URL: http://hpc-education.unn.ru/ru/globopt/глобальная-оптимизация-приложения-и (дата обращения: 10.10.2020).
 
-\bibitem{fio_bib8}
-Захарова Е.М., Минашина И.К. Обзор методов многомерной оптимизации. Информационные процессы // том 14 - №3 – 2014 - С. 256-274.
 
-\bibitem{fio_bib9}
-Городецкий С. Ю. Методические материалы к лабораторной работе «Вычислительные методы поиска локальных минимумов функций», 2001.% URL: http://itmm.unn.ru/files/2016/09/MO_Lab2_LocOpt.pdf (дата обращения: 09.07.2022).
 
-\bibitem{fio_bib10}
-Шефов К. С., Степанова М. М. Реализация и применение параллельного алгоритма глобального поиска минимума к задаче оптимизации параметров молекулярно-динамического потенциала ReaxFF: %URL: http://crm.ics.org.ru/uploads/crmissues/crm_2015_3/15750.pdf, 2015 (дата обращения: 13.10.2020).
 
 \bibitem{fio_bib11}
-Gergel V.P. A global optimization algorithm for multivariate functions with lipschitzian first derivatives / Gergel V.P. // Journal of Global Optimization. – 1997. – Vol. 10, No. 3. – P. 257-281.
+V. P. Gergel, “A global optimization algorithm for multivariate functions with lipschitzian first derivatives,” Journal of Global Optimization, vol. 10, no. 3, pp. 257–281, 1997.
 
 \bibitem{fio_bib12}
 Barkalov K.A. A global optimization technique with an adaptive order of checking for constraints / Barkalov K.A., Strongin R.G. // Computational Mathematics and Mathematical Physics. – 2002. – Vol. 42, No. 9. – P. 1289-1300.
 
 \bibitem{fio_bib13}
-Gaviano, M. Software for generation of classes of test functions with known local and global minima for global optimization/ M. Gaviano, D. Lera, D. E. Kvasov, Y. D. Sergeyev // ACM Transactions on Mathematical Software. – 2003. – Vol. 29. – P. 469-480.
+M. Gaviano, D. Lera, D. E. Kvasov, and Y. D. Sergeyev, “Software for generation of classes of test functions with known local and global minima for global optimization,” ACM Transactions on Mathematical Software, vol. 29, pp. 469–480, 2003.
 
 \bibitem{fio_bib14}
-Химмельблау Д. Прикладное нелинейное программирование // М.: Мир - 1975 - 536 с. 
+D. Himmelblau, Applied Nonlinear Programming. Mir Publishers, 1975.
 
 \bibitem{fio_bib15}
 Nelder J., Mead R. A simplex method for function minimization // Computer Journal - 7(4) – 1965 - P. 308-313.
 
 \bibitem{fio_bib16}
-OpenCV (Open Source Computer Vision) documentation. %URL: https://docs.opencv.org/4.x/dc/dd6/ml_intro.html (дата обращения: 10.07.2022)
+“Opencv (open source computer vision) documentation,” (accessed: 10 July 2022).
+[Online]. Available: %URL:{https://docs.opencv.org/4.x/dc/dd6/ml_intro.html}
+
 
 \bibitem{fio_bib17}
-Сергеев, Я.Д. Диагональные методы глобальной оптимизации / Я.Д. Сергеев, Д.Е. Квасов – М.: Физматлит, 2008. – 352 c.
+Ya.D. Sergeev, D.E. Kvasov, Diagonal Global Optimization Methods. Fizmatlit, 2008.
 
 \bibitem{fio_bib18}
-Sysoyev, A.,  Barkalov, K.,  Sovrasov, V.,  Lebedev, I.,  Gergel, V. Globalizer – A parallel software system for solving global optimization problems. Lecture Notes in Computer Science. Volume 10421 LNCS, 2017, Pages 492-499
+Sysoyev, K. Barkalov, V. Sovrasov, I. Lebedev, and V. Gergel, “Globalizer – a parallel software system for solving global optimization problems,” Lecture Notes in Computer Science, vol. 10421, no. LNCS, pp. 492–499, 2017.
 
 \bibitem{fio_bib19}
-Sergeyev, Ya.D. Global search based on efficient diagonal partitions and a set of Lipschitz constants / Ya.D. Sergeyev, D.E. Kvasov // SIAM Journal on Optimization. – 2006. Vol. 16, No. 3. – P. 910–937
+Y. D. Sergeyev and D. E. Kvasov, “Global search based on efficient diagonal partitions and a set of lipschitz constants,” SIAM Journal on Optimization, vol. 16, no. 3, pp. 910–937, 2006.
 
 \bibitem{fio_bib20}
-Стронгин Р.Г. Параллельные вычисления в задачах глобальной оптимизации / Стронгин Р.Г., Гергель В.П., Гришагин В.А., Баркалов К.А. – М.: Издательство Московского университета, 2013. 280 с.
+R.G. Strongin, V.P. Gergel, V.A. Grishagin, K.A. Barkalov , Parallel Computations in Global Optimization Problems. Izd. Mosk. Gos. Univ., 2013.
 
 
 
