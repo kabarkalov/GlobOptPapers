@@ -17,7 +17,7 @@
 % to typeset URLs, URIs, and DOIs
 \usepackage{url}
 \usepackage{hyperref}
-\usepackage[english, russian]{babel} 
+\usepackage[english]{babel} 
 \usepackage{amsmath} 
 \def\UrlFont{\rmfamily}
 \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}
@@ -57,11 +57,11 @@ In the present work, the solving of the multidimensional global optimization pro
 
 \section{Introduction}
 
-In the present work, we consider the parallel algorithms for solving the multidimensional global optimization problems. Such problems often arise in the cases, when it is necessary to select the values  of parameters of the mathematical model being investigated, in which the simulation results best fit the experimental data. For solving the problems of this class, many algorithms are known: from the metaheuristic algorithms, based on the  idea of random search \cite{fio_bib1,fio_bib2,fio_bib3}, to the deterministic algorithms guarantying convergence to the global minimum \cite{fio_bib4,fio_bib5,fio_bib6}.  
+In the present work, we consider the parallel algorithms for solving the multidimensional global optimization problems. Such problems often arise in the cases, when it is necessary to select the values  of parameters of the mathematical model being investigated, in which the simulation results best fit the experimental data. For solving the problems of this class, many algorithms are known: from the metaheuristic algorithms, based on the  idea of random search \cite{Ferreiro2013,Garcia2014,Langdon2011}, to the deterministic algorithms guarantying convergence to the global minimum \cite{Evtushenko2009,He2008,Paulavicius2011}.  
 
-Since in real global optimization problems each computing of the function value (hereafter called  \textit{a trial}) is a computation-costly operation, one has to reduce the number of such trials. It  can be achieved by intentional choice of variants in the course of search for the optimal solution cutting  off unpromising search subdomains and investigating only these ones, in which the solution of the  problem can be found. The global search algorithm (GSA) is based on this idea \cite{fio_bib7}. In  the present work, we tried to combine GSA and a local optimization method (Hooke-Jeeves pattern search method) to reduce the number of trials executed. The decision on the run of the local method will be made using a decision tree.
+Since in real global optimization problems each computing of the function value (hereafter called  \textit{a trial}) is a computation-costly operation, one has to reduce the number of such trials. It  can be achieved by intentional choice of variants in the course of search for the optimal solution cutting  off unpromising search subdomains and investigating only these ones, in which the solution of the  problem can be found. The global search algorithm (GSA) is based on this idea. In  the present work, we tried to combine GSA and a local optimization method (Hooke-Jeeves pattern search method) to reduce the number of trials executed. The decision on the run of the local method will be made using a decision tree.
 
-The local optimization algorithms are intended for determining only one of local extrema within a set  of feasible solutions, in which the objective function takes the extremal (maximum or minimum) value.  Among the local methods,  the zero-order methods and the gradient methods (of the 1\textsuperscript{st} order and of the  2\textsuperscript{nd} one) are traditionally distinguished \cite{fio_bib8,fio_bib9}. Note that the application of the first-order methods (not to mention the second one) in the problems  with the ``black-box'' type functions is difficult since the problem of numerical estimating the gradient arises here. Therefore, further we will consider only the zero-order methods. 
+The local optimization algorithms are intended for determining only one of local extrema within a set  of feasible solutions, in which the objective function takes the extremal (maximum or minimum) value.  Among the local methods,  the zero-order methods and the gradient methods (of the 1\textsuperscript{st} order and of the  2\textsuperscript{nd} one) are traditionally distinguished. Note that the application of the first-order methods (not to mention the second one) in the problems  with the ``black-box'' type functions is difficult since the problem of numerical estimating the gradient arises here. Therefore, further we will consider only the zero-order methods. 
 
 In order to determine,  at which moment it is best to run the local method within the framework of the  global search, we will use an algorithm based on a decision tree. At the first search stage, the search information is accumulated in the form of the results of the trials  executed. We used the trial results for training the decision tree that allows obtaining a piecewise constant approximation of the objective function and predicting the objective function behavior on its base.  To do so, we will compare the function values at the points neighboring to the one, which we consider  to be suspicious for a local minimum, and make a decision  whether the next trial point falls into the attractor region of a local minimum or not.
 
@@ -168,13 +168,13 @@ As the final estimate of the global optimizer of the considered problem, the val
 \end{equation} 
 are taken. 
 
-The substantiation of this method of organization of computations see in \cite{fio_bib20}. The  modifications taking into account the presence of inequality constraints as well as the information on the derivative of the objective function are presented in \cite{fio_bib12, fio_bib9,  fio_bib11}.
+The substantiation of this method of organization of computations see in \cite{Strongin2013}. The  modifications taking into account the presence of inequality constraints as well as the information on the derivative of the objective function are presented in \cite{Barkalov2002,Gergel1997}.
 
 
 
 \subsection{Hooke--Jeeves method}\label{SecHG}
 
-The Hooke--Jeeves pattern search algorithm belongs to the class of zero-order methods. Its computation rules are a  combination of the investigating search (to select the direction) and search in the direction selected  \cite{fio_bib14, fio_bib15}.
+The Hooke--Jeeves pattern search algorithm belongs to the class of zero-order methods. Its computation rules are a  combination of the investigating search (to select the direction) and search in the direction selected  \cite{NelderMead,Himmelblau75}.
 
 The investigating search is performed as follows. 
 \begin{enumerate} 
@@ -202,7 +202,7 @@ With regard to the search in a direction, it consists in performing a step from 
 
 The decision tree is a tool used for an automated analysis of big data arrays, which is applied in the  machine learning. Decision tree is a binary tree (a tree, in which each non-leaf node has two child nodes). It can be used for solving the classification problems as well as the regression ones. When solving  the classification problems, each leaf of the tree is marked by a class label, and several leafs can have  the same labels. In the case of constructing a regression, a constant is assigned to each leaf of the tree.   Therefore, the approximating function obtained is a piecewise-constant one. In our case, the decision tree constructs the function $\psi(y)$ as a piecewise-constant  approximation of $\varphi(y)$ in the search domain. Let us denote the value  computed by the  decision tree at the point $y$ as $z' = \psi(y)$.
 
-When implementing the algorithm for finding the attraction areas of the local  minima, we used the algorithms from OpenCV library to construct decision tree. OpenCV is an open source library of the algorithms of computer vision, image processing, and  general-purpose numerical algorithms. More details on the decision tree can be found  in \cite{fio_bib16}.
+When implementing the algorithm for finding the attraction areas of the local  minima, we used the algorithms from OpenCV library to construct decision tree. OpenCV is an open source library of the algorithms of computer vision, image processing, and  general-purpose numerical algorithms. More details on the decision tree can be found  in \cite{Opencv}.
 
 \section{Combination of local and global search algorithms for solving multidimensional  problems}\label{SecGSAL}
 
@@ -322,7 +322,7 @@ Upon computing the next trial point, the master process adds it to the set $I_k$
 
 
 % переводить до этого раздела
-\section{Результаты экспериментов}\label{SecR}
+\section{Numerical Experiments}\label{SecR}
 
 
 The numerical experiments were carried out on Lobachevsky supercomputer. Each supercomputer  node had two processors Intel Sandy Bridge E5-2660 2.2 GHz, 64 Gb RAM. 
@@ -346,11 +346,11 @@ To demonstrate the efficiency of  investigated global search algorithm, here we 
 \end{table}
 
 
-%Ниже приведены результаты сравнения двух параллельных алгоритмов --- асинхронного GSA и его модификации с использованием decision tree и локального метода Хука-Дживса. Численное сравнение проводилось на классах функций Simple и Hard размерности 2, 3, 4 и 5 из \cite{fio_bib19}. Критерием остановки служило попадание точки очередного испытания trial в $\varepsilon$ окрестность истинного глобального минимума. 
+%Ниже приведены результаты сравнения двух параллельных алгоритмов --- асинхронного GSA и его модификации с использованием decision tree и локального метода Хука-Дживса. Численное сравнение проводилось на классах функций Simple и Hard размерности 2, 3, 4 и 5 из \cite{Sergeyev2006}. Критерием остановки служило попадание точки очередного испытания trial в $\varepsilon$ окрестность истинного глобального минимума. 
 %В таблице \ref{tab:2} представлено среднее количество итераций и ускорение по времени относительно последовательного запуска. Распараллеливание  осуществлялось с применением  MPI. При этом запуск производился на 4 процессах, а следовательно, на каждой итерации вычислялось 3 точки. Значение в скобках (если оно есть) показывает количество не решенных задач. Это означает, что было достигнут максимум по числу проводимых итераций, но в окрестность глобального минимума точка так и не попала.
 
 
-Below, the results of comparing two parallel algorithms --- asynchronous global search algorithm  (GSA) and its modification using the decision tree to find the attractor areas of the local minima  (Decision Tree) are presented. The numerical comparison was performed on two classes of the GKLS  functions (Simple and Hard) of dimensionalities 2, 3, 4, and 5 from \cite{fio_bib19}. The stop  criterion for the algorithms was the falling of the next trial points into the $\varepsilon$-nearness of  true global minimum.  In Table \ref{tab:2}, the averaged numbers of iterations executed by the algorithms when solving the  problems and the values of speedup in time relative to the sequential run are compared. The  parallelization was performed using MPI technology, the run was performed on 8 processes.
+Below, the results of comparing two parallel algorithms --- asynchronous global search algorithm  (GSA) and its modification using the decision tree to find the attractor areas of the local minima  (Decision Tree) are presented. The numerical comparison was performed on two classes of the GKLS  functions (Simple and Hard) of dimensionalities 2, 3, 4, and 5 from \cite{Sergeyev2006}. The stop  criterion for the algorithms was the falling of the next trial points into the $\varepsilon$-nearness of  true global minimum.  In Table \ref{tab:2}, the averaged numbers of iterations executed by the algorithms when solving the  problems and the values of speedup in time relative to the sequential run are compared. The  parallelization was performed using MPI technology, the run was performed on 8 processes.
 
 
 
@@ -383,81 +383,11 @@ So far, as a result of the work done, we succeeded to combine the global search 
 
 The parallel version of the algorithm preserves the properties of its sequential prototype that was  confirmed by he numerical experiments on solving a series of several hundred problems of various  dimensionalities. The scheme we proposed allows utilizing the advantages of both approaches – of the  parallelization as well as of fast search of local extrema.
 
-
 %
 % ---- Bibliography ----
 %
 \bibliographystyle{spmpsci}
-\begin{thebibliography}{6}
-%
-
-\bibitem{fio_bib1}
-M. Ferreiro, J. A. Garcia, J. G. Lopez-Salas, and C. Vazquez, “An efficient implementation of parallel simulated annealing algorithm in gpus,” Journal of global optimization, vol. 57, no. 3, pp. 863–890, 2013.
-
-\bibitem{fio_bib2}
-J. M. Garcia-Martinez, E. M. Garzon, and P. M. Ortigosa, “A gpu implementation of a hybrid evolutionary algorithm: Gpuego,” Journal of super-computing, vol. 70, no. 2, pp. 684–695, 2014.
-
-\bibitem{fio_bib3}
-W. B. Langdon, “Graphics processing units and genetic programming: an overview,” Soft Computing, vol. 15, no. 8, pp. 1657–1669, 2011.
+\bibliography{bibliography}{}
 
 
-
-
-
-\bibitem{fio_bib4}
-Евтушенко Ю.Г., Малкова В.У., Станевичюс А.А. Параллельный поиск глобального экстремума функций многих переменных // Ж. вычисл. матем. и матем. физ. — 2009. — Т. 49, №2. — С. 255–269.
-
-\bibitem{fio_bib5}
-He J., Verstak A., Watson L.T., Sosonkina M. Design and implementation of a mas-sively parallel version of DIRECT // Computational optimization and applications. — 2008. — Vol. 40, No. 2. — P. 217–245
-
-\bibitem{fio_bib6}
-Paulavicius R., Žilinskas J., Grothey A. Parallel branch and bound for global optimiza-tion with combination of Lipschitz bounds // Optimization methods and software. — 2011. — Vol. 26, No. 3. — P. 487–498.
-
-\bibitem{fio_bib7}
-Глобальная оптимизация: приложения и вычислительная сложность. %URL: http://hpc-education.unn.ru/ru/globopt/глобальная-оптимизация-приложения-и (дата обращения: 10.10.2020).
-
-
-
-
-\bibitem{fio_bib11}
-V. P. Gergel, “A global optimization algorithm for multivariate functions with lipschitzian first derivatives,” Journal of Global Optimization, vol. 10, no. 3, pp. 257–281, 1997.
-
-\bibitem{fio_bib12}
-Barkalov K.A. A global optimization technique with an adaptive order of checking for constraints / Barkalov K.A., Strongin R.G. // Computational Mathematics and Mathematical Physics. – 2002. – Vol. 42, No. 9. – P. 1289-1300.
-
-\bibitem{fio_bib13}
-M. Gaviano, D. Lera, D. E. Kvasov, and Y. D. Sergeyev, “Software for generation of classes of test functions with known local and global minima for global optimization,” ACM Transactions on Mathematical Software, vol. 29, pp. 469–480, 2003.
-
-\bibitem{fio_bib14}
-D. Himmelblau, Applied Nonlinear Programming. Mir Publishers, 1975.
-
-\bibitem{fio_bib15}
-Nelder J., Mead R. A simplex method for function minimization // Computer Journal - 7(4) – 1965 - P. 308-313.
-
-\bibitem{fio_bib16}
-“Opencv (open source computer vision) documentation,” (accessed: 10 July 2022).
-[Online]. Available: %URL:{https://docs.opencv.org/4.x/dc/dd6/ml_intro.html}
-
-
-\bibitem{fio_bib17}
-Ya.D. Sergeev, D.E. Kvasov, Diagonal Global Optimization Methods. Fizmatlit, 2008.
-
-\bibitem{fio_bib18}
-Sysoyev, K. Barkalov, V. Sovrasov, I. Lebedev, and V. Gergel, “Globalizer – a parallel software system for solving global optimization problems,” Lecture Notes in Computer Science, vol. 10421, no. LNCS, pp. 492–499, 2017.
-
-\bibitem{fio_bib19}
-Y. D. Sergeyev and D. E. Kvasov, “Global search based on efficient diagonal partitions and a set of lipschitz constants,” SIAM Journal on Optimization, vol. 16, no. 3, pp. 910–937, 2006.
-
-\bibitem{fio_bib20}
-R.G. Strongin, V.P. Gergel, V.A. Grishagin, K.A. Barkalov , Parallel Computations in Global Optimization Problems. Izd. Mosk. Gos. Univ., 2013.
-
-
-
-
-
-
-
-
-
-\end{thebibliography}
 \end{document}
