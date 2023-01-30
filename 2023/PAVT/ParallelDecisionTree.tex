@@ -80,11 +80,11 @@ Also, assume the function to satisfy the Lipschitz condition with \textit{a prio
 \begin{displaymath} 
 	|\varphi(y_1)-\varphi(y_2)|\leq L\parallel y_1-y_2 \parallel ,y_1,y_2 \in D, 0<L< \infty. 
 \end{displaymath}
-This suggestion can be interpreted (with respect to the applied problems ) as the reflection of limited  power generating the changes in the system being simulated.
+This suggestion can be considered (with respect to the real-world problems) as the reflection of limited  power generating the changes in the system being simulated.
 
 The numerical solving of the problem (\ref{sec:problem})  is reduced to constructing an estimate  $ y_k^\ast\in D$ matching some concept of nearness to the point $y^\ast$ (for example,  ${||y^\ast-y}_k^\ast||\le\ \varepsilon$, where $\varepsilon\geq0$ is a predefined accuracy) based on a  finite number $k$ of the objective function values computed. With respect to the class of the considered problems, it is suggested that the objective function $\varphi(y)$ can be defined algorithmically, as a result of executing some subroutine or library.
 
-The solving of the multiextremal optimization problems is much more computation-costly  as compared  to other types of optimization problems since the global optimum is an integral characteristic of the  problem being solved and requires investigating the whole search domain. As a result, the search of the  global optimum is reduced to constructing some coverage (grid) in the search domain and the choice of  the best function value on this grid. When using the uniform grids, the computation costs of solving the  problem grow exponentially with increasing dimensionality.
+The solving of the global optimization problems is much more computationally expensive as compared to the local optimization problems since finding the global optimum requires exploration of the whole search domain. As a result, the search of the  global optimum is reduced to constructing some coverage in the search domain and choosing the best function value on this grid. When using the uniform grids, the computation costs of solving the  problem grow exponentially with increasing dimensionality.
 
 
 
@@ -225,18 +225,18 @@ When considering the neighbors, it is necessary to take into account the followi
 
 The method of parallel computing described in  previous section implies synchronous  performing of $p$ search trials at the points computed at current iteration. The next iteration will be  started only upon completing all trials. In the case of different computation costs of executing the trials at different points of the search  domain, this approach may lead to a disbalance of the computing jobs.  This drawback can be corrected by introduction of asynchrony. The idea of the asynchronous scheme is not to wait for completing all $p$ trials but to initiate the  execution of a new trial immediately upon completing one of the trials. 
 
-Let us assume that the master process computes one point of the next trial at every iteration and sends  it to the worker process to execute the trial. Note that executing a trial by the worker process in  the applied optimization problems is much more computation costly than the choice of a new trial point  by the master process. Therefore, the idle time of the processes will be negligible. In this  case (unlike the synchronous parallel algorithms) total number of trials executed by each worker  process will depend on the computation costs for executing particular trials and cannot be estimated in  advance. When describing the parallel algorithm, let us assume that we have $p+1$ computational  processes at our disposal: one master and $p$ workers.
+Let us assume that the master process computes one point of the next trial at every iteration and sends  it to the slave process to execute the trial. Note that executing a trial by the slave process in  the applied optimization problems is much more computation costly than the choice of a new trial point  by the master process. Therefore, the idle time of the processes will be negligible. In this  case (unlike the synchronous parallel algorithms) total number of trials executed by each slave  process will depend on the computation costs for executing particular trials and cannot be estimated in  advance. When describing the parallel algorithm, let us assume that we have one master and $p$ slave processes at our disposal.
 
-In the beginning of search, the master process (assume it to have the identifier $0$) initiates parallel  execution of $p$ trials in $p$ different points of the search domain.
-Two of these points are the boundary ones, the rest are the internal points, i.e. at the points  $\{y\left(x^1\right),y\left(x^2\right),\ldots,y\left(x^p\right)\}$ where $x^1=0,x^p=1,x^i\in\left(0,1\right),i=2,\ldots,p-1$.
+At the initial phase the master process (assume it to have the identifier $0$) starts $p$ trials in parallel at $p$ different points $\{y\left(x^1\right),y\left(x^2\right),\ldots,y\left(x^p\right)\}$.
+The inverse images of two points are the boundary ones $x^1=0,x^p=1$; the rest are the internal points $x^i\in\left(0,1\right),i=2,\ldots,p-1$.
 
-Now assume $k\geq0$ trials to be completed, and the worker processes are performing the trials at the points $y\left(x^{k+1}\right),\;y\left(x^{k+2}\right),\ldots,\;y\left(x^{k+p}\right)$.
+Now assume $k\geq0$ trials to be completed, and the slave processes are performing the trials at the points $y\left(x^{k+1}\right),\;y\left(x^{k+2}\right),\ldots,\;y\left(x^{k+p}\right)$.
 
-Each worker process having completed the computing of the function at some time moment sends  the computed value to the master process. In turn, the master process selects a new point  $x^{k+p+1}$ for the worker process according to the rules described below. Note that in this case  we will have a set of preimages of the trial points  $I_k=\left\{x^{k+1},x^{k+2},\ldots,x^{k+p}\right\}$, in which the trials have been already started but haven't been completed yet.
+Each slave process having completed the computing of the function at some time moment sends  the computed value to the master process. Next, the master process selects a new point  $x^{k+p+1}$ for the slave process according to the rules provided below. Note that in this case it will be a set of inverse images of the trial points  $I_k=\left\{x^{k+1},x^{k+2},\ldots,x^{k+p}\right\}$, in which the trials have been already initiated but haven't been completed yet.
 
 So far, the parallel asynchronous global optimization algorithm using decision tree to find the local  extrema attractors consists of the following steps.
 
-\begin{enumerate} \item Arrange in the increasing order (by the lower indices) the set of preimages of the trial points
+\begin{enumerate} \item Arrange in the increasing order (by the lower indices) the set of inverse images of the trial points
 	\begin{displaymath} 
 		X_k=\left\{x^1,x^2,\ldots,x^{k+p}\right\}, 
 	\end{displaymath} 
@@ -255,7 +255,7 @@ So far, the parallel asynchronous global optimization algorithm using decision t
 	\begin{displaymath} 
 		M=\max{\{}M_1,M_2\}, 
 	\end{displaymath} 
-	where $ z_i=\varphi\left(y\left(x_i\right)\right)$ if $x_i\notin I_k,\;1\le i\le k+p$. The values $z_i$ at the points $x_i\in I_k$ are undefined since the trials at the points $x_i\in I_k$ haven't been completed yet. If the value of $M$ equals to $0$, set $M=1$.
+	where $ z_i=\varphi\left(y\left(x_i\right)\right)$ if $x_i\notin I_k,\;1\le i\le k+p$. The values $z_i$ at the points $x_i\in I_k$ are not defined as far as the trials at these points haven't been completed yet. If $M=0$, then set $M=1$.
 	
 	\item Juxtapose each interval $\left(x_{i-1},x_i\right),\;x_{i-1}\notin I_k,x_i\notin I_k,\;2\le i\le  k+p$, with its characteristic $R\left(i\right)$ computed according to the formula 
 	\begin{displaymath} 
@@ -263,13 +263,13 @@ So far, the parallel asynchronous global optimization algorithm using decision t
 	\end{displaymath} 
 	where $\Delta_i=\left(x_i-x_{i-1}\right)^{1/N}$ and $ r>1$ is the reliability parameter of the method.
 	
-	\item Select the interval $\left[x_{t-1},x_t\right]$, which corresponds to the highest characteristic, i.e.
+	\item Find the interval $\left[x_{t-1},x_t\right]$, which corresponds to the highest characteristic, i.e.
 	\begin{displaymath} 
 		R\left(t\right)=\max{\left\{R\left(i\right):\;x_{i-1}\notin I_k,x_i\notin I_k,\;2\le i\le k+p\right\}}. 
 	\end{displaymath} 
 	
 	
-	\item Define a new trial point $y^{k+p+1}=y\left(x^{k+p+1}\right)$, the preimage of which is  $x^{k+p+1}\in\left(x_{t-1},x_t\right)$, according to the formula 
+	\item Compute a new trial point $y^{k+p+1}=y\left(x^{k+p+1}\right)$, the inverse image of which is  $x^{k+p+1}\in\left(x_{t-1},x_t\right)$, according to the formula 
 \begin{displaymath}
 	x^{k+p+1}=\frac{x_t+x_{t-1}}{2}-\mathrm{sign}\left(z_t-z_{t-1}\right)\frac{1}{2r}\left[\frac{\left|z_t-z_{t-1}\right|}{M}\right]^N.
 \end{displaymath}
@@ -306,7 +306,7 @@ So far, the parallel asynchronous global optimization algorithm using decision t
 	
 \end{enumerate}
 
-Upon computing the next trial point, the master process adds it to the set $I_k$ and sends to the  worker process, which initiates the new trial in this point. The master process stops the algorithm, if one of the two conditions is satisfied: $\Delta_t<$ or  $k+p>K_{max}$. The real value $\epsilon>0$ and the integer value $K_{max}>0$ are the parameters of the algorithm  and correspond to the accuracy of the search and the maximum number of trials, respectively.
+After the next trial point is computed, the master process includes it to the set $I_k$ and sends to the  slave process, which starts the new trial at this point. The master process stops the algorithm, if at least one of the two conditions is satisfied: $\Delta_t<$ or  $k+p>K_{max}$. The real value $\epsilon>0$ and the integer value $K_{max}>0$ are the algorithm parameters. They correspond to the accuracy of the search and the maximum number of trials, respectively.
 
 \begin{figure}[ht!]
 	
