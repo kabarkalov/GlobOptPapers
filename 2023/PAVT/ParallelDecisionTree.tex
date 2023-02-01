@@ -176,17 +176,7 @@ The substantiation of this method of organization of computations see in \cite{S
 
 The Hooke--Jeeves pattern search algorithm belongs to the class of zero-order methods. Its computation rules are a  combination of the investigating search (to select the direction) and search in the direction selected  \cite{Himmelblau72}.
 
-The investigating search is performed as follows. 
-\begin{enumerate} 
-\item	The step value is determined (it is different for each coordinate and can be varied in the course  of search).  
-\item	The search step is considered to be successful if the value of the objective function at the check  point doesn't exceed the value of the objective function at the initial point.  
-\item	Otherwise, it is necessary to return to the previous item and make a step in the reverse direction.  
-\item	After making the steps in all $N$ coordinates, the investigating search is completed. The point  obtained is called the base point. 
-\end{enumerate}
-
-With regard to the search in a direction, it consists in performing a step from the base point found  during the investigating search along the straight line direction connecting this one with the previous  base point. The magnitude of this step is defined by a parameter set in advance.
-
-\begin{figure}[!h] 
+\begin{figure} 
 	\begin{center} 
 		\begin{minipage}[h]{0.8\linewidth} 
 			\includegraphics[width=1\linewidth]{figure/fig1.pdf} 
@@ -197,10 +187,44 @@ With regard to the search in a direction, it consists in performing a step from 
 \end{figure}	
 
 
+The investigating search is performed as follows (see Fig. \ref{fig:fig1}).
+\begin{enumerate} 
+\item	The step value is determined (it is different for each coordinate and can be varied in the course  of search).  
+\item	The search step is considered to be successful if the value of the objective function at the check  point doesn't exceed the value of the objective function at the initial point.  
+\item	Otherwise, it is necessary to return to the previous item and make a step in the reverse direction.  
+\item	After making the steps in all $N$ coordinates, the investigating search is completed. The point  obtained is called the base point. 
+\end{enumerate}
+
+With regard to the search in a direction, it consists in performing a step from the base point found  during the investigating search along the straight line direction connecting this one with the previous  base point. The magnitude of this step is defined by a parameter set in advance.
+
+
 
 \subsection{Decision tree}\label{SecDT}
 
 The decision tree is a tool used for an automated analysis of big data arrays, which is applied in the  machine learning. Decision tree is a binary tree (a tree, in which each non-leaf node has two child nodes). It can be used for solving the classification problems as well as the regression ones. When solving  the classification problems, each leaf of the tree is marked by a class label, and several leafs can have  the same labels. In the case of constructing a regression, a constant is assigned to each leaf of the tree.   Therefore, the approximating function obtained is a piecewise-constant one. In our case, the decision tree constructs the function $\psi(y)$ as a piecewise-constant  approximation of $\varphi(y)$ in the search domain. Let us denote the value  computed by the  decision tree at the point $y$ as $z' = \psi(y)$.
+Fig. \ref{fig:fig2} presents a graph of the objective function $\varphi(y)$; Fig. \ref{fig:fig2_2} presents corresponding approximation $\psi(y)$ built using decision tree. 
+
+
+\begin{figure}
+	\begin{center}
+		\begin{minipage}[h]{0.8\linewidth}
+			\includegraphics[width=1\linewidth]{figure/fig5.png}
+			\caption{An objective function $\varphi(y)$ from the test class} %% подпись к рисунку
+			\label{fig:fig2}
+		\end{minipage}
+	\end{center}
+\end{figure}	
+
+\begin{figure}
+	\begin{center}
+		\begin{minipage}[h]{0.8\linewidth}
+			\includegraphics[width=1\linewidth]{figure/fig4.png}
+			\caption{A piecewise-constant  approximation $\psi(y)$ of the function $\varphi(y)$} %% подпись к рисунку
+			\label{fig:fig2_2}
+		\end{minipage}
+	\end{center}
+\end{figure}	
+
 
 When implementing the algorithm for finding the attraction areas of the local  minima, we used the algorithms from OpenCV library to construct decision tree. OpenCV is an open source library of the algorithms of computer vision, image processing, and  general-purpose numerical algorithms. More details on the decision tree can be found  in \cite{Brahmbhatt2013}.
 
@@ -216,30 +240,6 @@ Therefore, we will determine the attraction areas of the local extrema in the or
 After completing a certain number of trials (for example, $100\ \ast\ N$), let us use all accumulated  points to initialize a suitable data structure and training the decision tree on its base. To make the  determining the adjacent points easier, we construct a uniform grid with certain step in each coordinate.  Next, we compute the values of the approximation of the objective function in these points  using the decision tree. Now, having a uniform grid of points and knowing the function values in each  point, let us find the closest point to the initial one (from the viewpoint of the Euclidian distance). This  closest point is a projection of the initial point onto the uniform grid, on which its neighbors can be  determined easily. Since the decision tree constructs the approximation of the initial function (even  piecewise constant), we can estimate the function values in the areas, in which the trials haven't been  executed earlier.
 
 When considering the neighbors, it is necessary to take into account the following. If even a single  neighbor has a lower function value than current point, there is no need to run the local method. If at  even a single neighboring point the function value is the same as at the current one, this point must be also checked (i.e. to find all its neighbors and to check these ones in the same way). Only in the case when  all function values at the neighboring points are greater than at the current point, we can run the local  method.
-
-Fig. \ref{fig:fig2} presents a contour plot of an objective function and the trial points; Fig.  \ref{fig:fig2_2} presents corresponding decision tree. 
-
-
-\begin{figure}[ht!]
-	\begin{center}
-		\begin{minipage}[h]{0.9\linewidth}
-			\includegraphics[width=1\linewidth]{figure/fig4.png}
-			\caption{A function from the GKLS generator before using Peano curves} %% подпись к рисунку
-			\label{fig:fig2}
-		\end{minipage}
-	\end{center}
-\end{figure}	
-
-\begin{figure}[ht!]
-	\begin{center}
-		\begin{minipage}[h]{0.9\linewidth}
-			\includegraphics[width=1\linewidth]{figure/fig5.png}
-			\caption{A figure with a two-dimensional decision tree} %% подпись к рисунку
-			\label{fig:fig2_2}
-		\end{minipage}
-	\end{center}
-\end{figure}	
-
 
 
 \section{Asynchronous algorithm parallelization scheme}\label{SecASP}
