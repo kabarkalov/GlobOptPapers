@@ -88,7 +88,7 @@ The solving of the global optimization problems is much more computationally exp
 
 
 
-\section{The algorithms used}\label{SecA}
+\section{Algorithms}\label{SecA}
 
 The main idea of the approach to constructing more efficient nonuniform grid is that its points are  computed sequentially while the objective function is considered as a realization of some random process. The decision rules of the grid building algorithm are constructed in such a way that the next  grid point corresponds to the global minimum point of the mathematical expectation of the function  values. This point is stored in the list of known values, and the iterations are repeated until the stop criteria is satisfied: either the distance between the trial points becomes less than a  predefined value or a preset maximum number of iterations is achieved.
 
@@ -158,7 +158,7 @@ If $n \geq 1$ iterations are completed, which correspond to $k=k(n)$ trials exec
 The next $p$ trials are executed in parallel at the points $x^{k+j},\ 1\leq j\leq p$, computed according  to the formulae (\ref{agp5_x1}), (\ref{agp4_xi}). Upon completing the trials, the results of these ones  are stored in the information database, and the algorithm goes to computing new trial points.
 Note that as a rule the process of executing a trial in the applied optimization problems is much more  computation-costly as compared to computing the trial point.
 
-The algorithm stops in the case if the condition \(\Delta_{t_j} < \varepsilon\) is satisfied for even a  single value $t_j,\ 1\le\ j\le\ p$ from (\ref{agp4_R_sort}). This stop criterion (along with the criterion limiting the number of executed iterations usual for the  iteration methods) is used in the applied optimization problems, in which the global minimum point $x^*$ is unknown a priori. 
+The algorithm stops in the case if the condition \(\Delta_{t_j} < \varepsilon\) is satisfied for even a  single value $t_j,\ 1\le\ j\le\ p$, from (\ref{agp4_R_sort}). This stop criterion (along with the criterion limiting the number of executed iterations usual for the  iteration methods) is used in the applied optimization problems, in which the global minimum point $y^*$ is unknown a priori. 
 
 When solving the test problems, in which the global minimum point $y^*$ is known, we can use the stop criterion upon falling into the vicinity of the global minimum as well. In this case, the method  stops if the condition $\left\|y(x_{t_j})-\ y^\ast\right\| < \varepsilon$ is satisfied even for one value of $t_j,\  1\le\ j\le\ p$, from (\ref{agp4_R_sort}). 
 
@@ -237,7 +237,7 @@ In the current section, let us present a detailed description how we used the de
 
 Therefore, we will determine the attraction areas of the local extrema in the original multidimensional space. However, the determining of the adjacent points in the multidimensional space is quite expensive in terms of computing resources. To do so, we will use the decision tree. 
 
-After completing a certain number of trials (for example, $100\ \ast\ N$), let us use all accumulated  points to initialize a suitable data structure and training the decision tree on its base. To make the  determining the adjacent points easier, we construct a uniform grid with certain step in each coordinate.  Next, we compute the values of the approximation of the objective function in these points  using the decision tree. Now, having a uniform grid of points and knowing the function values in each  point, let us find the closest point to the initial one (from the viewpoint of the Euclidian distance). This  closest point is a projection of the initial point onto the uniform grid, on which its neighbors can be  determined easily. Since the decision tree constructs the approximation of the initial function (even  piecewise constant), we can estimate the function values in the areas, in which the trials haven't been  executed earlier.
+After completing a certain number of trials (for example, $100\cdot N$), let us use all accumulated  points to initialize a suitable data structure and training the decision tree on its base. To make the  determining the adjacent points easier, we construct a uniform grid with certain step in each coordinate.  Next, we compute the values of the approximation of the objective function in these points  using the decision tree. Now, having a uniform grid of points and knowing the function values in each  point, let us find the closest point to the initial one (from the viewpoint of the Euclidian distance). This  closest point is a projection of the initial point onto the uniform grid, on which its neighbors can be  determined easily. Since the decision tree constructs the approximation of the initial function (even  piecewise constant), we can estimate the function values in the areas, in which the trials haven't been  executed earlier.
 
 When considering the neighbors, it is necessary to take into account the following. If even a single  neighbor has a lower function value than current point, there is no need to run the local method. If at  even a single neighboring point the function value is the same as at the current one, this point must be also checked (i.e. to find all its neighbors and to check these ones in the same way). Only in the case when  all function values at the neighboring points are greater than at the current point, we can run the local  method.
 
@@ -306,12 +306,11 @@ So far, the parallel asynchronous global optimization algorithm using decision t
 	
 	\item Create the decision tree using the set $I_k$, get the approximating function $\psi(y)$.
 	
-	\item If the decision tree is used for the first time, construct a uniform grid 
-	
+	\item If the decision tree is used for the first time, construct a uniform grid
 	\begin{displaymath} 
-		Y'=\{ y'\in\ R^N:\ a_i\le\  {y'_i}^k \le\ b_i,\ 1\le\ i\le\ N,\ 1\le k\le\ \sqrt[N]{300}  \} 
+		Y'=\{ y'\in R^N:\ a_i\le y'_i \le b_i,\ 1\le i\le N \},
 	\end{displaymath} 
-	
+	where number of the grid nodes is a parameter of the method.
 	
 	\item Compute the approximation values: $Z' = \{ z'=  \psi(y'), y' \in Y'\}$
 	
