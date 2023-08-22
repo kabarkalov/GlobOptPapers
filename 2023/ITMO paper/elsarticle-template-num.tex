@@ -58,6 +58,7 @@
 %% advanced mathematics
 \usepackage{amsmath}
 \usepackage[ruled]{algorithm2e}
+\usepackage{multirow}
 
 \journal{Knowledge-Based Systems}
 
@@ -466,7 +467,64 @@ x^{k+1} = \frac{x_t+x_{t-1}}{2} , \; \mathrm{if} \; \nu(x_i) \neq \nu(x_{i-1}). 
 
 Datasets
 
+\begin{table}[]
+\caption{\label{tab:1}14 datasets used in the experiments.}
+
+\begin{tabular}{lllllll}
+\hline
+Name                                                                               & Num   & Attributes & Int & Float & Categorical & Classes \\ \hline
+Bank Marketing{[}5{]}                                                              & 45211 & 20         & 6   & 4     & 10          & 2       \\
+Wilt{[}15{]}                                                                       & 4889  & 5          & 0   & 5     & 0           & 2       \\
+\begin{tabular}[c]{@{}l@{}}Banknote \\ authentication{[}9{]}\end{tabular}          & 1372  & 4          & 0   & 4     & 0           & 2       \\
+\begin{tabular}[c]{@{}l@{}}Credit \\ Approval{[}11{]}\end{tabular}                 & 690   & 15         & 0   & 6     & 9           & 2       \\
+\begin{tabular}[c]{@{}l@{}}Breast Cancer \\ Wisconsin{[}2{]}\end{tabular}          & 569   & 9          & 9   & 0     & 0           & 2       \\
+Parkinsons{[}13{]}                                                                 & 197   & 22         & 0   & 22    & 0           & 2       \\
+\begin{tabular}[c]{@{}l@{}}Balance Scale \\ Weight \& Distance{[}8{]}\end{tabular} & 625   & 4          & 4   & 0     & 0           & 3       \\
+Car Evaluation {[}10{]}                                                            & 1728  & 6          & 0   & 0     & 6           & 4       \\
+\begin{tabular}[c]{@{}l@{}}Statlog \\ (Image Segmentation){[}7{]}\end{tabular}     & 2310  & 19         & 1   & 18    & 0           & 7       \\
+Zoo{[}19{]}                                                                        & 101   & 16         & 16  & 0     & 0           & 7       \\
+\begin{tabular}[c]{@{}l@{}}Protein \\ Localization \\ Sites (Ecoli){[}12{]}\end{tabular}     & 336  & 7  & 0  & 7 & 0 & 8  \\
+CNAE-9{[}3{]}                                                                      & 1080  & 856        & 856 & 0     & 0           & 9       \\
+\begin{tabular}[c]{@{}l@{}}Optical Recognition\\  of Handwritten Digits {[}4{]}\end{tabular} & 5620 & 64 & 64 & 0 & 0 & 10 \\
+\begin{tabular}[c]{@{}l@{}}Semeion Handwritten \\ Digit{[}6{]}\end{tabular}        & 1593  & 256        & 256 & 0     & 0           & 10      \\
+\begin{tabular}[c]{@{}l@{}}Turkiye Student \\ Evaluation{[}14{]}\end{tabular}      & 5820  & 32         & 32  & 0     & 0           & 13      \\ \hline
+\end{tabular}
+\end{table}
+
+
 Metrics
+
+
+% Please add the following required packages to your document preamble:
+% \usepackage{multirow}
+\begin{table}[]
+\caption{Настраиваемые гиперпараметры для алгоритмов машинного обучения}
+\label{tab:2}
+\begin{tabular}{llll}
+\hline
+Метод                    & Параметры            & Тип параметра & Диапазон параметра                                                     \\ \hline
+\multirow{7}{*}{XGBoost} & n\_estimators        & Int           & {[}10, 200{]}                                                          \\
+                         & max\_depth           & Int           & {[}5, 20{]}                                                            \\
+                         & min\_child\_weight   & Int           & {[}1, 10{]}                                                            \\
+                         & Gamma                & Float         & {[}0.01, 0.6{]}                                                        \\
+                         & Subsample            & Float         & {[}0.05, 0.95{]}                                                       \\
+                         & colsample\_bytree    & Float         & {[}0.05, 0.95{]}                                                       \\
+                         & learning\_rate       & Float         & {[}0.001, 0.1{]}                                                       \\ \hline
+\multirow{3}{*}{\begin{tabular}[c]{@{}l@{}}Support \\ Vector   \\ Classification \\ (SVC)\end{tabular}} &
+  Gamma &
+  Float &
+  {[}$10^{-9}$, $10^{-6}${]} \\
+                         & C                    & Int           & {[}$10^1$,$10^{10}${]}                     \\
+                         & Kernel               & Categorial    & \begin{tabular}[c]{@{}l@{}}\{‘poly’, ‘rbf’,\\ ‘sigmoid’\}\end{tabular} \\ \hline
+\multirow{4}{*}{\begin{tabular}[c]{@{}l@{}}Multi-layer   \\ Perceptron \\ (MLP)\end{tabular}} &
+  Activation &
+  Categorial &
+  \begin{tabular}[c]{@{}l@{}}\{'identity', \\ 'logistic', \\ 'tanh', 'relu'\}\end{tabular} \\
+                         & hidden\_layer\_sizes & Int           & {[}2, 30{]}                                                            \\
+                         & max\_iter            & Int           & {[}100, 700{]}                                                         \\
+                         & Solver               & Categorial    & \begin{tabular}[c]{@{}l@{}}\{'lbfgs', 'sgd', \\ 'adam'\}\end{tabular}  \\ \hline
+\end{tabular}
+\end{table}
 
 Algorithms for comparison
 
@@ -479,7 +537,34 @@ Second result
 Third result
 
 
-
+\begin{table}[]
+\caption{Время поиска значений гиперпараметров при однократном запуске алгоритма оптимизации.}
+\label{tab:3}
+\begin{tabular}{lllllll}
+\hline
+Dataset &
+  \begin{tabular}[c]{@{}l@{}}Optuna \\ random\end{tabular} &
+  \begin{tabular}[c]{@{}l@{}}Optuna\\ tpe\end{tabular} &
+  \begin{tabular}[c]{@{}l@{}}Optuna \\ cmaes\end{tabular} &
+  \begin{tabular}[c]{@{}l@{}}Optuna \\ nsgaii\end{tabular} &
+  \begin{tabular}[c]{@{}l@{}}Hyperopt\\ tpe\end{tabular} &
+  iOpt \\ \hline
+Balance                                                        & 10,77   & 9,15    & 9,02    & 10,60   & 10,29   & 7,67    \\
+\begin{tabular}[c]{@{}l@{}}Bank\\ Marketing\end{tabular}       & 2888,48 & 3406,47 & 2704,68 & 3078,63 & 3190,31 & 2963,32 \\
+Banknote                                                       & 31,89   & 12,01   & 17,67   & 22,08   & 21,70   & 18,43   \\
+\begin{tabular}[c]{@{}l@{}}Breast\\ Cancer\end{tabular}        & 9,29    & 7,57    & 6,25    & 8,10    & 8,50    & 5,96    \\
+CarEvaluation                                                  & 50,90   & 63,33   & 50,95   & 53,07   & 69,48   & 45,23   \\
+CNAE9                                                          & 295,55  & 207,57  & 318,40  & 262,22  & 253,48  & 144,87  \\
+CreditApproval                                                 & 14,24   & 12,56   & 13,37   & 13,40   & 15,78   & 10,78   \\
+Digits                                                         & 132,77  & 57,46   & 82,11   & 111,61  & 92,41   & 62,47   \\
+Ecoli                                                          & 5,54    & 6,30    & 4,04    & 5,39    & 6,36    & 3,63    \\
+Parkinsons                                                     & 3,52    & 5,04    & 3,58    & 3,80    & 4,38    & 2,92    \\
+Semeion                                                        & 218,40  & 119,48  & 157,90  & 135,74  & 193,62  & 114,15  \\
+\begin{tabular}[c]{@{}l@{}}Statlog\\ Segmentation\end{tabular} & 156,05  & 55,43   & 87,07   & 159,16  & 91,57   & 66,47   \\
+Wilt                                                           & 70,04   & 75,76   & 68,47   & 67,41   & 78,18   & 60,91   \\
+Zoo                                                            & 3,02    & 3,90    & 2,99    & 3,08    & 4,21    & 1,78    \\ \hline
+\end{tabular}
+\end{table}
 
 
 \section*{CRediT authorship contribution statement}
