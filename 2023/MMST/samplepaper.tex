@@ -20,6 +20,8 @@
 %
 \usepackage{amsmath}
 
+\usepackage{hyperref}
+
 \begin{document}
 %
 \title{An algorithm for finding the global extremum 
@@ -32,7 +34,7 @@ of a partially defined function\thanks{This work was supported by the Russian Sc
 \author{Marina Usova\inst{1}\orcidID{0000-0002-0722-6884} \and
 Konstantin Barkalov\inst{1}\orcidID{0000-0001-5273-2471}}
 %
-\authorrunning{M. Usova et al.}
+\authorrunning{M. Usova, K. Barkalov}
 % First names are abbreviated in the running head.
 % If there are more than two authors, 'et al.' is used.
 %
@@ -53,28 +55,29 @@ The paper discusses the problem of finding the global minimum of a function that
 \section{Introduction}
 Global optimization deals with the development of methods for solving problems of finding the global (absolute) minima of multidimensional multiextremal functions. The possibility of constructing a reliable estimate of the global extremum in such problems is principally based on the availability of the \textit{a priori} known information on the problem to be solved. This information makes it possible to relate the unknown values of the objective function to the known values at the points of the performed search trials.
 
-Often, such information is represented in the form of suggestion that the objective function $\phi$ satisfies the Lipschitz condition with a priori unknown constant $L$.
+Often such information is represented in the form of suggestion that the objective function $\phi$ satisfies the Lipschitz condition with a priori unknown constant $L$.
 
-This suggestion can be interpreted (in the relation to the applied problems) as the reflection of a limited power generating the changes in the simulated system. At that, the objective function defined in the form of a "\textit{black box}"\ type functions as a rule is a non differentiable one, and each computation of its value in some point within a feasible domain may require considerable computational resources.
+This suggestion can be interpreted (in the relation to the applied problems) as the reflection of a limited power generating the changes in the simulated system. At that, the objective function defined in the form of a ``\textit{black box}'' type functions as a rule is a non differentiable one, and each computation of its value in some point within a feasible domain may require considerable computational resources.
 
 A number of efficient deterministic algorithms for solving the Lipschitz global optimization problems have been developed ~\cite{Jones2009,Birect2020,Sergeyev2017}. The comparisons conducted have shown the deterministic algorithms to overcome (in various criteria) the widespread nature-inspired algorithms ~\cite{Liberti2005,Sergeyev2018,Sovrasov2019} .
 
-The present work continues the development of one of the efficient deterministic algorithms for solving the Lipschitz global optimization problems, namely the of the information-statistical algorithm of global search ~\cite{indexMethod,strongin1978,Strongin2000}. This algorithm suggests the solving of a multidimensional problem by means of its reduction to an equivalent one-dimensional optimization problem using the space-filling curves (Peano curves) ~\cite{Sergeyev2013}. 
+The present work continues the development of one of the efficient deterministic algorithms for solving the Lipschitz global optimization problems, namely the of the information-statistical global search algorithm ~\cite{indexMethod,strongin1978,Strongin2000}. This algorithm suggests the solving of a multidimensional problem by means of its reduction to an equivalent one-dimensional optimization problem using the Peano-Hilbert space-filling curves \cite{Sergeyev2013}. 
 
-Note that the use of complex mathematical models is natural in the optimization of complex real world objects that, as a consequence, increases the computation costs for searching the optimum Essentially. In last decades, the experts in the fields of optimization and parallel computations have proposed many methods for reducing the computation costs an speed-up of the algorithms related to solving the appearing optimization problems \cite{Kvasov2013}  as well as to the numerical analysis of the original models \cite{Dongarra2022,Duwe2020}.
+Note that the use of complex mathematical models is natural in the optimization of complex real world objects that, as a consequence, essentially increases the computation costs for searching the optimum. In last decades, the experts in the fields of optimization and parallel computations have proposed many methods for reducing the computation costs an speed-up of the algorithms related to solving the appearing optimization problems \cite{Kvasov2013}  as well as to the numerical analysis of the original models \cite{Dongarra2022,Duwe2020}.
 
-However, a principally new problem in applications, namely the numerical instability of the models investigated in some (unknown a priori) regions in the ranges of the parameters’ variations became relevant recently. In such regions, one cannot perform the numerical modeling and compute the objective function values correctly. This phenomenon can be interpreted either as the presence of some hidden (unknown a priori) constraints In the problem or as a partial (limited) definition of the objective function in the search domain. In such a statement, the optimization problem becomes more complex essentially since the region of feasible parameters’ combinations is not defined in advance.
+However, a principally new problem in applications, namely the numerical instability of the models investigated in some (unknown a priori) regions in the ranges of the parameters’ variations recently became relevant. In such regions, one cannot perform the numerical modeling and compute the objective function values correctly. This phenomenon can be interpreted either as the presence of some hidden (unknown a priori) constraints or as a partial computability of the objective function in the search domain. In such a statement, the optimization problem becomes more complex since the region of feasible parameters’ combinations is not defined in advance.
 
-This paper presents the results in a new research direction related to the use of imputation\footnote{The term «imputation» in the paper is used following the established terminology in the field of machine learning related to the restoring of the missing data.} (restoring) of the objective function values in the course of the global search algorithm operation when solving the problems with partially defined objective functions. The approach proposed is based on an adoption of the computation rules of the global search algorithm. The efficiency of the approach proposed has been demonstrated numerically.
+This paper presents the results in a new research direction related to the use of imputation\footnote{The term ``imputation'' in the paper is used following the established terminology in the field of machine learning related to the restoring of the missing data.} (restoring) of the objective function values in the course of the global search algorithm operation when solving the problems with partially defined objective functions. The approach proposed is based on an adoption of the computation rules of the global search algorithm. The efficiency of the approach proposed has been demonstrated numerically.
 
 \section{Problem Statement}
+
 In the general form, the global optimization problem can be formulated as follows:
 \begin{equation}\label{eq1} 
 \phi^*=\phi(y^* )=\min_{y \in D} \phi(y), D=\left\{ y \in R^N: a_i \leq y_i \leq b_i, a,b \in R^N,1 \leq i \leq N \right\},
 \end{equation}
 where $y=(y_1,y_2,...,y_N)$ is the vector of the varied parameters, $D$ is an $N$-dimensional hypercube, and $N$ is the dimension of the problem being solved.
 
-Using the Peano curves mapping the interval $[0,1]$ onto the $N$-dimensional unitary hypercube unambiguously
+Using the Peano-Hilbert curves unambiguously mapping the interval $[0,1]$ onto the $N$-dimensional unit hypercube 
 $$
 D=\left\{ y \in R^N: -2^{-1} \leq y_i \leq 2^{-1}, 1 \leq i \leq N \right\} = \left\{ y(x): 0 \leq x \leq 1 \right\},
 $$
@@ -86,9 +89,8 @@ that allows applying efficient one-dimensional optimization algorithms for its s
 
 We make the following assumptions on the objective function. 
 
-First, the objective function may be multiextremal, nondifferentiable, and, moreover, defined in the form of a "black box"\ (i. e. in the form of some subroutine, which entry the argument is supplied to, and the output is respective function value).
-
-Second, each computing of the function in some point of the feasible region may require considerable computation resources.
+First, the objective function may be multiextremal, nondifferentiable, and, moreover, defined in the form of a ``black box'' (i.e. in the form of some subroutine, which entry the argument is supplied to, and the output is respective function value).
+Second, each computing of the function at some point of the feasible region may require considerable computation resources.
 
 Third, the objective function satisfies the Lipschitz condition
 \begin{equation}\label{eq3} 
@@ -98,102 +100,104 @@ where $L$ is the Lipschitz constant. The dimensionality reduction scheme using P
 \begin{equation}\label{eq4} 
 | \phi (x')-\phi (x'') | \leq K \| x'-x'' \| ^{1/N}, x',x' \in [0,1],
 \end{equation}
-where $N$ is the dimensionality of the initial multidimensional problem and coefficient $K$ is related to the Lipschitz constant $L$ by the rule $K \leq 4L\sqrt N$ \cite{Strongin2000}.
+where $N$ is the dimensionality of the initial multidimensional problem and coefficient $K$ is related to the Lipschitz constant $L$ by the rule $K \leq 2L\sqrt {N+3}$ \cite{Strongin2000}.
 
-Various versions of algorithms for solving the problems of such a class and respective theories of convergence are presented in \cite{Gourdin1996,Lera2015,strongin1978}.
+Various versions of algorithms for solving the problems of such a class and respective theories of convergence are presented in \cite{Sergeyev2013,Strongin2000}.
 
-Fourth, the objective function may be undefined in some regions of search domain $D$ (in particular cases, in one or in several points of this one).
+Fourth, the objective function may be undefined in some regions of search domain $D$ (in particular cases, at one or several points).
 
-From our experience in solving the applied optimization problems \cite{Barkalov2022,Gubaydullin2022}, we will assume the total volume of the non-computability regions to be a small fraction of the whole volume of the search domain $D$ (about 10-20\%)\footnote{When testing the algorithm, we have considered also more complex problem statements, which the volume of the non-computability region achieved 50-80\% in. The problems of this kind were solved by the algorithm proposed successfully as well but a large number of trials was required to solve the problem because the method attempted to explore the whole non-computability region. In this connection, in the rules of constructing the problems the experiments for the dimensionality $N=5$ were modified so that the non-computability region were located in the corners of the search domain only.}.
+From our experience in solving the applied optimization problems \cite{Barkalov2022,Gubaydullin2022}, we will assume the total volume of the non-computability regions to be a small fraction of the whole volume of the search domain $D$ (about 10-20\%)\footnote{When testing the algorithm, we have considered also more complex problems, in which the volume of the non-computability region achieved 50-80\%. The problems of this kind were successfully solved by the proposed algorithm as well but a large number of trials was required to do it since the method attempted to explore the whole non-computability region. In this connection, in the rules of constructing the test problems for the dimensionality $N=5$ were modified so that the non-computability region were located olny in the corners of the search domain.}.
 
-The last assumption makes the application of the classic information-statistical \textit{global search algorithm} \cite{indexMethod,strongin1978} or other Lipschitz optimization methods impossible and requires developing a modification for solving the problems with the objective functions, which are not defined everywhere.
+The last assumption makes the application of the classic information-statistical \textit{global search algorithm} \cite{Strongin2000} or other Lipschitz optimization methods \cite{Sergeyev2017} impossible and requires developing a modification for solving the problems with the objective functions, which are not defined everywhere.
 
 \section{Solving Method}
 
-\subsection{Description of Classic Global Search Algorithm}
-Within the framework of the approach proposed, the information-statistical theory of global search is used for solving the problems (\ref{eq2}). The main idea of the algorithm is the use of the accumulated information to determine the next interval, which the absolute minimum is most probable to find within. The next trial point in this interval corresponds to the mathematical expectation of the minimum location.
+\subsection{Description of the Global Search Algorithm}
+
+Within the framework of the proposed approach, the information-statistical theory of global search is used for solving the problems (\ref{eq2}). The main idea of the algorithm is the use of the accumulated information to determine the next interval, within which it is most probable to find the absolute minimum. The next trial point in this interval corresponds to the mathematical expectation of the minimum location.
 
 Let us give more detailed description of the algorithm.
 
-\subsubsection{Global search algorithm (GSA)} At every iteration of the global search a \textit{search trial} is executed. We will call a trial a computing the optimized function value  $\phi (x)$ from (\ref{eq2}). The first trial will be performed in the middle internal point $x^1 \in (0,1)$. The choice of the point $x^{k+1}, k \leq 1$ of the next $(k+1)^\text{th}$ trial is performed on the base of the following rules.
+\subsubsection{Global search algorithm (GSA)} At every iteration of the global search a \textit{trial} is executed. We will refer to computing the objective function value  $\phi (x)$ from (\ref{eq2}) as a trial. The first trial will be executed in the middle point $x^1 \in (0,1)$. The choice of the point $x^{k+1}, k \leq 1$ of the next $(k+1)^\text{th}$ trial is performed on the base of the following rules.
 
-\paragraph{Rule 1} Renumber (by the lower indices) the points $x^i, 1 \leq i \leq k$  of the previous trials in the ascending order by their coordinates i. e.
+\paragraph{Rule 1.} Renumber (by the lower indices) the points $x^i, 1 \leq i \leq k$  of the previous trials in the ascending order by their coordinates, i.e.
 \begin{equation}\label{eq5} 
 0=x_0 < x_1 < ... < x_i < ... < x_k=1
 \end{equation}
-and juxtapose these ones to the values $z_i=\phi (x_i), 1 \leq i \leq k$ computed in these points and to the indices $v_i=v(x_i)$ defined by the rule
+and juxtapose them with the values $z_i=\phi (x_i), 1 \leq i \leq k$, computed at these points and to the indices $v_i=v(x_i)$ defined by the rule
 \begin{equation}\label{eq6} 
 v_i=v(x_i)=
   \begin{cases}
     -1 & {\quad \text{if } x_i \text{ is a boundary point,}}\\
-    1  & {\quad \text{if } x_i \text{ is an internal point,}}
+    1  & {\quad \text{if } x_i \text{ is an internal point.}}
   \end{cases}
 \end{equation}
-the points $x_0=0$ and $x_{k+1}=1$ are introduced additionally (the values $z_0$ and $z_{k+1}$ are undefined) for convenience of the following notations.
+The points $x_0=0$ and $x_{k+1}=1$ are introduced additionally (the values $z_0$ and $z_{k+1}$ are undefined) for convenience of the following notations.
 
-\paragraph{Rule 2} Compute current lower estimate
+\paragraph{Rule 2.} Compute the estimate
 \begin{equation}\label{eq7} 
-\mu = \max\left\{ \frac{|z_i-z_{i-1}|}{\Delta _i}, 2 \leq i \leq k \right\} , \Delta _i= \| x_i -x_{i-1} \| =(x_i-x_{i-1})^{1/N},
+\mu = \max\left\{ \frac{|z_i-z_{i-1}|}{\Delta _i}, 2 \leq i \leq k \right\} , \Delta _i= (x_i-x_{i-1})^{1/N},
 \end{equation}
-of the unknown H{\"o}lder constant $K$ from (\ref{eq4}) for the reduced function $\phi(x)$ where $r, r>1$ is a parameter of the algorithm; if $\mu=0$ accept $\mu=1$.
-\paragraph{Rule 3} Determine the best current value of the objective function
+of the unknown H{\"o}lder constant $K$ from (\ref{eq4}) for the reduced function $\phi(x)$, where $r>1$ is a parameter of the algorithm; if $\mu=0$ accept $\mu=1$.
+\paragraph{Rule 3.} Determine the best current value of the objective function
 \begin{equation}\label{eq8} 
 z^*=\min \left\{ \phi (x_i): 1\leq i \leq k \right\}.
 \end{equation}
 
-\paragraph{Rule 4} For each interval $(x_{i-1},x_i),1 \leq i \leq k+1$ compute the value $R(i)$ called a \textit{characteristic} of the interval according to the formula
+\paragraph{Rule 4.} For each interval $(x_{i-1},x_i),1 \leq i \leq k+1$, compute the value $R(i)$ called a \textit{characteristic} of the interval according to the formula
 \begin{equation}\label{eq9} 
 R(x_i)=
   \begin{cases}
-    \Delta _i+\frac {{(z_i-z_{i-1})}^2}{{(r \mu)}^2 \Delta _i} - 2 \frac {z_i+z_{i-1}-2z^*}{r \mu}, & {\quad  v(x_i)=v(x_{i-1})=1}\\
-    2 \Delta _i-4 \frac {(z_i-z^*)}{r \mu}, & {\quad  v(x_{i-1})=-1, v(x_i)=1}\\
-    2 \Delta _i-4 \frac {(z_{i-1}-z^*)}{r \mu}, & {\quad  v(x_{i-1})=1, v(x_i)=-1}
+    \Delta _i+\frac {{(z_i-z_{i-1})}^2}{{(r \mu)}^2 \Delta _i} - 2 \frac {z_i+z_{i-1}-2z^*}{r \mu}, & {\quad  v(x_i)=v(x_{i-1})=1},\\
+    2 \Delta _i-4 \frac {(z_i-z^*)}{r \mu}, & {\quad  v(x_{i-1})=-1, v(x_i)=1},\\
+    2 \Delta _i-4 \frac {(z_{i-1}-z^*)}{r \mu}, & {\quad  v(x_{i-1})=1, v(x_i)=-1.}
   \end{cases}
 \end{equation}
 
-\paragraph{Rule 5} Select the interval $t$ with the largest value of characteristic $R(i):R(t)= \max_{1 \leq i \leq k+1} R(i)$.
+\paragraph{Rule 5.} Select the interval $t$ with the largest value of characteristic $R(i):R(t)= \max_{1 \leq i \leq k+1} R(i)$.
 
-\paragraph{Rule 6} Perform the next trial in the middle point of the interval $(x_{t-1},x_t)$ if the indices of its end points are not the same i. e.
+\paragraph{Rule 6.} Perform the next trial in the middle point of the interval $(x_{t-1},x_t)$, if the indices of its end points are not the same, i.e.
 \begin{equation}\label{eq10} 
-x^{k+1}=\frac {x_t+x_{t-1}}{2}, v(x_{t-1})\neq v(x_t),
+x^{k+1}=\frac {x_t+x_{t-1}}{2}, v(x_{t-1})\neq v(x_t).
 \end{equation}
 Otherwise, perform the next trial in the point
 \begin{equation}\label{eq11} 
-x^{k+1}= \frac {x_t+x_{t-1}}{2} -  \text{sign} {(z_t-z_{t-1})} \frac {{|z_t-z_{t-1}|}^N}{2r \mu ^N}, v(x_{t-1})=v(x_t).
+x^{k+1}= \frac {x_t+x_{t-1}}{2} -  \text{sign} {(z_t-z_{t-1})} \frac{1}{2r} \left[\frac {{|z_t-z_{t-1}|}}{\mu} \right]^N, v(x_{t-1})=v(x_t).
 \end{equation}
 
-\paragraph{Stop criterion} of the algorithm, according to which the execution of the algorithm is terminated for current global optimization problem (\ref{eq2}) is the achievement of a predefined accuracy of the problem solution i. e. if the length of the interval $(x_{t-1},x_t)$ containing current point $x^{k+1}$ is less or equal to the predefined accuracy $\Delta _t \leq \varepsilon$ where $t$ is from Rule 5 and $\varepsilon >0$ is the predefined accuracy.
+\paragraph{Stop criterion.} The search is terminated, if the length of the interval $(x_{t-1},x_t)$ containing current point $x^{k+1}$ is less than or equal to the predefined accuracy $\varepsilon$, i.e. $\Delta _t \leq \varepsilon$, where $t$ is from Rule 5 and $\varepsilon>0$ is the algorithm parameter.
 
 \subsection{ Approaches to the Reconstruction of the Objective Function Values }
-The problem of not everywhere defined objective function described above is a partial analog of the long-standing missing data problem in Data Science. The origin of this problem may be, for example, the technical problems or assembling the data set from several sources with different sets of parameters.
 
-It is worth noting that some machine learning algorithms can take into account and even restore the missing values in the data. For example, LightGBM has a regime of ignoring the missing values while XGBoost restores the data by means of the decrease in the loss function when learning. Nevertheless, the majority of models cannot process the missing values and require the valid data without NaN or «missing» values. It makes this problem to be serious enough.
+The optimization problem with not everywhere defined objective function described above is a partial analog of the long-standing missing data problem in Data Science. The origin of this problem may be, for example, the technical problems or assembling the data set from several sources with different sets of parameters.
+
+It is worth noting that some machine learning algorithms can take into account and even restore the missing values in the data. For example, LightGBM has a regime of ignoring the missing values while XGBoost restores the data by means of the decrease in the loss function when learning. Nevertheless, the majority of models cannot process the missing values and require the valid data without NaN or ``missing'' values. It makes this problem to be serious enough.
 
 The experts in Data Science have proposed various approaches to the imputation (restoring) of the missing data:
 \begin{itemize}
-  \item Deleting of all cases, which have missing values of some variables (the last resort, the algorithm loses the access to the useful information contained in the on-missing observations’ values);
+  \item Deleting of all cases, which have missing values of some variables (at the worst, the algorithm loses the access to the useful information contained in the on-missing observations’ values);
   \item Replacing any missing value with the average of the available values of the variable (doesn’t work with the qualitative variables, doesn’t account for the correlation of the data);
   \item Replacing by the most frequent value or by a constant (differs from the use of the median only by the ability to work with the qualitative parameters);
-  \item Replacing the data using the method of $k$ nearest neighbors or kNN (unlike the former, accounts for the correlation between the parameters, sensitive to the fadeouts, computation costly);
-  \item Multiple imputation by chained equations (MICE) – imputation of each value is performed not one but many times (allows understanding how reliable or unreliable is the value suggested);
-  \item Imputation of the data using a deep learning (restores the missing values by means of training a neural network on the points, which all parameters are available for, computation costly for big data).
+  \item Replacing the data using the method of $k$ nearest neighbors (unlike the former, accounts for the correlation between the parameters, sensitive to the fadeouts, computation costly);
+  \item Multiple imputation by chained equations (MICE) -- imputation of each value is performed not one but many times (allows understanding how reliable or unreliable is the value suggested);
+  \item Imputation of the data using a deep learning (restores the missing values by means of training a neural network on the points, for which all parameters are available, computation costly for big data).
 \end{itemize}
 
-The absence of an universal algorithm and the necessity to find the most suitable methods for each particular problem are the common drawbacks of the approaches listed above.
+The absence of a universal algorithm and the necessity to find the most suitable methods for each particular problem are the common drawbacks of the approaches listed above.
 
-For the imputation of the objective function values, one can consider, in general, a similar set of approaches, however, taking into account the Lipschitz condition and using the information-statistical theory. It allows selecting a universal algorithm fro this problem class. Next, the points, which the non-computability was found in are interpreted as the ones having the zero index, and (\ref{eq6}) is replaced by an extended formula
+For the imputation of the objective function values, one can consider, in general, a similar set of approaches, however, taking into account the Lipschitz condition and using the information-statistical approach. It allows to propose a good algorithm for this problem class. The points, at which the non-computability was found, are interpreted as the ones having the zero index, and (\ref{eq6}) is replaced by an extended formula
 \begin{equation}\label{eq12} 
 v_i=v(x_i)=
   \begin{cases}
-    -1 & {\quad \text{if } x_i \text{ is boundary point}}\\
-    1  & {\quad \text{if } x_i \text{ is internal point}}\\
-    0  & {\quad \text{if } x_i \text{ is non-computability}}
+    -1, & {\quad \text{if } x_i \text{ is boundary point}},\\
+    0, & {\quad \text{if } x_i \text{ is non-computable point}},\\
+    1, & {\quad \text{if } x_i \text{ is internal point}}.
   \end{cases}
 \end{equation}
 
-Let us describe various possible approaches to the implementation of the modification.
+Let us describe various possible approaches to the imputation of the objective function values.
 
-\subsubsection{The first approach.}To ignore the absence of the objective function value in the point. The characteristic of an interval with even a single non-computable point is computed from the length of the interval
+\subsubsection{The first approach.} To ignore the absence of the objective function value at the point. The characteristic of an interval with even a single non-computable point is equal to the length of the interval, i.e.
 \begin{equation}\label{eq13} 
 R(i)=\Delta _i, \text{ if } v(x_i)=0 \text{ or } v(x_{i-1})=0.
 \end{equation}
@@ -205,9 +209,9 @@ R(i)=\Delta _i, \text{ if } v(x_i)=0 \text{ or } v(x_{i-1})=0.
 
 A large number of excess trials after getting into the non-computability region due to a large value of the characteristic obtained according to (\ref{eq13}) is an essential draw-back of this approach.
 
-\subsubsection{The second approach.} To ignore the absence of the objective function values in the point. The characteristic of the interval with two non-computable point or with one non-computable point and one boundary point is computed from the interval multiplied by a reducing constant
+\subsubsection{The second approach.} To ignore the absence of the objective function values at the point. The characteristic of the interval with two non-computable point or with one non-computable point and one boundary point is equal to the interval length multiplied by a coefficient, i.e.
 \begin{equation}\label{eq14} 
-R(i)={(1- \frac {1}{r})}^N \Delta _i,
+R(i)={(1-{1}/{r})}^N \Delta _i,
 \end{equation}
 if $v(x_i)=v(x_{i-1})=0$ or $v(x_i)=0$ and $v(x_{i-1})=-1$ or $v(x_i)=-1$ and $v(x_{i-1})=0$.
 The characteristic of the interval with one non-computable point and one computable point is calculated according to the rules of operation with the boundary interval
