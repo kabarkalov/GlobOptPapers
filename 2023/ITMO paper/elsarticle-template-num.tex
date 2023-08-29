@@ -137,11 +137,7 @@
 \begin{abstract}
 %% Text of abstract
 
-На качество работы методов машинного обучения существенное влияние оказывают их гиперпараметры, при этом оценка критерия качества является трудоемкой операцией. Поэтому актуальной является задача разработки ителлектуальных методов для выбора оптимальных значений гиперпараметров, которые требуют малого числа поисковых испытаний.
-В этой статье мы предлагаем новый подход к настройке гиперпараметров, основанный на идеях Lipschitz global optimization. 
-В рамках данного подхода решение задач с несколькими параметрами сводится к решению эквивалентных им одномерных задач. Соответствующая редукция основана на использовании space-filling curves (Peano curves). 
-Указанные подходы реализованы в open-source фреймворке методов интеллектуальной оптимизации iOpt.
-Для демонстрации преимуществ iOpt проведено его сравнение с известными фреймворками Optuna и HyperOpt при настройке гиперпараметров различных методов машинного обучения на представительном наборе датасетов. Результаты показывают, что методы Lipschitz global optimization обеспечивают сравнимые по качеству результаты за существенно меньшее время по сравнению с известными алгоритмами настройки гиперпараметров.
+The quality of machine learning methods is substantially affected by their hyperparameters, while the evaluation of the quality criterion is a time-consuming operation. Therefore, it is important to develop intelligent methods for selecting optimal values of hyperparameters that require a small number of search trials. In this paper, we propose a new approach to hyperparameter tuning based on the ideas of Lipschitz global optimization. In the framework of this approach, the solution of problems with several parameters is reduced to solving equivalent one-dimensional problems. The reduction is based on the use of space-filling curves (Peano curves). These approaches are implemented in the iOpt open-source framework of intelligent optimization methods.  To demonstrate the advantages of iOpt, we compare it with the well-known Optuna and HyperOpt frameworks when tuning hyperparameters of various machine learning methods on a representative set of datasets. The results show that Lipschitz global optimization methods provide comparable (in terms of quality) results in a significantly shorter time compared to known hyperparameter tuning algorithms.
 
 \end{abstract}
 
@@ -152,10 +148,11 @@
 
 %%Research highlights
 \begin{highlights}
-\item Для настройки гиперпараметров разработан фреймворк методов липшицевой оптимизации
-\item Для решения многомерных задач используется редукция размерности на оснвое кривых Пеано
-\item Предложена схема сведения задач, часть параметров которых является категориальными, к одной задаче с непрерывными параметрами 
-\item Разработанные методы (в отличие от известных методов настройки гиперпараметров) являются детерминированными, что обеспечивает стабильный результат при разных запусках алгоритмов
+\item A framework of Lipschitz optimization methods is developed for the tuning of hyperparameters
+\item Dimensionality reduction based on Peano space-filling curves is used to solve multidimensional problems
+\item A scheme is proposed for reducing the problems, some of whose parameters are categorical, to a single problem with continuous parameters
+\item The developed methods (unlike the known methods of hyperparameter tuning) are deterministic, which ensures stable results at different runs of the algorithms 
+
 \end{highlights}
 
 \begin{keyword}
@@ -177,55 +174,53 @@ Lipschitz optimization \sep Multiextremal function \sep Hyperparameter tuning
 \section{Introduction}
 \label{sec_intro}
 
-В настоящее время сложные научно и/или промышленные задачи чаще всего решаются численными методами. В большинстве таких методов, например, в методах машинного обучения, имеются гиперпараметры, от выбора конкретных значений которых может зависеть эффективность (в заданной метрике) полученного решения при заданных тем или иным способом ограничениях на время расчетов \cite{Hutter2019,nikitin2021}. Тот факт, что во многих случаях разница в эффективности получаемого решения при разных значениях гиперпараметров может быть достаточно значительной, привел к возникновению the hyperparameter optimization (HPO) problem, а также исследованиям подходов к ее решению, реализуемых в фреймворках автоматического подбора гиперпараметров \cite{Tune, optuna, hyperopt,Sherpa}. С математической точки зрения HPO problem соответствует задаче глобальной оптимизации с фиксированными границах изменения гиперпараметров. В некоторых случаях часть гиперпараметров может быть категориальной, то есть принимать значения лишь из некоторого, обычно небольшого, числа вариантов, что приводит к необходимости использовать методы оптимизации, способные решать задачи с дискретными параметрами.
+Currently, complex scientific and/or industrial problems are most often solved by numerical methods. Most of such methods, for example, machine learning methods, have hyperparameters, and the choice of specific values of these hyperparameters can determine the efficiency (in a given metric) of the obtained solution under certain constraints on the computation time \cite{Hutter2019,nikitin2021}. The fact that in many cases the difference in the efficiency of the solution obtained with different values of hyperparameters can be quite significant, has resulted in the emergence of the hyperparameter optimization (HPO) problem, as well as the research of approaches to its solution that are implemented in the frameworks for automatic selection of hyperparameters \cite{Tune, optuna, hyperopt,Sherpa}. From the mathematical point of view, the HPO problem corresponds to a global optimization problem with fixed bounds on the variation of hyperparameters.  In certain cases, some of the hyperparameters may be categorical, i.e., they can only assume values from a certain, usually small, number of variants, which necessitates the use of optimization methods capable of solving problems with discrete parameters.
 
-Для конечного пользователя, желающего провести настройку используемого метода, подобрав оптимальное сочетание гиперпараметров, выбор конкретного фреймворка определяется следующими факторами: 1) эффективность реализованных в фреймворке методов, позволяющих решить HPO problem того класса задач, которому принадлежит задача пользователя; 2) простота использования фреймворка с точки зрения описания/формирования задачи подбора оптимального сочетания гиперпараметров, организации процесса поиска оптимума, а также получения и анализа результатов. В настоящее время наиболее распространенным способом организации такого интерфейса является использование языка программирования Python, при этом сами фреймворки могут быть написаны, как на этом, так и на других языках.
+For an end user who wishes to fine-tune the method used by selecting an optimal combination of hyperparameters, the choice of a particular framework is determined by the following factors: 1) efficiency of the methods implemented in the framework that allow solving an HPO problem from the class of problems to which the user's problem belongs; 2) ease of using the  framework from the point of view of description/formulation of the problem of selecting the optimal combination of hyperparameters, organization of the optimum search process, as well as obtaining and analyzing the results. Today, the most common way to organize such an interface is to use the Python programming language, while the frameworks can be written both in this and other languages.
 
-В данной статье мы представляем фреймворк методов интеллектуальной оптимизации iOpt\footnote{\url{https://github.com/aimclub/iOpt/}}, ориентированный на решение задач выбора оптимальных значений гиперпараметров различных алгоритмов (включая методы машинного обучения и эвристической оптимизации). Статья построена следующим образом. В начале приведен обзор известных методов, используемых для настройки гиперпараметров. В section \ref{sec_lip} приведена математическая постановка задачи, описаны одходы к редукции многомерных задач к одномерным и решению задач с дискретными параметрами. В section \ref{sec_iOpt} описана алгоритмическая основа методов глобальной оптимизации, реализованных во фреймворке iOpt. В section \ref{sec_exp} даны результаты численных экспериментов, проведенных для сравнения эффективности фреймворка iOpt с другими известными фреймворками на модельных и прикладных задачах. В заключении приведены выводы и планы по развитию фреймворка.
+In this paper, we present iOpt \footnote{\url{https://github.com/aimclub/iOpt/}}, a framework of intelligent optimization methods focused on solving problems of selecting optimal values of hyperparameters of various algorithms (including machine learning and heuristic optimization methods). The paper is organized as follows. At the beginning, there is a review of known methods used for hyperparameter tuning. Section \ref{sec_lip} presents the mathematical formulation of the problem, describes approaches to the reduction of multidimensional problems to one-dimensional problems and to the solution of problems with discrete parameters. Section \ref{sec_iOpt} explains the algorithmic basis of global optimization methods implemented in the iOpt framework. In Section \ref{sec_exp}, we present the results of numerical experiments conducted to compare the efficiency of the iOpt framework with other known frameworks on model and applied problems. The conclusion summarizes the findings and plans   for the development of the framework.
 
 
 \section{Related work}
 \label{sec_rel}
 
-Основная сложность при решении HPO problem состоит в том, что поиск оптимального сочетания гиперпараметров требует для каждого выбранного варианта их значений решения соответствующей исходной задачи, например, задачи машинного обучения, а значит, может быть довольно длительным по времени. Таким образом, любой подход к решению HPO problem будет ограничен в числе сочетаний гиперпараметров, которое метод глобальной оптимизации сможет проверить прежде, чем будет исчерпан доступный вычислительный ресурс. Конечно, в таких условиях сложно говорить о сходимости метода к глобальному оптимуму или о каких-то гарантиях его отыскания. Речь может идти только о возможности получения приемлемого (с точки зрения исследователя) решения. Дадим краткую характеристику ряда методов, которые используются для задач настройки гиперпараметров (в зависимости от свойств исходно задачи).
+The main difficulty in solving the HPO problem is that the search for the optimal combination of hyperparameters requires for each selected variant of their values to solve the corresponding initial problem, for example, the problem of machine learning, and thus can take quite a long time. Thus, any approach to solving the HPO problem will be limited by the number of combinations of hyperparameters that the global optimization method can test before the available computational resource is exhausted.  Certainly, it is difficult in such circumstances to speak about convergence of the method to the global optimum or about any guarantees of finding it. We can only consider the possibility of obtaining an acceptable (from the researcher's point of view) solution. Let us briefly characterize a number of methods that are used to tune hyperparameters (depending on the properties of the initial problem). 
 
-Самым простым способом поиска глобального оптимума является метод полного перебора (поиска по равномерной \cite{Bao2006} или случайной \cite{Bergstra2012} сетке). Выбрав число анализируемых вариантов по каждому из гиперпараметров, перебрав все получившиеся сочетания и взяв наилучшее из них в заданной метрике, мы получим оценку оптимума с определенной точностью \cite{Nevendra2022}. Метод полного перебора прост в реализации, обладает идеальным параллелизмом, но имеет существенный недостаток – экспоненциальный рост числа узлов сетки с ростом числа гиперпараметров. Таким образом, в качестве метода для решения HPO problem полный перебор может использоваться только в «простых» задачах, где малО как число гиперпараметров (один-два), так и время решения исходной задачи при каждом выбранном их сочетании.
+The simplest way to find the global optimum is the exhaustive search method (поиска по равномерной \cite{Bao2006} или случайной \cite{Bergstra2012} сетке). By selecting the number of analyzed variants for each of the hyperparameters, searching all the resulting combinations and choosing the best of them in a given metric, we obtain an estimate of the optimum with a certain accuracy \cite{Nevendra2022}. The exhaustive search method is easy to implement, it has perfect parallelism, but it has a significant drawback (an exponential growth of the number of grid nodes as the number of hyperparameters increases). Thus, exhaustive search can be used as a method for solving HPO problems only in "simple" problems where both the number of hyperparameters (one or two) and the time for solving the initial problem with each selected combination of hyperparameters are small. 
 
-Альтернативой полному перебору при увеличении числа гиперпараметров являются метаэвристические (генетические и аналогичные) алгоритмы \cite{Opara2019}. Данные алгоритмы широко применяются при отсутствии формульного описания исследуемой модели (модель вида «черный ящик»), что характерно для рассматриваемых HPO problems \cite{Zhou2021,Yang2022}. Метаэвристические алгоритмы слабо зависят от числа гиперпараметров, используют информацию с предыдущих итераций для выполнения текущей, однако в силу заложенной в методы случайности дают гарантию отыскания глобального оптимума только в вероятностном смысле.
+Metaheuristic (genetic and similar) algorithms are an alternative to the exhaustive search when the number of hyperparameters increases \cite{Opara2019}. These algorithms are widely used in the absence of a formula-based description of the model under study (``black-box'' model), which is typical for the considered HPO problems \cite{Zhou2021,Yang2022}. Metaheuristic algorithms only weakly depend on the number of hyperparameters, they use information from previous iterations to perform the current one, but due to the randomness inherent in the methods, they guarantee the finding of the global optimum only in the probabilistic sense.
 
-Еще один подход к поиску глобального оптимума -- байесовская оптимизация, также применяемая для решения задач вида «черный ящик» \cite{Frazier2018,Archetti2019}. Фактически методы байесовской оптимизации строят стохастическую модель оптимизируемой функции. Модель итерационно обновляется на основе накапливаемой в процессе поиска оптимума информации, позволяя на каждой очередной итерации оценить наиболее вероятное положение глобального оптимума. Методы байесовской оптимизации обладают существенно более высокой эффективностью в сравнении с полным перебором, но, тем не менее, также подвержены влиянию «проклятия размерности», пусть и в меньшей степени.
+Another approach to finding the global optimum is Bayesian optimization, which is also used to solve ``black-box'' problems \cite{Frazier2018,Archetti2019}. In fact, Bayesian optimization methods build a stochastic model of the function being optimized. The model is iteratively updated on the basis of the information accumulated in the process of searching for the optimum, making it possible to estimate the most probable position of the global optimum at each iteration. Bayesian optimization methods have significantly higher efficiency compared to the exhaustive search, but they are also affected by the ``curse of dimensionality'', albeit to a lesser extent. 
 
-В известных фреймворках по настройке гиперпараметров широко используется алгоритм Tree-Structured Parzen Estimator (TPE) \cite{hyperopt,NIPS2011}. TPE -- это итерационный алгоритм, идейно близкий к методам байесовской оптимизации. Перед началом работы алгоритма должна быть задана область поиска в пространстве гиперпараметров и определена оптимизируемая функция. В процессе своей работы метод проводит испытания в области поиска, после чего на их основе строит оценки распределения лучших и всех остальных результатов в пространстве гиперпараметров. Далее проводится поиск сочетания гиперпараметров, которое дает максимальное ожидаемое улучшение. These hyperparameters are then evaluated on the objective function. Описанный процесс повторяется до достижения заданного числа итераций или до тех пор, пока не будет достигнуто ограничение по времени.
+In well-known hyperparameter tuning frameworks, the Tree-Structured Parzen Estimator (TPE) algorithm is widely used \cite{hyperopt,NIPS2011}. TPE is an iterative algorithm, conceptually close to Bayesian optimization methods. Before the algorithm starts, a search region in the hyperparameter space must be specified and the function to be optimized must be defined. In the course of its work, the method performs trials in the search region and then uses these trials to construct estimates of the distribution of the best and all other results in the hyperparameter space. Next, the combination of hyperparameters that gives the maximum expected improvement is searched for. These hyperparameters are then evaluated on the objective function. The described process is repeated until a specified number of iterations is attained or until the time constraint is reached.  
 
-Хорошие результаты, достигаемые методами байесовской оптимизации  \cite{Joy2020} и TPE \cite{Watanabe2022a,Watanabe2022b}, основаны на априорном предположении, что функция соответствует определенной стохастической модели, например, Gaussian process \cite{Rasmussen2005}. Однако в глобальной оптимизации существуют и иные предположения о виде функции, которые дают замечательные результаты.
+The good results achieved by Bayesian optimization \cite{Joy2020} and TPE \cite{Watanabe2022a,Watanabe2022b} methods are based on the a priori assumption that the function corresponds to a certain stochastic model, such as a Gaussian process \cite{Rasmussen2005}. However, there are other assumptions about the shape of the function in global optimization that yield remarkable results. 
 
-Одним из таких допущений о решаемой задаче является предположение об ограниченности относительных изменений целевой функции. В этом случае говорят, что функция удовлетворяет условию Липшица, а решаемая задача называется задачей липшицевой глобальной оптимизации. Для класса задач липшицевой глобальной оптимизации разработан целый ряд эффективных алгоритмов \cite{Jones2021,Paulavicius2020,Strongin2020,Sergeyev2017,PaulaviciusZilinskas2014}, которые превосходят многие другие методы глобальной оптимизации \cite{Sergeyev2018} и показали свою применимость ряде приложений \cite{Kvasov2008,CANDELIERI2019,Gubaydullin2021}.
- 
-Фреймворк iOpt содержит реализацию алгоритмов липшицевой оптимизации, являющихся развитием информационно-статистического алгоритма глобального поиска, детально описанного в \cite{Strongin2000,Sergeyev2013}. 
-В частности, методы были адаптированы для решения задач с частично целочисленными параметрами, которые весьма часто встречаются в задачах HPO.
-Результаты экспериментов, приведенные в Section \ref{sec_exp}, показывают, что в задачах HPO фреймворк iOpt не уступает известным фреймворкам аналогичного назначения (таким как Optuna \cite{optuna} and HyperOpt \cite{hyperopt}).
+One of such assumptions about the problem to be solved is the assumption of boundedness of relative changes in the objective function. In this case, the function is said to satisfy the Lipschitz condition, and the problem to be solved is called a Lipschitz global optimization problem. For the class of Lipschitz global optimization problems, a number of efficient algorithms have been developed \cite{Jones2021,Paulavicius2020,Strongin2020,Sergeyev2017,PaulaviciusZilinskas2014}, which surpass many other global optimization methods \cite{Sergeyev2018} and have shown their applicability in a number of applications \cite{Kvasov2008,CANDELIERI2019,Gubaydullin2021}.
+
+The iOpt framework contains an implementation of Lipschitz optimization algorithms, which are an extension of the information-statistical global search algorithm described in detail in \cite{Strongin2000,Sergeyev2013}. In particular, the methods have been adapted to solve problems with partially integer parameters, which are very common in HPO problems. The experimental results presented in Section \ref{sec_exp} show that the iOpt framework is not inferior in HPO problems to well-known frameworks having the same purpose (such as Optuna \cite{optuna} and HyperOpt \cite{hyperopt}). 
 
 \section{Lipschitz optimization} 
 \label{sec_lip}
 
 \subsection{Problem statement} 
 
-Мы будем рассматривать задачу поиска глобального минимума в следующей постановке:
+We will consider the problem of finding the global minimum formulated as follows:
 \begin{gather}
 	\varphi(y^*) = \min \varphi(y), \; y \in D, \label{f_func} \\
 	D = \left\{y \in R^N : a_j \leq y_j \leq b_j , \; 1 \leq j \leq N \right\}. \label{f_D}
 \end{gather}
 
-Будем также предполагать, что целевая функция $\varphi(y)$ удовлетворяет в области поиска $D$ условию Липшица, т.е.
+We will also assume that the objective function $\varphi(y)$ satisfies the Lipschitz condition in the search domain $D$, i.e.
 \begin{equation} \label{f_lip}
 	\left| \varphi(y')-\varphi(y'') \right| \leq L\left\| y' - y''  \right\| , \; y',y'' \in D, \; 0<L<\infty.
 \end{equation}
-Здесь $ \left\| \cdot \right\|$ обозначает евклидову норму, а константа $L$ является априори не известной и подлежит оценке в процессе решения. 
-%Такие задачи называются задачами липшицевой глобальной оптимизации with box-constraints.
+Here $ \left\| \cdot \right\|$ denotes the Euclidean norm, and the constant $L$ is not known a priori and is subject to estimation in the process of solution. 
 
-Функция $\varphi(y)$ предполагается многоэкстремальной и заданной в виде ``черного ящика'', т.е. некоторого алгоритма вычисления ее значений. Кроме того, подразумевается, что каждое поисковое испытание (т.е. вычисление значения функции в точке допустимой области) требует значительных вычислительных ресурсов. Такая постановка проблемы полностью соответствует задаче настройки гиперпараметров методов машинного обучения \cite{Joy2020,Wang2021}.
+The function $\varphi(y)$ is assumed to be multiextremal and specified in the form of a ``black box'', i.e., of some algorithm for computing its values. Moreover, it is assumed that each search trial (i.e., computing the value of the function at a point in the admissible region) requires significant computational resources. This problem formulation fully corresponds to the task of tuning the hyperparameters of machine learning methods \cite{Joy2020,Wang2021}.
 
-Условие Липшица допускает следующую геометрическую интерпретацию. Допустим, что одномерная липшицева функция $f(x)$ (с известной константой Липшица $L$) была вычислена в двух точках $x'$ и $x''$. В соответствии с условием (\ref{f_lip}) выполняются следующие неравенства, характеризующие поведение функции $f(x)$ на интервале $[x', x'']$:
+
+The Lipschitz condition allows the following geometric interpretation. Suppose that a one-dimensional Lipschitz function $f(x)$ (with the known Lipschitz constant $L$) has been computed at two points $x'$ and $x''$. According to condition (\ref{f_lip}), the following inequalities characterizing the behaviour of the function $f(x)$ on the interval $[x', x'']$  are satisfied:
 \begin{gather*}
 	f(x) \leq f(x') + L(x-x'), \; x \geq x',\\
 	f(x) \geq f(x') - L(x-x'), \; x \geq x',\\
@@ -233,61 +228,59 @@ Lipschitz optimization \sep Multiextremal function \sep Hyperparameter tuning
 	f(x) \geq f(x') + L(x-x''), \; x \leq x''.
 \end{gather*}
 
-В силу данных неравенств значения функции в точках интервала $[x', x'']$ должны располагаться внутри области, ограниченной прямыми, проходящими через точки $(x', f(x'))$ и $(x'', f(x''))$ с наклоном $L$ и $-L$ (see Fig. \ref{fig1}).
+  By virtue of these inequalities, the values of the function at the points of the interval $[x', x'']$ must lie inside the region bounded by the straight lines passing through the points $(x', f(x'))$ and $(x'', f(x''))$ with slopes $L$ and $-L$ (see Fig. \ref{fig1}).
 
 \begin{figure}
 \centering
 \includegraphics[width=0.8\textwidth]{Fig1.pdf}
-\caption{Значения функции $f(x)$ должны находиться внутри области, выделенной цветом} \label{fig1}
+\caption{The values of the function $f(x)$ must be inside the area highlighted by colour} \label{fig1}
 \end{figure}
 
+Also according to (\ref{f_lip}), we can write the inequality $f(x) \geq F(x)$, where the function  $F(x)$ (called the minorant) is defined according to the formula
 
-Также в соответствии с (\ref{f_lip}) может быть записано неравенство $f(x) \geq F(x)$, где функция $F(x)$ (называемая минорантой) определяется в соответствии с формулой
 \[
 F(x) = \max\left\{f(x') - L(x-x'),f(x') + L(x-x'')\right\}, \; x\in [x', x''].
 \] 
 
-Наименьшее значение миноранты $F(x)$ на $[x', x'']$ совпадает с оценкой наименьшего значения функции $f(x)$ на данном интервале. Указанная оценка достигается в точке 
+The smallest value of the minorant $F(x)$ on $[x', x'']$ coincides with the estimate of the smallest value of the function $f(x)$ on this interval. This estimate is reached at the point
 \[
 \overline{x} = \frac{x'+x''}{2}-\frac{f(x'')-f(x')}{2L}
 \] 
-и равна
+and equals
 \[
 F(\overline{x}) = \frac{f(x')+f(x'')}{2} -L \frac{x''-x'}{2}.
 \]
 
-Методы липшицевой глобальной оптимизации используют эту идею в своих вычислительных правилах; на ней также основано и доказательство их сходимости (see, e.g.,
+Lipschitz global optimization methods use this idea in their computational rules; the proof of their convergence is also based on this idea (see, e.g.,
 \cite{Jones2021,PaulaviciusZilinskas2014,Sergeyev2013,Evtushenko2013}).
 
-\subsection{Проблема редукции размерности} 
+\subsection{The problem of dimensionality reduction} 
 
-Одной из основных трудностей при решении многомерных задач глобальной оптимизации является рост вычислительных затрат при увеличении размерности задачи. Эта сложность имеет место и при решении задач липшицевой глобальной оптимизации.
-Например, решение задачи (\ref{f_func}) c помощью поиска по равномерной сетке с шагом $\epsilon$ потребует проведения 
+One of the main difficulties in solving multidimensional global optimization problems is the increase in computational cost as the dimensionality of the problem increases. This difficulty also occurs when solving Lipschitzian global optimization problems. 
+For example, solving problem (\ref{f_func}) by means of the uniform grid search with a step $\epsilon$ will require performing
 \[
 K \approx \prod_{j=1}^N{\frac{b_j-a_j}{\epsilon}}
 \]
-испытаний. Очевидно, что $K$ экспоненциально возрастает с ростом $N$.
-Уменьшение числа испытаний при тех же требованиях к точности решения возможно за счет адаптивного построения неравномерной сетки в области изменения параметров.
+trials. Obviously, $K$ increases exponentially with increasing $N$. It is possible to reduce the number of trials with the same requirements to the solution accuracy using the adaptive construction of a non-uniform grid in the region of parameter variation. 
 
-Известным подходом к решению многомерной задачи (\ref{f_func}) является ее редукция к одномерной задаче с последующим применением эффективных одномерных алгоритмов глобальной оптимизации (see \cite{Strongin2000,Sergeyev2013}). Здесь хорошо зарекомендовал себя подход, в котором размерность задачи редуцируется при помощи кривой Пеано–Гильберта $y(x), x \in [0, 1]$.
-Такая кривая однозначно и непрерывно отображает интервал $[0, 1]$ на гиперинтервал $D$ из (\ref{f_D}), т.е. заполняет всю область $D$.
 
-Для решения задачи глобальной липшицевой оптимизации кривые, заполняющие пространство, могут быть применены следующим образом.
-Если $y(x)$ есть кривая Пеано–Гильберта, то из непрерывности целевой функции $\varphi(y)$ следует, что
+A well-known approach to solving the multidimensional problem (\ref{f_func}) is to reduce it to a one-dimensional problem and then apply efficient one-dimensional global optimization algorithms (see \cite{Strongin2000,Sergeyev2013}). A well-proven approach here is to reduce the dimensionality of the problem by means of a Peano-Hilbert curve $y(x), x \in [0, 1]$.  Such a curve uniquely and continuously maps the interval $[0, 1]$ onto the hyperinterval $D$ of (\ref{f_D}), i.e., it fills the entire region $D$.
+
+
+To solve the Lipschitz global optimization problem, space-filling curves can be applied as follows. If $y(x)$ is a Peano-Hilbert curve, then it follows from the continuity of the objective function $\varphi(y)$ that
 \[
 \min_{y \in D } \varphi(y) = \min_{x \in [0,1] } \varphi(y(x)),
 \]
-т.е. исходная многомерная задача (\ref{f_func}) редуцируется к одномерной.
+i.e., the original multidimensional problem (\ref{f_func}) is reduced to a one-dimensional problem.
 
-
-При этом известно (see \cite{Strongin2000}), что если многомерная функция $\varphi(y), \; y \in D,$  удовлетворяет условию Липшица с константой $L$, то редуцированная одномерная функция $\varphi(y(x)), \; \in [0,1]$ удовлетворяет the H{\"o}lder condition
+It is known (see \cite{Strongin2000}) that if a multidimensional function  $\varphi(y), \; y \in D$,  satisfies the Lipschitz condition with the constant $L$, then the reduced one-dimensional function $\varphi(y(x)), \; x \in [0,1]$ satisfies the H{\"o}lder condition
 \[
 \left|\varphi(y(x'))-\varphi(y(x''))\right|\leq H\left|x'-x''\right|^{1/N}, \; x',x''\in[0,1].
 \]
-Здесь $N$ есть размерность исходной задачи, а коэффициент $ H=2 L \sqrt{N+3}$.
+Here, $N$ is the dimensionality of the original problem, and the coefficient
+$ H=2 L \sqrt{N+3}$.
 
-Замечание 1. Для редуцированной одномерной функции $\varphi(y(x))$  не будет выполняться условие Липшица. Однако многие одномерные алгоритмы липшицевой оптимизации
-могут быть обобщены на случай минимизации гeльдеровых функций. Конкретный пример такого обобщения приведен в subsection \ref{sec_GSA}. 
+Remark 1.  The Lipshitz condition will not be satisfied for the reduced one-dimensional function $\varphi(y(x))$. However, many one-dimensional Lipschitz optimization algorithms can be generalized to the case of H{\"o}lder function minimization. A concrete example of such a generalization is given in subsection \ref{sec_GSA}.
 
 \begin{figure}
 \center
@@ -300,102 +293,87 @@ K \approx \prod_{j=1}^N{\frac{b_j-a_j}{\epsilon}}
 \caption{Evolvents $y_m(x)$ with $m=4$.}\label{fig:Peano}
 \end{figure}   
 
-Замечание 2. Теоретическая кривая Пеано-Гильберта $y(x)$ определяется как предельный объект. В численных алгоритмах применяются evolvents $y_m(x)$, аппроксимирующие истинную curve c заданным уровнем плотности $2^{-m}$, зависящим от требуемой точности поиска. Эффективные схемы вычисления нескольких видов evolvents подробно описаны в \cite{Sergeyev2013}.
-Для иллюстрации на Fig.~\ref{fig:Peano} приведены графики, соответствующие разверткам $y_m(x)$ с плотностью $m=4$ для размерностей $N=2$ и $N=3$. 
+Remark 2: The theoretical Peano-Hilbert curve $y(x)$ is defined as a limiting object. Numerical algorithms use evolvents $y_m(x)$, that approximate the true curve with a given density level $2^{-m}$, which depends on the required search accuracy. Efficient schemes for computing several types of evolvents are described in detail in \cite{Sergeyev2013}. For illustration, Fig.~\ref{fig:Peano} shows graphs corresponding to the evolvents $y_m(x)$ with density $m=4$ for dimensions $N=2$ and $N=3$.
 
-
-\subsection{Проблема дискретных параметров}
+\subsection{The problem of discrete parameters}
 \label{sec_discr} 
 
-Особый интерес представляют задачи, в которых часть параметров может принимать значения из заранее заданного конечного множества, т.к. для них сложнее построить оценки оптимума по сравнению с задачами с непрерывными параметрами.
-Методам решения задач со смешанными параметрами посвящено много публикаций (см., например, обзоры \cite{Burer2012,Boukouvala2016}). 
-Известные детерминированные методы решения задач данного класса ориентированы на решение линейных или выпуклых задач \cite{Lee2012}.
-Сложные многоэкстремальные задачи предлагается решать с помощью эвристических подходов \cite{Belotti2013}.
+Of particular interest are problems where some of the parameters can assume values from a predetermined finite set, since it is more difficult to construct estimates of the optimum for these problems than for problems with continuous parameters. Many publications address the methods for solving mixed-parameter problems (see, for example, reviews \cite{Burer2012,Boukouvala2016}). Known deterministic methods for solving problems of this class are centered on solving linear or convex problems \cite{Lee2012}. It is suggested that complex multi-extremal problems should be solved using heuristic approaches \cite{Belotti2013}. 
 
-Нами был предложен и реализован новый детерминированный подход к решению задач со смешанными параметрами; приведем здесь его краткое описание. 
-Пусть  целевая функция задачи зависит от двух векторов параметров: вектора $y$, принадлежащего гиперинтервалу $D$, и вектора $u$, имеющий конечный (и при этом не очень большой) набор возможных значений, т.е. 
+We have proposed and implemented a new deterministic approach to solving problems with mixed parameters; here we give a brief description of it. 
+Let the objective function of the problem depend on two parameter vectors: vector $y$, which belongs to the hyperinterval $D$, and vector $u$, which has a finite (and not very large) set of possible values, i.e.
 \begin{gather}\label{problem_i}
 \min{\left\{ \varphi(y,u) : y\in D \right\}},\\
 D=\left\{a_j \leq y_j \leq b_j, \; 1\leq j \leq N \right\}.\nonumber
 \end{gather}
 
-Такие конечные наборы значений могут характеризовать множество возможных сочетаний категориальных гиперпараметров исследуемого алгоритма машинного обучения. 
-Характерными примером является support vector machine, влияние на качество работы которого оказывают непрерывные параметр регуляризации $C$ и коэффициент ядра $\gamma$. При этом тип функции ядря выбирается из конечного множества вариантов (например, полиномиальная функция, радиальная базисная функция, сигмоид и т.д.).
+Such finite sets of values can characterize many possible combinations of categorical hyperparameters of the machine learning algorithm under study. A typical example is the support vector machine, whose performance is influenced by the continuous regularization parameter $C$ and the kernel coefficient $\gamma$. In this case, the type of kernel function is chosen from a finite set of variants (e.g., polynomial function, radial basis function, sigmoid, etc.). 
 %Целочисленные параметры = непрерывные параметры с округлением, добавить комментарий об этом?
 
-Занумеруем целыми числами $s, 1\leq s \leq S,$ все различные комбинации категориальных параметров, т.е. сопоставим каждому номеру $s$ вектор $u_s$. 
-Тогда рассматриваемая задача может быть записана в виде 
+Let us number all the different combinations of categorical parameters with integers $s, 1\leq s \leq S$, i.e., let us assign a vector $u_s$ to each number $s$. Then the problem under consideration can be written in the form
 \begin{gather}\label{problem_is}
  \min_{s\in\{1,...,S\}}\left[\min{\left\{ \varphi(y,u_s) : y\in D \right\}}\right].
 \end{gather}
 
-Используя схему редукции размерности с помощью кривых Пеано $y(x), x\in [0,1]$ можно сопоставить каждой задаче минимизации по $y$ одномерную задачу минимизации
+Using a dimensionality reduction scheme with Peano curves $y(x), x\in [0,1]$,  we can assign to each minimization problem on $y$ a one-dimensional minimization problem
 \[
  \min{\left\{ \varphi(y(x),u_s): x \in [0,1] \right\}}, s \in \{1,...,S\}.
 \]
 
-Рассмотрим теперь отображение 
+Let us now consider the mapping
 \[
 Y(x)=y(x-E(x)), \; x\in[0,S],
 \]
-переводящее любую точку интервала [0,S] на область $D$ (обозначение $E(x)$ соответствует целой части числа $x$) и определим функцию 
+which translates any point of the interval $[0,S]$ to the region $D$ (the notation $E(x)$ corresponds to the integer part of the number $x$) and define the function
 \[
 f(x) = \varphi(Y(x),u_{E(x)+1}), x\in[0,S],
 \]
-имеющую, вообще говоря, разрывы в целочисленных точках $x_i = i, 1\leq i \leq S-1$.
-Поэтому значения  $z_i = f(x_i)$ в этих точках будут считаться неопределенными и не будут использоваться в алгоритме.
+which has, generally speaking, discontinuities at integer points $x_i = i, 1 \leq i \leq S-1$.
+Therefore, the values $z_i = f(x_i)$ at these points will be considered undefined and will not be used in the algorithm.
 %, а значения индекса -- равным 0, т.е. $\nu(x_i) = 0$.
 
-Используя введенные обозначения можно переформулировать исходную задачу как
+Using the introduced notations, we can reformulate the original problem as
 \begin{equation}\label{problem_is1}
 \min \left\{f(x): x \in [0,S] \right\}.
 \end{equation}
 
-Применяя к решению задачи (\ref{problem_is1}) алгоритм глобального поиска, мы найдем решение задачи (\ref{problem_i}). При этом основная часть испытаний будет проведена в $s$-й подзадаче, решение которой соответствует решению исходной задачи (\ref{problem_i}). В остальных подзадачах будет проведена лишь незначительная часть испытаний, т.к. решения данных подзадач являются локально-оптимальными по отношению к решению $s$-й подзадачи.
+Applying the global search algorithm to the solution of problem (\ref{problem_is1}), we will find the solution of problem (\ref{problem_i}). In this case, the main part of trials will be carried out in the $s$-th subproblem, whose solution corresponds to the solution of the original problem (\ref{problem_i}). In the other subproblems, only a small part of trials will be carried out, since the solutions of these subproblems are locally optimal with respect to the solution of the $s$-th subproblem.
 
 \section{iOpt framework} 
 \label{sec_iOpt}
 
+The iOpt framework of intelligent optimization methods was developed as part of the ``Strong Artificial Intelligence in Industry'' project. It is designed to select optimal (in a given metric) values of parameters of complex objects and processes, for example, artificial intelligence and machine learning methods. The framework allows fine-tuning of parameters of models and methods used in applied research in various fields of science.  The iOpt framework was designed in the Python programming language using its standard library. To use the framework, you need to have the Pyhon interpreter version 3.8 or higher installed. The framework is open source and is available at \url{https://github.com/aimclub/iOpt}.
 
-Фреймворк методов интеллектуальной оптимизации iOpt разработан в рамках выполенния проекта ``Strong Artificial Intelligence in Industry''.
-Он предназначен для выбора оптимальных (в заданной метрике) значений параметров сложных объектов и процессов, например, методов искусственного интеллекта и машинного обучения. Фреймворк позволяет проводить точную настройку параметров моделей и методов, используемых в прикладных исследованиях в различных научных областях. Фреймворк iOpt разработан на языке программирования Python с использованием его стандартной библиотеки. Для его использования необходим установленный интерпретатор языка Pyhon версии не ниже 3.8. Фреймворк является open source и доступен по адресу https://github.com/aimclub/iOpt.
-
-Фреймворк iOpt может использоваться при создании специализированных систем поддержки принятия решений для решения задач выбора оптимальных параметров сложных моделей или методов. Область применения фреймворка фокусируется на задачах настройки гиперпараметров, поскольку при решении задач этого класса возникают проблемы многоэкстремальности критерия оптимизации и отсутствия формульного описания исследуемой модели (модель вида «черный ящик»). 
-
+The iOpt framework can be used to develop specialized decision support systems for solving the tasks of selecting optimal parameters for complex models or methods. The application area of the framework is focused on the hyperparameter tuning tasks, since this class of tasks involves the problems of multiextremality of the optimization criterion and the lack of a formula-based description of the model under study (a ``black box'' type model).
 
 \subsection{Global search algorithm}
 \label{sec_GSA}
 
-Алгоримтическим ядром фреймворка iOpt является информационно-статистический алгоритм глобального поиска для решения задач вида (\ref{f_func}), (\ref{f_D}). 
-Данный алгоритм предполагает построение последовательности точек $y^i$, в которых проводятся поисковые испытания, т.е. вычисляются значения objective function $z^i = \varphi(y^i)$. В соответствии с используемой схемой редукции размерности проведение испытания подразумевает вычисление $y^i=y(x^i))$, поэтому результатом испытания будет являться набор значений $(x^i, y^i=y(x^i), z^i = \varphi(y^i))$. 
-Поисковую информацию, накопленную после проведения $k$ испытаний, удобно представлять в виде множества, в котором соответствующие наборы перенумерованы (нижним индексом) в порядке возрастания $x$, т.е. в виде множества 
+The algorithmic core of the iOpt framework is an information-statistical global search algorithm for solving problems of the form (\ref{f_func}), (\ref{f_D}). This algorithm assumes the construction of a sequence of points $y^i$,  at which search trials are performed, i.e., the values of the objective function $z^i = \varphi(y^i)$ are computed. According to the dimensionality reduction scheme used, conducting a trial implies computing $y^i=y(x^i)$, so the result of the trial will be a set of values $(x^i, y^i=y(x^i), z^i = \varphi(y^i))$. 
+It is convenient to represent the search information accumulated after conducting $k$ trials as a set in which the corresponding entries are renumbered (by the lower index) in ascending order of $x$, i.e., as a set 
 \begin{equation}\label{omega}
 \Omega_k = \left\{  (x_i, y_i=y(x_i), z_i = \varphi(y_i)): 1 \leq i \leq k  \right\},	
 \end{equation}
-где $x_1 < x_2 < ... < x_k$.
+where $x_1 < x_2 < ... < x_k$.
 
-
-
-Основная идея алгоритма глобального поиска состоит в следующем.
-Пусть в процессе поиска проведено $k \geq 2$ испытаний and the search information $\Omega_k$ from (\ref{omega}) is obtained.
-Для выбора точки очередного испытания для каждого поискового интервала $(x_{i-1},x_i), 1<i\leq k$, вычисляется его характеристика в соответствии с формулой
+The main idea of the global search algorithm is as follows. Let $k \geq 2$ trials be conducted in the search process and the search information $\Omega_k$ from (\ref{omega}) is obtained. To select the point of the next trial for each search interval $(x_{i-1},x_i), 1<i\leq k$, its characteristic is calculated according to the following formula
 \begin{equation}\label{R}
 R(i) = \Delta_i + \frac{(z_i-z_{i-1})^2}{(r\mu)^2\Delta_i}-2\frac{z_{i-1}+z_i}{r\mu}.	
 \end{equation}
-Здесь $r>1$ -- параметр алгоритма, $\Delta_i=(x_i-x_{i-1})^{1/N}$. Значение $\mu$ является нижней оценкой константы Гельдера целевой функции, вычисленной на основе поисковой информации из (\ref{omega}) по формуле
+
+Here,  $r>1$ is the algorithm parameter, $\Delta_i=(x_i-x_{i-1})^{1/N}$.  The value $\mu$ is the lower estimate of the H\"older constant of the objective function computed using the search information from (\ref{omega}) by the formula
 \begin{equation}\label{mu}
 \mu = \max_{1<i\leq k}\frac{\left|z_i-z_{i-1}\right|}{\Delta_i},
 \end{equation}
-причем в случае, если формула (\ref{mu}) выдает значение $\mu=0$, то используется значение $\mu=1$.
+and in case when formula (\ref{mu}) gives the value $\mu=0$, the value $\mu=1$ is used.
 
-Новое испытание проводится в точке $x^{k+1}$, принадлежащей интервалу с наибольшей характеристикой. Если правая точка этого интервала имеет номер $t$ в множестве $\Omega_k$, то формула для вычисления $x^{k+1}$ будет выглядеть следующим образом:
+A new trial is performed at the point $x^{k+1}$ that belongs to the interval
+with the largest characteristic. If the right point of this interval has the number $t$ in the set $\Omega_k$, then the formula for calculating $x^{k+1}$ will look as follows:
 \begin{equation}\label{xk1}
 x^{k+1} = \frac{x_t+x_{t-1}}{2}- \frac{\mathrm{sign}(z_t-z_{t-1})}{2r} \left(\frac{\left|z_t-z_{t-1}\right|}{\mu}\right)^N.   
 \end{equation}
 
-
-Algorithm \ref{alg_GSA} shows the pseudo code of the Global Search Algorithm.
-Входными данными алгоритма являются objective function $\varphi(y)$  и область поиска $D$ из (\ref{f_func}) and (\ref{f_D}), параметр алгоритма $r>1$, точность поиска минимума $\epsilon > 0$, максимально допустимое число испытаний $K_{max}$. Выходным параметром алгоритма является оценка точки глобального минимума $y_{min}$. Дополнительными выходными параметрами могут быть значение функции в точке минимума $\varphi(y_{min})$ и число проведенных испытаний $k$.
+Algorithm \ref{alg_GSA} shows the pseudo code of the Global Search Algorithm. The input data of the algorithm are the objective function $\varphi(y)$ and the search region $D$ from (\ref{f_func}) and (\ref{f_D}), the algorithm parameter $r>1$, the minimum search accuracy $\epsilon > 0$, and the maximum allowable number of trials $K_{max}$. The output parameter of the algorithm is an estimate of the global minimum point $y_{min}$. Additional output parameters can include the value of the function at the minimum point $\varphi(y_{min})$ and the number of trials $k$.
 
 \begin{algorithm}
 \LinesNumbered
@@ -403,64 +381,61 @@ Algorithm \ref{alg_GSA} shows the pseudo code of the Global Search Algorithm.
  \KwOut{$y_{min}$}
  Initialize $k=2$, $\Omega_k= \left\{ (x_1=0, y_1=y(x_1), z_1=\varphi(y_1)), (x_2=1, y_2=y(x_2), z_2=\varphi(y_2)) \right\}$\\
  \While{ $\Delta_t \geq \epsilon$ and  $k \leq K_{max}$}{
-  Вычислить оценку H\"older constant $\mu$ в соответствии с (\ref{mu})\\
+  Compute the estimate of the H\"older constant $\mu$ according to (\ref{mu})\\
 	\For{$i=1$ \KwTo $k$}{
-	Вычислить характеристику $R(i)$ в соответствии с (\ref{R})\\
+	Compute the characteristic $R(i)$ according to (\ref{R})\\
 	}
-	Определить номер $t$, для которого $R(t) = \max \left\{ R(i), 1 \leq i \leq k \right\}$
+	Determine the number $t$, for which $R(t) = \max \left\{ R(i), 1 \leq i \leq k \right\}$
 	
-	Вычислить точку нового испытания $x^{k+1}$ в соответствии с (\ref{xk1})
+	Compute the new trial point $x^{k+1}$ according to (\ref{xk1})
 	
-	Провести новое испытание в точке $x^{k+1}$
+	Perform a new trial at the point $x^{k+1}$
 	
-	Добавить $(x^{k+1}, y^{k+1}, z^{k+1})$ в множество $\Omega_k$
+	Add $(x^{k+1}, y^{k+1}, z^{k+1})$ to the set $\Omega_k$
 	
   $k = k + 1$\\
  }
  $l = \arg \min \left\{ z_i, 1 < i \leq k \right\}$\\
  $y_{min} = y_l$, \\ 
  \KwRet{$y_{min}$}
- \caption{Global search}\label{alg_GSA}
+ \caption{Global search algorithm}\label{alg_GSA}
 \end{algorithm}
 
-Теория сходимости алгоритма, а также некоторые его модификации представлены в \cite{Strongin2000}.
+The theory of algorithm convergence as well as some of its modifications are presented in \cite{Strongin2000}.
 
 \subsection{GSA for the problems with categorical parameters}
 \label{sec_mGSA}
 
-Рассмотрим случай, когда в настраиваемом алгоритме имеются как непрерывные, так и категориальные параметрами. 
-В этом случае категориальным параметрам можно поставить в соответствие целочисленные значения, и свести сзадачу к постановке (\ref{problem_is1}).
-Так как решение задач с частично целочисленными параметрами в соответсвии со схемой, изложенной в Section \ref{sec_discr}, предполагает решение задачи (\ref{problem_is1}) с разрывной целевой функцией, требуется модификация алгоритма, учитывающая эту особенность.
+Let us consider the case when the algorithm to be tuned has both continuous and categorical parameters.  In this case, the categorical parameters can be assigned integer values, and the problem can be reduced to the formulation (\ref{problem_is1}).
+Since the solution of problems with partially integer parameters in accordance with the scheme described in Section \ref{sec_discr} implies the solution of problem (\ref{problem_is1}) with a discontinuous objective function, a modification of the algorithm that takes this feature into account is required.
 
-С этой целью введем классификацию точек из области поиска с помощью специального индекса $\nu_i=\nu(x_i)$.
-Индексы целочисленных точек $x_i = i, 0\leq i \leq S$, будем полагать равным нулю, т.е. $\nu(x_i) = 0$. Для всех остальных значений $x\in(i,i+1),  0 \leq i < S$, значение индекса будем считать равным единице, т.е. $\nu(x) = 1$. Тогда результатом испытания в некоторой точке $x^j\in[0,S]$ будет являться набор значений
-$(x^j, \nu^j=\nu(x^j), y^j=y(x^j), z^j = \varphi(y^j))$. Причем в случае $\nu^j=0$ значение $z^j$ будет считаться неопределенным.
+For this purpose, we introduce the classification of points from the search region using a special index $\nu_i=\nu(x_i)$. We will assume the indices of integer points $x_i = i, 0\leq i \leq S$, to be equal to zero, i.e. $\nu(x_i) = 0$. For all other values of $x\in(i,i+1),  0 \leq i < S$, we will assume the index value to be equal to unity, i.e.  $\nu(x) = 1$. Then the result of the trial at some point $x^j\in[0,S]$  will be the set of values $(x^j, \nu^j=\nu(x^j), y^j=y(x^j), z^j = \varphi(y^j))$. In the case of  $\nu^j=0$, the value of $z^j$ will be considered undefined.
 
-Общая вычислительная схема, изложенная в виде Алгоритма \ref{alg_GSA}, останется прежней. Модификации будут состоять в следующем.
-Модификации будут состоять в следующем.
+The general computational scheme outlined as Algorithm \ref{alg_GSA} will remain the same. The modifications will consist of the following.
 
-1. На этапе инициализации в множество $\Omega_k$, содержащее поисковую информацию, заносятся значения $(x^i = i, \nu^i=0, y^i=y(x^i), z^i)$, $ i, 0\leq i \leq S$, т.е. заносятся граничные точки интервалов $(x_{i-1},x_i), 1<i\leq S$.
-После этого проводятся испытания в произвольных внутренних точках (например, в серединах) интервалов $(x_{i-1},x_i), 1<i\leq S$; результаты испытаний также добавляются в поисковую информацию. 
-Таким образом, после инициализации множество $\Omega_k$ будет содержать $k=2S+1$ элемент.
+1. At the initialization stage, the values $(x^i = i, \nu^i=0, y^i=y(x^i), z^i)$, $ i, 0\leq i \leq S$, i.e., the boundary points of the intervals $(x_{i-1},x_i), 1<i\leq S$, are entered into the set $\Omega_k$ containing the search  information. 
+After that, trials are carried out at arbitrary internal points (e.g., midpoints) of the intervals $(x_{i-1},x_i), 1<i\leq S$; the trial results are also added to the search information. Thus, after initialization, the set $\Omega_k$ will contain $k=2S+1$ elements.
 
-2. Вычисление оценки константы Гельдера $\mu$ в соответствии с формулой (\ref{mu}) должно выполняться только для  интервалов, для которых $\nu(x_i) = \nu(x_{i-1}) = 1$, т.е. когда значения $z_i$ and $z_{i-1}$ определены.
+2. The computation of the estimate of the H\"older constant $\mu$ according to formula (\ref{mu}) must be performed only for intervals for which $\nu(x_i) = \nu(x_{i-1}) = 1$, i.e., when the values $z_i$ and $z_{i-1}$ are determined.
 
-3. Вычисление характеристики поискового интервала $(x_{i-1},x_i), 1<i\leq k$, проводится по следующим правилам:
+3. The computation of the characteristic of the search interval $(x_{i-1},x_i), 1<i\leq k$, is performed according to the following rules:
 \begin{gather}\label{R_int}
 R(i) = \Delta_i + \frac{(z_i-z_{i-1})^2}{(r\mu)^2\Delta_i}-2\frac{z_{i-1}+z_i}{r\mu}, \; \mathrm{if} \; \nu(x_i) = \nu(x_{i-1}) = 1, \nonumber \\ 
 R(i) = 2\Delta_i-4\frac{z_i}{r\mu}, \; \mathrm{if} \;  \nu(x_i) = 1, \nu(x_{i-1}) = 0, \nonumber \\ 
 R(i) = 2\Delta_i-4\frac{z_{i-1}}{r\mu}, \; \mathrm{if} \;  \nu(x_{i-1}) = 1, \nu(x_{i}) = 0. \nonumber
 \end{gather}
-Отметим, что в процессе работы алгоритма не будет возникать интервалов, у которых обе граничные точки имеют неопределенные значения функции, т.е. $\nu(x_i) = \nu(x_{i-1}) = 0$.
 
-4. Точка нового испытания $x^{k+1}$ будет вычисляться следующим образом:
+Note that the algorithm will not produce intervals whose both boundary points have undefined function values, i.e., $\nu(x_i) = \nu(x_{i-1}) = 0$.
+
+4. The new trial point $x^{k+1}$ will be calculated as follows:
 \begin{gather}\label{xk1_int}
 x^{k+1} = \frac{x_t+x_{t-1}}{2}- \frac{\mathrm{sign}(z_t-z_{t-1})}{2r} \left(\frac{\left|z_t-z_{t-1}\right|}{\mu}\right)^N, \; \mathrm{if} \; \nu(x_i) = \nu(x_{i-1}) = 1, \nonumber \\    
 x^{k+1} = \frac{x_t+x_{t-1}}{2} , \; \mathrm{if} \; \nu(x_i) \neq \nu(x_{i-1}). \nonumber
 \end{gather}
-Здесь $t$ есть номер поискового интервала, имеющего максимальную характеристику.
 
-Еще раз отметим, что характеристика $R(i)$ количественно оценивает возможность нахождения точки $x^*$, являющейся inverse image of the global optimizer $y* = y(x^*)$, в пределах рассматриваемого интервала $(x_{i-1},x_i)$.
+Here, $t$ is the number of the search interval that has the maximum characteristic.
+
+We note again that the characteristic $R(i)$ quantifies the possibility of finding a point $x^*$, which is the inverse image of the global optimizer $y^* = y(x^*)$, within the considered interval $(x_{i-1},x_i)$.
 
 \section{Numerical experiments}
 \label{sec_exp}
