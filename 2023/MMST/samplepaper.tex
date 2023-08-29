@@ -56,16 +56,15 @@ The paper discusses the problem of finding the global minimum of a function that
 Global optimization deals with the development of methods for solving problems of finding the global (absolute) minima of multidimensional multiextremal functions. The possibility of constructing a reliable estimate of the global extremum in such problems is principally based on the availability of the \textit{a priori} known information on the problem to be solved. This information makes it possible to relate the unknown values of the objective function to the known values at the points of the performed search trials.
 
 Often such information is represented in the form of suggestion that the objective function $\phi$ satisfies the Lipschitz condition with a priori unknown constant $L$.
-
 This suggestion can be interpreted (in the relation to the applied problems) as the reflection of a limited power generating the changes in the simulated system. At that, the objective function defined in the form of a ``\textit{black box}'' type functions as a rule is a non differentiable one, and each computation of its value in some point within a feasible domain may require considerable computational resources.
 
-A number of efficient deterministic algorithms for solving the Lipschitz global optimization problems have been developed ~\cite{Jones2009,Birect2020,Sergeyev2017}. The comparisons conducted have shown the deterministic algorithms to overcome (in various criteria) the widespread nature-inspired algorithms ~\cite{Liberti2005,Sergeyev2018,Sovrasov2019} .
+A number of efficient deterministic algorithms for solving the Lipschitz global optimization problems have been developed ~\cite{Grishagin2018,Jones2021,Birect2020,PaulaviciusZilinskas2014,Sergeyev2017}. The comparisons conducted have shown the deterministic algorithms to overcome (in various criteria) the widespread nature-inspired algorithms ~\cite{Liberti2005,Sergeyev2018}.
 
-The present work continues the development of one of the efficient deterministic algorithms for solving the Lipschitz global optimization problems, namely the of the information-statistical global search algorithm ~\cite{indexMethod,strongin1978,Strongin2000}. This algorithm suggests the solving of a multidimensional problem by means of its reduction to an equivalent one-dimensional optimization problem using the Peano-Hilbert space-filling curves \cite{Sergeyev2013}. 
+The present work continues the development of one of the efficient deterministic algorithms for solving the Lipschitz global optimization problems, namely the of the information-statistical global search algorithm ~\cite{Strongin2000,Sergeyev2013}. This algorithm suggests the solving of a multidimensional problem by means of its reduction to an equivalent one-dimensional optimization problem using the Peano-Hilbert space-filling curves. 
 
-Note that the use of complex mathematical models is natural in the optimization of complex real world objects that, as a consequence, essentially increases the computation costs for searching the optimum. In last decades, the experts in the fields of optimization and parallel computations have proposed many methods for reducing the computation costs an speed-up of the algorithms related to solving the appearing optimization problems \cite{Kvasov2013}  as well as to the numerical analysis of the original models \cite{Dongarra2022,Duwe2020}.
+Note that the use of complex mathematical models is natural in the optimization of complex real world objects that, as a consequence, essentially increases the computation costs for searching the optimum. In last decades, the experts in the fields of optimization and parallel computations have proposed many methods for reducing the computation costs an speed-up of the algorithms related to solving the appearing optimization problems \cite{Kvasov2013,Sergeyev2020} as well as to the numerical analysis of the original models \cite{Dongarra2022,Duwe2020}.
 
-However, a principally new problem in applications, namely the numerical instability of the models investigated in some (unknown a priori) regions in the ranges of the parameters’ variations recently became relevant. In such regions, one cannot perform the numerical modeling and compute the objective function values correctly. This phenomenon can be interpreted either as the presence of some hidden (unknown a priori) constraints or as a partial computability of the objective function in the search domain. In such a statement, the optimization problem becomes more complex since the region of feasible parameters’ combinations is not defined in advance.
+However, a principally new problem in applications, namely the numerical instability of the models investigated in some (unknown a priori) regions in the ranges of the parameters’ variations recently became relevant. In such regions, one cannot perform the numerical modeling and compute the objective function values correctly. This phenomenon can be interpreted either as the presence of some hidden (unknown a priori) constraints \cite{Stripinis2021} or as a partial computability of the objective function in the search domain \cite{Candelieri2019,Sergeyev2003,Strongin2020}. In such a statement, the optimization problem becomes more complex since the region of feasible parameters' combinations is not defined in advance.
 
 This paper presents the results in a new research direction related to the use of imputation\footnote{The term ``imputation'' in the paper is used following the established terminology in the field of machine learning related to the restoring of the missing data.} (restoring) of the objective function values in the course of the global search algorithm operation when solving the problems with partially defined objective functions. The approach proposed is based on an adaption of the computation rules of the global search algorithm. The efficiency of the approach proposed has been demonstrated numerically.
 
@@ -112,13 +111,13 @@ The last assumption makes the application of the classic information-statistical
 
 \section{Solving Method}
 
-\subsection{Description of the Global Search Algorithm}
+\subsection{Global Search Algorithm}
 
-Within the framework of the proposed approach, the information-statistical theory of global search is used for solving the problems (\ref{eq2}). The main idea of the algorithm is the use of the accumulated information to determine the next interval, within which it is most probable to find the absolute minimum. The next trial point in this interval corresponds to the mathematical expectation of the minimum location.
+%Within the framework of the proposed approach, the information-statistical theory of global search is used for solving the problems (\ref{eq2}). The main idea of the algorithm is the use of the accumulated information to determine the next interval, within which it is most probable to find the absolute minimum. The next trial point in this interval corresponds to the mathematical expectation of the minimum location.
 
-Let us give more detailed description of the algorithm.
+Let us give more detailed description of the \textbf{global search algorithm} (GSA) for solving the problem (\ref{eq2}).
 
-\subsubsection{Global search algorithm (GSA)} At every iteration of the global search a \textit{trial} is executed. We will refer to computing the objective function value  $\phi (x)$ from (\ref{eq2}) as a trial. The first trial will be executed in the middle point $x^1 \in (0,1)$. The choice of the point $x^{k+1}, k \leq 1$ of the next $(k+1)^\text{th}$ trial is performed on the base of the following rules.
+At every iteration of the global search a \textit{trial} is executed. We will refer to computing the objective function value  $\phi (y(x))$ from (\ref{eq2}) as a trial. The first trial will be executed in the middle point $x^1 \in (0,1)$. The choice of the point $x^{k+1}, k \leq 1$ of the next $(k+1)^\text{th}$ trial is performed on the base of the following rules.
 
 \paragraph{Rule 1.} Renumber (by the lower indices) the points $x^i, 1 \leq i \leq k$  of the previous trials in the ascending order by their coordinates, i.e.
 \begin{equation}\label{eq5} 
@@ -207,7 +206,7 @@ R(i)=\Delta _i, \text{ if } v(x_i)=0 \text{ or } v(x_{i-1})=0.
 \caption{Examples of the search trials distribution in the non-computability regions for the first approach to the values imputation} \label{fig1}
 \end{figure}
 
-A large number of excess trials after getting into the non-computability region due to a large value of the characteristic obtained according to (\ref{eq13}) is an essential draw-back of this approach.
+A large number of excess trials after getting into the non-computability region due to a large value of the characteristic obtained according to (\ref{eq13}) is an essential drawback of this approach.
 
 \subsubsection{The second approach.} To ignore the absence of the objective function values at the point. The characteristic of the interval with two non-computable point or with one non-computable point and one boundary point is equal to the interval length multiplied by a coefficient, i.e.
 \begin{equation}\label{eq14} 
@@ -239,9 +238,10 @@ Essential drawbacks of this approach are not utilizing the information on the co
 
 \subsubsection{The fourth approach.} To restore the objective function values in the points for the intervals with two non-computable points as the averages of the nearest computable points taking into account the coordinates, i.e.
 \begin{equation}\label{eq17} 
-\tilde{z}(x)=z'+ \text{sign}(z''-z') \frac {|z''-z'| \cdot \| x-x' \|}{\| x''-x' \|},
+%\tilde{z}(x)=z'+ \text{sign}(z''-z') \frac {|z''-z'| \cdot \| x-x' \|}{\| x''-x' \|},
+\tilde{z}(x)=z'+ \text{sign}(z''-z') \frac {|z''-z'| \cdot \rho(x,x')}{\rho(x',x'') },
 \end{equation}
-where $z'$ and $z''$ are the objective function values in the computable points $x'$ and $x''$  nearest to the interval.
+where $z'$ and $z''$ are the objective function values in the computable points $x'$ and $x''$  nearest to the interval and $\rho(x_1,x_2) =  |x_1 - x_2|^{1/N}$.
 The rest of the approach is identical to the third one. Formula (\ref{eq14}) in this case will be applied when the non-computable region is located only near the boundary point.
 \begin{figure}
 \includegraphics[width=\textwidth]{fig4.png}
@@ -262,10 +262,12 @@ The rest of the approach is identical to the third one. Formula (\ref{eq14}) in 
 \tilde{z}(x)=
   \begin{cases}
     z', & {\quad x \leq \hat{x}',}\\
-    \frac {z'+z''}{2}- \frac {r \mu}{2} (\| x - x' \| + \| x - x'' \|), & {\quad \hat{x}' < x < \hat{x}'',}\\
-    z'',  & {\quad x \geq \hat{x}''.}
+    %\frac {z'+z''}{2}- \frac {r \mu}{2} (\| x - x' \| + \| x - x'' \|), & {\quad \hat{x}' < x < \hat{x}'',}\\
+    \frac {z'+z''}{2}- \frac {r \mu}{2} (\rho(x,x')  + \rho(x,x'')), & {\quad \hat{x}' < x < \hat{x}'',}\\
+    z'',  & {\quad x \geq \hat{x}'',}
   \end{cases}
 \end{equation}
+where $\rho(x_1,x_2) =  |x_1 - x_2|^{1/N}$.
 The value $\tilde{z}(x)$ can be interpreted as an average value of the minorant and the majorant for a function satisfying the H{\"o}lder condition. Let us give the description of the modification of the global search algorithm in the case of partially defined function based on this approach.
 
 \subsubsection{Description of the modification.} The algorithm remains the same with an introduction of the following minor additions in the computing formulae in the case of falling into the non-computable search regions.
@@ -293,7 +295,7 @@ R(i)=
     2 \Delta _i-4 \frac {(z_{i-1}-z_1^*)}{r \mu}, & {\quad  v(x_{i-1})=1, v(x_i)=-1.}
   \end{cases}
 \end{equation}
-        \paragraph{Case 2.}   For the intervals with \textbf{one boundary point and one non-computable point}, perform the imputation of the values for the non-computable point based on the neighbor computable point and apply the formula
+        \paragraph{Case 2.}   For the intervals with \textbf{one non-computable point and one boundary point}, perform the imputation of the values for the non-computable point based on the neighbor computable point and apply the formula
 \begin{equation}\label{eq22} 
 R(i)=
   \begin{cases}
@@ -344,7 +346,7 @@ Number of solved problems & 100 / 100 & 100 / 100 & 100 / 100\\
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{fig6.png}
-\caption{Examples of problems \#\# 19, 25, and 35 from the first series of experiments} \label{fig6}
+\caption{Examples of problems No. 19, 25, and 35 from the first series of experiments} \label{fig6}
 \end{figure}
 
 Fig.~\ref{fig6} presents the examples of solving several problems with the modified GSA. The trials inside the computable regions are marked by the blue points, the global minima of the problems are marked by the red points, and the points of trials performed inside the non-computability regions are marked by the black points. Also, the non-computability regions are filled with grey for clarity.
