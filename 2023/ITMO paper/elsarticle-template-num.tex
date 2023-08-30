@@ -441,11 +441,15 @@ We note again that the characteristic $R(i)$ quantifies the possibility of findi
 \label{sec_exp}
 
 \subsection{Experimental setup}
+In this section, we present experimental results that demonstrate the effectiveness of the developed framework for a number of HPO problems. First, we describe in detail the setup of the computational experiment. Then, the results of comparing the iOpt framework with several well-known frameworks widely used for hyperparameter tuning in machine learning methods are presented. The section closes with conclusions and a discussion of the results.
 
-Datasets
 
-\begin{table}[]
-\caption{14 datasets used in the experiments.}
+\textbf{Datasets.} 
+We used for our experiments fifteen datasets from the UCI repository \cite{AsuncionNewman2007}, which covers a large number of areas. Datasets from this repository are quite often used to test the correct operation of hyperparameter tuning algorithms \cite{WU2023110160,Wang2021,Joy2020}. We selected the datasets to ensure that the data contained in them were described by both numerical and categorical attributes. Note that most of the datasets were unbalanced and the data presented in the datasets were adapted for the classification task.  The characteristics of the datasets used are presented in Table \ref{tab:1}.
+
+
+\begin{table}[ht]
+\caption{The datasets used in the experiments}
 \label{tab:1}
 \begin{tabular}{lllllll}
 \hline
@@ -467,17 +471,22 @@ Zoo                                                             & 101   & 16    
 \end{tabular}
 \end{table}
 
-Metrics
+\textbf{Classification algorithms.} We performed hyperparameter tuning for three types of classification algorithms on all datasets.
+\begin{enumerate}
+	\item XGBoost is one of the tree ensemble construction methods, which is an efficient implementation of gradient boosting over decision trees \cite{XGBoost2016}. The main advantages of the algorithm include a smart penalty mechanism, proportional reduction of leaf nodes, and automatic feature selection. It is known that the performance of an algorithm and its predictive ability depend significantly on the correct tuning of hyperparameters. The implementation of the method is based on the widely used XGBoost library.
+ \item Multi-Layer Perceptron (MLP), a fully connected artificial neural network, is a supervised learning algorithm that forms a functionf:$R^m \to R^o$, where $m$ is the number of input attributes, and o is the output dimensionality of the network \cite{GARDNER19982627}. Using this method, it is possible to form the function f as a universal nonlinear approximator for the classification and regression problem. In the framework of this study, we will consider the multilayer perceptron for the task of attributing an object to a particular class.
+ \item Support Vector Classification (SVC) is a support vector method for the classification problem \cite{SVC2003}. The main purpose of this algorithm is to find the equation of a separating hyperplane $(\sum_{i=1}^n \omega_i x_i)+\omega_0=0$ in the space $R^n$ that separates classes in some optimal way. To improve the predictive ability of the algorithm, a method for constructing a nonlinear classifier was proposed by switching from scalar products to arbitrary kernels, which allows the construction of nonlinear separators. An implementation of the SVC method from the scikit learn library was used to investigate the capabilities of HPO algorithms.
 
+\end{enumerate}
 
-% Please add the following required packages to your document preamble:
-% \usepackage{multirow}
-\begin{table}[]
-\caption{Настраиваемые гиперпараметры для алгоритмов машинного обучения}
+The tunable hyperparameters of the above algorithms and their search region are listed in Table \ref{tab:2}.
+
+\begin{table}[ht]
+\caption{Tunable hyperparameters of machine learning algorithms.}
 \label{tab:2}
 \begin{tabular}{llll}
 \hline
-Метод                    & Параметры            & Тип параметра & Диапазон параметра                                                     \\ \hline
+Method  & Parameters & Parameter type & Parameter range \\ \hline
 \multirow{7}{*}{XGBoost} & n\_estimators        & Int           & {[}10, 200{]}                                                          \\
                          & max\_depth           & Int           & {[}5, 20{]}                                                            \\
                          & min\_child\_weight   & Int           & {[}1, 10{]}                                                            \\
@@ -501,19 +510,98 @@ Metrics
 \end{tabular}
 \end{table}
 
-Algorithms for comparison
+\textbf{Evaluation Metrics.} To evaluate the quality of machine learning methods on the considered datasets, it is necessary to determine the metrics. In view of the peculiarities of datasets, namely their unbalanced nature and the different number of classes in different datasets, the use of a single metric would result in a biased evaluation. Therefore, we used the following set of metrics:
+\begin{itemize}
+	\item Accuracy is a metric describing the overall prediction accuracy of the method across all classes. It is most visible in the case when each class is equally important and the dataset shows a balance of classes \cite{Metric1}. This metric has been applied when working with the datasets Optical Recognition of Handwritten Digits, Bank Marketing, CNAE9, Statlog Segmentation, Semeion Handwritten Digit;
+ \item Binary F1 - F1 score is adapted for binary classification tasks, with the predominance of one class over another in the dataset \cite{Chicco2020}. This metric is suitable for analyzing Breast Cancer Wisconsin, Credit Approval, Parkinsons, Banknote authentication, Wilt datasets; 
+ \item Macro F1 - F1 score is suitable for tasks with a large number of unbalanced classes \cite{Metric2}. The datasets Protein Localization Sites (Ecoli), Balance Scale Weight \& Distance, Zoo, Car Evaluation, Turkiye Student Evaluation have this particular feature.
 
-\subsection{Experimental results}
+\end{itemize}
 
-First result
+\textbf{HPO algorithms.} The hyperparameters of machine learning methods were tuned using the iOpt framework developed by us, and also using the well-known frameworks Optuna \cite{optuna} and HyperOpt \cite{hyperopt}.
 
-Second result 
+Optuna is an automatic hyperparameter optimization software environment specifically designed for optimizing hyperparameters of machine learning algorithms. Several methods for selecting test points, which are referred to as \textit{samplers} within this framework, are available in Optuna.  In the study, we used the following hyperparameter search options:
+\begin{enumerate}
+	\item Optuna(random) will perform a random search. For each hyperparameter, a distribution is specified, from which its value is selected.
+	\item Optuna(tpe) is a sampler based on the Tree-structured Parzen Estimator algorithm \cite{NIPS2011_86e8f7ab}. On each trial, for each parameter, TPE fits one Gaussian Mixture Model (GMM) $l(x)$ to the set of parameter values associated with the best objective values, and another GMM $g(x)$ to the remaining parameter values. It chooses the parameter value x that maximizes the ratio $l(x)/g(x)$.
+	\item Optuna(cmaes) is an algorithm based on CMA-ES (Lightweight Covariance Matrix Adaptation Evolution Strategy) \cite{cmaes2015}. The CMA-ES is a stochastic method for real-parameter optimization of non-linear, non-convex functions. The algorithm derived from intuitive concepts and from requirements of non-linear, non-convex search in continuous domain.
+	\item Optuna (nsgaii) is a sampler based on the Nondominated Sorting Genetic Algorithm II,  which is a well known, fast and elitist multi-objective genetic algorithm \cite{nsgaii2013}.
 
-Third result
+\end{enumerate}
 
 
-\begin{table}[]
-\caption{Время поиска значений гиперпараметров при однократном запуске алгоритма оптимизации.}
+Hyperopt framework is a Python library for optimization over complex search spaces, which may include real-valued, discrete, and conditional dimensions. As with Optuna, Hyperopt has different options for finding hyperparameter values. There are currently three algorithms implemented in Hyperopt: Random Search, Tree of Parzen Estimators (TPE) and Adaptive TPE. We used the computation variant with the TPE algorithm implementation - Hyperopt(tpe) \cite{NIPS2011_86e8f7ab}.
+
+When using the iOpt framework, we applied a variant of computation in which the available resource was divided into portions by the number of trials. Most of the trials (75\%) were performed using the global search algorithm (see Section \ref{sec_iOpt}), while in the remaining trials we used the local method to refine the solution found \cite{Kelley}.
+
+\subsection{Results and discussion}
+
+Computational experiments were performed on the computing nodes of the Lobachevsky supercomputer (Intel Xeon Silver 4310T CPU @ 2.30GHz, 64Gb RAM, Linux CentOS 7). We used the following versions of frameworks for the experiments: iOpt 0.2.22, Optuna 3.1.1, Hyperopt 0.2.7. All runs were performed using Python version 3.11.3.
+
+In one experiment on hyperparameter tuning, we ran 200 search trials with each method. Due to the stochastic nature of the Optuna and Hyperopt algorithms, we ran them 10 times and calculated both the average and worst values of the objective  metric. For iOpt, we ran it once because the global search algorithm is deterministic and the average, worst and best case values are the same.
+
+Figures \ref{fig_res_1} and \ref{fig_res_2} show the values of the classification metrics of the SVC algorithm in the worst and average case, respectively. As can be seen, when optimizing the hyperparameters of the SVC algorithm on the Banknote, CNAE-9, Statlog Segmentation, and Wilt datasets, the iOpt framework has demonstrated the best results.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.85\textwidth]{SVC_1.pdf}
+\caption{Values of the optimized metrics for the SVC algorithm, obtained in the worst case} \label{fig_res_1}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.85\textwidth]{SVC_2_avg.pdf}
+\caption{Values of optimized metrics for the SVC algorithm averaged over 10 runs} \label{fig_res_2}
+\end{figure}
+
+
+On the CarEvaluation, Credit Approval, Ecoli, Parkinsons, and Semeion datasets, the best values of the metrics on average were obtained with the Optuna (tpe). On the datasets Balance, Breast Cancer, Digits, on average the Optuna(cmaes) performed well. The Hyperopt(tpe) performed better than the others on the Bank-marketing dataset. In the case of the Zoo dataset, all optimization algorithms showed the same results.
+
+It is especially worth noting that the algorithms implemented in both Optuna and Hyperopt contain random parameters; as a consequence, the best values of the objective metric are not guaranteed for a single run. 
+
+This fact is illustrated by Fig. \ref{fig_res_1}. The iOpt framework additionally performed better on the Bank-marketing, Banknote, CNAE-9, Statlog Segmentation, and Wilt datasets. Thus on 9 out of 14 datasets the iOpt framework showed better values of the objective metric compared to the Optuna and Hyperopt frameworks.
+
+
+\begin{figure}
+\centering
+\includegraphics[width=0.85\textwidth]{XGBoost_1.pdf}
+\caption{Values of the optimized metrics for the XGBoost algorithm, obtained in the worst case} \label{fig_res_3}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.85\textwidth]{XGBoost_2_avg.pdf}
+\caption{Values of optimized metrics for the XGBoost algorithm averaged over 10 runs} \label{fig_res_4}
+\end{figure}
+
+Figures \ref{fig_res_3} and \ref{fig_res_4} show the value of classification metrics of the XGBoost algorithm in the worst and average case, respectively. In the case of optimizing the hyperparameters  of the XGBoost algorithm, the iOpt framework showed better results on the CarEvaluation, CNAE-9, Credit Approval, Ecoli, Parkinsons, Wilt, Zoo datasets.
+
+On average, when using 10 runs, the best performance of the Optuna(tpe) framework was observed on the Balance, Bank-marketing, Banknote, Breast Cancer, CarEvaluation, Credit Approval, Digits, Ecoli, Semeion, Statlog Segmentation, Wilt datasets. The Hyperopt(tpe) showed good results on the CNAE-9 and Parkinsons datasets on average for 10 runs.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.85\textwidth]{MLP_1.pdf}
+\caption{Values of the optimized metrics for the XGBoost algorithm, obtained in the worst case} \label{fig_res_5}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.85\textwidth]{MLP_2_avg.pdf}
+\caption{Values of optimized metrics for the XGBoost algorithm averaged over 10 runs} \label{fig_res_6}
+\end{figure}
+
+Figures \ref{fig_res_5} and \ref{fig_res_6} show the values of classification metrics of the MLP algorithm. The iOpt framework performed better on the Balance, Bank-marketing, Banknote, Breast Cancer, Credit Approval, Wilt, Zoo datasets. Considering the average values of metrics on 10 runs of hyperparameter optimization, the Optuna framework performed better on the Breast Cancer, CNAE-9, Credit Approval, Digits, Ecoli, Parkinsons, Semeion datasets, and the Hyperopt on the Statlog Segmentation, Wilt, CarEvaluation datasets.
+
+
+Thus, we can conclude that the iOpt framework shows comparable results with the Optuna and Hyperopt frameworks in terms of performance quality. It should be reminded that the algorithms implemented within the iOpt framework are deterministic. As a consequence, iOpt, unlike Optuna and Hyperopt, only needs to be run once to achieve the best values of the quality metric.
+
+Next, we consider the performance of the iOpt, Optuna, and Hyperopt frameworks. Table \ref{tab:3} shows the running time of the frameworks for optimizing the hyperparameters of the SVC algorithm.  A single optimization run was performed with a maximum number of 200 search trials. It is obvious that even in the case of a single run iOpt shows better performance on many datasets compared to Optuna and Hyperopt.
+
+To obtain a good solution, the randomized methods from Optuna and Hyperopt should be repeated several times. In this case, the performance gain of iOpt is even greater. As an example, Figure \ref{fig8} shows a comparison of the runtime of the frameworks with 10 reruns of Optuna and Hyperopt on the Wilt dataset.
+
+
+\begin{table}[ht]
+\caption{Time of hyperparameter tuning for a single run of algorithms.}
 \label{tab:3}
 \begin{tabular}{lllllll}
 \hline
@@ -540,6 +628,20 @@ Wilt                                                            & 70.0   & 75.8 
 Zoo                                                             & 3.0    & 3.9    & 3.0    & 3.1    & 4.2    & \textbf{1.8}    \\ \hline
 \end{tabular}
 \end{table}
+
+
+\begin{figure}
+\centering
+\includegraphics[width=0.85\textwidth]{Fig8}
+\caption{Time for tuning hyperparameters of the SVC algorithm to obtain good values of quality metrics on the Wilt dataset} \label{fig8}
+\end{figure}
+
+\section{Conclusion}
+In this paper, we propose a hyperparameter tuning method that is based on the ideas of Lipschitz global optimization. In particular, we use a global search algorithm combined with dimensionality reduction based on Peano curves. We have proposed a generalization of Lipschitz optimization methods to the case of problems with partially integer variables, since many tunable algorithms have discrete hyperparameters.
+
+We have tested our newly developed iOpt framework on real datasets, and experimental results show that our method can search for hyperparameters with comparable (and often better) values of the objective metric. At the same time, due to its deterministic nature, our method provides a stable result at any run, whereas known randomized algorithms need to be run several times to achieve a good result. This ensures a significant superiority of our framework in terms of the time required to select the optimal variant.
+
+In the future, we plan to implement the parallelization of our algorithm, with a focus on heterogeneous computing systems. This will allow us to perform hyperparameter tuning of deep neural networks, which requires significant resources and cannot be performed in an acceptable time on a single computing device.
 
 
 \section*{CRediT authorship contribution statement}
