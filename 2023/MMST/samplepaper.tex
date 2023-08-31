@@ -92,7 +92,8 @@ that allows applying efficient one-dimensional optimization algorithms for its s
 
 We make the following assumptions on the objective function. 
 
-First, the objective function may be multiextremal, nondifferentiable, and, moreover, defined in the form of a ``black box'' (i.e. in the form of some subroutine, which entry the argument is supplied to, and the output is respective function value).
+First, the objective function may be multiextremal, non-differentiable, and, moreover, defined in the form of a ``black box'' (i.e. in the form of some subroutine, which entry the argument is supplied to, and the output is respective function value).
+
 Second, each computing of the function at some point of the feasible region may require considerable computation resources.
 
 Third, the objective function satisfies the Lipschitz condition
@@ -184,7 +185,7 @@ The experts in Data Science have proposed various approaches to the imputation (
   \item Deleting of all cases, which have missing values of some variables (at the worst, the algorithm loses the access to the useful information contained in the on-missing observations’ values);
   \item Replacing any missing value with the average of the available values of the variable (doesn’t work with the qualitative variables, doesn’t account for the correlation of the data);
   \item Replacing by the most frequent value or by a constant (differs from the use of the median only by the ability to work with the qualitative parameters);
-  \item Replacing the data using the method of $k$ nearest neighbors (unlike the former, accounts for the correlation between the parameters, sensitive to the fadeouts, computation costly);
+  \item Replacing the data using the method of $k$-nearest neighbors (unlike the former, accounts for the correlation between the parameters, sensitive to the fadeouts, computation costly);
   \item Multiple imputation by chained equations (MICE) -- imputation of each value is performed not one but many times (allows understanding how reliable or unreliable is the value suggested);
   \item Imputation of the data using a deep learning (restores the missing values by means of training a neural network on the points, for which all parameters are available, computation costly for big data).
 \end{itemize}
@@ -334,9 +335,18 @@ R(i)=\Delta _i \cdot {\left( 1-\frac {1}{r} \right)}^N+z_0^*.
 
 The numerical experiments were carried out using a computer with Intel\textregistered\ Core\texttrademark\ i7-10750H CPU @ 2.60GHz using the developed software package implementing the modification described in Section 3. To generate a series of problems, GKLS generator described in \cite{Gaviano2003} was used. It allows generating the multiextremal optimization problems with the properties known in advance. These problems were appended with the non-computable regions of various kinds.
 
-Each series of experiments consisted of 100 GKLS problems with everywhere computable objective function (the original GKLS problems), 100 problems with the non-computabilities at the boundaries of the search domains, and 100 problems with non-computability regions defined randomly.
+Each series of experiments consisted of 100 GKLS problems with everywhere computable objective function (original), 100 problems with the non-computabilities at the boundaries of the search domains (round), and 100 problems with non-computability regions defined randomly (random).
+
+\begin{figure}[h]
+\includegraphics[width=\textwidth]{fig6.png}
+\caption{Examples of problems No. 19, 25, and 35 from the first series of experiments} \label{fig6}
+\end{figure}
 
 In the first series of experiments, the correctness of the modification operation was checked and the features of executing the trials in the non-computability regions were revealed. The problems of the dimensionality $N=2$ were used in the experiment. The reliability parameter was set to $r=5.5$, the accuracy was $\varepsilon=0.01$. The results of experiments are presented in Table~\ref{tab1}.
+
+Fig.~\ref{fig6} presents the examples of solving several problems with the modified GSA. The trials inside the computable regions are marked by the blue points, the global minima of the problems are marked by the red points, and the points of trials performed inside the non-computability regions are marked by the black points. Also, the non-computability regions are filled with grey for clarity.
+
+Since the modified algorithm works with the original GKLS problem series according to the rules of base algorithm, one can compare it with the GSA. Thus, the general behavior of GSA was preserved for the modification, and the same regions of trials' accumulation near the local minima were observed that can be explained by the realization of the  computation rules (\ref{eq21}) in most cases. One can see in Table~\ref{tab1} that the number of trials executed inside the non-computable regions is small. Total number of trials for the original problems and for the problems with partially defined objective function are comparable, the method doesn't perform excess trials in the non-promising regions due to the computing formulae utilizing the information on the nearest computable points.
 
 \begin{table}[h]
 \caption{Comparison of the original and modified GSA}\label{tab1}
@@ -351,15 +361,6 @@ Average number of trials & 781.7	& 854.9 & 839.0 \\
 \hline
 \end{tabular}
 \end{table}
-
-\begin{figure}[h]
-\includegraphics[width=\textwidth]{fig6.png}
-\caption{Examples of problems No. 19, 25, and 35 from the first series of experiments} \label{fig6}
-\end{figure}
-
-Fig.~\ref{fig6} presents the examples of solving several problems with the modified GSA. The trials inside the computable regions are marked by the blue points, the global minima of the problems are marked by the red points, and the points of trials performed inside the non-computability regions are marked by the black points. Also, the non-computability regions are filled with grey for clarity.
-
-Since the modified algorithm works with the original GKLS problem series according to the rules of base algorithm, one can compare it with the GSA. Thus, the general behavior of GSA was preserved for the modification, and the same regions of trials' accumulation near the local minima were observed that can be explained by the realization of the  computation rules (\ref{eq21}) in most cases. One can see in Table~\ref{tab1} that the number of trials executed inside the non-computable regions is small. Total number of trials for the original problems and for the problems with partially defined objective function are comparable, the method doesn't perform excess trials in the non-promising regions due to the computing formulae utilizing the information on the nearest computable points.
 
 The use of rule (\ref{eq25}) forms a grid of trials inside the non-computability regions that is visible clearly for problem No. 35. In this case, the trial points are denser at the boundary of the non-computable region close to potential minimum when attempting to approach this one from different sides due to the computational rules (\ref{eq22})--(\ref{eq24}) that was observed in all problems presented as the examples. 
 100\% of the problems were solved. However, for the series with the boundary non-computability region the value of parameter $r=6.0$ was required to solve one problem, and for the series with the random non-computability regions the same value of $r$ was required to solve two problems.
