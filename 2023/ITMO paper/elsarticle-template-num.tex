@@ -157,7 +157,7 @@ The quality of machine learning methods is substantially affected by their hyper
 
 \begin{keyword}
 %% keywords here, in the form: keyword \sep keyword
-Lipschitz optimization \sep Multiextremal function \sep Hyperparameter tuning
+Lipschitz optimization \sep Global optimization \sep Multiextremal functions \sep Hyperparameter tuning
 
 %% PACS codes here, in the form: \PACS code \sep code
 
@@ -178,7 +178,7 @@ Currently, complex scientific and/or industrial problems are most often solved b
 
 For an end user who wishes to fine-tune the method used by selecting an optimal combination of hyperparameters, the choice of a particular framework is determined by the following factors: 1) efficiency of the methods implemented in the framework that allow solving an HPO problem from the class of problems to which the user's problem belongs; 2) ease of using the  framework from the point of view of description/formulation of the problem of selecting the optimal combination of hyperparameters, organization of the optimum search process, as well as obtaining and analyzing the results. Today, the most common way to organize such an interface is to use the Python programming language, while the frameworks can be written both in this and other languages.
 
-In this paper, we present iOpt \footnote{\url{https://github.com/aimclub/iOpt/}}, a framework of intelligent optimization methods focused on solving problems of selecting optimal values of hyperparameters of various algorithms (including machine learning and heuristic optimization methods). The paper is organized as follows. At the beginning, there is a review of known methods used for hyperparameter tuning. Section \ref{sec_lip} presents the mathematical formulation of the problem, describes approaches to the reduction of multidimensional problems to one-dimensional problems and to the solution of problems with discrete parameters. Section \ref{sec_iOpt} explains the algorithmic basis of global optimization methods implemented in the iOpt framework. In Section \ref{sec_exp}, we present the results of numerical experiments conducted to compare the efficiency of the iOpt framework with other known frameworks on model and applied problems. The conclusion summarizes the findings and plans   for the development of the framework.
+In this paper, we present iOpt\footnote{\url{https://github.com/aimclub/iOpt/}}, a framework of intelligent optimization methods focused on solving problems of selecting optimal values of hyperparameters of various algorithms (including machine learning and heuristic optimization methods). The paper is organized as follows. At the beginning, there is a review of known methods used for hyperparameter tuning. Section \ref{sec_lip} presents the mathematical formulation of the problem, describes approaches to the reduction of multidimensional problems to one-dimensional problems and to the solution of problems with discrete parameters. Section \ref{sec_iOpt} explains the algorithmic basis of global optimization methods implemented in the iOpt framework. In Section \ref{sec_exp}, we present the results of numerical experiments conducted to compare the efficiency of the iOpt framework with other known frameworks on model and applied problems. The conclusion summarizes the findings and plans   for the development of the framework.
 
 
 \section{Related work}
@@ -291,10 +291,10 @@ Remark 1.  The Lipshitz condition will not be satisfied for the reduced one-dime
 \begin{minipage}{0.45\linewidth}
 \center{\includegraphics[width=0.9\linewidth]{fig2b.jpg} }
 \end{minipage}
-\caption{Evolvents $y_m(x)$ with $m=4$.}\label{fig:Peano}
+\caption{Evolvents $y_m(x)$ with $m=4$ for dimensions $N=2$ and $N=3$.}\label{fig:Peano}
 \end{figure}   
 
-Remark 2: The theoretical Peano-Hilbert curve $y(x)$ is defined as a limiting object. Numerical algorithms use evolvents $y_m(x)$, that approximate the true curve with a given density level $2^{-m}$, which depends on the required search accuracy. Efficient schemes for computing several types of evolvents are described in detail in \cite{Sergeyev2013}. For illustration, Fig.~\ref{fig:Peano} shows graphs corresponding to the evolvents $y_m(x)$ with density $m=4$ for dimensions $N=2$ and $N=3$.
+Remark 2. The theoretical Peano-Hilbert curve $y(x)$ is defined as a limiting object. Numerical algorithms use evolvents $y_m(x)$, that approximate the true curve with a given density level $2^{-m}$, which depends on the required search accuracy. Efficient schemes for computing several types of evolvents are described in detail in \cite{Sergeyev2013}. For illustration, Fig.~\ref{fig:Peano} shows graphs corresponding to the evolvents $y_m(x)$ with density $m=4$ for dimensions $N=2$ and $N=3$.
 
 \subsection{The problem of discrete parameters}
 \label{sec_discr} 
@@ -343,7 +343,7 @@ Applying the global search algorithm to the solution of problem (\ref{problem_is
 \section{iOpt framework} 
 \label{sec_iOpt}
 
-The iOpt framework of intelligent optimization methods was developed as part of the ``Strong Artificial Intelligence in Industry'' project. It is designed to select optimal (in a given metric) values of parameters of complex objects and processes, for example, artificial intelligence and machine learning methods. The framework allows fine-tuning of parameters of models and methods used in applied research in various fields of science.  The iOpt framework was designed in the Python programming language using its standard library. To use the framework, you need to have the Pyhon interpreter version 3.8 or higher installed. The framework is open source and is available at \url{https://github.com/aimclub/iOpt}.
+The iOpt framework of intelligent optimization methods was developed as part of the ``Strong Artificial Intelligence in Industry'' project. It is designed to select optimal (in a given metric) values of parameters of complex objects and processes, for example, artificial intelligence and machine learning methods. The framework allows fine-tuning of parameters of models and methods used in applied research in various fields of science.  The iOpt framework was designed in the Python programming language using its standard library. To use the framework, you need to have the Python interpreter version 3.8 or higher installed. The framework is open source and is available at \url{https://github.com/aimclub/iOpt}.
 
 The iOpt framework can be used to develop specialized decision support systems for solving the tasks of selecting optimal parameters for complex models or methods. The application area of the framework is focused on the hyperparameter tuning tasks, since this class of tasks involves the problems of multiextremality of the optimization criterion and the lack of a formula-based description of the model under study (a ``black box'' type model).
 
@@ -380,7 +380,7 @@ Algorithm \ref{alg_GSA} shows the pseudo code of the Global Search Algorithm. Th
 \LinesNumbered
  \KwIn{$\varphi(y), D, r, \epsilon, K_{max}$}
  \KwOut{$y_{min}$}
- Initialize $k=2$, $\Omega_k= \left\{ (x_1=0, y_1=y(x_1), z_1=\varphi(y_1)), (x_2=1, y_2=y(x_2), z_2=\varphi(y_2)) \right\}$\\
+ Initialize $k=2$, $t=2$, $\Omega_k= \left\{ (x_1=0, y_1=y(x_1), z_1=\varphi(y_1)), (x_2=1, y_2=y(x_2), z_2=\varphi(y_2)) \right\}$\\
  \While{ $\Delta_t \geq \epsilon$ and  $k \leq K_{max}$}{
   Compute the estimate of the H\"older constant $\mu$ according to (\ref{mu})\\
 	\For{$i=1$ \KwTo $k$}{
@@ -441,18 +441,18 @@ We note again that the characteristic $R(i)$ quantifies the possibility of findi
 \section{Numerical experiments}
 \label{sec_exp}
 
-\subsection{Experimental setup}
 In this section, we present experimental results that demonstrate the effectiveness of the developed framework for a number of HPO problems. First, we describe in detail the setup of the computational experiment. Then, the results of comparing the iOpt framework with several well-known frameworks widely used for hyperparameter tuning in machine learning methods are presented. The section closes with conclusions and a discussion of the results.
 
+\subsection{Experimental setup}
 
 \textbf{Datasets.} 
-We used for our experiments fifteen datasets from the UCI repository \cite{AsuncionNewman2007}, which covers a large number of areas. Datasets from this repository are quite often used to test the correct operation of hyperparameter tuning algorithms \cite{WU2023110160,Wang2021,Joy2020}. We selected the datasets to ensure that the data contained in them were described by both numerical and categorical attributes. Note that most of the datasets were unbalanced and the data presented in the datasets were adapted for the classification task.  The characteristics of the datasets used are presented in Table \ref{tab:1}.
+We used for our experiments fifteen datasets from the UCI repository \cite{UCI}, which covers a large number of areas. Datasets from this repository are quite often used to test the correct operation of hyperparameter tuning algorithms \cite{Joy2020,Wang2021,Wu2023}. We selected the datasets to ensure that the data contained in them were described by both numerical and categorical attributes. Note that most of the datasets were unbalanced and the data presented in the datasets were adapted for the classification task.  The characteristics of the datasets used are presented in Table \ref{tab:1}.
 
 
 \begin{table}[ht]
 \caption{The datasets used in the experiments}
 \label{tab:1}
-\begin{tabular}{lllllll}
+\begin{tabular}{lcccccc}
 \hline
 Name                                                            & Num   & Attributes & Int & Float & Categorical & Classes \\ \hline
 Balance                                                         & 625   & 4          & 4   & 0     & 0           & 3       \\
@@ -475,8 +475,8 @@ Zoo                                                             & 101   & 16    
 \textbf{Classification algorithms.} We performed hyperparameter tuning for three types of classification algorithms on all datasets.
 \begin{enumerate}
 	\item XGBoost is one of the tree ensemble construction methods, which is an efficient implementation of gradient boosting over decision trees \cite{XGBoost2016}. The main advantages of the algorithm include a smart penalty mechanism, proportional reduction of leaf nodes, and automatic feature selection. It is known that the performance of an algorithm and its predictive ability depend significantly on the correct tuning of hyperparameters. The implementation of the method is based on the widely used XGBoost library.
- \item Multi-Layer Perceptron (MLP), a fully connected artificial neural network, is a supervised learning algorithm that forms a functionf:$R^m \to R^o$, where $m$ is the number of input attributes, and o is the output dimensionality of the network \cite{GARDNER19982627}. Using this method, it is possible to form the function f as a universal nonlinear approximator for the classification and regression problem. In the framework of this study, we will consider the multilayer perceptron for the task of attributing an object to a particular class.
- \item Support Vector Classification (SVC) is a support vector method for the classification problem \cite{SVC2003}. The main purpose of this algorithm is to find the equation of a separating hyperplane $(\sum_{i=1}^n \omega_i x_i)+\omega_0=0$ in the space $R^n$ that separates classes in some optimal way. To improve the predictive ability of the algorithm, a method for constructing a nonlinear classifier was proposed by switching from scalar products to arbitrary kernels, which allows the construction of nonlinear separators. An implementation of the SVC method from the scikit learn library was used to investigate the capabilities of HPO algorithms.
+ \item Multi-Layer Perceptron (MLP), a fully connected artificial neural network, is a supervised learning algorithm that forms a function $f : R^m \to R^o$, where $m$ is the number of input attributes, and $o$ is the output dimensionality of the network \cite{GARDNER19982627}. Using this method, it is possible to form the function f as a universal nonlinear approximator for the classification and regression problem. In the framework of this study, we will consider the multilayer perceptron for the task of attributing an object to a particular class.
+ \item Support Vector Classification (SVC) is a support vector method for the classification problem \cite{SVC}. The main purpose of this algorithm is to find the equation of a separating hyperplane $\omega_0 + \sum_{i=1}^n \omega_i x_i=0$ in the space $R^n$ that separates classes in some optimal way. To improve the predictive ability of the algorithm, a method for constructing a nonlinear classifier was proposed by switching from scalar products to arbitrary kernels, which allows the construction of nonlinear separators. An implementation of the SVC method from the scikit-learn library was used to investigate the capabilities of HPO algorithms.
 
 \end{enumerate}
 
@@ -485,7 +485,7 @@ The tunable hyperparameters of the above algorithms and their search region are 
 \begin{table}[ht]
 \caption{Tunable hyperparameters of machine learning algorithms.}
 \label{tab:2}
-\begin{tabular}{llll}
+\begin{tabular}{lccc}
 \hline
 Method  & Parameters & Parameter type & Parameter range \\ \hline
 \multirow{7}{*}{XGBoost} & n\_estimators        & Int           & {[}10, 200{]}                                                          \\
@@ -514,8 +514,8 @@ Method  & Parameters & Parameter type & Parameter range \\ \hline
 \textbf{Evaluation Metrics.} To evaluate the quality of machine learning methods on the considered datasets, it is necessary to determine the metrics. In view of the peculiarities of datasets, namely their unbalanced nature and the different number of classes in different datasets, the use of a single metric would result in a biased evaluation. Therefore, we used the following set of metrics:
 \begin{itemize}
 	\item Accuracy is a metric describing the overall prediction accuracy of the method across all classes. It is most visible in the case when each class is equally important and the dataset shows a balance of classes \cite{Metric1}. This metric has been applied when working with the datasets Optical Recognition of Handwritten Digits, Bank Marketing, CNAE9, Statlog Segmentation, Semeion Handwritten Digit;
- \item Binary F1 - F1 score is adapted for binary classification tasks, with the predominance of one class over another in the dataset \cite{Chicco2020}. This metric is suitable for analyzing Breast Cancer Wisconsin, Credit Approval, Parkinsons, Banknote authentication, Wilt datasets; 
- \item Macro F1 - F1 score is suitable for tasks with a large number of unbalanced classes \cite{Metric2}. The datasets Protein Localization Sites (Ecoli), Balance Scale Weight \& Distance, Zoo, Car Evaluation, Turkiye Student Evaluation have this particular feature.
+ \item Binary F1 -- F1 score is adapted for binary classification tasks, with the predominance of one class over another in the dataset \cite{Chicco2020}. This metric is suitable for analyzing Breast Cancer Wisconsin, Credit Approval, Parkinsons, Banknote authentication, Wilt datasets; 
+ \item Macro F1 -- F1 score is suitable for tasks with a large number of unbalanced classes \cite{Metric2}. The datasets Protein Localization Sites (Ecoli), Balance Scale Weight \& Distance, Zoo, Car Evaluation, Turkiye Student Evaluation have this particular feature.
 
 \end{itemize}
 
@@ -531,7 +531,7 @@ Optuna is an automatic hyperparameter optimization software environment specific
 \end{enumerate}
 
 
-Hyperopt framework is a Python library for optimization over complex search spaces, which may include real-valued, discrete, and conditional dimensions. As with Optuna, Hyperopt has different options for finding hyperparameter values. There are currently three algorithms implemented in Hyperopt: Random Search, Tree of Parzen Estimators (TPE) and Adaptive TPE. We used the computation variant with the TPE algorithm implementation - Hyperopt(tpe) \cite{NIPS2011_86e8f7ab}.
+Hyperopt framework is a Python library for optimization over complex search spaces, which may include real-valued, discrete, and conditional dimensions. As with Optuna, Hyperopt has different options for finding hyperparameter values. There are currently three algorithms implemented in Hyperopt: Random Search, Tree of Parzen Estimators (TPE) and Adaptive TPE. We used the computation variant with the TPE algorithm implementation -- Hyperopt(tpe) \cite{NIPS2011_86e8f7ab}.
 
 When using the iOpt framework, we applied a variant of computation in which the available resource was divided into portions by the number of trials. Most of the trials (75\%) were performed using the global search algorithm (see Section \ref{sec_iOpt}), while in the remaining trials we used the local method to refine the solution found \cite{Kelley}.
 
