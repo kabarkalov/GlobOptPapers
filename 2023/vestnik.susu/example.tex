@@ -22,7 +22,7 @@
 \footnote{The paper is recommended for publication by the Program Committee of the International Scientific Conference “Parallel Computational Technologies (PCT) 2023”}
 }
 
-
+\selectlanguage{english}
 
 
 \authorsen{Konstantin Barkalov, Ilya Lebedev,  Dmitry Silenko}
@@ -61,11 +61,11 @@
 
 In the present work, we consider the parallel algorithms for solving the multidimensional global optimization problems. Such problems often arise in the cases, when it is necessary to select the values  of parameters of the mathematical model being investigated, in which the simulation results best fit the experimental data. For solving the problems of this class, many algorithms are known: from the metaheuristic algorithms, based on the  idea of random search \bblcite{Ferreiro2013,Garcia2014,Langdon2011}, to the deterministic algorithms guarantying convergence to the global minimum \bblcite{Evtushenko2009,He2008,Paulavicius2011}.  
 
-Since in real global optimization problems each computing of the function value (hereafter called  \textit{a trial}) is a computation-costly operation, one has to reduce the number of such trials. It  can be achieved by intentional choice of variants in the course of search for the optimal solution cutting  off unpromising search subdomains and investigating only these ones, in which the solution of the  problem can be found. The global search algorithm (GSA) is based on this idea \bblcite{Strongin2000}. In  the present work, we tried to combine GSA and a local optimization method (Hooke-Jeeves pattern search method \bblcite{HookJeeves}) to reduce the number of trials executed. The decision on the run of the local method will be made using a decision tree.
+Since in real global optimization problems each computing of the function value (hereafter called  \textit{a trial}) is a computation-costly operation, one has to reduce the number of such trials. It  can be achieved by intentional choice of variants in the course of search for the optimal solution cutting  off unpromising search subdomains and investigating only the ones, in which the solution of the  problem can be found. The global search algorithm (GSA) is based on this idea \bblcite{Strongin2000}. In  the present work, we tried to combine GSA and a local optimization method (Hooke-Jeeves pattern search method \bblcite{HookJeeves}) to reduce the number of trials executed. The decision on the run of the local method will be made using a decision tree.
 
 The local optimization algorithms are intended for determining only one of local extrema within a set  of feasible solutions, in which the objective function takes the extremal (maximum or minimum) value.  Among the local methods,  the zero-order methods and the gradient methods (of the 1\textsuperscript{st} order and of the  2\textsuperscript{nd} one) are traditionally distinguished \bblcite{Nocedal}. Note that the application of the first-order methods (not to mention the second one) in the problems  with the ``black-box'' type functions is difficult since the problem of numerical estimating the gradient arises here \bblcite{Kelley}. Therefore, further we will consider only the zero-order methods. 
 
-In order to determine,  at which moment it is best to run the local method within the framework of the  global search, we will use an algorithm based on a decision tree. At the first search stage, the search information is accumulated in the form of the results of the trials  executed. We used the trial results for training the decision tree that allows obtaining a piecewise constant approximation of the objective function and predicting the objective function behavior on its base.  To do so, we will compare the function values at the points neighboring to the one, which we consider  to be suspicious for a local minimum, and make a decision  whether the next trial point falls into the attractor region of a local minimum or not.
+In order to determine  at which moment it is best to run the local method within the framework of the  global search, we will use an algorithm based on a decision tree. At the first search stage, the search information is accumulated in the form of the results of the trials  executed. We used the trial results for training the decision tree that allows obtaining a piecewise constant approximation of the objective function and predicting the objective function behavior on its base.  To do so, we will compare the function values at the points neighboring to the one, which we consider  to be suspicious for a local minimum, and make a decision  whether the next trial point falls into the attractor region of a local minimum or not.
 
 The main part of the paper has the following structure.  In Section \ref{SecPS}, the global optimization problem statement is considered, the basic suggestions  on the objective function are made. In Section \ref{SecA}, the description of the methods and approaches used is given. In particular, the main idea of global search algorithm is discussed and its computational rules are given. The section also contains the description of the local search method used and the method of constructing the approximation of the function using the decision trees. The novel algorithm combining the global search and the local one on the base of using the decision  trees is presented in Section \ref{SecGSAL}. In the next section,  the features of the asynchronous parallelization scheme of the new algorithm are discussed. Section \ref{SecR} contains the results of experiments, carried out using a parallel computer system  with distributed memory, and a brief conclusion.
 
@@ -78,7 +78,7 @@ Let us consider a problem of searching the global minimum of a function $\varphi
 \end{equation}
 where $a,b \in R$ are given vectors.
 
-Also, assume the function to satisfy the Lipschitz condition with \textit{a priori} unknown constant $L$, that corresponds to limited variation of the function values at limited variation of the argument.   
+Also, assume the function to satisfy the Lipschitz condition with \textit{a priori} unknown constant $L$ that corresponds to limited variation of the function values at limited variation of the argument.   
 \begin{displaymath} 
 	|\varphi(y_1)-\varphi(y_2)|\leq L\parallel y_1-y_2 \parallel ,y_1,y_2 \in D, 0<L< \infty. 
 \end{displaymath}
@@ -179,42 +179,46 @@ The substantiation of this method of organization of computations see in \bblcit
 
 \subsection{Hooke--Jeeves method}\label{SecHG}
 
-The Hooke--Jeeves pattern search algorithm belongs to the class of zero-order methods. Its computation rules are a  combination of the investigating search (to select the direction) and search in the direction selected  \bblcite{Himmelblau72}.
+For the Hooke--Jeeves pattern search algorithm belongs to the class of zero-order methods. Its computation rules are a  combination of the investigating search (to select the direction) and search in the direction selected  \bblcite{Himmelblau72}.
+
+
+
 
 \begin{figure} 
 	\begin{center} 
 		\begin{minipage}[h]{0.8\linewidth} 
 			\includegraphics[width=1\linewidth]{figure/fig1.pdf} 
-			\caption{An example of iterations of the Hooke-Jeeves algorithm} %%  подпись к рисунку 
+			\caption{Example of iterations of the Hooke-Jeeves algorithm} %%  подпись к рисунку 
 			\label{fig:fig1} 
 		\end{minipage} 
 	\end{center} 
 \end{figure}	
 
 
+
 The investigating search is performed as follows.
 \begin{enumerate} 
 	\item	The step value is determined (it is different for each coordinate and can be varied in the course  of search).  
-	\item	The search step is considered to be successful if the value of the objective function at the check  point doesn't exceed the value of the objective function at the initial point.  
+	\item	The search step is considered to be successful if the value of the objective function at the check  point does not exceed the value of the objective function at the initial point.  
 	\item	Otherwise, it is necessary to return to the previous item and make a step in the reverse direction.  
 	\item	After making the steps in all $N$ coordinates, the investigating search is completed. The point  obtained is called the base point. 
 \end{enumerate}
 
-Fig. \ref{fig:fig1} shows the example of the algorithm work. Function level lines are displayed, filled circles indicate successful steps, unfilled circles correspond to unsuccessful steps performed during the investigating search. With regard to the search in a selected direction, it consists in performing a step from the base point found during the investigating search along the line connecting this one with the previous base point. The magnitude of this step is defined by a parameter set in advance.
+Figure \ref{fig:fig1} shows the example of the algorithm work. Function level lines are displayed, filled circles indicate successful steps, unfilled circles correspond to unsuccessful steps performed during the investigating search. With regard to the search in a selected direction, it consists in performing a step from the base point found during the investigating search along the line connecting this one with the previous base point. The magnitude of this step is defined by a parameter set in advance.
 
 
 
 \subsection{Decision tree}\label{SecDT}
 
 The decision tree is a tool used for an automated analysis of big data arrays, which is applied in the  machine learning. Decision tree is a binary tree (a tree, in which each non-leaf node has two child nodes). It can be used for solving the classification problems as well as the regression ones. When solving  the classification problems, each leaf of the tree is marked by a class label, and several leafs can have  the same labels. In the case of constructing a regression, a constant is assigned to each leaf of the tree.   Therefore, the approximating function obtained is a piecewise-constant one. In our case, the decision tree constructs the function $\psi(y)$ as a piecewise-constant  approximation of $\varphi(y)$ in the search domain. Let us denote the value  computed by the  decision tree at the point $y$ as $z' = \psi(y)$.
-Fig. \ref{fig:fig2} presents a graph of the objective function $\varphi(y)$; Fig. \ref{fig:fig2_2} presents corresponding approximation $\psi(y)$ built using decision tree. 
+Figure \ref{fig:fig2} presents a graph of the objective function $\varphi(y)$; Figure \ref{fig:fig2_2} presents corresponding approximation $\psi(y)$ built using decision tree. 
 
 
 \begin{figure}
 	\begin{center}
 		\begin{minipage}[h]{0.7\linewidth}
 			\includegraphics[width=1\linewidth]{figure/fig5.png}
-			\caption{An objective function $\varphi(y)$ from the test class} %% подпись к рисунку
+			\caption{Objective function $\varphi(y)$ from the test class} %% подпись к рисунку
 			\label{fig:fig2}
 		\end{minipage}
 	\end{center}
@@ -224,7 +228,7 @@ Fig. \ref{fig:fig2} presents a graph of the objective function $\varphi(y)$; Fig
 	\begin{center}
 		\begin{minipage}[h]{0.7\linewidth}
 			\includegraphics[width=1\linewidth]{figure/fig4.png}
-			\caption{A piecewise-constant  approximation $\psi(y)$ of the function $\varphi(y)$} %% подпись к рисунку
+			\caption{Piecewise-constant  approximation $\psi(y)$ of the function $\varphi(y)$} %% подпись к рисунку
 			\label{fig:fig2_2}
 		\end{minipage}
 	\end{center}
@@ -235,16 +239,16 @@ When implementing the algorithm for finding the attraction areas of the local  m
 
 \section{Combination of local and global search algorithms for solving multidimensional  problems}\label{SecGSAL}
 
-In the current section, let us present a detailed description how we used the decision tree for finding  the attraction areas of the local extrema.  In the course of running GSA, it is necessary to determine whether it is worth to use current point as a  start one for the local method or not. To do so, one can check the points of adjacent trials. If among  these ones there are no points at which the function values are lower than in current one, one  can suggest that we are in the attractor of a local minimum. In this case, we can run the local method  from current point, which will rapidly converge to a local minimum of the function.  We can do it in the multidimensional space only, not in one-dimensional interval after the  dimensionality reduction.  First, the reduced function $\varphi(y(x))$ changes its properties: one local minimum in the  multidimensional space may divide into a set of minima after the dimensionality reduction.  Second, after the use of the mapping $y(x)$, we can lose the information on the mutual arrangement of  the points in the original space. The points located close to each other in the multidimensional space  may appear to be essentially separated in the one-dimensional interval.
+In the current section, let us present a detailed description of how we used the decision tree for finding  the attraction areas of the local extrema.  In the course of running GSA, it is necessary to determine whether it is worth to use current point as a  start one for the local method or not. To do so, one can check the points of adjacent trials. If among  these ones there are no points at which the function values are lower than in current one, one  can suggest that we are in the attractor of a local minimum. In this case, we can run the local method  from current point, which will rapidly converge to a local minimum of the function.  We can do it in the multidimensional space only, not in one-dimensional interval after the  dimensionality reduction.  First, the reduced function $\varphi(y(x))$ changes its properties: one local minimum in the  multidimensional space may divide into a set of minima after the dimensionality reduction.  Second, after the use of the mapping $y(x)$, we can lose the information on the mutual arrangement of  the points in the original space. The points located close to each other in the multidimensional space  may appear to be essentially separated in the one-dimensional interval.
 
 
 
 
 Therefore, we will determine the attraction areas of the local extrema in the original multidimensional space. However, the determining of the adjacent points in the multidimensional space is quite expensive in terms of computing resources. To do so, we will use the decision tree. 
 
-After completing a certain number of trials (for example, $100\cdot N$), let us use all accumulated  points to initialize a suitable data structure and training the decision tree on its base. To make the  determining the adjacent points easier, we construct a uniform grid with certain step in each coordinate.  Next, we compute the values of the approximation of the objective function in these points  using the decision tree. Now, having a uniform grid of points and knowing the function values in each  point, let us find the closest point to the initial one (from the viewpoint of the Euclidian distance). This  closest point is a projection of the initial point onto the uniform grid, on which its neighbors can be  determined easily. Since the decision tree constructs the approximation of the initial function (even  piecewise constant), we can estimate the function values in the areas, in which the trials haven't been  executed earlier.
+After completing a certain number of trials (for example, $100\cdot N$), let us use all accumulated  points to initialize a suitable data structure and training the decision tree on its base. To make the  determining of the adjacent points easier, we construct a uniform grid with certain step in each coordinate.  Next, we compute the values of the approximation of the objective function in these points  using the decision tree. Now, having a uniform grid of points and knowing the function values in each  point, let us find the closest point to the initial one (from the viewpoint of the Euclidian distance). This  closest point is a projection of the initial point onto the uniform grid, on which its neighbors can be  determined easily. Since the decision tree constructs the approximation of the initial function (even  piecewise constant), we can estimate the function values in the areas, in which the trials have not been  executed earlier.
 
-When considering the neighbors, it is necessary to take into account the following. If even a single  neighbor has a lower function value than current point, there is no need to run the local method. If at  even a single neighboring point the function value is the same as at the current one, this point must be also checked (i.e. to find all its neighbors and to check these ones in the same way). Only in the case when  all function values at the neighboring points are greater than at the current point, we can run the local  method.
+When considering the neighbors, it is necessary to take into account the following. If even a single  neighbor has a lower function value than current point, there is no need to run the local method. If at  even a single neighboring point the function value is the same as at the current one, this point must be also checked (i.e., to find all its neighbors and to check these ones in the same way). Only in the case when  all function values at the neighboring points are greater than at the current point, we can run the local  method.
 
 
 \section{Asynchronous algorithm parallelization scheme}\label{SecASP}
@@ -258,7 +262,7 @@ The inverse images of two points are the boundary ones $x^1=0,x^p=1$; the rest a
 
 Now assume $k\geq0$ trials to be completed, and the slave processes are performing the trials at the points $y\left(x^{k+1}\right),\;y\left(x^{k+2}\right),\ldots,\;y\left(x^{k+p}\right)$.
 
-Each slave process having completed the computing of the function at some time moment sends  the computed value to the master process. Next, the master process selects a new point  $x^{k+p+1}$ for the slave process according to the rules provided below. Note that in this case it will be a set of inverse images of the trial points  $I_k=\left\{x^{k+1},x^{k+2},\ldots,x^{k+p}\right\}$, in which the trials have been already initiated but haven't been completed yet.
+Each slave process having completed the computing of the function at some time moment sends  the computed value to the master process. Next, the master process selects a new point  $x^{k+p+1}$ for the slave process according to the rules provided below. Note that in this case it will be a set of inverse images of the trial points  $I_k=\left\{x^{k+1},x^{k+2},\ldots,x^{k+p}\right\}$, in which the trials have been already initiated but have not been completed yet.
 
 So far, the parallel asynchronous global optimization algorithm using decision tree to find the local  extrema attractors consists of the following steps.
 
@@ -281,7 +285,7 @@ So far, the parallel asynchronous global optimization algorithm using decision t
 	\begin{displaymath} 
 		M=\max{\{}M_1,M_2\}, 
 	\end{displaymath} 
-	where $ z_i=\varphi\left(y\left(x_i\right)\right)$ if $x_i\notin I_k,\;1\le i\le k+p$. The values $z_i$ at the points $x_i\in I_k$ are not defined as far as the trials at these points haven't been completed yet. If $M=0$, then set $M=1$.
+	where $ z_i=\varphi\left(y\left(x_i\right)\right)$ if $x_i\notin I_k,\;1\le i\le k+p$. The values $z_i$ at the points $x_i\in I_k$ are not defined as far as the trials at these points have not been completed yet. If $M=0$, then set $M=1$.
 	
 	\item Juxtapose each interval $\left(x_{i-1},x_i\right),\;x_{i-1}\notin I_k,x_i\notin I_k,\;2\le i\le  k+p$, with its characteristic $R\left(i\right)$ computed according to the formula 
 	\begin{displaymath} 
@@ -325,7 +329,7 @@ So far, the parallel asynchronous global optimization algorithm using decision t
 	
 	Make a detour of the neighbors $y'_q$ according to the principle described above.
 	
-	If no one neighbor point has a lower value than in $y'_q$, run the local method.
+	If not one neighbor point has a lower value than in $y'_q$, run the local method.
 	
 	Clear the set $V$.
 	
@@ -336,7 +340,7 @@ After the next trial point is computed, the master process includes it to the se
 
 
 % переводить до этого раздела
-\section{Numerical Experiments}\label{SecR}
+\section{Numerical experiments}\label{SecR}
 
 
 The numerical experiments were carried out on Lobachevsky supercomputer. Each supercomputer  node had two processors Intel Sandy Bridge E5-2660 2.2 GHz, 64 Gb RAM. 
