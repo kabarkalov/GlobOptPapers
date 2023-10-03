@@ -468,24 +468,26 @@ We used for our experiments fifteen datasets from the UCI repository \cite{UCI},
 \begin{table}[ht]
 \caption{The datasets used in the experiments}
 \label{tab:1}
-\begin{tabular}{lcccccc}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{ccccccc}
 \hline
 Name                                                            & Num   & Attributes & Int & Float & Categorical & Classes \\ \hline
-Balance                                                         & 625   & 4          & 4   & 0     & 0           & 3       \\
-Bank Marketing                                                  & 45211 & 20         & 6   & 4     & 10          & 2       \\
-Banknote                                                        & 1372  & 4          & 0   & 4     & 0           & 2       \\
-Breast Cancer                                                   & 569   & 9          & 9   & 0     & 0           & 2       \\
-CarEvaluation                                                   & 1728  & 6          & 0   & 0     & 6           & 4       \\
-CNAE9                                                           & 1080  & 856        & 856 & 0     & 0           & 9       \\
-Credit Approval                                                 & 690   & 15         & 0   & 6     & 9           & 2       \\
-Digits                                                          & 5620  & 64         & 64  & 0     & 0           & 10      \\
-Ecoli                                                           & 336   & 7          & 0   & 7     & 0           & 8       \\
-Parkinsons                                                      & 197   & 22         & 0   & 22    & 0           & 2       \\
-Semeion                                                         & 1593  & 256        & 256 & 0     & 0           & 10      \\
-\begin{tabular}[c]{@{}l@{}}Statlog \\ Segmentation\end{tabular} & 2310  & 19         & 1   & 18    & 0           & 7       \\
-Wilt                                                            & 4889  & 5          & 0   & 5     & 0           & 2       \\
-Zoo                                                             & 101   & 16         & 16  & 0     & 0           & 7       \\ \hline
+\textbf{Balance}                                                         & 625   & 4          & 4   & 0     & 0           & 3       \\
+\textbf{Bank Marketing}                                                  & 45211 & 20         & 6   & 4     & 10          & 2       \\
+\textbf{Banknote}                                                        & 1372  & 4          & 0   & 4     & 0           & 2       \\
+\textbf{Breast Cancer}                                                   & 569   & 9          & 9   & 0     & 0           & 2       \\
+\textbf{CarEvaluation}                                                   & 1728  & 6          & 0   & 0     & 6           & 4       \\
+\textbf{CNAE-9}                                                           & 1080  & 856        & 856 & 0     & 0           & 9       \\
+\textbf{Credit Approval}                                                 & 690   & 15         & 0   & 6     & 9           & 2       \\
+\textbf{Digits}                                                          & 5620  & 64         & 64  & 0     & 0           & 10      \\
+\textbf{Ecoli}                                                           & 336   & 7          & 0   & 7     & 0           & 8       \\
+\textbf{Parkinsons}                                                      & 197   & 22         & 0   & 22    & 0           & 2       \\
+\textbf{Semeion}                                                         & 1593  & 256        & 256 & 0     & 0           & 10      \\
+\textbf{Statlog Segmentation}                                            & 2310  & 19         & 1   & 18    & 0           & 7       \\
+\textbf{Wilt}                                                            & 4889  & 5          & 0   & 5     & 0           & 2       \\
+\textbf{Zoo}                                                             & 101   & 16         & 16  & 0     & 0           & 7       \\ \hline
 \end{tabular}
+}
 \end{table}
 
 \textbf{Classification algorithms.} We performed hyperparameter tuning for three types of classification algorithms on all datasets.
@@ -501,7 +503,7 @@ The tunable hyperparameters of the above algorithms and their search region are 
 \begin{table}[ht]
 \caption{Tunable hyperparameters of machine learning algorithms.}
 \label{tab:2}
-\begin{tabular}{lccc}
+\begin{tabular}{cccc}
 \hline
 Method  & Parameters & Parameter type & Parameter range \\ \hline
 \multirow{7}{*}{XGBoost} & n\_estimators        & Int           & {[}10, 200{]}                                                          \\
@@ -549,79 +551,81 @@ Optuna is an automatic hyperparameter optimization software environment specific
 
 Hyperopt framework is a Python library for optimization over complex search spaces, which may include real-valued, discrete, and conditional dimensions. As with Optuna, Hyperopt has different options for finding hyperparameter values. There are currently three algorithms implemented in Hyperopt: Random Search, Tree of Parzen Estimators (TPE) and Adaptive TPE. We used the computation variant with the TPE algorithm implementation -- Hyperopt(tpe) \cite{NIPS2011_86e8f7ab}.
 
-When using the iOpt framework, we applied a variant of computation in which the available resource was divided into portions by the number of trials. Most of the trials (75\%) were performed using the global search algorithm (see Section \ref{sec_iOpt}), while in the remaining trials we used the local method to refine the solution found \cite{Kelley}.
+When using the iOpt framework, we applied a variant of computation in which the available resource was divided into portions by the number of trials. Most of the trials (85\%) were performed using the global search algorithm (see Section \ref{sec_iOpt}), while in the remaining trials we used the local method to refine the solution found \cite{Kelley}.
 
 \subsection{Results and discussion}
 
-Computational experiments were performed on the computing nodes of the Lobachevsky supercomputer (Intel Xeon Silver 4310T CPU @ 2.30GHz, 64Gb RAM, Linux CentOS 7). We used the following versions of frameworks for the experiments: iOpt 0.2.22, Optuna 3.1.1, Hyperopt 0.2.7. All runs were performed using Python version 3.11.3.
+Computational experiments were performed on the computing nodes of the Lobachevsky supercomputer (Intel Xeon CPU E5-2660 @ 2.20GHz, 64Gb RAM, Linux CentOS 7). We used the following versions of frameworks for the experiments: iOpt 0.2.22, Optuna 3.1.1, Hyperopt 0.2.7. All runs were performed using Python version 3.11.3.
 
 In one experiment on hyperparameter tuning, we ran 200 search trials with each method. Due to the stochastic nature of the Optuna and Hyperopt algorithms, we ran them 10 times and calculated both the average and worst values of the objective  metric. For iOpt, we ran it once because the global search algorithm is deterministic and the average, worst and best case values are the same.
 
-Figures \ref{fig_res_1} and \ref{fig_res_2} show the values of the classification metrics of the SVC algorithm in the worst and average case, respectively. As can be seen, when optimizing the hyperparameters of the SVC algorithm on the Banknote, CNAE-9, Statlog Segmentation, and Wilt datasets, the iOpt framework has demonstrated the best results.
+The values of the classification metrics and its standard deviation of the SVC, XGBoost and MLP algorithms are presented in the table \ref{tab:res}. The table bold shows the best values for averaging the results. Values in case of unsuccessful launch of stochastic algorithms are highlighted in red.
 
-\begin{figure}
-\centering
-\includegraphics[width=0.85\textwidth]{SVC_1.pdf}
-\caption{Values of the optimized metrics for the SVC algorithm, obtained in the worst case} \label{fig_res_1}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=0.85\textwidth]{SVC_2_avg.pdf}
-\caption{Values of optimized metrics for the SVC algorithm averaged over 10 runs} \label{fig_res_2}
-\end{figure}
+It is easy to see from the table \ref{tab:res} that our iOpt framework is comparable in terms of quality to Hyperopt and Optuna. When using various methods for constructing classification models and different datasets based on the average metric values, iOpt allows us to obtain the best values in 15 models out of 42. It is especially worth noting that the algorithms implemented in both Optuna and Hyperopt contain random parameters; as a consequence, the best values of the objective metric are not guaranteed for a single run. To obtain a guaranteed result, the stochastic algorithm must be run several times. Looking at the unsuccessful launch Optuna or Hyperopt framework, our framework shows better results in more than half of the cases (23 out of 42 models). In most of the remaining models, the value of quality metrics lags only slightly. iOpt shows the best results when tuning hyperparameters for training the SVC model.
 
 
-On the CarEvaluation, Credit Approval, Ecoli, Parkinsons, and Semeion datasets, the best values of the metrics on average were obtained with the Optuna (tpe). On the datasets Balance, Breast Cancer, Digits, on average the Optuna(cmaes) performed well. The Hyperopt(tpe) performed better than the others on the Bank-marketing dataset. In the case of the Zoo dataset, all optimization algorithms showed the same results.
+%Figures \ref{fig_res_1} and \ref{fig_res_2} show the values of the classification metrics of the SVC algorithm in the worst and average case, respectively. As can be seen, when optimizing the hyperparameters of the SVC algorithm on the Banknote, CNAE-9, Statlog Segmentation, and Wilt datasets, the iOpt framework has demonstrated the best results.
 
-It is especially worth noting that the algorithms implemented in both Optuna and Hyperopt contain random parameters; as a consequence, the best values of the objective metric are not guaranteed for a single run. 
-
-This fact is illustrated by Fig. \ref{fig_res_1}. The iOpt framework additionally performed better on the Bank-marketing, Banknote, CNAE-9, Statlog Segmentation, and Wilt datasets. Thus on 9 out of 14 datasets the iOpt framework showed better values of the objective metric compared to the Optuna and Hyperopt frameworks.
-
-
-\begin{figure}
-\centering
-\includegraphics[width=0.85\textwidth]{XGBoost_1.pdf}
-\caption{Values of the optimized metrics for the XGBoost algorithm, obtained in the worst case} \label{fig_res_3}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=0.85\textwidth]{XGBoost_2_avg.pdf}
-\caption{Values of optimized metrics for the XGBoost algorithm averaged over 10 runs} \label{fig_res_4}
-\end{figure}
-
-Figures \ref{fig_res_3} and \ref{fig_res_4} show the value of classification metrics of the XGBoost algorithm in the worst and average case, respectively. In the case of optimizing the hyperparameters  of the XGBoost algorithm, the iOpt framework showed better results on the CarEvaluation, CNAE-9, Credit Approval, Ecoli, Parkinsons, Wilt, Zoo datasets.
-
-On average, when using 10 runs, the best performance of the Optuna(tpe) framework was observed on the Balance, Bank-marketing, Banknote, Breast Cancer, CarEvaluation, Credit Approval, Digits, Ecoli, Semeion, Statlog Segmentation, Wilt datasets. The Hyperopt(tpe) showed good results on the CNAE-9 and Parkinsons datasets on average for 10 runs.
-
-\begin{figure}
-\centering
-\includegraphics[width=0.85\textwidth]{MLP_1.pdf}
-\caption{Values of the optimized metrics for the XGBoost algorithm, obtained in the worst case} \label{fig_res_5}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=0.85\textwidth]{MLP_2_avg.pdf}
-\caption{Values of optimized metrics for the XGBoost algorithm averaged over 10 runs} \label{fig_res_6}
-\end{figure}
-
-Figures \ref{fig_res_5} and \ref{fig_res_6} show the values of classification metrics of the MLP algorithm. The iOpt framework performed better on the Balance, Bank-marketing, Banknote, Breast Cancer, Credit Approval, Wilt, Zoo datasets. Considering the average values of metrics on 10 runs of hyperparameter optimization, the Optuna framework performed better on the Breast Cancer, CNAE-9, Credit Approval, Digits, Ecoli, Parkinsons, Semeion datasets, and the Hyperopt on the Statlog Segmentation, Wilt, CarEvaluation datasets.
+%\begin{figure}
+%\centering
+%\includegraphics[width=0.85\textwidth]{SVC_1.pdf}
+%\caption{Values of the optimized metrics for the SVC algorithm, obtained in the worst case} \label{fig_res_1}
+%\end{figure}
+%
+%\begin{figure}
+%\centering
+%\includegraphics[width=0.85\textwidth]{SVC_2_avg.pdf}
+%\caption{Values of optimized metrics for the SVC algorithm averaged over 10 runs} \label{fig_res_2}
+%\end{figure}
+%
+%
+%On the CarEvaluation, Credit Approval, Ecoli, Parkinsons, and Semeion datasets, the best values of the metrics on average were obtained with the Optuna (tpe). On the datasets Balance, Breast Cancer, Digits, on average the Optuna(cmaes) performed well. The Hyperopt(tpe) performed better than the others on the Bank-marketing dataset. In the case of the Zoo dataset, all optimization algorithms showed the same results.
+%
+%It is especially worth noting that the algorithms implemented in both Optuna and Hyperopt contain random parameters; as a consequence, the best values of the objective metric are not guaranteed for a single run. 
+%
+%This fact is illustrated by Fig. \ref{fig_res_1}. The iOpt framework additionally performed better on the Bank-marketing, Banknote, CNAE-9, Statlog Segmentation, and Wilt datasets. Thus on 9 out of 14 datasets the iOpt framework showed better values of the objective metric compared to the Optuna and Hyperopt frameworks.
 
 
-Thus, we can conclude that the iOpt framework shows comparable results with the Optuna and Hyperopt frameworks in terms of performance quality. It should be reminded that the algorithms implemented within the iOpt framework are deterministic. As a consequence, iOpt, unlike Optuna and Hyperopt, only needs to be run once to achieve the best values of the quality metric.
+%\begin{figure}
+%\centering
+%\includegraphics[width=0.85\textwidth]{XGBoost_1.pdf}
+%\caption{Values of the optimized metrics for the XGBoost algorithm, obtained in the worst case} \label{fig_res_3}
+%\end{figure}
+%
+%\begin{figure}
+%\centering
+%\includegraphics[width=0.85\textwidth]{XGBoost_2_avg.pdf}
+%\caption{Values of optimized metrics for the XGBoost algorithm averaged over 10 runs} \label{fig_res_4}
+%\end{figure}
+%
+%Figures \ref{fig_res_3} and \ref{fig_res_4} show the value of classification metrics of the XGBoost algorithm in the worst and average case, respectively. In the case of optimizing the hyperparameters  of the XGBoost algorithm, the iOpt framework showed better results on the CarEvaluation, CNAE-9, Credit Approval, Ecoli, Parkinsons, Wilt, Zoo datasets.
+%
+%On average, when using 10 runs, the best performance of the Optuna(tpe) framework was observed on the Balance, Bank-marketing, Banknote, Breast Cancer, CarEvaluation, Credit Approval, Digits, Ecoli, Semeion, Statlog Segmentation, Wilt datasets. The Hyperopt(tpe) showed good results on the CNAE-9 and Parkinsons datasets on average for 10 runs.
 
-Next, we consider the performance of the iOpt, Optuna, and Hyperopt frameworks. Table \ref{tab:time} shows the running time of the frameworks for optimizing the hyperparameters.  A single optimization run was performed with a maximum number of 200 search trials. It is obvious that even in the case of a single run iOpt shows better performance on many datasets compared to Optuna and Hyperopt.
+%\begin{figure}
+%\centering
+%\includegraphics[width=0.85\textwidth]{MLP_1.pdf}
+%\caption{Values of the optimized metrics for the XGBoost algorithm, obtained in the worst case} \label{fig_res_5}
+%\end{figure}
+%
+%\begin{figure}
+%\centering
+%\includegraphics[width=0.85\textwidth]{MLP_2_avg.pdf}
+%\caption{Values of optimized metrics for the XGBoost algorithm averaged over 10 runs} \label{fig_res_6}
+%\end{figure}
+%
+%Figures \ref{fig_res_5} and \ref{fig_res_6} show the values of classification metrics of the MLP algorithm. The iOpt framework performed better on the Balance, Bank-marketing, Banknote, Breast Cancer, Credit Approval, Wilt, Zoo datasets. Considering the average values of metrics on 10 runs of hyperparameter optimization, the Optuna framework performed better on the Breast Cancer, CNAE-9, Credit Approval, Digits, Ecoli, Parkinsons, Semeion datasets, and the Hyperopt on the Statlog Segmentation, Wilt, CarEvaluation datasets.
+%
 
-To obtain a good solution, the randomized methods from Optuna and Hyperopt should be repeated several times. In this case, the performance gain of iOpt is even greater. As an example, Figure \ref{fig8} shows a comparison of the runtime of the frameworks with 10 reruns of Optuna and Hyperopt on the Wilt dataset.
+%Thus, we can conclude that the iOpt framework shows comparable results with the Optuna and Hyperopt frameworks in terms of performance quality. It should be reminded that the algorithms implemented within the iOpt framework are deterministic. As a consequence, iOpt, unlike Optuna and Hyperopt, only needs to be run once to achieve the best values of the quality metric.
+
 
 
 % Please add the following required packages to your document preamble:
 % \usepackage{graphicx}
 % \usepackage[table,xcdraw]{xcolor}
 % If you use beamer only pass "xcolor=table" option, i.e. \documentclass[xcolor=table]{beamer}
-\begin{table}[]
+\begin{table}[ht]
 \centering
 \caption{Values of optimized metrics for the algorithm's averaged over 10 runs}
 \label{tab:res}
@@ -677,6 +681,12 @@ To obtain a good solution, the randomized methods from Optuna and Hyperopt shoul
 \end{tabular}%
 }
 \end{table}
+
+
+Next, we consider the performance of the iOpt, Optuna, and Hyperopt frameworks. Table \ref{tab:time} shows the running time of the frameworks for optimizing the hyperparameters\footnote{Since the random search did not show good results for the optimized metrics, the columns were excluded.}. A single optimization run was also performed with a maximum number of 200 search trials. As before, the best results when considering the average time value are shown in bold. It is obvious that even in the case of a single run iOpt shows better performance on many datasets compared to Optuna and Hyperopt (29 out of 42 models).
+
+To obtain a good solution, the stochastic methods from Optuna and Hyperopt should be repeated several times. In this case, the performance gain of iOpt is even greater. As an example, Figure \ref{fig8} shows a comparison of the hyperparameter tuning times of iOpt, Optuna and Hyperopt on several datasets and different classification models. For iOpt, the time is shown as a blue dot. For Optuna and Hyperopt, the average computation time is displayed, as well as the spread of values.
+
 
 % Please add the following required packages to your document preamble:
 % \usepackage{graphicx}
@@ -770,7 +780,7 @@ To obtain a good solution, the randomized methods from Optuna and Hyperopt shoul
 \begin{figure}
 \centering
 \includegraphics[width=\textwidth]{fig_time}
-\caption{Time for tuning hyperparameters of the SVC algorithm to obtain good values of quality metrics on the Wilt dataset} \label{fig8}
+\caption{Time of hyperparameter tuning} \label{fig8}
 \end{figure}
 
 \section{Conclusion}
