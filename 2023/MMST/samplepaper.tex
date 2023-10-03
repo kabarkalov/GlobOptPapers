@@ -57,12 +57,12 @@ The paper discusses the problem of finding the global minimum of a function that
 %
 \section{Introduction}
 
-Global optimization deals with the development of methods for solving problems of finding the global (absolute) minima of multidimensional multiextremal functions. The possibility of constructing a reliable estimate of the global extremum in such problems is principally based on the available information on the problem to be solved. This information makes it possible to relate the unknown values of the objective function to the known values at the points of the performed search trials.
+Global optimization deals with the development of methods for solving problems of finding the global (absolute) minimum of multidimensional multiextremal functions. The possibility of constructing a reliable estimate of the global extremum in such problems is principally based on the available information on the problem to be solved. This information makes it possible to relate the unknown values of the objective function to the known values at the points of the performed search trials.
 
 Often such information is represented in the form of suggestion that the objective function $\phi(y)$ satisfies the Lipschitz condition with a priori unknown constant $L$.
 This suggestion can be interpreted (in the relation to the applied problems) as the reflection of a limited power generating the changes in the simulated system. In this case, the objective function is defined in the form of a ``\textit{black box}'', may be a non-differentiable one, and each computation of its value at some point within a feasible domain may require considerable computational resources.
 
-A number of efficient deterministic algorithms for solving the Lipschitz global optimization problems have been developed ~\cite{Grishagin2018,Jones2021,PaulaviciusZilinskas2014,Birect2020,Sergeyev2017}. The comparisons conducted have shown the deterministic algorithms outperform (in various criteria) the widespread nature-inspired algorithms ~\cite{Liberti2005,Sergeyev2018}.
+A number of efficient deterministic algorithms for solving the Lipschitz global optimization problems have been developed ~\cite{Grishagin2016_2,Jones2021,PaulaviciusZilinskas2014,Birect2020,Sergeyev2017}. The comparisons conducted have shown the deterministic algorithms outperform (in various criteria) the widespread nature-inspired algorithms ~\cite{Liberti2005,Sergeyev2018}.
 
 The present work continues the development of one of the efficient deterministic algorithms for solving the Lipschitz global optimization problems, namely the information-statistical global search algorithm ~\cite{Sergeyev2013,Strongin2000}. This algorithm suggests the solving of a multidimensional problem by means of its reduction to an equivalent one-dimensional optimization problem using the Peano-Hilbert space-filling curves. 
 
@@ -86,7 +86,7 @@ D=\left\{ y \in R^N: -2^{-1} \leq y_i \leq 2^{-1}, 1 \leq i \leq N \right\} = \l
 $$
 we can reduce the initial problem (\ref{eq1}) to a one-dimensional problem
 \begin{equation}\label{eq2} 
-\phi^*=\phi(y(x^* ))=\min_{x \in [0,1]} \left\{ \phi(y(x)) \right\},
+f^*(x)=\phi(y(x^* ))=\min_{x \in [0,1]} \left\{ \phi(y(x)) \right\},
 \end{equation}
 that allows applying efficient one-dimensional optimization algorithms for its solving.
 
@@ -102,9 +102,9 @@ Third, the objective function satisfies the Lipschitz condition
 \end{equation}
 where $L$ is the Lipschitz constant. The dimensionality reduction scheme using Peano curves is known to juxtapose the multidimensional problem with a Lipschitz objective function (\ref{eq1}) to problem (\ref{eq2}) with the one-dimensional objective function satisfying H{\"o}lder condition
 \begin{equation}\label{eq4} 
-| \phi (x')-\phi (x'') | \leq K \| x'-x'' \| ^{1/N}, \; x',x'' \in [0,1],
+| \phi (x')-\phi (x'') | \leq K \rho(x',x''), \; x',x'' \in [0,1],
 \end{equation}
-where $N$ is the dimensionality of the initial multidimensional problem and coefficient $K$ is related to the Lipschitz constant $L$ by the relation $K \leq 2L\sqrt {N+3}$ \cite{Strongin2000}.
+where $\rho(x',x'') =  |x' - x''|^{1/N}$ and $N$ is the dimensionality of the initial multidimensional problem and coefficient $K$ is related to the Lipschitz constant $L$ by the relation $K \leq 2L\sqrt {N+3}$ \cite{Strongin2000}.
 
 Various versions of algorithms for solving the problems of such a class and respective theories of convergence are presented in \cite{Sergeyev2013,Strongin2000}.
 
@@ -122,13 +122,13 @@ The last assumption makes the application of the information-statistical global 
 
 Let us give more detailed description of the \textbf{global search algorithm} (GSA) for solving the problem (\ref{eq2}).
 
-At every iteration of the global search a \textit{trial} is executed. We will refer to computing the objective function value  $\phi (y(x))$ from (\ref{eq2}) as a trial. The first trial will be executed in the middle point $x^1 \in (0,1)$. The choice of the point $x^{k+1}, k \leq 1$ of the next $(k+1)^\text{th}$ trial is performed on the base of the following rules.
+At every iteration of the global search a \textit{trial} is executed. We will refer to computing the objective function value  $\phi (y(x))$ from (\ref{eq2}) as a trial. The first trial will be executed in the middle point $x^1 \in (0,1)$. The choice of the point $x^{k+1}, k \geq 1$ of the next $(k+1)^\text{th}$ trial is performed on the base of the following rules.
 
-\paragraph{Rule 1.} Renumber (by the lower indices) the points $x^i, 1 \leq i \leq k$  of the previous trials in the ascending order by their coordinates, i.e.
+\paragraph{Rule 1.} Renumber (by the lower indices) the points $x^i, 0 \leq i \leq k$  of the previous trials in the ascending order by their coordinates, i.e.
 \begin{equation}\label{eq5} 
-0=x_0 < x_1 < ... < x_i < ... < x_k=1
+0=x_0 < x_1 < ... < x_i < ... < x_{k}=1
 \end{equation}
-and juxtapose them with the values $z_i=\phi (x_i), 1 \leq i \leq k$, computed at these points and to the indices $v_i=v(x_i)$ defined by the rule
+and juxtapose them with the values $z_i=\phi (x_i), 0 < i < k$, computed at these points and to the indices $v_i=v(x_i)$ defined by the rule
 \begin{equation}\label{eq6} 
 v_i=v(x_i)=
   \begin{cases}
@@ -136,7 +136,7 @@ v_i=v(x_i)=
     1  & {\quad \text{if } x_i \text{ is an internal point.}}
   \end{cases}
 \end{equation}
-The points $x_0=0$ and $x_{k+1}=1$ are introduced additionally (the values $z_0$ and $z_{k+1}$ are undefined) for convenience of the following notations.
+The points $x_0=0$ and $x_{k}=1$ are introduced additionally (the values $z_0$ and $z_{k}$ are undefined) for convenience of the following notations.
 
 \paragraph{Rule 2.} Compute the estimate
 \begin{equation}\label{eq7} 
@@ -148,7 +148,7 @@ of the unknown H{\"o}lder constant $K$ from (\ref{eq4}) for the reduced function
 z^*=\min \left\{ \phi (x_i): 1\leq i \leq k \right\}.
 \end{equation}
 
-\paragraph{Rule 4.} For each interval $(x_{i-1},x_i),1 \leq i \leq k+1$, compute the value $R(i)$ called a \textit{characteristic} of the interval according to the formula
+\paragraph{Rule 4.} For each interval $(x_{i-1},x_i),1 \leq i \leq k$, compute the value $R(i)$ called a \textit{characteristic} of the interval according to the formula
 \begin{equation}\label{eq9} 
 R(x_i)=
   \begin{cases}
@@ -160,7 +160,7 @@ R(x_i)=
 
 \paragraph{Rule 5.} Select the interval $(x_{t-1},x_t)$ with the largest value of characteristic $R(i)$:
 \[
-R(t)= \max\{R(i): \; 1 \leq i \leq k+1\}.
+R(t)= \max\{R(i): \; 1 \leq i \leq k\}.
 \]
 
 \paragraph{Rule 6.} Perform the next trial in the middle point of the interval $(x_{t-1},x_t)$, if the indices of its end points are not the same, i.e.
@@ -292,7 +292,7 @@ z_v^*=
 \end{equation}
 where $\varepsilon _r > 0$ is a parameter of the method.
 
-  \item For each interval $(x_{i-1}, x_i), 1 \leq i \leq k+1$, the computing of the characteristic $R(i)$ is performed according to the following formulae.
+  \item For each interval $(x_{i-1}, x_i), 1 \leq i \leq k$, the computing of the characteristic $R(i)$ is performed according to the following formulae.
       
         \paragraph{Case 1.} For the intervals with \textbf{two computable points} or with \textbf{one computable and one boundary point}, apply the original rules of the global search algorithm
 \begin{equation}\label{eq21} 
