@@ -125,7 +125,7 @@
 \author[UNN,ITMO]{Marina Usova}
 
 \affiliation[UNN]{organization={Lobachevsky University},%Department and Organization
-            addressline={Gagarin Av. 23}, 
+            addressline={Gagarin Ave. 23}, 
             city={Nizhni Novgorod},
             postcode={603022}, 
             %state={},
@@ -240,7 +240,7 @@ The Lipschitz condition allows the following geometric interpretation. Suppose t
 \begin{figure}
 \centering
 \includegraphics[width=0.8\textwidth]{Fig1.pdf}
-\caption{The values of the function $f(x)$ must be inside the area highlighted by colour} \label{fig1}
+\caption{The values of the function $f(x)$ must be inside the area highlighted by colour.} \label{fig1}
 \end{figure}
 
 Also according to (\ref{f_lip}), we can write the inequality $f(x) \geq F(x)$, where the function  $F(x)$ (called the minorant) is defined according to the formula
@@ -350,13 +350,12 @@ Applying the global search algorithm to the solution of problem (\ref{problem_is
 \label{sec_iOpt}
 
 The iOpt framework of intelligent optimization methods is designed to select optimal (in a given metric) values of parameters of complex objects and processes, especially in artificial intelligence and machine learning methods. The framework allows fine-tuning of parameters of models and methods used in applied research in various fields of science.  The iOpt framework was designed in the Python programming language using its standard library. To use the framework, you need to have the Python interpreter version 3.8 or higher installed. The framework is open source and is available at \url{https://github.com/aimclub/iOpt}.
-\textcolor[rgb]{1,0,0}{The general structure of the framework is shown in Fig. \ref{fig_iOpt}. 
-Description of the main algorithms used in iOpt is given in the following sections.
-}
+The general structure of the framework is shown in Fig.~\ref{fig_iOpt}. The main algorithms used in iOpt are described in the following sections.
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=1.0\textwidth]{scheme.pdf}
-\caption{iOpt general structure} \label{fig_iOpt}
+\caption{iOpt general structure.} \label{fig_iOpt}
 \end{figure}
 
 
@@ -559,9 +558,14 @@ Computational experiments were performed on the computing nodes of the Lobachevs
 
 In one experiment on hyperparameter tuning, we ran 200 search trials with each method. Due to the stochastic nature of the Optuna and Hyperopt algorithms, we ran them 10 times and calculated both the average and worst values of the objective  metric. For iOpt, we ran it once because the global search algorithm is deterministic and the average, worst and best case values are the same.
 
-The values of the classification metrics and its standard deviation of the SVC, XGBoost and MLP algorithms are presented in the table \ref{tab:res}. The table bold shows the best values for averaging the results. Values in case of unsuccessful launch of stochastic algorithms are highlighted in red.
+In order to check the statistical significance of the experimental results, the Friedman test was applied. An implementation of the corresponding test from the SciPy library was used. The target metric values obtained by Optuna, Hyperopt and iOpt framework runs were used as input data. The test was carried out separately for each of the algorithms for which hyperparameters were tuned: SVC, XGBoost, MLP. The null hypothesis about the consistent work of the compared methods is rejected at significance level $p=0.01$. Note that in some cases the $p$-value was undefined (for example, when analyzing the ``Banknote'' data set using the MLP method and ``Zoo'' using the SVC method), which is due to the equality of the target metric for all optimization runs.
 
-It is easy to see from the table \ref{tab:res} that our iOpt framework is comparable in terms of quality to Hyperopt and Optuna. When using various methods for constructing classification models and different datasets based on the average metric values, iOpt allows us to obtain the best values in 15 models out of 42. It is especially worth noting that the algorithms implemented in both Optuna and Hyperopt contain random parameters; as a consequence, the best values of the objective metric are not guaranteed for a single run. To obtain a guaranteed result, the stochastic algorithm must be run several times. Looking at the unsuccessful launch Optuna or Hyperopt framework, our framework shows better results in more than half of the cases (23 out of 42 models). In most of the remaining models, the value of quality metrics lags only slightly. iOpt shows the best results when tuning hyperparameters for training the SVC model.
+The values of the classification metrics and their standard deviation for the SVC, XGBoost and MLP algorithms are presented in Table \ref{tab:res}. 
+The values corresponding to the best result on average are highlighted in bold. The values corresponding to the guaranteed best result, i.e. the best result for the worst case, are highlighted in red.
+
+It is obvious from Table \ref{tab:res} that the iOpt framework is comparable in terms of quality to Hyperopt and Optuna. When using various methods for constructing classification models and different datasets based on the average metric values, iOpt allows us to obtain the best values in 15 models out of 42. 
+It is worth noting that algorithms which involve random variables in one way or another do not guarantee the best values of the objective function for one run. To obtain good results, a stochastic algorithm must be run several times.
+If one focuses on a guaranteed result, iOpt works better in more than half of the cases (23 out of 42 models). iOpt shows the best results when tuning hyperparameters for the SVC model. For most of the remaining models, the value of quality metrics differs only slightly. 
 
 
 %Figures \ref{fig_res_1} and \ref{fig_res_2} show the values of the classification metrics of the SVC algorithm in the worst and average case, respectively. As can be seen, when optimizing the hyperparameters of the SVC algorithm on the Banknote, CNAE-9, Statlog Segmentation, and Wilt datasets, the iOpt framework has demonstrated the best results.
@@ -625,9 +629,9 @@ It is easy to see from the table \ref{tab:res} that our iOpt framework is compar
 % \usepackage{graphicx}
 % \usepackage[table,xcdraw]{xcolor}
 % If you use beamer only pass "xcolor=table" option, i.e. \documentclass[xcolor=table]{beamer}
-\begin{table}[ht]
+\begin{table}
 \centering
-\caption{Values of optimized metrics for the algorithm's averaged over 10 runs}
+\caption{Values of optimized metrics for the algorithms averaged over 10 runs}
 \label{tab:res}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{ccccccc}
@@ -683,14 +687,18 @@ It is easy to see from the table \ref{tab:res} that our iOpt framework is compar
 \end{table}
 
 
-Next, we consider the performance of the iOpt, Optuna, and Hyperopt frameworks. Table \ref{tab:time} shows the running time of the frameworks for optimizing the hyperparameters\footnote{Since the random search did not show good results for the optimized metrics, the columns were excluded.}. A single optimization run was also performed with a maximum number of 200 search trials. As before, the best results when considering the average time value are shown in bold. It is obvious that even in the case of a single run iOpt shows better performance on many datasets compared to Optuna and Hyperopt (29 out of 42 models).
+Next, we consider the performance of the iOpt, Optuna, and Hyperopt frameworks. Table \ref{tab:time} shows the running time of the frameworks for tuning the hyperparameters.
+Since the random search did not show good results in terms of the evaluation metrics, we did not include the corresponding column in the table. 
+A single optimization run was performed with a maximum of 200 search trials. The values corresponding to the best result on average are highlighted in bold. It can be clearly seen that even in the case of a single run iOpt shows better performance on many datasets compared to Optuna and Hyperopt (29 out of 42 models).
 
-To obtain a good solution, the stochastic methods from Optuna and Hyperopt should be repeated several times. In this case, the performance gain of iOpt is even greater. As an example, Figure \ref{fig8} shows a comparison of the hyperparameter tuning times of iOpt, Optuna and Hyperopt on several datasets and different classification models. For iOpt, the time is shown as a blue dot. For Optuna and Hyperopt, the average computation time is displayed, as well as the spread of values.
+
+To obtain a good solution, the methods from Optuna and Hyperopt should be restarted several times. If one focuses on the total operating time, the performance gain of iOpt is even greater. As an example, Figure \ref{fig8} shows a comparison of the hyperparameter tuning times for iOpt, Optuna and Hyperopt on several datasets and different classification models. For iOpt, the time is shown as a blue dot. For Optuna and Hyperopt, the box plots are shown.
+
 
 
 % Please add the following required packages to your document preamble:
 % \usepackage{graphicx}
-\begin{table}[]
+\begin{table}
 \centering
 \caption{Time of hyperparameter tuning.}
 \label{tab:time}
@@ -699,50 +707,50 @@ To obtain a good solution, the stochastic methods from Optuna and Hyperopt shoul
 \hline
 \textbf{Dataset}                & \textbf{iOpt}     & \textbf{Optuna(tpe)}        & \textbf{Optuna(cmaes)} & \textbf{Optuna(nsgaii)}    & \textbf{Hyperopt(tpe)}      \\ \hline
                                 & \multicolumn{5}{c}{\textbf{SVM}}                                                                                                    \\ \hline
-\textbf{Balance}                & \textbf{00:00:15} & 00:00:19 ± 0.66\%           & 00:00:17 ± 8.71\%      & 00:00:20 ± 3.00\%          & 00:00:21 ± 4.44\%           \\
-\textbf{Bank-marketing}         & \textbf{01:31:18} & 02:02:05 ± 4.12\%           & 01:49:42 ± 8.35\%      & 01:51:06 ± 4.62\%          & 01:52:03 ± 8.25\%           \\
-\textbf{Banknote}               & 00:00:35          & \textbf{00:00:25 ± 3.60\%}  & 00:00:32 ± 10.86\%     & 00:00:48 ± 5.89\%          & 00:00:39 ± 4.37\%           \\
-\textbf{Breast Cancer}          & \textbf{00:00:11} & 00:00:15 ± 1.38\%           & 00:00:14 ± 3.45\%      & 00:00:16 ± 4.59\%          & 00:00:18 ± 3.79\%           \\
-\textbf{CarEvaluation}          & \textbf{00:01:21} & 00:01:48 ± 2.82\%           & 00:01:28 ± 6.69\%      & 00:01:34 ± 2.01\%          & 00:01:44 ± 3.10\%           \\
-\textbf{CNAE-9}                 & \textbf{00:05:53} & 00:08:24 ± 18.64\%          & 00:08:30 ± 3.92\%      & 00:08:27 ± 2.28\%          & 00:08:22 ± 5.14\%           \\
-\textbf{Credit   Approval}      & \textbf{00:00:19} & 00:00:26 ± 16.46\%          & 00:00:21 ± 7.39\%      & 00:00:23 ± 2.38\%          & 00:00:25 ± 4.47\%           \\
-\textbf{Digits}                 & 00:02:07          & \textbf{00:02:01 ± 5.04\%}  & 00:02:47 ± 7.83\%      & 00:03:35 ± 7.10\%          & 00:03:09 ± 4.74\%           \\
-\textbf{Ecoli}                  & \textbf{00:00:08} & 00:00:13 ± 2.09\%           & 00:00:10 ± 2.28\%      & 00:00:10 ± 1.66\%          & 00:00:14 ± 3.30\%           \\
-\textbf{Parkinsons}             & \textbf{00:00:07} & 00:00:11 ± 1.38\%           & 00:00:08 ± 0.96\%      & 00:00:08 ± 1.43\%          & 00:00:12 ± 4.09\%           \\
-\textbf{Semeion}                & \textbf{00:04:03} & 00:04:16 ± 5.22\%           & 00:05:17 ± 3.24\%      & 00:05:51 ± 1.73\%          & 00:05:57 ± 3.06\%           \\
-\textbf{Statlog   Segmentation} & 00:02:07          & \textbf{00:01:45 ± 4.02\%}  & 00:02:59 ± 5.75\%      & 00:04:12 ± 6.43\%          & 00:03:05 ± 4.06\%           \\
-\textbf{Wilt}                   & \textbf{00:01:51} & 00:02:17 ± 6.65\%           & 00:02:01 ± 9.83\%      & 00:02:07 ± 3.28\%          & 00:02:16 ± 4.78\%           \\
-\textbf{Zoo}                    & \textbf{00:00:05} & 00:00:10 ± 2.08\%           & 00:00:07 ± 1.73\%      & 00:00:07 ± 2.42\%          & 00:00:10 ± 3.47\%           \\ \hline
+\textbf{Balance}                & \textbf{00:00:15} & 00:00:19 $\pm$ 0.66\%           & 00:00:17 $\pm$ 8.71\%      & 00:00:20 $\pm$ 3.00\%          & 00:00:21 $\pm$ 4.44\%           \\
+\textbf{Bank-marketing}         & \textbf{01:31:18} & 02:02:05 $\pm$ 4.12\%           & 01:49:42 $\pm$ 8.35\%      & 01:51:06 $\pm$ 4.62\%          & 01:52:03 $\pm$ 8.25\%           \\
+\textbf{Banknote}               & 00:00:35          & \textbf{00:00:25 $\pm$ 3.60\%}  & 00:00:32 $\pm$ 10.86\%     & 00:00:48 $\pm$ 5.89\%          & 00:00:39 $\pm$ 4.37\%           \\
+\textbf{Breast Cancer}          & \textbf{00:00:11} & 00:00:15 $\pm$ 1.38\%           & 00:00:14 $\pm$ 3.45\%      & 00:00:16 $\pm$ 4.59\%          & 00:00:18 $\pm$ 3.79\%           \\
+\textbf{CarEvaluation}          & \textbf{00:01:21} & 00:01:48 $\pm$ 2.82\%           & 00:01:28 $\pm$ 6.69\%      & 00:01:34 $\pm$ 2.01\%          & 00:01:44 $\pm$ 3.10\%           \\
+\textbf{CNAE-9}                 & \textbf{00:05:53} & 00:08:24 $\pm$ 18.64\%          & 00:08:30 $\pm$ 3.92\%      & 00:08:27 $\pm$ 2.28\%          & 00:08:22 $\pm$ 5.14\%           \\
+\textbf{Credit   Approval}      & \textbf{00:00:19} & 00:00:26 $\pm$ 16.46\%          & 00:00:21 $\pm$ 7.39\%      & 00:00:23 $\pm$ 2.38\%          & 00:00:25 $\pm$ 4.47\%           \\
+\textbf{Digits}                 & 00:02:07          & \textbf{00:02:01 $\pm$ 5.04\%}  & 00:02:47 $\pm$ 7.83\%      & 00:03:35 $\pm$ 7.10\%          & 00:03:09 $\pm$ 4.74\%           \\
+\textbf{Ecoli}                  & \textbf{00:00:08} & 00:00:13 $\pm$ 2.09\%           & 00:00:10 $\pm$ 2.28\%      & 00:00:10 $\pm$ 1.66\%          & 00:00:14 $\pm$ 3.30\%           \\
+\textbf{Parkinsons}             & \textbf{00:00:07} & 00:00:11 $\pm$ 1.38\%           & 00:00:08 $\pm$ 0.96\%      & 00:00:08 $\pm$ 1.43\%          & 00:00:12 $\pm$ 4.09\%           \\
+\textbf{Semeion}                & \textbf{00:04:03} & 00:04:16 $\pm$ 5.22\%           & 00:05:17 $\pm$ 3.24\%      & 00:05:51 $\pm$ 1.73\%          & 00:05:57 $\pm$ 3.06\%           \\
+\textbf{Statlog   Segmentation} & 00:02:07          & \textbf{00:01:45 $\pm$ 4.02\%}  & 00:02:59 $\pm$ 5.75\%      & 00:04:12 $\pm$ 6.43\%          & 00:03:05 $\pm$ 4.06\%           \\
+\textbf{Wilt}                   & \textbf{00:01:51} & 00:02:17 $\pm$ 6.65\%           & 00:02:01 $\pm$ 9.83\%      & 00:02:07 $\pm$ 3.28\%          & 00:02:16 $\pm$ 4.78\%           \\
+\textbf{Zoo}                    & \textbf{00:00:05} & 00:00:10 $\pm$ 2.08\%           & 00:00:07 $\pm$ 1.73\%      & 00:00:07 $\pm$ 2.42\%          & 00:00:10 $\pm$ 3.47\%           \\ \hline
                                 & \multicolumn{5}{c}{\textbf{XGBoost}}                                                                                                \\ \hline
-\textbf{Balance}                & \textbf{00:01:49} & 00:03:38 ± 10.57\%          & 00:03:09 ± 10.94\%     & 00:02:36 ± 6.39\%          & 00:02:55 ± 11.63\%          \\
-\textbf{Bank-marketing}         & 01:46:27          & 01:52:51 ± 17.65\%          & 02:06:44 ± 14.76\%     & 01:51:28 ± 7.79\%          & \textbf{01:43:15 ± 13.30\%} \\
-\textbf{Banknote}               & \textbf{00:02:02} & 00:03:36 ± 18.51\%          & 00:03:15 ± 10.33\%     & 00:02:35 ± 6.93\%          & 00:02:45 ± 5.20\%           \\
-\textbf{Breast Cancer}          & \textbf{00:01:45} & 00:03:25 ± 26.50\%          & 00:02:33 ± 19.95\%     & 00:02:31 ± 13.55\%         & 00:02:26 ± 8.54\%           \\
-\textbf{CarEvaluation}          & 00:10:10          & 00:12:05 ± 8.62\%           & 00:10:53 ± 8.07\%      & 00:07:14 ± 6.79\%          & \textbf{00:07:42 ± 12.51\%} \\
-\textbf{CNAE-9}                 & 03:47:42          & 04:55:03 ± 26.76\%          & 05:43:27 ± 14.35\%     & 03:55:49 ± 13.82\%         & \textbf{03:42:39 ± 18.30\%} \\
-\textbf{Credit   Approval}      & \textbf{00:01:30} & 00:02:27 ± 23.63\%          & 00:01:54 ± 23.08\%     & 00:01:58 ± 6.65\%          & 00:01:44 ± 13.34\%          \\
-\textbf{Digits}                 & 00:48:57          & 00:59:09 ± 21.83\%          & 00:54:27 ± 8.20\%      & 00:43:35 ± 9.93\%          & \textbf{00:46:52 ± 8.24\%}  \\
-\textbf{Ecoli}                  & \textbf{00:02:40} & 00:04:03 ± 21.05\%          & 00:03:30 ± 22.08\%     & 00:02:48 ± 8.63\%          & 00:03:05 ± 8.97\%           \\
-\textbf{Parkinsons}             & \textbf{00:01:09} & 00:02:32 ± 16.25\%          & 00:01:52 ± 12.30\%     & 00:01:34 ± 4.24\%          & 00:01:45 ± 12.30\%          \\
-\textbf{Semeion}                & 01:52:08          & 01:19:57 ± 12.21\%          & 01:42:52 ± 14.47\%     & 02:01:16 ± 9.22\%          & \textbf{01:41:40 ± 7.68\%}  \\
-\textbf{Statlog   Segmentation} & 00:34:59          & 00:43:59 ± 13.68\%          & 00:38:13 ± 6.14\%      & \textbf{00:25:03 ± 8.20\%} & 00:32:15 ± 8.61\%           \\
-\textbf{Wilt}                   & 00:06:44          & 00:10:42 ± 6.89\%           & 00:08:20 ± 7.94\%      & \textbf{00:06:11 ± 8.76\%} & 00:08:09 ± 8.43\%           \\
-\textbf{Zoo}                    & \textbf{00:01:47} & 00:02:53 ± 20.08\%          & 00:02:21 ± 16.16\%     & 00:02:05 ± 4.28\%          & 00:02:13 ± 9.09\%           \\ \hline
+\textbf{Balance}                & \textbf{00:01:49} & 00:03:38 $\pm$ 10.57\%          & 00:03:09 $\pm$ 10.94\%     & 00:02:36 $\pm$ 6.39\%          & 00:02:55 $\pm$ 11.63\%          \\
+\textbf{Bank-marketing}         & 01:46:27          & 01:52:51 $\pm$ 17.65\%          & 02:06:44 $\pm$ 14.76\%     & 01:51:28 $\pm$ 7.79\%          & \textbf{01:43:15 $\pm$ 13.30\%} \\
+\textbf{Banknote}               & \textbf{00:02:02} & 00:03:36 $\pm$ 18.51\%          & 00:03:15 $\pm$ 10.33\%     & 00:02:35 $\pm$ 6.93\%          & 00:02:45 $\pm$ 5.20\%           \\
+\textbf{Breast Cancer}          & \textbf{00:01:45} & 00:03:25 $\pm$ 26.50\%          & 00:02:33 $\pm$ 19.95\%     & 00:02:31 $\pm$ 13.55\%         & 00:02:26 $\pm$ 8.54\%           \\
+\textbf{CarEvaluation}          & 00:10:10          & 00:12:05 $\pm$ 8.62\%           & 00:10:53 $\pm$ 8.07\%      & 00:07:14 $\pm$ 6.79\%          & \textbf{00:07:42 $\pm$ 12.51\%} \\
+\textbf{CNAE-9}                 & 03:47:42          & 04:55:03 $\pm$ 26.76\%          & 05:43:27 $\pm$ 14.35\%     & 03:55:49 $\pm$ 13.82\%         & \textbf{03:42:39 $\pm$ 18.30\%} \\
+\textbf{Credit   Approval}      & \textbf{00:01:30} & 00:02:27 $\pm$ 23.63\%          & 00:01:54 $\pm$ 23.08\%     & 00:01:58 $\pm$ 6.65\%          & 00:01:44 $\pm$ 13.34\%          \\
+\textbf{Digits}                 & 00:48:57          & 00:59:09 $\pm$ 21.83\%          & 00:54:27 $\pm$ 8.20\%      & 00:43:35 $\pm$ 9.93\%          & \textbf{00:46:52 $\pm$ 8.24\%}  \\
+\textbf{Ecoli}                  & \textbf{00:02:40} & 00:04:03 $\pm$ 21.05\%          & 00:03:30 $\pm$ 22.08\%     & 00:02:48 $\pm$ 8.63\%          & 00:03:05 $\pm$ 8.97\%           \\
+\textbf{Parkinsons}             & \textbf{00:01:09} & 00:02:32 $\pm$ 16.25\%          & 00:01:52 $\pm$ 12.30\%     & 00:01:34 $\pm$ 4.24\%          & 00:01:45 $\pm$ 12.30\%          \\
+\textbf{Semeion}                & 01:52:08          & 01:19:57 $\pm$ 12.21\%          & 01:42:52 $\pm$ 14.47\%     & 02:01:16 $\pm$ 9.22\%          & \textbf{01:41:40 $\pm$ 7.68\%}  \\
+\textbf{Statlog   Segmentation} & 00:34:59          & 00:43:59 $\pm$ 13.68\%          & 00:38:13 $\pm$ 6.14\%      & \textbf{00:25:03 $\pm$ 8.20\%} & 00:32:15 $\pm$ 8.61\%           \\
+\textbf{Wilt}                   & 00:06:44          & 00:10:42 $\pm$ 6.89\%           & 00:08:20 $\pm$ 7.94\%      & \textbf{00:06:11 $\pm$ 8.76\%} & 00:08:09 $\pm$ 8.43\%           \\
+\textbf{Zoo}                    & \textbf{00:01:47} & 00:02:53 $\pm$ 20.08\%          & 00:02:21 $\pm$ 16.16\%     & 00:02:05 $\pm$ 4.28\%          & 00:02:13 $\pm$ 9.09\%           \\ \hline
                                 & \multicolumn{5}{c}{\textbf{MLP}}                                                                                                    \\ \hline
-\textbf{Balance}                & \textbf{00:09:29} & 00:18:14 ± 61.97\%          & 00:26:45 ± 11.25\%     & 00:20:55 ± 11.15\%         & 00:15:37 ± 10.06\%          \\
-\textbf{Bank-marketing}         & 06:10:05          & \textbf{04:42:08 ± 39.48\%} & 05:44:30 ± 15.70\%     & 07:04:15 ± 10.63\%         & 08:11:02 ± 16.22\%          \\
-\textbf{Banknote}               & \textbf{02:07:36} & 02:29:16 ± 44.57\%          & 04:43:15 ± 13.11\%     & 03:20:56 ± 8.58\%          & 02:39:20 ± 11.03\%          \\
-\textbf{Breast Cancer}          & \textbf{00:43:14} & 02:48:26 ± 10.35\%          & 02:41:29 ± 15.72\%     & 02:46:45 ± 5.13\%          & 02:11:56 ± 29.01\%          \\
-\textbf{CarEvaluation}          & \textbf{02:08:22} & 04:21:15 ± 17.08\%          & 03:04:09 ± 12.40\%     & 03:45:18 ± 9.32\%          & 03:55:44 ± 19.04\%          \\
-\textbf{CNAE-9}                 & 07:46:15          & \textbf{07:26:02 ± 9.33\%}  & 13:29:53 ± 11.28\%     & 10:57:27 ± 12.39\%         & 08:32:12 ± 7.19\%           \\
-\textbf{Credit   Approval}      & \textbf{00:43:32} & 02:41:30 ± 10.89\%          & 02:24:56 ± 15.16\%     & 02:39:29 ± 4.92\%          & 01:57:22 ± 29.27\%          \\
-\textbf{Digits}                 & \textbf{02:58:50} & 10:50:47 ± 7.21\%           & 09:30:39 ± 5.32\%      & 10:19:20 ± 6.95\%          & 08:45:23 ± 29.04\%          \\
-\textbf{Ecoli}                  & \textbf{00:05:52} & 00:08:21 ± 16.93\%          & 00:07:03 ± 16.70\%     & 00:08:08 ± 7.34\%          & 00:07:01 ± 12.44\%          \\
-\textbf{Parkinsons}             & \textbf{00:16:21} & 00:46:32 ± 34.33\%          & 00:49:54 ± 14.73\%     & 00:44:24 ± 5.05\%          & 00:34:48 ± 14.89\%          \\
-\textbf{Semeion}                & \textbf{03:38:23} & 11:26:28 ± 25.20\%          & 10:19:44 ± 7.97\%      & 09:01:10 ± 13.98\%         & 07:55:17 ± 20.55\%          \\
-\textbf{Statlog   Segmentation} & \textbf{00:48:57} & 19:27:00 ± 15.47\%          & 17:09:16 ± 11.57\%     & 17:02:03 ± 3.17\%          & 11:20:02 ± 3.89\%           \\
-\textbf{Wilt}                   & \textbf{01:23:04} & 17:57:58 ± 28.49\%          & 19:23:37 ± 11.57\%     & 22:06:21 ± 9.34\%          & 12:38:43 ± 3.14\%           \\
-\textbf{Zoo}                    & 00:01:46          & 00:01:52 ± 22.83\%          & 00:01:58 ± 7.72\%      & \textbf{00:01:40 ± 8.30\%} & 00:02:01 ± 12.96\%          \\ \hline
+\textbf{Balance}                & \textbf{00:09:29} & 00:18:14 $\pm$ 61.97\%          & 00:26:45 $\pm$ 11.25\%     & 00:20:55 $\pm$ 11.15\%         & 00:15:37 $\pm$ 10.06\%          \\
+\textbf{Bank-marketing}         & 06:10:05          & \textbf{04:42:08 $\pm$ 39.48\%} & 05:44:30 $\pm$ 15.70\%     & 07:04:15 $\pm$ 10.63\%         & 08:11:02 $\pm$ 16.22\%          \\
+\textbf{Banknote}               & \textbf{02:07:36} & 02:29:16 $\pm$ 44.57\%          & 04:43:15 $\pm$ 13.11\%     & 03:20:56 $\pm$ 8.58\%          & 02:39:20 $\pm$ 11.03\%          \\
+\textbf{Breast Cancer}          & \textbf{00:43:14} & 02:48:26 $\pm$ 10.35\%          & 02:41:29 $\pm$ 15.72\%     & 02:46:45 $\pm$ 5.13\%          & 02:11:56 $\pm$ 29.01\%          \\
+\textbf{CarEvaluation}          & \textbf{02:08:22} & 04:21:15 $\pm$ 17.08\%          & 03:04:09 $\pm$ 12.40\%     & 03:45:18 $\pm$ 9.32\%          & 03:55:44 $\pm$ 19.04\%          \\
+\textbf{CNAE-9}                 & 07:46:15          & \textbf{07:26:02 $\pm$ 9.33\%}  & 13:29:53 $\pm$ 11.28\%     & 10:57:27 $\pm$ 12.39\%         & 08:32:12 $\pm$ 7.19\%           \\
+\textbf{Credit   Approval}      & \textbf{00:43:32} & 02:41:30 $\pm$ 10.89\%          & 02:24:56 $\pm$ 15.16\%     & 02:39:29 $\pm$ 4.92\%          & 01:57:22 $\pm$ 29.27\%          \\
+\textbf{Digits}                 & \textbf{02:58:50} & 10:50:47 $\pm$ 7.21\%           & 09:30:39 $\pm$ 5.32\%      & 10:19:20 $\pm$ 6.95\%          & 08:45:23 $\pm$ 29.04\%          \\
+\textbf{Ecoli}                  & \textbf{00:05:52} & 00:08:21 $\pm$ 16.93\%          & 00:07:03 $\pm$ 16.70\%     & 00:08:08 $\pm$ 7.34\%          & 00:07:01 $\pm$ 12.44\%          \\
+\textbf{Parkinsons}             & \textbf{00:16:21} & 00:46:32 $\pm$ 34.33\%          & 00:49:54 $\pm$ 14.73\%     & 00:44:24 $\pm$ 5.05\%          & 00:34:48 $\pm$ 14.89\%          \\
+\textbf{Semeion}                & \textbf{03:38:23} & 11:26:28 $\pm$ 25.20\%          & 10:19:44 $\pm$ 7.97\%      & 09:01:10 $\pm$ 13.98\%         & 07:55:17 $\pm$ 20.55\%          \\
+\textbf{Statlog   Segmentation} & \textbf{00:48:57} & 19:27:00 $\pm$ 15.47\%          & 17:09:16 $\pm$ 11.57\%     & 17:02:03 $\pm$ 3.17\%          & 11:20:02 $\pm$ 3.89\%           \\
+\textbf{Wilt}                   & \textbf{01:23:04} & 17:57:58 $\pm$ 28.49\%          & 19:23:37 $\pm$ 11.57\%     & 22:06:21 $\pm$ 9.34\%          & 12:38:43 $\pm$ 3.14\%           \\
+\textbf{Zoo}                    & 00:01:46          & 00:01:52 $\pm$ 22.83\%          & 00:01:58 $\pm$ 7.72\%      & \textbf{00:01:40 $\pm$ 8.30\%} & 00:02:01 $\pm$ 12.96\%          \\ \hline
 \end{tabular}%
 }
 \end{table}
@@ -780,7 +788,7 @@ To obtain a good solution, the stochastic methods from Optuna and Hyperopt shoul
 \begin{figure}
 \centering
 \includegraphics[width=\textwidth]{fig_time}
-\caption{Time of hyperparameter tuning} \label{fig8}
+\caption{Time of hyperparameter tuning.} \label{fig8}
 \end{figure}
 
 \section{Conclusion}
