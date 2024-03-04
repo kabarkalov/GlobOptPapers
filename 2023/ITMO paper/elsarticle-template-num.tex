@@ -53,7 +53,7 @@
 \usepackage{lineno}
 
 %% Русский язык - закомментировать в финальной версии
-%\usepackage[russian]{babel}
+\usepackage[russian]{babel}
 
 %% advanced mathematics
 \usepackage{amsmath}
@@ -65,6 +65,7 @@
 \usepackage{amssymb}
 
 \usepackage{hyperref}
+\usepackage[normalem]{ulem}
 
 \journal{Knowledge-Based Systems}
 
@@ -143,7 +144,7 @@
 \begin{abstract}
 %% Text of abstract
 
-The quality of machine learning methods is substantially affected by their hyperparameters, while the evaluation of the quality criterion is a time-consuming operation. Therefore, it is important to develop intelligent methods for selecting optimal values of hyperparameters that require a small number of search trials. In this paper, we propose a new approach to hyperparameter tuning based on the ideas of Lipschitz global optimization. In the framework of this approach, the solution of problems with several parameters is reduced to solving equivalent one-dimensional problems. The reduction is based on the use of space-filling curves (Peano curves). These approaches are implemented in the iOpt open-source framework of intelligent optimization methods.  To demonstrate the advantages of iOpt, we compare it with the well-known Optuna and HyperOpt frameworks when tuning hyperparameters of various machine learning methods on a representative set of datasets. The results show that Lipschitz global optimization methods provide comparable (in terms of quality) results in a significantly shorter time compared to known hyperparameter tuning algorithms.
+The quality of machine learning methods is substantially affected by their hyperparameters, while the evaluation of the quality criterion is a time-consuming operation. Therefore, it is important to develop intelligent methods for selecting optimal values of hyperparameters that require a small number of search trials. In this paper, we propose a new approach to hyperparameter tuning based on the ideas of Lipschitz global optimization. In the framework of this approach, the solution of problems with several parameters is reduced to solving equivalent one-dimensional problems. The reduction is based on the use of space-filling curves (Peano curves). These approaches are implemented in the open-source framework of \textit{i}ntelligent \textit{opt}imization methods \textcolor[rgb]{1,0,0}{(iOpt)}.  To demonstrate the advantages of iOpt, we compare it with the well-known Optuna and HyperOpt frameworks when tuning hyperparameters of various machine learning methods on \textcolor[rgb]{1,0,0}{\sout{a} the}  representative \textcolor[rgb]{1,0,0}{ \sout{set of} } datasets. The results show that Lipschitz global optimization methods provide comparable (in terms of quality) results in a significantly shorter time compared to known hyperparameter tuning algorithms.
 
 \end{abstract}
 
@@ -153,13 +154,13 @@ The quality of machine learning methods is substantially affected by their hyper
 %\end{graphicalabstract}
 
 %%Research highlights
-\begin{highlights}
-\item A framework of Lipschitz optimization methods is developed for the tuning of hyperparameters
-\item Dimensionality reduction based on Peano space-filling curves is used to solve multidimensional problems
-\item A scheme is proposed for reducing the problems, some of whose parameters are categorical, to a single problem with continuous parameters
-\item The developed methods (unlike the known methods of hyperparameter tuning) are deterministic, which ensures stable results at different runs of the algorithms 
-
-\end{highlights}
+%\begin{highlights}
+%\item A framework of Lipschitz optimization methods is developed for the tuning of hyperparameters
+%\item Dimensionality reduction based on Peano space-filling curves is used to solve multidimensional problems
+%\item A scheme is proposed for reducing the problems, some of whose parameters are categorical, to a single problem with continuous parameters
+%\item The developed methods (unlike the known methods of hyperparameter tuning) are deterministic, which ensures stable results at different runs of the algorithms 
+%
+%\end{highlights}
 
 \begin{keyword}
 %% keywords here, in the form: keyword \sep keyword
@@ -174,7 +175,7 @@ Lipschitz optimization \sep Global optimization \sep Multiextremal functions \se
 
 \end{frontmatter}
 
-\linenumbers
+%\linenumbers
 
 %% main text
 \section{Introduction}
@@ -184,7 +185,13 @@ Currently, complex scientific and/or industrial problems are most often solved b
 
 For an end user who wishes to fine-tune the method used by selecting an optimal combination of hyperparameters, the choice of a particular framework is determined by the following factors: 1) efficiency of the methods implemented in the framework that allow solving an HPO problem from the class of problems to which the user's problem belongs; 2) ease of using the  framework from the point of view of description/formulation of the problem of selecting the optimal combination of hyperparameters, organization of the optimum search process, as well as obtaining and analyzing the results. Today, the most common way to organize such an interface is to use the Python programming language, while the frameworks can be written both in this and other languages.
 
-In this paper, we present iOpt\footnote{\url{https://github.com/aimclub/iOpt/}}, a framework of intelligent optimization methods focused on solving problems of selecting optimal values of hyperparameters of various algorithms (including machine learning and heuristic optimization methods). The paper is organized as follows. At the beginning, there is a review of known methods used for hyperparameter tuning. Section \ref{sec_lip} presents the mathematical formulation of the problem, describes approaches to the reduction of multidimensional problems to one-dimensional problems and to the solution of problems with discrete parameters. Section \ref{sec_iOpt} explains the algorithmic basis of global optimization methods implemented in the iOpt framework. In Section \ref{sec_exp}, we present the results of numerical experiments conducted to compare the efficiency of the iOpt framework with other known frameworks on model and applied problems. The conclusion summarizes the findings and plans   for the development of the framework.
+In this paper, we present a framework of \textit{i}ntelligent \textit{opt}imization methods  \textcolor[rgb]{1,0,0}{iOpt\footnote{\url{https://github.com/aimclub/iOpt/}}}, focused on solving problems of selecting optimal values of hyperparameters of various algorithms (including machine learning \textcolor[rgb]{1,0,0}{and artificial intelligence} methods). 
+
+\textcolor[rgb]{1,0,0}{Отличительной особенностью фреймворка iOpt является использование for hyperparameters tuning методов липшицевой оптимизации, которые являются детерминированными, обладают быстрой сходимостью, а также возможностью адаптации к различного рода специальным постановкам задач.
+Например, рассматриваемые методы допускают обобщение для работы с зашумленными функциями \cite{Sergeyev2020}. В данной работе они были адаптированы для решения HPO problems, в которых часть параметров часто являются дискретными и/или категориальными.}
+
+
+The paper is organized as follows. At the beginning, there is a review of known methods used for hyperparameter tuning. Section \ref{sec_lip} presents the mathematical formulation of the problem, describes approaches to the reduction of multidimensional problems to one-dimensional problems and to the solution of problems with discrete parameters. Section \ref{sec_iOpt} explains the algorithmic basis of global optimization methods implemented in the iOpt framework. In Section \ref{sec_exp}, we present the results of numerical experiments conducted to compare the efficiency of the iOpt framework with other known frameworks on model and applied problems. The conclusion summarizes the findings and plans   for the development of the framework.
 
 
 \section{Related work}
@@ -281,9 +288,9 @@ To solve the Lipschitz global optimization problem, space-filling curves can be 
 i.e., the original multidimensional problem (\ref{f_func}) is reduced to a one-dimensional problem.
 
 It is known (see \cite{Strongin2000}) that if a multidimensional function  $\varphi(y), \; y \in D$,  satisfies the Lipschitz condition with the constant $L$, then the reduced one-dimensional function $\varphi(y(x)), \; x \in [0,1]$ satisfies the H{\"o}lder condition
-\[
+\begin{equation}\label{holder}
 \left|\varphi(y(x'))-\varphi(y(x''))\right|\leq H\left|x'-x''\right|^{1/N}, \; x',x''\in[0,1].
-\]
+\end{equation}
 Here, $N$ is the dimensionality of the original problem, and the coefficient
 $ H=2 L \sqrt{N+3}$.
 
@@ -308,13 +315,13 @@ Remark 2. The theoretical Peano-Hilbert curve $y(x)$ is defined as a limiting ob
 Of particular interest are problems where some of the parameters can assume values from a predetermined finite set, since it is more difficult to construct estimates of the optimum for these problems than for problems with continuous parameters. Many publications address the methods for solving mixed-parameter problems (see, for example, reviews \cite{Burer2012,Boukouvala2016}). Known deterministic methods for solving problems of this class are centered on solving linear or convex problems \cite{Lee2012}. It is suggested that complex multiextremal problems should be solved using heuristic approaches \cite{Belotti2013}. 
 
 We have proposed and implemented a new deterministic approach to solving problems with mixed parameters; here we give a brief description of it. 
-Let the objective function of the problem depend on two parameter vectors: vector $y$, which belongs to the hyperinterval $D$, and vector $u$, which has a finite (and not very large) set of possible values, i.e.
+Let the objective function of the problem depend on two parameter vectors: vector $y$, which belongs to the hyperinterval $D$, and vector $u$, which has a finite (and not very large) set of values $U$, i.e.
 \begin{gather}\label{problem_i}
-\min{\left\{ \varphi(y,u) : y\in D \right\}},\\
+\min{\left\{ \varphi(y,u) : y\in D, u \in U \right\}},\\
 D=\left\{a_j \leq y_j \leq b_j, \; 1\leq j \leq N \right\}.\nonumber
 \end{gather}
 
-Such finite sets of values can characterize many possible combinations of categorical hyperparameters of the machine learning algorithm under study. A typical example is the support vector machine, whose performance is influenced by the continuous regularization parameter $C$ and the kernel coefficient $\gamma$. In this case, the type of kernel function is chosen from a finite set of variants (e.g., polynomial function, radial basis function, sigmoid, etc.). 
+Such finite sets of values can characterize possible combinations of categorical hyperparameters of the machine learning algorithm under study. A typical example is the support vector machine, whose performance is influenced by the continuous regularization parameter $C$ and the kernel coefficient $\gamma$. In this case, the type of kernel function is chosen from a finite set of variants (e.g., polynomial function, radial basis function, sigmoid, etc.). 
 %Целочисленные параметры = непрерывные параметры с округлением, добавить комментарий об этом?
 
 Let us number all the different combinations of categorical parameters with integers $s, 1\leq s \leq S$, i.e., let us assign a vector $u_s$ to each number $s$. Then the problem under consideration can be written in the form
@@ -332,9 +339,9 @@ Let us now consider the mapping
 Y(x)=y(x-E(x)), \; x\in[0,S],
 \]
 which translates any point of the interval $[0,S]$ to the region $D$ (the notation $E(x)$ corresponds to the integer part of the number $x$) and define the function
-\[
+\begin{equation}\label{f}
 f(x) = \varphi(Y(x),u_{E(x)+1}), x\in[0,S],
-\]
+\end{equation}
 which has, generally speaking, discontinuities at integer points $x_i = i, 1 \leq i \leq S-1$.
 Therefore, the values $z_i = f(x_i)$ at these points will be considered undefined and will not be used in the algorithm.
 %, а значения индекса -- равным 0, т.е. $\nu(x_i) = 0$.
@@ -423,13 +430,23 @@ The theory of algorithm convergence as well as some of its modifications are pre
 \label{sec_mGSA}
 
 Let us consider the case when the algorithm to be tuned has both continuous and categorical parameters.  In this case, the categorical parameters can be assigned integer values, and the problem can be reduced to the formulation (\ref{problem_is1}).
-Since the solution of problems with partially integer parameters in accordance with the scheme described in Section \ref{sec_discr} implies the solution of problem (\ref{problem_is1}) with a discontinuous objective function, a modification of the algorithm that takes this feature into account is required.
+Since the solution of problems with partially integer parameters in accordance with the scheme described in Section \ref{sec_discr} implies the solution of problem (\ref{problem_is1}) with a discontinuous objective function, a modification of the global search algorithm that takes this feature into account is required.
 
-For this purpose, we introduce the classification of points from the search region using a special index $\nu_i=\nu(x_i)$. We will assume the indices of integer points $x_i = i, 0\leq i \leq S$, to be equal to zero, i.e. $\nu(x_i) = 0$. For all other values of $x\in(i,i+1),  0 \leq i < S$, we will assume the index value to be equal to unity, i.e.  $\nu(x) = 1$. Then the result of the trial at some point $x^j\in[0,S]$  will be the set of values $(x^j, \nu^j=\nu(x^j), y^j=y(x^j), z^j = \varphi(y^j))$. In the case of  $\nu^j=0$, the value of $z^j$ will be considered undefined.
+For this purpose, we introduce the classification of points from the search region using a special index $\nu_i=\nu(x_i)$. We will assume the indices of integer points $x_i = i, 0\leq i \leq S$, to be equal to zero. For all other values of $x\in(i,i+1),  0 \leq i < S$, we will assume the index value to be equal to unity, i.e.  
+\begin{equation}\label{index}
+	\nu(x) = \left\{
+   \begin{array}{lr}
+     0, \; x = i, 0\leq i \leq S, \\
+     1, \; x \neq i,  0 \leq i \leq S.
+   \end{array}
+\right.
+\end{equation}
+
+Then the result of the trial at some point $x^j\in[0,S]$  will be the set of values $(x^j, \nu^j=\nu(x^j), z^j = f(x^j))$. In the case of  $\nu^j=0$, the value of $z^j$ will be considered undefined.
 
 The general computational scheme outlined as Algorithm \ref{alg_GSA} will remain the same. The modifications will consist of the following.
 
-1. At the initialization stage, the values $(x^i = i, \nu^i=0, y^i=y(x^i), z^i)$, $ i, 0\leq i \leq S$, i.e., the boundary points of the intervals $(x_{i-1},x_i), 1<i\leq S$, are entered into the set $\Omega_k$ containing the search  information. 
+1. At the initialization stage, the values $(x^i = i, \nu^i=0, z^i)$, $ i, 0\leq i \leq S$, i.e., the boundary points of the intervals $(x_{i-1},x_i), 1<i\leq S$, are entered into the set $\Omega_k$ containing the search  information. 
 After that, trials are carried out at arbitrary internal points (e.g., midpoints) of the intervals $(x_{i-1},x_i), 1<i\leq S$; the trial results are also added to the search information. Thus, after initialization, the set $\Omega_k$ will contain $k=2S+1$ elements.
 
 2. The computation of the estimate of the H\"older constant $\mu$ according to formula (\ref{mu}) must be performed only for intervals for which $\nu(x_i) = \nu(x_{i-1}) = 1$, i.e., when the values $z_i$ and $z_{i-1}$ are determined.
@@ -450,8 +467,35 @@ x^{k+1} = \frac{x_t+x_{t-1}}{2} , \; \mathrm{if} \; \nu(x_i) \neq \nu(x_{i-1}). 
 \end{gather}
 
 Here, $t$ is the number of the search interval that has the maximum characteristic.
-
 We note again that the characteristic $R(i)$ quantifies the possibility of finding a point $x^*$, which is the inverse image of the global optimizer $y^* = y(x^*)$, within the considered interval $(x_{i-1},x_i)$.
+
+Условия сходимости Global Search Algorithm для задач с Categorical Parameters (GSA-CP)  могут быть сформулированы в виде следующей теоремы.
+
+\textbf{Theorem} (convergence conditions)
+
+Пусть в постановке задачи (\ref{problem_is1}) функция $f(x)$ из (\ref{f}) удовлетворяет условию Гельдера с константой $H$ при $x \in (i, i + 1), 0 \leq i < S$.
+И пусть точка $\overline{x}$ be a limit point of the sequence $\left\{x^k\right\} $, полученной при минимизации функции $f(x)$ с помощью алгоритма GSA-CP. Then:
+\begin{enumerate}
+	\item 
+	если одноверменно с $\overline{x}$ существует другая предельная точка $x'$ последовательности $\left\{x^k\right\}$, тогда $f(\overline{x}) = f(x')$.
+	\item
+	$z^k=f(x^k) \geq f(\overline{x})$ при любом $k \geq 0$.
+	\item
+	Если на некотором шаге поиска величина $\mu$ from (\ref{mu}) satisfies the condition
+\begin{equation}\label{217}
+  r \mu > 4H,
+\end{equation}
+then $\overline{x}$ is a global minimizer of the function $f(x), x\in[0,S]$ and any global minimizer $x^\ast$ is also a limit point of the sequence $\left\{x^k\right\}$.
+\end{enumerate}
+
+\textbf{Proof}. Эта теорема может быть доказана аналогично теореме о сходимости index method of global optimization from \cite{Strongin2000}, принимая во внимание формулу (\ref{f}), определяющую функцию $f(x)$, правила (\ref{index}), задающие индексы у точек испытаний, а также взаимосвясь (\ref{holder}) между Lipschitz and H\"older conditions при редукции размерности с помощью evolvents.
+
+
+
+
+
+
+ 
 
 \section{Numerical experiments}
 \label{sec_exp}
