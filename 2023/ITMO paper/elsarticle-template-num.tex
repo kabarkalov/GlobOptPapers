@@ -501,6 +501,8 @@ then $\overline{x}$ is a global minimizer of the function $f(x), x\in[0,S]$ and 
 In this section, we present experimental results that demonstrate the effectiveness of the developed framework for a number of HPO problems. First, we describe in detail the setup of the computational experiment. Then, the results of comparing the iOpt framework with several well-known frameworks widely used for hyperparameter tuning in machine learning methods are presented. The section closes with conclusions and a discussion of the results.
 
 \subsection{Experimental setup}
+\label{sec_setup}
+
 
 \textbf{Datasets.} 
 We used for our experiments fifteen datasets from the UCI repository \cite{UCI}, which covers a large number of areas. Datasets from this repository are quite often used to test the correct operation of hyperparameter tuning algorithms \cite{Joy2020,Wang2021,Wu2023}. We selected the datasets to ensure that the data contained in them were described by both numerical and categorical attributes. Note that most of the datasets were unbalanced and the data presented in the datasets were adapted for the classification task.  The characteristics of the datasets used are presented in Table \ref{tab:1}.
@@ -832,6 +834,28 @@ To obtain a good solution, the methods from Optuna and Hyperopt should be restar
 \includegraphics[width=\textwidth]{fig_time}
 \caption{Time of hyperparameters tuning.} \label{fig8}
 \end{figure}
+
+\subsection{Результаты вычислительных экспериментов на суррогатных моделях}
+
+Для проведения вычислительных экспериментов на основе суррогатных моделей нами использовался тот же набор алгоритмов оптимизации и параметры запуска, что и в случае реальных наборов данных (см. раздел \ref{sec_setup}). В качестве критерия оптимальности была выбрана метрика ``valid-acc''. В процессе оптимизации варьировались LearningRate, WeightDecay, а также функция активации в приделах, рекомендуемых авторами jahs\_bench [XXX]. Для оптимизации алгоритмам максимальное число испытаний было ограничено 200. Для недетерминированных алгоритмов данные усреднялись по 10 запускам. Результаты вычислительных экспериментов представлены в таблице \ref{tab:met-surr}.
+
+% Please add the following required packages to your document preamble:
+% \usepackage{graphicx}
+\begin{table}
+\centering
+\caption{Values of optimized metrics for the algorithms averaged over 10 runs (surrogate models)}
+\label{tab:met-surr}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{ccccccc}
+\hline
+\textbf{}                      & \textbf{iOpt}   & \textbf{Optuna(random)} & \textbf{Optuna(tpe)}     & \textbf{Optuna(cmaes)}   & \textbf{Optuna(nsgaii)} & \textbf{Hyperopt(tpe)} \\ \hline
+\textbf{cifar10}               & \textbf{88.394} & 88.144 $\pm$ 0.21\%         & 88.287 $\pm$ 0.21\%          & 88.218 $\pm$ 0.15\%          & 88.063 $\pm$ 0.27\%         & 88.316 $\pm$ 0.11\%        \\
+\textbf{fashion\_mnist}        & 94.797          & 94.677 $\pm$ 0.18\%         & 94.837 $\pm$ 0.13\%          & \textbf{94.952 $\pm$ 0.08\%} & 94.631 $\pm$ 0.35\%         & 94.759 $\pm$ 0.19\%        \\
+\textbf{colorectal\_histology} & \textbf{94.447} & 94.013 $\pm$ 0.33\%         & \textbf{94.447 $\pm$ 0.17\%} & 94.194 $\pm$ 1.18\%          & 94.150 $\pm$ 0.36\%         & 94.233 $\pm$ 0.17\%        \\ \hline
+\end{tabular}%
+}
+\end{table}
+Исходя из таблицы видно превосходство iOpt на моделях cifar10 и colorectal\_histology. При использовании моделей fashion\_mnist и фреймворк iOpt демонстрирует схожее качество. Отметим, что при использовании суррогатных моделей время вычисления критерия близко к нулю. Как следствия результаты, связанные с временем оптимизации, мы не приводим. 
 
 \section{Conclusion}
 In this paper, we propose a hyperparameter tuning method that is based on the ideas of Lipschitz global optimization. In particular, we use a global search algorithm combined with dimensionality reduction based on Peano curves. We have proposed a generalization of Lipschitz optimization methods to the case of problems with partially integer variables, since many tunable algorithms have discrete hyperparameters.
