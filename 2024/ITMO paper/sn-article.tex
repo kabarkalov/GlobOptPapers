@@ -125,6 +125,11 @@
 
 %\author[1,2]{\fnm{Denis} \sur{Rodionov}}
 
+\author[2]{\fnm{Lubov} \sur{Yamschikova}}
+
+\author[2]{\fnm{Nikolay O.} \sur{Nikitin}}
+
+
 \author[1,2]{\fnm{Marina} \sur{Usova}}
 
 \affil[1]{
@@ -135,7 +140,7 @@
 
 \affil[2]{
 %\orgdiv{Department},
-\orgname{ITMO University}, \orgaddress{\street{Lomonosova St. 9}, \city{St. Petersburg}, \postcode{191002}, 
+\orgname{ITMO University}, \orgaddress{\street{Kronverksky Ave. 49, bldg. A}, \city{St. Petersburg}, \postcode{197101}, 
 %\state{State},
 \country{Russia}}}
 
@@ -166,7 +171,7 @@
 \maketitle
 \section{Introduction}\label{sec_intro}
 
-Currently, complex scientific and/or industrial problems are most often solved by numerical methods. Most of such methods, for example, machine learning methods, have hyperparameters, and the choice of specific values of these hyperparameters can determine the efficiency (in a given metric) of the obtained solution under certain constraints on the computation time \citep{Hutter2019,nikitin2021}. The fact that in many cases the difference in the efficiency of the solution obtained with different values of hyperparameters can be quite significant, has resulted in the emergence of the hyperparameter optimization (HPO) problem, as well as the research of approaches to its solution that are implemented in the frameworks for automatic selection of hyperparameters \citep{Tune,optuna,hyperopt,Sherpa}. From the mathematical point of view, the HPO problem corresponds to a global optimization problem with fixed bounds on the variation of hyperparameters.  In certain cases, some of the hyperparameters may be categorical, i.e., they can only assume values from a certain, usually small, number of variants, which necessitates the use of optimization methods capable of solving problems with discrete parameters.
+Currently, complex scientific and/or industrial problems are most often solved by numerical methods. Most of such methods, for example, machine learning methods, have hyperparameters, and the choice of specific values of these hyperparameters can determine the efficiency (in a given metric) of the obtained solution under certain constraints on the computation time \citep{Hutter2019,nikitin2022automated}. The fact that in many cases the difference in the efficiency of the solution obtained with different values of hyperparameters can be quite significant, has resulted in the emergence of the hyperparameter optimization (HPO) problem, as well as the research of approaches to its solution that are implemented in the frameworks for automatic selection of hyperparameters \citep{Tune,optuna,hyperopt,Sherpa}. From the mathematical point of view, the HPO problem corresponds to a global optimization problem with fixed bounds on the variation of hyperparameters.  In certain cases, some of the hyperparameters may be categorical, i.e., they can only assume values from a certain, usually small, number of variants, which necessitates the use of optimization methods capable of solving problems with discrete parameters.
 
 For an end user who wishes to fine-tune the method used by selecting an optimal combination of hyperparameters, the choice of a particular framework is determined by the following factors: 1) efficiency of the methods implemented in the framework that allow solving an HPO problem from the class of problems to which the user's problem belongs; 2) ease of using the  framework from the point of view of description/formulation of the problem of selecting the optimal combination of hyperparameters, organization of the optimum search process, as well as obtaining and analyzing the results. Today, the most common way to organize such an interface is to use the Python programming language, while the frameworks can be written both in this and other languages.
 
@@ -185,6 +190,9 @@ By selecting the number of analyzed variants for each of the hyperparameters, se
 
 Metaheuristic (genetic and similar) algorithms are an alternative to the exhaustive search when the number of hyperparameters increases \citep{Opara2019}. These algorithms are widely used in the absence of a formula-based description of the model under study (``black-box'' model), which is typical for the considered HPO problems \citep{Zhou2021,Yang2022}. Metaheuristic algorithms only weakly depend on the number of hyperparameters, they use information from previous iterations to perform the current one, but due to the randomness inherent in the methods, they guarantee the finding of the global optimum only in the probabilistic sense.
 
+%Nikitin
+Due to the high complexity of many HPO tasks, the meta-learning techniques are frequently used. For example, deep learning models \citep{doke2021survey} are usually too computationally expensive to tune the hyperparameters directly. In resent studies, large language models are used as powerful meta-models \citep{zhang2023using}. However, the deficiency of meta-learning based approach as not sufficient for many machine learning applications \citep{doke2021survey}.
+
 Another approach to finding the global optimum is Bayesian optimization, which is also used to solve ``black-box'' problems \citep{Frazier2018,Archetti2019}. In fact, Bayesian optimization methods build a stochastic model of the function being optimized. The model is iteratively updated on the basis of the information accumulated in the process of searching for the optimum, making it possible to estimate the most probable position of the global optimum at each iteration. Bayesian optimization methods have significantly higher efficiency compared to the exhaustive search, but they are also affected by the ``curse of dimensionality'', albeit to a lesser extent. 
 
 In well-known hyperparameter tuning frameworks, the Tree-Structured Parzen Estimator (TPE) algorithm is widely used \citep{hyperopt,NIPS2011}. TPE is an iterative algorithm, conceptually close to Bayesian optimization methods. Before the algorithm starts, a search region in the hyperparameter space must be specified and the function to be optimized must be defined. In the course of its work, the method performs trials in the search region and then uses these trials to construct estimates of the distribution of the best and all other results in the hyperparameter space. Next, the combination of hyperparameters that gives the maximum expected improvement is searched for. These hyperparameters are then evaluated on the objective function. The described process is repeated until a specified number of iterations is attained or until the time constraint is reached.  
@@ -193,7 +201,7 @@ The good results achieved by Bayesian optimization \citep{Joy2020} and TPE \cite
 
 One of such assumptions about the problem to be solved is the assumption of boundedness of relative changes in the objective function. In this case, the function is said to satisfy the Lipschitz condition, and the problem to be solved is called a Lipschitz global optimization problem. For the class of Lipschitz global optimization problems, a number of efficient algorithms have been developed \citep{Jones2021,Paulavicius2020,Strongin2020,Sergeyev2017,PaulaviciusZilinskas2014}, which surpass many other global optimization methods \citep{Sergeyev2018} and have shown their applicability in a number of applications \citep{Kvasov2008,CANDELIERI2019,Gubaydullin2021}.
 
-The iOpt framework contains an implementation of Lipschitz optimization algorithms, which are an extension of the information-statistical global search algorithm described in detail in \citet{Strongin2000,Sergeyev2013}. In particular, the methods have been adapted to solve problems with partially integer parameters, which are very common in HPO problems. The experimental results presented in Section \ref{sec_exp} show that the iOpt framework is not inferior in HPO problems to well-known frameworks having the same purpose (such as Optuna \citep{optuna} and HyperOpt \citep{hyperopt}).
+The iOpt framework contains an implementation of Lipschitz optimization algorithms, which are an extension of the information-statistical global search algorithm described in detail in \citet{Strongin2000,Sergeyev2013}. In particular, the methods have been adapted to solve problems with partially integer parameters, which are very common in HPO problems. The experimental results presented in Section~\ref{sec_exp} show that the iOpt framework is not inferior in HPO problems to well-known frameworks having the same purpose (such as Optuna~\citep{optuna} and HyperOpt~\citep{hyperopt}).
 
 \section{Lipschitz optimization}\label{sec_lip}
 
@@ -574,7 +582,7 @@ Hyperopt framework is a Python library for optimization over complex search spac
 
 When using the iOpt framework, we applied a variant of computation in which the available resource was divided into portions by the number of trials. Most of the trials (85\%) were performed using the global search algorithm (see Section \ref{sec_iOpt}), while in the remaining trials we used the local method to refine the solution found \citep{Kelley}.
 
-\subsection{Results on live hyperparameters tuning}
+\subsection{Results on ML models}
 
 Computational experiments were performed on the computing nodes of the Lobachevsky supercomputer (Intel Xeon CPU E5-2660 @ 2.20GHz, 64Gb RAM, Linux CentOS 7). We used the following versions of frameworks for the experiments: iOpt 0.2.22, Optuna 3.1.1, Hyperopt 0.2.7. All runs were performed using Python version 3.11.3.
 
@@ -711,15 +719,15 @@ Next, we consider the performance of the iOpt, Optuna, and Hyperopt frameworks. 
 Since the random search did not show good results in terms of the evaluation metrics, we did not include the corresponding column in the table. 
 A single optimization run was performed with a maximum of 200 search trials. The values corresponding to the best result on average are highlighted in bold. It can be clearly seen that even in the case of a single run iOpt shows better performance on many datasets compared to Optuna and Hyperopt (29 out of 42 models).
 
-To obtain a good solution, the methods from Optuna and Hyperopt should be restarted several times. If one focuses on the total operating time, the performance gain of iOpt is even greater. As an example, Figure \ref{fig8} shows a comparison of the hyperparameter tuning times for iOpt, Optuna and Hyperopt on several datasets and different classification models. For iOpt, the time is shown as a blue dot. For Optuna and Hyperopt, the box plots are shown.
+To obtain a good solution, the methods from Optuna and Hyperopt should be restarted several times. If one focuses on the total operating time, the performance gain of iOpt is even greater. As an example, Fig.~\ref{fig8} shows a comparison of the hyperparameter tuning times for iOpt, Optuna and Hyperopt on several datasets and different classification models. For iOpt, the time is shown as a blue dot. For Optuna and Hyperopt, the box plots are shown.
 
 \begin{figure*}
 \centering
-\includegraphics[width=\textwidth]{fig_time}
+\includegraphics[width=0.9\textwidth]{fig_time}
 \caption{Time of hyperparameters tuning.} \label{fig8}
 \end{figure*}
 
-\subsection{Results on surrogate models}
+\subsection{Results on surrogate HPO benchmark}
 
 An additional series of experiments to compare iOpt, Optuna, and HyperOpt were conducted using the JAHS-Bench-201 framework described in \citet{jahsbench}. JAHS-Bench provides convenient access to a set of tasks to determine the optimal combination of hyperparameters and neural network architecture. This tool for comparing HPO algorithms contains an extensive dataset on the quality and performance of neural networks that comprises approximately 161 million data points, each consisting of 20 performance metrics.
 
@@ -745,6 +753,79 @@ In our experiments, hyperparameter tuning using iOpt, Optuna and HyperOpt framew
 The validation accuracy metric calculated after 200 training epochs was used as the objective function. The search accuracy in the stopping criterion of all methods was set to 0.01 and the maximum number of trials was set to 200. For the algorithms from Optuna and HyperOpt, the obtained data were averaged over 10 runs. The comparison results are shown in Table \ref{tab:met-surr}. As before, the values corresponding to the best result on average are highlighted in bold and the values corresponding to the best result for the worst case are highlighted in red.
 
 The results show the superiority of iOpt on the CIFAR-10 and Colorectal-Histology datasets. When using the Fashion MNIST dataset, the iOpt framework outperforms HyperOpt, but is inferior to Optuna. Note that when using surrogate models, the computation time of the objective function takes only fractions of a second, so the results related to the comparison of algorithm running times are not reported for this experiment.
+
+\subsection{Results on AutoML-designed pipelines}
+
+In many cases, HPO is considered not as an independent machine learning task but as a part of automated machine learning workflow (see, e.g., \cite{filippou2023structure}). The AutoML task is commonly formulated as CASH -- Combined Algorithms Selection and Hyperparameter Optimization \citep{kim2022survey}. Since state-of-the-art AutoML tends to produce complicated ensemble-based modeling pipelines, the efficiency of HPO can differ for AutoML-generated models and static tasks in benchmarks.
+
+In the paper, we choose the FEDOT AutoML framework \citep{nikitin2022automated} as a test bench since it allows the production of diverse pipelines with different complexities. The performance of HPO for the tuning of ensemble-based models was compared to the results of optimization algorithms based on Optuna and Hyperopt frameworks. Optimizers were compared on ensemble machine-learning pipelines designed by the FEDOT framework. In this case, the pipelines are ensembles of ML algorithms assembled together using stacking. Such compositions of algorithms can be represented in the form of directed acyclic graphs.
+
+For multi-node pipeline, the optimization strategy can be implemented in different ways:
+\begin{enumerate}
+    \item Optimization of hyperparameters in each node sequentially, maximizing the metric for the parameters of the entire graph.
+    \item Optimization of all hyperparameters of the model simultaneously.
+\end{enumerate}
+
+In this experiment, the second approach was used; the search space was formed from all the hyperparameters of each of the vertices of the graph.
+
+The algorithms were compared for regression task. %two machine learning tasks: regression and classification. 
+The optimizers were run for a limited number of iterations (20 and 100). Each of the experiments was conducted with a different set of test models, datasets, and algorithms and was run for 30 times. Based on the results of the experiments, the average increase in the target metric on test data was compared, that is, the difference in metrics for models with the default hyperparameters and with the hyperparameters obtained after optimization.
+
+%\subsubsection{Regression}
+For the regression problem, three directed cyclic graphs were chosen to represent the different pipeline structures for the regression problem. These graphs differed in the complexity of their structure and the number of hyperparameters for optimization. The following types of graphs were taken as test ones: linear, branched, and complex (see Fig.~\ref{fig_reg_pipe}).
+
+\begin{figure}
+\center{\includegraphics[width=1.0\linewidth]{regression_pipe.png} }
+\caption{Test graphs for regression task: a) linear pipeline, where \textit{knnreg} -- k-nearest neighbors algorithm, \textit{ridge} -- linear regression with L2 regularization; b) branched pipeline, where \textit{svr} -- support vector machine, \textit{rfr} -- random forest algorithm; c) complex pipeline, where \textit{lasso} -- linear regression with L1 regularization.}\label{fig_reg_pipe}
+\end{figure} 
+
+Optimization of the hyperparameters for each pipeline was conducted for three data sets:
+\begin{enumerate}
+    \item California Housing Prices (CHP) -- data contains information from the 1990 California Census and provides average home prices for various quarters. The average cost of houses is the target variable.
+    \item Delta Ailerons (DA) -- this data set is derived from the F16 aircraft aileron control problem. The attributes describe the state of the aircraft, and the goal is to predict the control input on the aircraft's ailerons.
+    \item Pol -- a data set with forty-eight features describing a telecommunications problem.
+\end{enumerate}
+
+
+\begin{table*}
+\centering
+\caption{Metric improvement for regression task, where L -- linear pipeline, B -- branched pipeline, C -- complex pipeline.}
+\label{tab:automl_reg}
+\begin{tabular}{llccccc} \hline
+Dataset & № iters & Test graph& iOpt & Hyperopt(tpe) & Optuna(tpe) & p-value\\ \hline
+\multirow{6}{*}{CHP} & \multirow{3}{*}{20} & L& 1.2 & 1.2$\pm$0.1& 0.9$\pm$0.6& 0.9048 \\
+ &  & B& 2.2& 2.2$\pm$0.3& \textbf{2.5$\pm$0.3}& 0.0001\\
+ &  & C& \textbf{4.6} & 3.2$\pm$0.4& 3.2$\pm$0.6& 0.0000 \\
+ & \multirow{3}{*}{100} & L
+& 1.1& 1.1$\pm$0.0& 1.1$\pm$0.2& -\\
+ &  & B
+& 2.0& 2.1$\pm$0.0& \textbf{2.5$\pm$0.3}& 0.0000\\
+ &  & C& \textbf{4.6} & 4.1$\pm$0.3& 4.0$\pm$0.6& 0.0000 \\ \hline
+\multirow{6}{*}{DA} & \multirow{3}{*}{20} & L 
+& \textbf{4.2} & 0.5$\pm$1.8& 0.5$\pm$1.1& 0.0000 \\ 
+ &  & B
+& \textbf{1.7}& 1.4$\pm$0.1& 1.4$\pm$0.1& 0.0000\\
+ &  & C& \textbf{62.3} & 33.5$\pm$31.4& 11.9$\pm$23.6& 0.0001 \\
+ & \multirow{3}{*}{100} & L
+& 4.2 & \textbf{6.3$\pm$2.1}& 6.1$\pm$2.3& 0.0005 \\
+ &  & 
+B& \textbf{1.7}& 1.5$\pm$0.2& 1.5$\pm$0.2& 0.0000\\
+ &  & C& 62.3 & \textbf{63.3$\pm$1.4}& 50.6$\pm$24.3& 0.0065 \\ \hline
+\multirow{6}{*}{Pol} & \multirow{3}{*}{20} & 
+L
+& \textbf{1.2} & 0.8$\pm$0.3& 0.4$\pm$0.6& 0.0000 \\
+ &  & 
+B& \textbf{19.0}& 1.5$\pm$2.2& 3.7$\pm$0.35.4& 0.0006\\
+ &  & C& 0.0 & 0.0$\pm$0.0& 0.0$\pm$0.0& -  \\ 
+ & \multirow{3}{*}{100} & L& \textbf{1.2} & \textbf{1.2$\pm$0.0}& 1.0$\pm$0.5& 0.0000 \\
+ &  &  B& \textbf{19.0}& 17.8$\pm$2.3& 13.9$\pm$5.3& 0.0000\\
+ &  & C& 0.0 & 0.0$\pm$0.0& 0.0$\pm$0.0& - \\ \hline
+\end{tabular}
+\end{table*}
+
+The results and their statistical significance (Friedman and Nemenyi tests) are shown in Table~\ref{tab:automl_reg}.
+The experiments confirmed that the performance of iOpt in the HPO problem for ensemble models is comparable to Optuna, however, the undisputed advantage of the iOpt algorithm is its deterministic nature.
+
 
 
 \section{Conclusion}\label{sec13}
