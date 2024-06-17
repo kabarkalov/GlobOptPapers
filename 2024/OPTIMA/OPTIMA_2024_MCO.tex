@@ -1,0 +1,241 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.21 of 2022/01/12
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage[T1]{fontenc}
+% T1 fonts will be used to generate the final print and online PDFs,
+% so please use T1 fonts in your manuscript whenever possible.
+% Other font encondings may result in incorrect characters.
+%
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{cite}
+\usepackage{hyperref}
+
+\usepackage[misc,geometry]{ifsym}
+
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+% If you use the hyperref package, please uncomment the following two lines
+% to display URLs in blue roman font according to Springer's eBook style:
+%\usepackage{color}
+%\renewcommand\UrlFont{\color{blue}\rmfamily}
+%\urlstyle{rm}
+%
+\begin{document}
+%
+\title{Comparison of approaches to using machine learning models to increase the efficiency of the global search algorithm for solving multicriterial problems}
+%
+%\titlerunning{Abbreviated paper title}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{Sergey Konnov\orcidID{0009-0003-4590-0870} \and
+Evgeny Kozinov \Letter\orcidID{0000-0001-6776-0096} \and
+Konstantin Barkalov \Letter\orcidID{0000-0001-5273-2471} \and
+Vladimir Grishagin\orcidID{0000-0002-2884-3670}}
+%
+\authorrunning{S. Konnov, E. Kozinov, K. Barkalov and V. Grishagin}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+
+\institute{Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia 
+\email{a230172@unn.ru}, \email{\{konstantin.barkalov,evgeny.kozinov\}@itmm.unn.ru}, \email{vagris@unn.ru}}
+%
+\maketitle
+
+%
+\begin{abstract}
+To solve a multicriterial optimization problem, it is necessary to find a whole set of parameters values corresponding to non-dominated criteria values (Pa-reto set). The complexity of these problems increases significantly in the case of the criteria are multiextremal. In the paper discusses several varia-tions of the multicriteria optimization algorithm using the black box method with multiextremal criteria. The developed algorithms are based on an infor-mation-statistical approach and a machine learning procedure used to in-crease the efficiency of constructing the Pareto set. As a novelty, the authors proposed a new approach to using the constructed machine learning models. The method involves using the calculated probability of a trial points belong-ing to the Pareto set to assess the prospects one. The effectiveness of differ-ent variations of the developed algorithms estimated in a representative com-putational experiment.
+
+\keywords{Multicriterial Problems \and Global Optimization \and Machine Learning.}
+\end{abstract}
+%
+%
+%
+\section{Introduction}
+\label{sec:1}
+
+\cite{Miettinen1999,Ehrgott2005,Pardalos2017,ML_MCO_2023,Evtushenko2014,Deb2002,Durillo2010,Mostaghim2007,NDG09,RC05,ZLT01,Gergel2019_2,Gergel2018,GergelKozinov2020,Marler2004,Strongin2000,Sergeyev2013,SVM_2000,PROB_2004,iOpt_url,Grishagin2015_2}
+
+\section{Problem statement}
+\label{sec:2}
+
+\begin{equation}
+\label{eq:01}
+  \Phi(y) = (f_1 (y),f_2 (y), \dots, f(y)) \to \min, y \in D
+\end{equation}
+
+\begin{equation}
+\label{eq:02}
+    D=\{y \in R^n : a_i \leq y_i \leq b_i, 1 \leq i \leq N\}
+\end{equation}
+
+
+\begin{equation}
+\label{eq:03}
+|f_i (y') - f_i (y'')| \leq L_i \|y' - y''\| ,y',y'' \in D, 1 \leq i \leq s,
+\end{equation}
+
+\section{General computational scheme}
+\label{sec:3}
+
+\begin{equation}
+\label{eq:04}
+\min \varphi(y) = F( \lambda, y ), y \in D,
+\end{equation}
+
+
+\begin{equation}
+\label{eq:05}
+F(\lambda, y) = \max_{1 \leq i \leq s} {(\lambda_i f_i (y))}, y \in D, \sum_{i=1}^s {\lambda_i} = 1, 0 \leq \lambda_i \leq 1.
+\end{equation}
+
+
+\begin{equation}
+\label{eq:06}
+F(y) = \{ F(\lambda_1,y),F(\lambda_2,y), \dots ,F(\lambda_\tau,y)\}
+\end{equation}
+
+
+\begin{equation}
+\label{eq:07}
+\min{\varphi(y(x))} = \min {\varphi(y)}, x \in [0,1], y \in D
+\end{equation}
+
+
+\begin{equation}
+\label{eq:08}
+|\varphi(y(x')) - \varphi(y(x''))| \leq H \|x' - x''\|^{1/N} , x \in [0,1],
+\end{equation}
+
+
+\begin{equation}
+    \label{eq:09}
+    x_0 = 0 < x_1 < \dots < x_i < \dots < x_{k} = 1.
+\end{equation}
+
+
+\begin{equation}
+    \label{eq:10}
+		\begin{matrix}
+		m=\begin{cases}
+				\begin{matrix}
+					 r M, & M >0 \\
+					 1, & M = 0 
+				\end{matrix} 
+			\end{cases} ,
+		M = \max_{1 \leq i \leq k} \frac{| z_i - z_{i-1}|}{\varrho_i}, \\
+		z_i = \varphi( x_i ), \varrho_i=\sqrt[N]{x_i-x_{i-1}}
+		\end{matrix}
+\end{equation}
+
+\begin{equation}
+    \label{eq:11}
+    R(j) = \varrho_j + \frac{(z_i-z_{i-1})^2}{m^2 \varrho_i} - \frac{2 (z_i+z_{i-1})}{m}, 1 \leq i \leq k.
+\end{equation}
+
+
+\begin{equation}
+    \label{eq:12}
+    R(t) = argmax_{1 \leq i \leq k} {R(i)}.
+\end{equation}
+
+
+\begin{equation}
+    \label{eq:13}
+    x^{k+1} = \frac{x_t + x_{t-1}}{2} - sign(z_t - z_{t-1}) \frac{1}{2r} \left(\frac{|z_l - z_{l-1}|}{m} \right)^N,
+\end{equation}
+
+
+\begin{equation}
+    \label{eq:14}
+    \varrho < \varepsilon.
+\end{equation}
+
+
+
+\section{Approaches to improving search efficiency}
+\label{sec:4}
+
+\begin{equation}
+    \label{eq:15}
+    \Omega_k=\{\mu^i = (y^i,f^i=f(y^i))^T: 0 \leq i \leq k\}.
+\end{equation}
+
+
+\begin{equation}
+    \label{eq:16}
+    R(i) = R_{gsa} (i) +  \alpha R_{ps} (i).
+\end{equation}
+
+
+\begin{equation}
+    \label{eq:17}
+d'_i=
+\begin{cases}
+  \begin{matrix}
+     d_i / d_{max}, & d_i > 0 \\
+     -d_i / d_{min}, & d_i < 0 
+  \end{matrix}
+\end{cases}, 
+1 \leq i \leq k,
+\end{equation}
+
+
+\begin{equation}
+    \label{eq:18}
+p'_i= \frac{ \log (p_i) - \log (p_{min})}{ \log (p_{max}) - \log (p_{min})} , 1 \leq i \leq k,
+\end{equation}
+
+
+\section{Results of computational experiments}
+\label{sec:5}
+
+
+\begin{equation}
+    \label{eq:19}
+		\begin{matrix}
+		  f(y)= -(AB + CD)^{1/2} \\
+			AB =(\sum_{i=1}^7{\sum_{j=1}^7{[A_{ij} a_{ij} (y_1,y_2) + B_{ij} b_{ij} (y_1,y_2)])}})^2 \\
+			CD =(\sum_{i=1}^7{\sum_{j=1}^7{[C_{ij} a_{ij} (y_1,y_2) - D_{ij} b_{ij} (y_1,y_2)])}})^2 \\
+			a_{ij} (y_1,y_2) = \sin(\pi i y_1) \sin(\pi j y_2), \\
+			b_{ij} (y_1,y_2) = \cos(\pi i y_1) \cos(\pi j y_2),
+		\end{matrix}
+\end{equation}
+
+
+
+%
+% ---- Bibliography ----
+%
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted in the correct style.
+%
+ \bibliographystyle{splncs04}
+ \bibliography{bibliography}
+%
+%\begin{thebibliography}{8}
+%\bibitem{ref_article1}
+%Author, F.: Article title. Journal \textbf{2}(5), 99--110 (2016)
+%
+%\bibitem{ref_lncs1}
+%Author, F., Author, S.: Title of a proceedings paper. In: Editor,
+%F., Editor, S. (eds.) CONFERENCE 2016, LNCS, vol. 9999, pp. 1--13.
+%Springer, Heidelberg (2016). \doi{10.10007/1234567890}
+%
+%\bibitem{ref_book1}
+%Author, F., Author, S., Author, T.: Book title. 2nd edn. Publisher,
+%Location (1999)
+%
+%\bibitem{ref_proc1}
+%Author, A.-B.: Contribution title. In: 9th International Proceedings
+%on Proceedings, pp. 1--2. Publisher, Location (2010)
+%
+%\bibitem{ref_url1}
+%LNCS Homepage, \url{http://www.springer.com/lncs}, last accessed 2023/10/25
+%\end{thebibliography}
+\end{document}
