@@ -27,7 +27,7 @@
 %
 \begin{document}
 %
-\title{Comparison of approaches to using machine learning models to increase the efficiency of the global search algorithm for solving multicriteria problems\thanks{This work was supported by the Ministry of Science and Higher Education of the Russian Federation, project no. FSWR-2023-0034, and by by the Research and Education Mathematics Centre ``Mathematics for Future Technologies'', project no. 075-02-2024-1439.} }
+\title{Comparative efficiency of machine learning models for enhancing algorithms in solving multiextremal multicriteria problems\thanks{This work was supported by the Ministry of Science and Higher Education of the Russian Federation, project no. FSWR-2023-0034, and by by the Research and Education Mathematics Centre ``Mathematics for Future Technologies'', project no. 075-02-2024-1439.} }
 %
 \titlerunning{Algorithms for solving multicriteria problems}
 % If the paper title is too long for the running head, you can set
@@ -49,7 +49,7 @@ Vladimir Grishagin\orcidID{0000-0002-2884-3670}}
 
 %
 \begin{abstract}
-To solve a multicriteria optimization problem, it is necessary to find a whole set of independent variables corresponding to non-dominated criteria values (Pareto set). The complexity of these problems increases significantly in the case when the criteria are multiextremal. The paper presents several variations of the global optimization algorithm intended for solving black-box multiobjective problems with multiextremal criteria. The developed methods are based on a combination of the information-statistical approach and machine learning procedures aimed at increasing the efficiency of constructing the Pareto set. As a novelty, the paper describes a new approach to using machine learning models within the algorithm of multicriteria optimization. The effectiveness of different versions of the developed algorithm is estimated on the base of  a representative computational experiment.
+Solving a multicriteria optimization problem requires finding a whole set of independent variables corresponding to non-dominated criteria values (Pareto set). The complexity of these problems increases significantly in the case when the criteria are multiextremal. The paper presents several variations of the global optimization algorithm intended for solving ``black-box'' multiobjective problems with multiextremal criteria. The proposed methods are based on a combination of the information-statistical approach and machine learning procedures aimed at increasing the efficiency of constructing the Pareto set. As a novelty, the paper describes a new approach to using machine learning models within the algorithm of multicriteria optimization. The effectiveness of different versions of the proposed algorithm is estimated on the base of a representative computational experiment.
 
 \keywords{Multicriteria Problems \and Global Optimization \and Machine Learning.}
 \end{abstract}
@@ -61,26 +61,27 @@ To solve a multicriteria optimization problem, it is necessary to find a whole s
 
 \cite{Miettinen1999,Ehrgott2005,Pardalos2017,ML_MCO_2023,Evtushenko2014,Deb2002,Durillo2010,Mostaghim2007,NDG09,RC05,ZLT01,Gergel2019_2,Gergel2018,GergelKozinov2020,Marler2004,Strongin2000,Sergeyev2013,SVM_2000,PROB_2004,iOpt_url,Grishagin2015_2}
 
-Problems of optimal choice are widespread in many areas of activity. As a rule, in complicated decision making models there are several functions to be optimized which reflect the decision making objectives and those are, in general case, contradictory. In these circumstances, the notion of optimal solution is more complicated than in single criterion (scalar) statement formulated as mathematical programming problem because there exist incomparable decisions. In this situation under introduced definition of domination, the set of non-dominated variants (Pareto set) is taken as the solution of the multiobjective problem.
+Optimal choice problems are very common in many areas of activity. As a rule, in complex decision-making models there are several functions to be optimized which reflect the decision-making objectives that are in the general case in conflict with each other. In these circumstances, the notion of optimal solution is more complicated than in a single criterion (scalar) statement formulated as a mathematical programming problem because there exist incomparable decisions. In this situation, with the introduced definition of domination, the set of non-dominated variants (Pareto set) is taken as the solution of the multiobjective problem.
 
-In our study we deal with methods for solving the most complex class of multicriteria problems where criteria are considered as ``black-box'' functions and are multiextremal \cite{Miettinen1999,Ehrgott2005,Pardalos2017,Strongin2000,Sergeyev2013}.
+In our study, we deal with methods for solving the most complex class of multicriteria problems where criteria are considered as ``black-box'' functions and are multiextremal \cite{Miettinen1999,Ehrgott2005,Pardalos2017,Strongin2000,Sergeyev2013}.
 
-It should be noted that problems of multiextremal optimization are among the most complicated problems of mathematical programming. Unlike the local optimization where an optimal point has to be juxtaposed with other points only in its region of attraction, the global solution must be better w.r.t. all points in the feasible domain. If to solve such problems by grid search methods, the amount of computations will rise exponentially when increasing the number of parameters (variables of the problem).
+It should be noted that multiextremal optimization problems are among the most complicated problems of mathematical programming. Unlike the local optimization where an optimal point has to be juxtaposed with other points only in its region of attraction, the global solution must be better with respect to all points in the feasible domain. If one tries to solve such problems by grid search methods, the amount of computations will rise exponentially when increasing the number of parameters (variables of the problem).
 
-For solving the multiextremal problems the more effective algorithms are used which can be divided into two key classes, namely, into deterministic (see, e.g., \cite{Evtushenko2014,Gergel2018,GergelKozinov2020,Paulavicius2020,Jones2021}) and meta-heuristic (see, e.g., \cite{Battiti2009,Gendreau2010,Eiben2015}) methods . 
+For solving multiextremal problems, more effective algorithms are used which can be divided into two key classes, namely, into deterministic(see, e.g., \cite{Evtushenko2014,Gergel2018,GergelKozinov2020,Paulavicius2020,Jones2021}) and meta-heuristic (nature-inspired) methods (see, e.g., \cite{Battiti2009,Gendreau2010,Eiben2015}).
 
-Meta-heuristic algorithms model the behavior of living organisms or nature processes \cite{Deb2002,Durillo2010,Mostaghim2007,NDG09,RC05,ZLT01}. As a rule, these methods are simple enough in implementation and can demonstrate good efficiency for unimodal objective functions and multiextremal problems with a small number of local optima; however, they do not ensure finding the best solution.
+Meta-heuristic algorithms model the behavior of living organisms or natural processes \cite{Deb2002,Durillo2010,Mostaghim2007,NDG09,RC05,ZLT01}. As a rule, these methods are simple enough in implementation and can demonstrate good efficiency for unimodal objective functions and multiextremal problems with a small number of local optima; however, they do not ensure finding the best solution.
 
-Deterministic algorithms guarantee convergence to global optimum, but their computational schemes are more complex. However, advanced deterministic algorithms outperform metaheuristic ones in terms of quality \cite{Kvasov2018,Sergeyev2018}.
+Deterministic algorithms guarantee convergence to the global optimum, but their computational schemes are more complex. However, advanced deterministic algorithms outperform metaheuristic ones in terms of quality \cite{Kvasov2018,Sergeyev2018}.
 
-One of the qualitative deterministic methods for solving multiextremal problems is the  information-statistical algorithm of global search \cite{Strongin2000,Sergeyev2013}. This algorithm proposed initially for solving scalar problems was successfully developed for analyzing multiobjective statements \cite{ML_MCO_2023,Gergel2018,GergelKozinov2020}.
+One of the proven deterministic methods for solving multiextremal problems is the information-statistical algorithm of global search \cite{Strongin2000,Sergeyev2013}. This algorithm proposed initially for solving scalar problems was successfully developed for analyzing multiobjective statements \cite{ML_MCO_2023,Gergel2018,GergelKozinov2020}.
 
-In the paper \cite{ML_MCO_2023} we proposed an approach to solving multicriteria optimization problems combining the classic information-statistical global search algorithm with machine learning methods. In the framework of the approach a problem of multicriteria optimization was transformed to a series of scalar optimization subproblems. In the course of solving scalar subproblems, on the base of machine learning methods a hyperplane was built and gradually refined which separated points of effective and ineffective solutions in the criteria space. Additional information connected with the separating hyperplane was embedded in the computational scheme of the optimization algorithm and, as a result, the number of trials (criteria evaluations) in domains with ineffective solutions was significantly decreased. The experimental results showed that in comparison with a number of heuristic algorithms, the search for effective solutions was several times faster. At the same time, this approach can be improved because utilizing only the separating plane limits the class of machine learning techniques which can be applied for enhancing the global search algorithm.
+In our publication \cite{ML_MCO_2023}, we proposed an approach to solving multicriteria optimization problems combining the classic information-statistical global search algorithm with machine learning methods. In the framework of this approach, the problem of multicriteria optimization was transformed into a series of scalar optimization subproblems. In the course of solving scalar subproblems, a hyperplane separating the points of efficient and inefficient solutions in the criteria space was built and gradually refined using machine learning methods.  Additional information related to the separating hyperplane was embedded in the computational scheme of the optimization algorithm and, as a result, the number of trials (criteria evaluations) in domains with inefficient solutions was significantly decreased. The experimental results indicate that, compared to a number of heuristic algorithms, the search for efficient solutions is several times faster.
 
-In the framework of our study we propose a new approach to separating search trial points in the criteria space based on the probability that reflects the belonging of the trial point to the Pareto set. The most machine learning models allow obtaining this metric which makes it possible to choose an algorithm for building a machine learning model depending on the features of the problem being solved.
+At the same time, this approach can be improved because utilizing only the separating plane limits the class of machine learning techniques which can be applied for enhancing the global search algorithm.
 
-The paper has the following structure. Section \ref{sec:2} describes the mathematical statement of the problem to be studied. Section \ref{sec:3} is devoted to a brief description of the basic algorithms used for solving problems of multicriteria optimization. Section \ref{sec:4} contains information on the techniques applied for reducing the number of trials during the optimization process. Subsection \ref{ssec:41} gives a short description of the method considered in \cite{ML_MCO_2023}. A new approach to using probabilities of trial points belonging to different efficiency classes is presented in subsection \ref{ssec:42}. Section \ref{sec:5} contains results of computational experiments demonstrating the effectiveness of the proposed approach.
+In the framework of our study we propose a new approach to separating search trial points in the criteria space based on the probability that shows whether a trial point belongs to the Pareto set. Most machine learning models allow obtaining this metric which makes it possible to choose an algorithm for building a machine learning model depending on the features of the problem being solved.
 
+The paper has the following structure. Section \ref{sec:2} describes the mathematical statement of the problem to be studied. Section \ref{sec:3} presents a brief description of the basic algorithms used for solving problems of multicriteria optimization. Section \ref{sec:4} contains information on the techniques applied for reducing the number of trials during the optimization process. Subsection \ref{ssec:41} gives a short description of the method considered in \cite{ML_MCO_2023}. A new approach to using probabilities of trial points belonging to different efficiency classes is presented in subsection \ref{ssec:42}. Section \ref{sec:5} contains results of computational experiments demonstrating the effectiveness of the proposed approach.
 
 \section{Problem statement}
 \label{sec:2}
@@ -179,14 +180,14 @@ Each iteration of the search consists of one trial execution. The term ``trial''
 
 The first two trials are to be carried out at the boundary points of the interval $[0,1]$, i.e., at points $x^0=0$, $x^1=1$. 
 
-Let $k$, $k \geq 2$, search trials have been executed at the points $x^0, x^1,\dots,x^{k-1}$ with the objective function values $z^i=\varphi(y(x^i))$, $1 \leq i \leq k-1$. Then the choice of the new trial point $x^k$ is determined according to the following rules.
+Let $k$, $k \geq 2$, search trials have been executed at the points $x^0, x^1,\dots,x^{k-1}$ with the objective function values $z^i=\varphi(y(x^i))$, $0 \leq i \leq k-1$. Then the choice of the new trial point $x^k$ is determined according to the following rules.
 
 \textit{Rule 1.} Renumber by subscripts all trial points in increasing order
 \begin{equation}
     \label{eq:09}
     0 = x_0 < x_1 < \dots < x_i < \dots < x_{k-1} = 1.
 \end{equation}
-and juxtapose to them the values $z_i=\varphi(y(x_i))$, $1 \leq i \leq k-1$.
+and juxtapose to them the values $z_i=\varphi(y(x_i))$, $0 \leq i \leq k-1$.
 
 \textit{Rule 2.} Calculate the current estimation of the H{\" o}lder constant 
 
@@ -222,7 +223,7 @@ called \textit{characteristic} of the subinterval $(x_{i-1} ,x_i)$, $1 \leq i \l
 \textit{Rule 5.} Accept
 \begin{equation}
     \label{eq:13}
-    x^{k} = \frac{x_t + x_{t-1}}{2} - sign(z_t - z_{t-1}) \frac{1}{2r} \left(\frac{|z_l - z_{l-1}|}{m} \right)^N,
+    x^{k} = \frac{x_t + x_{t-1}}{2} - sign(z_t - z_{t-1}) \frac{1}{2r} \left(\frac{|z_t - z_{t-1}|}{m} \right)^N,
 \end{equation}
 as the point for the next trial.
 
@@ -239,7 +240,7 @@ is met where $\varepsilon > 0$ is a preassigned search accuracy.
 
 To enhance the efficiency of the Pareto set finding, several GSA modifications are used in the described approach.
 
-During minimization of one problem (\ref{eq:07}) with corresponding weight vector $\lambda$, the trial points $x^0, x^1,\dots,x^{k-1}$ from the interval $[0,1]$ generate points $y^0, y^1,\dots,y^{k-1}$ in the domain $D$, where $y^i=y(x^i)$, $1 \leq i \leq k-1$, and $y(x)$ is the Peano mapping. After computing values $f^i_j=f_j(y^i)$, $1 \leq i \leq k-1$, $1 \leq j \leq s$, of the partial criteria at points $y^i$ one can organize the set 
+During minimization of one problem (\ref{eq:07}) with corresponding weight vector $\lambda$, the trial points $x^0, x^1,\dots,x^{k-1}$ from the interval $[0,1]$ generate points $y^0, y^1,\dots,y^{k-1}$ in the domain $D$, where $y^i=y(x^i)$, $0 \leq i \leq k-1$, and $y(x)$ is the Peano mapping. After computing values $f^i_j=f_j(y^i)$, $0 \leq i \leq k-1$, $1 \leq j \leq s$, of the partial criteria at points $y^i$ one can organize the set 
 \begin{equation}
     \label{eq:15}
     \Omega_K=\{(x^q,y^q,f^q_1,\dots,f^q_s)^T: 0 \leq q \leq K\}.
@@ -248,7 +249,7 @@ called \textit{Search State Matrix} (SSM).
 
 Solving new problems (\ref{eq:04}) allows one to replenish SSM with new elements and to save the additional information on the investigated problem (\ref{eq:02a}). This information can accelerate the minimization process for problems (\ref{eq:07}) and, as a consequence, for the initial multicriteria problem. 
 
-One of the ways how this can be done is connected with the modification of the starting iterations of GSA. Namely, if $P \geq 1$ problems (\ref{eq:07}) have been already solved and the matrix (\ref{eq:15}) has been formed, then as initial trial coordinates, the points $x^q$, $1 \leq q \leq K$, can be used with values $z^q = F(\lambda,y^q)$. Moreover, the computation of the convolution (\ref{eq:05}) does not require the new calculation of criteria values at these points, because these values are taken from the matrix (\ref{eq:15}). After that, one can go to the basic iteration Rules 1-5. Such the scheme reduces significantly the number of criteria computations when jointly solving the family of problems (\ref{eq:04}) with convolution (\ref{eq:05}) for different weight coefficients $\lambda$ \cite{ML_MCO_2023,Gergel2018,GergelKozinov2020}.
+One of the ways how this can be done is connected with the modification of the starting iterations of GSA. Namely, if $P \geq 1$ problems (\ref{eq:07}) have been already solved and the matrix (\ref{eq:15}) has been formed, then as initial trial coordinates, the points $x^q$, $0 \leq q \leq K$, can be used with values $z^q = F(\lambda,y^q)$. Moreover, the computation of the convolution (\ref{eq:05}) does not require the new calculation of criteria values at these points, because these values are taken from the matrix (\ref{eq:15}). After that, one can go to the basic iteration Rules 1-5. Such the scheme reduces significantly the number of criteria computations when jointly solving the family of problems (\ref{eq:04}) with convolution (\ref{eq:05}) for different weight coefficients $\lambda$ \cite{ML_MCO_2023,Gergel2018,GergelKozinov2020}.
 
 The second approach also aims to further decreasing the number of trials required to find the Pareto set. It suggests to change the form of the characteristics (\ref{eq:11}) in the GSA scheme. It is proposed to use the characteristic 
 \begin{equation}
