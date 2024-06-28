@@ -268,13 +268,12 @@ In the paper \cite{ML_MCO_2023} we proposed an algorithm for calculation of the 
 
 In the framework of this study, we propose several new ways to calculate the penalty term (see Subsection \ref{ssec:42}) and investigate their efficiency in solving a series of optimization problems (see Section \ref{sec:5}).
 
-\subsection{Section 41}
+\subsection{Constructing the penalty term on the base of separating hyperplane}
 \label{ssec:41}
 
-\subsection{Section 42}
-\label{ssec:42}
+In the course of solving the MCO problem, with each change in the $\lambda$ coefficients, and therefore, the transition to a new optimization problem from (\ref{eq:04}), all obtained trial points in SSM (\ref{eq:15}) are divided into two classes. The first class includes points belonging to the Pareto set. All other trial points belong to the second class. The number of points that are not related to the Pareto domain is usually much larger, and therefore, the classes are not balanced. For the better functioning of machine learning algorithms, for each class the weights corresponding to the significance of the trial points are set if possible. Weights for classes are set at the beginning of the algorithm running. Subsequently, a separating  hyperplane is built between the two classes. To construct the hyperplane, the SVC algorithm with the linear kernel from the scikit-learn library \cite{SVM_2000,PROB_2004} is used.
 
-
+After the construction of the separating hyperplane, for each trial point the $d_i$ distance is calculated and normalized according to the following expression:
 \begin{equation}
     \label{eq:17}
 d'_i=
@@ -284,30 +283,64 @@ d'_i=
      -d_i / d_{min}, & d_i < 0 
   \end{matrix}
 \end{cases}, 
-1 \leq i \leq k,
+0 \leq i \leq k-1,
 \end{equation}
+where $d_i$ is the distance from the $i$-th point to the hyperplane, $d_{max}$, $d_{min}$ are maximal and minimal distances to the hyperplane.
+
+The value $R_{ps}(i)$ from (\ref{eq:16}) for the interval $(x_{i-1},x_{i})$ is calculated as the sum of normalized distances (\ref{eq:17}) to points $x_i$ and $x_{i-1}$. Let's denote this version of GSA as ML\_MGSA\_Dist.
+
+\subsection{Building the penalty term on the base of probabilities being derived from machine learning models}
+\label{ssec:42}
+
+For creating the penalty term $R_{ps}(i)$ from (\ref{eq:16}) that corresponds better to the estimation of the Pareto set, the following new ideas are suggested. 
+
+\begin{enumerate}
+	\item Probabilistic approach with application of machine learning models.   
+	\item Automatic adjustment of class weights when building a machine learning model.
+	\item Transformation of machine learning probabilities.
+\end{enumerate}
+
+As part of the proposed approach, the machine learning model is built according to the rules similar to the construction of the SVC model from section \ref{ssec:41}. As before, all trial points are divided into two classes -- points of the Pareto set and points that do not belong to the Pareto set. The classifier is trained on the selected classes. Note that the classifier models of most machine learning libraries can return not only the class label, but also the probability of relevance to the class. Unlike the approach described in Subsection \ref{ssec:41} the characteristic $R_{ps}(i)$ is computed as the average of probabilities of situations when the points $x_i$ and $x_{i-1}$ from interval $(x_{i-1},x_{i})$ belong to the Pareto set.
+
+A significant advantage of this approach is the possibility to easily replace both the machine learning model itself and its learning rules. In the framework of the study, several variants of building models that potentially improve the factor $R_{ps}(i)$ to beter solve the MCO problems.
+
+The first direction is to change the method of building the classifier. Changing the classifier can be useful if the Pareto set is complex, for instance, non-convex.
+For comparison the SVM models with linear kernel, polynomial kernel, and RBF function-based kernel are considered.
 
 \begin{figure}
-\center
+\centering
 \includegraphics[width=0.8\textwidth]{fig1.png}
-\label{fig1}
-\caption{A figure caption.} 
+\caption{Heatmap of the function $R_ps(i)$ in the criteria space for algorithms with different machine learning models.} 
+\label{fig:1}
 \end{figure}
 
+Fig. \ref{fig:1} shows the behavior of the characteristic $R_{ps}(i)$ in the criteria space for different models. Red points are related to the Pareto set, orange those to the class  where points are not effective ones. 
 
+The color background displays the behavior of the penalty $R_{ps}(i)$ as a function of the criteria $f1$ and $f2$. Fig. \ref{fig:1}(a) shows the function $R_{ps}(i)$ for the method ML\_MGSA\_Dist. Fig. \ref{fig:1}(b), \ref{fig:1}(c), and \ref{fig:1}(d) demonstrate $R_{ps}(i)$ for the different cases of the probabilistic models. Fig. \ref{fig:1}(b) corresponds to the model with linear kernel (ML\_MGSA\_Prob\_Linear), Fig. \ref{fig:1}(c) reflects results for the model with polynomial kernel (ML\_MGSA\_Prob\_Poly), and Fig. \ref{fig:1}(d) is related to RBF-based kernel (ML\_MGSA\_Prob\_RBF).
 
+The number of trials carried out in each experiment is indicated in parentheses after the name of the method.
+
+The figure shows that the penalty function with kernels other than linear describes the Pareto set well, but, may be, penalty is not sufficient to reduce the number of trials of the global search algorithm. Two modifications can be proposed to solve this problem.
+
+First, when changing the optimization problem from set (\ref{eq:07}), a new weight calculation scheme for each of two classes of trial points is proposed. In this scheme, the weights of each class are calculated inversely proportional to the ratio of the number of all points to the number of points belonging to the Pareto set.
+
+Second, the probabilities undergo the transformation
 \begin{equation}
     \label{eq:18}
-p'_i= \frac{ \log (p_i) - \log (p_{min})}{ \log (p_{max}) - \log (p_{min})} , 1 \leq i \leq k,
+p'_i= \frac{ \log (p_i) - \log (p_{min})}{ \log (p_{max}) - \log (p_{min})} , 0 \leq i \leq k-1,
 \end{equation}
+where $p_i$ is a probability of the event that the point $x_i$ belongs to the Pareto set, $p_{min}$, $p_{max}$ are minimum and maximum values of such probabilities. After transformation the function $R_{ps}(i)$ is calculated, as earlier, as the average value of probabilities of events in which the points $x_i$ and $x_{i-1}$ from interval $(x_{i-1}, x_i)$ belong to the Pareto set.
+
+Computational experiments were conducted for each method and each model in order to assess the effectiveness of using these techniques in the global search algorithm. Fig. \ref{fig:2} demonstrates the visualization of $R_{ps}(i)$ similar to Fig. \ref{fig:1}.
 
 \begin{figure}
-\center
+\centering
 \includegraphics[width=0.8\textwidth]{fig2.png}
-\label{fig2}
-\caption{A figure caption.} 
+\caption{Heatmap of the function $R_{ps}(i)$ in the criteria space for algorithms with different techniques of building models after transformation (\ref{eq:18}).} 
+\label{fig:2}
 \end{figure}
 
+It is easy to notice that new penalty functions (see Fig. \ref{fig:2}. (b)-(d)) describe better the Pareto set than functions built on the base of separating hyperplane. A detailed comparison of approaches to different computation of the characteristic (\ref{eq:16}) is given in Section \ref{sec:5}. 
 
 \section{Results of computational experiments}
 \label{sec:5}
@@ -327,19 +360,19 @@ p'_i= \frac{ \log (p_i) - \log (p_{min})}{ \log (p_{max}) - \log (p_{min})} , 1 
 
 \begin{figure}
 \includegraphics[width=\textwidth]{fig3.png}
-\label{fig3}
+\label{fig:3}
 \caption{A figure caption.} 
 \end{figure}
 
 \begin{figure}
 \includegraphics[width=\textwidth]{fig4.png}
-\label{fig4}
+\label{fig:4}
 \caption{A figure caption.} 
 \end{figure}
 
 \begin{figure}
 \includegraphics[width=\textwidth]{fig5.png}
-\label{fig5}
+\label{fig:5}
 \caption{A figure caption.} 
 \end{figure}
 
