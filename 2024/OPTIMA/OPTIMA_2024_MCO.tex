@@ -156,29 +156,39 @@ F(\lambda, y) = \max_{1 \leq i \leq s} \left\{\lambda_i f_i (y)\right\}, y \in D
 %F(y) = \{ F(\lambda_1,y),F(\lambda_2,y), \dots ,F(\lambda_\tau,y)\}
 %\end{equation}
 
-If all the partial criteria are Lipschitzian and at least one function $f_i(y)$, $1 \leq i \leq s$, is multiextremal, the convolution (\ref{eq:05}) will be Lipschitzian and multiextremal as well.
+In the case of partial criteria positivity the global minimizer of the convolution (\ref{eq:05}) is the Pareto-optimal point. In order to obtain all elements of the Pareto set, it is necessary to solve the series of scalar problems (\ref{eq:04}) for all weight vectors $\lambda$ satisfying the conditions from (\ref{eq:05}). 
 
-In the case of partial criteria positivity the global minimizer of the convolution (\ref{eq:05}) is the Pareto-optimal point. In order to obtain all elements of the Pareto set, it is necessary to solve the series of scalar problems (\ref{eq:04}) for all weight vectors $\lambda$ satisfying the conditions from (\ref{eq:05}).
+If all the partial criteria are Lipschitzian and at least one function $f_i(y)$, $1 \leq i \leq s$, is multiextremal, the convolution (\ref{eq:05}) will be Lipschitzian and multiextremal as well. Thus, global search algorithms must be used to solve problems (\ref{eq:04}) with convolution (\ref{eq:05}).
 
-\textbf{Dimensionality reduction.} For solving the optimization problems (\ref{eq:05}) the dimensionality reduction \cite{Gergel2019_2,Gergel2018,GergelKozinov2020} on the base of Peano curves is applied. The Peano curve $y(x)$ maps the close interval $[0,1]$ of the real axis onto the parallelepiped (\ref{eq:02}) unambiguously and continuously. It enables to replace the multidimensional problem (\ref{eq:04}) with solving the equivalent univariate problem
+\textbf{Dimensionality reduction.} For solving the optimization problems (\ref{eq:04}) the dimensionality reduction \cite{Gergel2019_2,Gergel2018,GergelKozinov2020} on the base of Peano curves is applied. The Peano curve $y(x)$ maps the close interval $[0,1]$ of the real axis onto the parallelepiped (\ref{eq:02}) unambiguously and continuously. It enables to replace the multidimensional problem (\ref{eq:04}) with solving the equivalent univariate problem
 \begin{equation}
 \label{eq:07}
 \min \left\{\varphi(y), y \in D\right\} = \min\left\{ \varphi(y(x)), x \in [0,1] \right\}.
 \end{equation}
 
-It should be noted that if the convolution $F(\lambda,y)$ satisfies the Lipschitz condition then the reduced function $\varphi(y(x)) = F(\lambda,y(x))$ meets the H{\" o}lder condition
+It should be noted that if the convolution $F(\lambda,y)$ satisfies the Lipschitz condition then the reduced function $\varphi(y(x)) = F(\lambda,y(x))$ meets the H{\" o}lder inequality
 \begin{equation}
 \label{eq:08}
 |\varphi(y(x')) - \varphi(y(x''))| \leq H \|x' - x''\|^{1/N} , x \in [0,1],
 \end{equation}
 with the H{\" o}lder constant $H=2L\sqrt{N+3}$, where $L$ is the Lipschitz constant of $F(\lambda,y)$ in the domain $D$.
 
+\textbf{Optimization.} This stage consists in solving a family of problems (\ref{eq:07}) corresponding to a finite set of weight coefficients $\lambda$. After minimization of all the problems from this family we get an approximation of the Pareto set. To solve problems (\ref{eq:07}), the information-statistical global search algorithm \cite{ML_MCO_2023,Gergel2019_2,Gergel2018,GergelKozinov2020,Strongin2000,Sergeyev2013} was used which provides efficient optimization of H{\" o}lderian functions. Computational scheme of the algorithm (call it briefly GSA) consists in the following.
 
+Each iteration of the search consists of one trial execution. The term ``trial'' means evaluation of the minimized function $\varphi(x)$ from (\ref{eq:07}) at some point.
+
+The first two trials are to be carried out at the boundary points of the interval $[0,1]$, i.e., at points $x^0=0$, $x^1=1$. 
+
+Let $k$, $k \geq 2$, search iterations have been executed at trial points $x^0, x^1,\dots,x^{k-1}$ with objective function values, where $z^0, z^1,\dots,z^{k-1}$, $z^i=\varphi(x^i)$, $1 \leq i \leq k-1$. Then the choice of the new trial point $x^k$ is determined according to the following rules.
+
+\textit{Rule 1.} Renumber by subscripts all trial points in increasing order
 \begin{equation}
     \label{eq:09}
     x_0 = 0 < x_1 < \dots < x_i < \dots < x_{k} = 1.
 \end{equation}
+and juxtapose to them the values $z_i=\varphi(x_i)$, $1 \leq i \leq k-1$.
 
+\textit{Rule 2.} Calculate the current estimation of the H{\" o}lder constant 
 
 \begin{equation}
     \label{eq:10}
@@ -189,55 +199,77 @@ with the H{\" o}lder constant $H=2L\sqrt{N+3}$, where $L$ is the Lipschitz const
 					 1, & M = 0 
 				\end{matrix} 
 			\end{cases} ,
-		M = \max_{1 \leq i \leq k} \frac{| z_i - z_{i-1}|}{\varrho_i}, \\
+		M = \max_{1 \leq i \leq k-1} \frac{| z_i - z_{i-1}|}{\varrho_i}, \\
 		z_i = \varphi( x_i ), \varrho_i=\sqrt[N]{x_i-x_{i-1}}
 		\end{matrix}
 \end{equation}
+where $r$, $r>1$ is the \textit{reliability} parameter of the algorithm.
+
+\textit{Rule 3.} For each subinterval $(x_{i-1} ,x_i)$, $1 \leq i \leq k-1$, compute the value
 
 \begin{equation}
     \label{eq:11}
-    R(j) = \varrho_j + \frac{(z_i-z_{i-1})^2}{m^2 \varrho_i} - \frac{2 (z_i+z_{i-1})}{m}, 1 \leq i \leq k.
+    R(i) = \varrho_i + \frac{(z_i-z_{i-1})^2}{m^2 \varrho_i} - \frac{2 (z_i+z_{i-1})}{m}, 1 \leq i \leq k-1.
 \end{equation}
+called \textit{characteristic} of the subinterval $(x_{i-1} ,x_i)$, $1 \leq i \leq k-1$.
 
-
+\textit{Rule 4.} Choose the subinterval $(x_{t-1} ,x_t)$ with maximal characteristic $R(t)$
 \begin{equation}
     \label{eq:12}
-    R(t) = argmax_{1 \leq i \leq k} {R(i)}.
+    R(t) = max_{1 \leq i \leq k-1} {R(i)}.
 \end{equation}
 
-
+\textit{Rule 5.} Accept
 \begin{equation}
     \label{eq:13}
-    x^{k+1} = \frac{x_t + x_{t-1}}{2} - sign(z_t - z_{t-1}) \frac{1}{2r} \left(\frac{|z_l - z_{l-1}|}{m} \right)^N,
+    x^{k} = \frac{x_t + x_{t-1}}{2} - sign(z_t - z_{t-1}) \frac{1}{2r} \left(\frac{|z_l - z_{l-1}|}{m} \right)^N,
 \end{equation}
+as the point for the next trial.
 
-
+The process of finding a solution to the current problem (\ref{eq:07}) is terminated when the condition
 \begin{equation}
     \label{eq:14}
     \varrho < \varepsilon.
 \end{equation}
-
+is met where $\varepsilon > 0$ is a preassigned search accuracy.
 
 
 \section{Approaches to improving search efficiency}
 \label{sec:4}
+
+To enhance the efficiency of the Pareto set finding, several GSA modifications are used in the described approach.
+
+During minimization of one problem (\ref{eq:07}) with corresponding weight vector $\lambda$, the trial points $x^0, x^1,\dots,x^{k-1}$ from the interval $[0,1]$ generate points $y^0, y^1,\dots,y^{k-1}$ in the domain $D$, where $y^i=y(x^i)$, $1 \leq i \leq k-1$, and $y(x)$ is the Peano mapping. After computing values $f^i_j=f_j(y^i)$, $1 \leq i \leq k-1$, $1 \leq j \leq s$, of the partial criteria at points $y^i$ one can organize the set 
+\begin{equation}
+    \label{eq:15}
+    \Omega_K=\{(x^q,y^q,f^q_1,\dots,f^q_s)^T: 0 \leq q \leq K\}.
+\end{equation}
+called \textit{Search State Matrix} (SSM).
+
+Solving new problems (\ref{eq:04}) allows one to replenish SSM with new elements and to save the additional information on the investigated problem (\ref{eq:02a}). This information can accelerate the minimization process for problems (\ref{eq:07}) and, as a consequence, for the initial multicriteria problem. 
+
+One of the ways how this can be done is connected with the modification of the starting iterations of GSA. Namely, if $P \geq 1$ problems (\ref{eq:07}) have been already solved and the matrix (\ref{eq:15}) has been formed, then as initial trial coordinates, the points $x^q$, $1 \leq q \leq K$, can be used with values $z^q = F(\lambda,y^q)$. Moreover, the computation of the convolution (\ref{eq:05}) does not require the new calculation of criteria values at these points, because these values are taken from the matrix (\ref{eq:15}). After that, one can go to the basic iteration Rules 1-5. Such the scheme reduces significantly the number of criteria computations when jointly solving the family of problems (\ref{eq:04}) with convolution (\ref{eq:05}) for different weight coefficients $\lambda$ \cite{ML_MCO_2023,Gergel2018,GergelKozinov2020}.
+
+The second approach also aims to further decreasing the number of trials required to find the Pareto set. It suggests to change the form of the characteristics (\ref{eq:11}) in the GSA scheme. It is proposed to use the characteristic 
+\begin{equation}
+    \label{eq:16}
+    R(i) = R_{gsa} (i) +  \alpha R_{ps} (i).
+\end{equation}
+instead of the characteristic (\ref{eq:11}) where $R_{gsa}(i)$ coincides with the expression (\ref{eq:11}) and the additional term $R_{ps}(i)$ depends on closeness of the points $y(x_{i-1})$, $y(x_{i})$ to the Pareto set, namely, the closer these points to the Pareto set, the greater the value $R_{ps}(i)$.
+
+The parameter $\alpha > 0$ allows changing the degree of influence of the $R_{ps}(i)$ on the choice of the next trial point. If $\alpha$ is small, the algorithm spends more trials to find the optimal solution to the current optimization problem. When $\alpha$ is large, the algorithm chooses the subintervals providing the closeness to the set of efficient points. In a certain sense, $R_{ps}(i)$ can be considered as a penalty for computations outside the Pareto set.
+
+For computation of $R_{ps}(i)$ we propose to apply the machine learning methods. It should be noted that in classical combinations of machine learning and optimization methods, the latter are used as an auxiliary internal techniques that improve the machine learning functioning. In our approach, on the contrary, machine learning methods are a part of the optimization algorithms enhancing their work.
+
+In the paper \cite{ML_MCO_2023} we proposed an algorithm for calculation of the penalty term $R_{ps}(i)$ on the base of a hyperplane separating the Pareto and other trial points (see Subsection \ref{ssec:41}). The changes in the characteristics led to a significant increase in the efficiency of the algorithm, but the question of the effectiveness of the proposed penalty term in problems where the Pareto set is non-convex and has a complex form, as well as the number of criteria is more than two, remained open.
+
+In the framework of this study, we propose several new ways to calculate the penalty term (see Subsection \ref{ssec:42}) and investigate their efficiency in solving a series of optimization problems (see Section \ref{sec:5}).
 
 \subsection{Section 41}
 \label{ssec:41}
 
 \subsection{Section 42}
 \label{ssec:42}
-
-\begin{equation}
-    \label{eq:15}
-    \Omega_k=\{\mu^i = (y^i,f^i=f(y^i))^T: 0 \leq i \leq k\}.
-\end{equation}
-
-
-\begin{equation}
-    \label{eq:16}
-    R(i) = R_{gsa} (i) +  \alpha R_{ps} (i).
-\end{equation}
 
 
 \begin{equation}
