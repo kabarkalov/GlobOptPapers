@@ -285,8 +285,7 @@ d'_i=
 0 \leq i \leq k-1,
 \end{equation}
 where $d_i$ is the distance from the $i$-th point to the hyperplane, $d_{max}$, $d_{min}$ are maximum and minimum distances to the hyperplane.
-
-The value $R_{ps}(i)$ from (\ref{eq:16}) for the interval $(x_{i-1},x_{i})$ is calculated as the sum of normalized distances (\ref{eq:17}) to points $x_i$ and $x_{i-1}$. Let's denote this version of GSA as ML\_MGSA\_Dist.
+The value $R_{ps}(i)$ from (\ref{eq:16}) for the interval $(x_{i-1},x_{i})$ is calculated as the sum of normalized distances (\ref{eq:17}) to $i$-th and $(i-1)$-th points. Let's denote this version of GSA as ML\_MGSA\_Dist.
 
 \subsection{Building the penalty term on the base of probabilities being derived from machine learning models}
 \label{ssec:42}
@@ -298,7 +297,9 @@ For creating the penalty term $R_{ps}(i)$ from (\ref{eq:16}) that corresponds be
 	\item Transformation of machine learning probabilities.
 \end{enumerate}
 
-As part of the proposed approach, the machine learning model is built according to the rules similar to the construction of the SVC model from section \ref{ssec:41}. As before, all trial points are divided into two classes -- points of the Pareto set and points that do not belong to the Pareto set. The classifier is trained on the selected classes. Note that the classifier models of most machine learning libraries can return not only the class label, but also the probability of relevance to the class. Unlike the approach described in Subsection \ref{ssec:41} the characteristic $R_{ps}(i)$ is computed as the average of probabilities of situations when the points $x_i$ and $x_{i-1}$ from interval $(x_{i-1},x_{i})$ belong to the Pareto set.
+As part of the proposed approach, the machine learning model is built according to the rules similar to the construction of the SVC model from section \ref{ssec:41}. As before, all trial points are divided into two classes -- points of the Pareto set and points that do not belong to the Pareto set. The classifier is trained on the selected classes. Note that the classifier models of most machine learning libraries can return not only the class label, but also the probability of relevance to the class. Unlike the approach described in Subsection \ref{ssec:41} the characteristic $R_{ps}(i)$ is computed as the average of probabilities of situations when the points
+%$y_i=y(x_i)$ and $y_{i-1}=y(x_{i-1})$
+correspond to boudaries of the interval $(x_{i-1},x_{i})$ belong to the Pareto set.
 
 A significant advantage of this approach is the possibility to easily replace both the machine learning model itself and its learning rules. In the framework of the study, several variants of building models that potentially improve the factor $R_{ps}(i)$ to beter solve the MCO problems.
 
@@ -326,7 +327,7 @@ Second, the probabilities undergo the transformation
     \label{eq:18}
 p'_i= \frac{ \log (p_i) - \log (p_{min})}{ \log (p_{max}) - \log (p_{min})} , 0 \leq i \leq k-1,
 \end{equation}
-where $p_i$ is a probability of the event that the point $x_i$ belongs to the Pareto set, $p_{min}$, $p_{max}$ are minimum and maximum values of such probabilities. After transformation the function $R_{ps}(i)$ is calculated, as earlier, as the average value of probabilities of events in which the points $x_i$ and $x_{i-1}$ from interval $(x_{i-1}, x_i)$ belong to the Pareto set.
+where $p_i$ is a probability of the event that the point $x_i$ belongs to the Pareto set, $p_{min}$, $p_{max}$ are minimum and maximum values of such probabilities. After transformation the function $R_{ps}(i)$ is calculated, as earlier, as the average value of probabilities of events in which the points correspond to bounaries of the interval $(x_{i-1}, x_i)$ belong to the Pareto set.
 
 Computational experiments were conducted for each method and each model in order to assess the effectiveness of using these techniques in the global search algorithm. Fig. \ref{fig:2} demonstrates the visualization of $R_{ps}(i)$ similar to Fig. \ref{fig:1}.
 \begin{figure}
@@ -341,7 +342,12 @@ Note that new penalty functions (see Fig. \ref{fig:2}(b,c,d)) describe better th
 \section{Results of computational experiments}
 \label{sec:5}
 
-Computations were conducted on the supercomputer ``Lobachevsky'' of the Nizhni Novgorod State University (operating system CentOS 7, control system SLURM). To obtain the executable program code the compilers Intel C++ 17.0.0 and python 3.9 were used. Computations were performed with the support of the package scikit-learn 0.24.2 and the optimization software iOpt \cite{iOpt_url}.
+Computations were conducted on the ``Lobachevsky'' supercomputer node (two Intel Sandy Bridge E5-2660 2.2 GHz processors and 64 Gb RAM) using the scikit-learn 0.24.2 library.
+The proposed algorithms were implemented in Python in intelligent optimization framework iOpt \cite{iOpt_url}.
+
+%Computations were performed with the support of the scikit-learn 0.24.2 framework.
+
+%of the Nizhni Novgorod State University (operating system CentOS 7, control system SLURM).To obtain the executable program code the compilers Intel C++ 17.0.0 and python 3.9 were used.  and the optimization software iOpt \cite{iOpt_url}.
 
 In the first experiment 100 bi-criterial MCO problems have been solved. As the partial criteria, the functions $f(y)$ from \cite{ML_MCO_2023} were taken,
 \begin{equation}
