@@ -177,7 +177,7 @@ For an end user who wishes to fine-tune the method used by selecting an optimal 
 
 In this paper, we present a framework of \textit{i}ntelligent \textit{opt}imization methods  iOpt\footnote{\url{https://github.com/aimclub/iOpt/}}, focused on solving problems of selecting optimal values of hyperparameters of various algorithms (including machine learning and artificial intelligence methods). 
 
-An essential feature of the iOpt framework is the use of Lipschitz optimisation methods for hyperparameter tuning. These methods are deterministic, provide fast convergence, and can be adapted to various types of special problem formulations. For example, such methods allow generalisation for working with noisy functions  \citep{Sergeyev2020}. In this paper, these methods have been adapted to solve HPO problems where some of the parameters are often discrete and/or categorical.
+An essential feature of the iOpt framework is the use of Lipschitz optimization methods for hyperparameter tuning. These methods are deterministic, provide fast convergence, and can be adapted to various types of special problem formulations. For example, such methods allow generalisation for working with noisy functions  \citep{Sergeyev2020}. In this paper, these methods have been adapted to solve HPO problems where some of the parameters are often discrete and/or categorical.
 
 The paper is organized as follows. At the beginning, there is a review of known methods used for hyperparameter tuning. Section \ref{sec_lip} presents the mathematical formulation of the problem, describes approaches to the reduction of multidimensional problems to one-dimensional problems and to the solution of problems with discrete parameters. Section \ref{sec_iOpt} explains the algorithmic basis of global optimization methods implemented in the iOpt framework. In Section \ref{sec_exp}, we present the results of numerical experiments conducted to compare the efficiency of the iOpt framework with other known frameworks on model and applied problems. The conclusion summarizes the findings and plans   for the development of the framework.
 
@@ -344,7 +344,7 @@ f(x) = \varphi(Y(x),u_{E(x)+1}), x\in[0,S],
 \end{equation}
 which has, generally speaking, discontinuities at integer points $x_i = i, 1 \leq i \leq S-1$.
 Therefore, the values $z_i = f(x_i)$ at these points will be considered undefined and will not be used in the algorithm.
-%, а значения индекса -- равным 0, т.е. $\nu(x_i) = 0$.
+\textcolor[rgb]{0,0,1}{For the same treatment of boundary points of the interval $[0,S]$ we will also consider the values $f(0)$ and $f(S)$ to be undefined. The function values at boundary points will not be used in the algorithm.}
 
 Using the introduced notations, we can reformulate the original problem as
 \begin{equation}\label{problem_is1}
@@ -359,7 +359,7 @@ The iOpt framework of intelligent optimization methods is designed to select opt
 The general structure of the framework is shown in Fig.~\ref{fig_iOpt}. The main algorithms used in iOpt are described in the following sections.
 
 The iOpt framework can be used to develop specialized decision support systems for solving the tasks of selecting optimal parameters for complex models or methods.
-\textcolor[rgb]{0,0,1}{In particular, it is focused on solving the problems of tuning hyperparameters of machine learning methods. In such problems there is a lack of analytical description of the objective function (``black box'' type problems), and the function itself can be multi-extremal.}
+\textcolor[rgb]{0,0,1}{In particular, it is focused on solving the problems of tuning hyperparameters of machine learning methods. In such problems there is a lack of analytical description of the objective function and the function itself can be multi-extremal.}
 
 \subsection{Global search algorithm}\label{sec_GSA}
 
@@ -400,10 +400,10 @@ Algorithm \ref{alg_GSA} shows the pseudo code of the Global Search Algorithm.
 \State $\Omega_k \Leftarrow \left\{ v_1, v_2 \right\}$
 \While{ $\Delta_t \geq \epsilon$ and $k \leq K_{max}$}
     \State compute the estimate of the H\"older constant $\mu$ by (\ref{mu})
-    \For{$i=0$ to $k$}
+    \For{$i=2$ to $k$}
         \State compute the characteristic $R(i)$ by (\ref{R})
     \EndFor
-    \State determine the number $t$, for which $R(t) = \max \left\{ R(i), 1 \leq i \leq k \right\}$
+    \State determine the number $t$, for which $R(t) = \max \left\{ R(i), 1 < i \leq k \right\}$
     \State compute the new trial point $x^{k+1}$ by (\ref{xk1})
     \State perform a new trial at the point $x^{k+1}$
     \State $\Omega_k \Leftarrow \Omega_k \cup (x^{k+1}, y^{k+1}, z^{k+1})$
@@ -439,7 +439,8 @@ Then the result of the trial at some point $x^j\in[0,S]$  will be the set of val
 The general computational scheme outlined as Algorithm \ref{alg_GSA} will remain the same. The modifications will consist of the following.
 
 \begin{enumerate}[1.]
-\item At the initialization stage, the values $(x^i = i, \nu^i=0, z^i)$, $ i, 0\leq i \leq S$, i.e., the boundary points of the intervals $(x_{i-1},x_i), 1<i\leq S$, are entered into the set $\Omega_k$ containing the search  information. 
+\item At the initialization stage, the values $(x^i = i, \nu^i=0, z^i)$, $ 0\leq i \leq S$, i.e., the boundary points of the intervals $(x_{i-1},x_i), 1<i\leq S$, are entered into the set $\Omega_k$ containing the search  information.
+\textcolor[rgb]{0,0,1}{Recall that the values $z^i$ at integer points $x^i=i, 0\leq i \leq S,$ are supposed to be undefined and are not used later in the algorithm.}
 After that, trials are carried out at arbitrary internal points (e.g., midpoints) of the intervals $(x_{i-1},x_i), 1<i\leq S$; the trial results are also added to the search information. Thus, after initialization, the set $\Omega_k$ will contain $k=2S+1$ elements.
 
 \item The computation of the estimate of the H\"older constant $\mu$ according to formula (\ref{mu}) must be performed only for intervals for which $\nu(x_i) = \nu(x_{i-1}) = 1$, i.e., when the values $z_i$ and $z_{i-1}$ are determined.
@@ -516,7 +517,7 @@ then $\overline{x}$ is a global minimizer of the function $f(x), x\in[0,S]$ and 
 \end{enumerate}
 \end{proposition}
 \begin{proof}
-This statement is proved in a similar way to the theorem on the convergence of the index method of global optimisation from \citet{Strongin2000}, taking into account the relationship (\ref{f}) of the functions $f(x)$ and $\varphi(y,u_s)$, as well as the rules (\ref{index}), specifying the indices of the trial points.
+This statement is proved in a similar way to the theorem on the convergence of the index method of global optimization from \citet{Strongin2000}, taking into account the relationship (\ref{f}) of the functions $f(x)$ and $\varphi(y,u_s)$, as well as the rules (\ref{index}), specifying the indices of the trial points.
 \end{proof}
 
 \section{Numerical experiments}\label{sec_exp}
