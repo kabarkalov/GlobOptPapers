@@ -50,9 +50,9 @@ Vladimir Grishagin\orcidID{0000-0002-2884-3670}}
 
 %
 \begin{abstract}
-Solving a multicriteria optimization problem requires finding a whole set of independent variables corresponding to non-dominated criteria values (Pareto set). The complexity of these problems increases significantly in the case when the criteria are multiextremal. The paper presents several variations of the global optimization algorithm intended for solving ``black-box'' multiobjective problems with multiextremal criteria. The proposed methods are based on a combination of the information-statistical approach and machine learning procedures aimed at increasing the efficiency of constructing the Pareto set. As a novelty, the paper describes a new approach to using machine learning models within the algorithm of multicriteria optimization. The effectiveness of different versions of the proposed algorithm is estimated on the base of a representative computational experiment.
+Solving a multicriteria optimization problem requires finding a whole set of independent variables corresponding to non-dominated criteria values (Pareto set). The complexity of these problems increases significantly in the case when the criteria are multiextremal. The paper presents several variations of the global optimization algorithm intended for approximate solving ``black-box'' multiobjective problems with multiextremal criteria. The proposed methods are based on a combination of the information-statistical approach and machine learning procedures aimed at increasing the efficiency of constructing the Pareto set approximation. As a novelty, the paper describes a new approach to using machine learning models within the algorithm of multicriteria optimization. The effectiveness of different versions of the proposed algorithm is estimated on the base of a representative computational experiment.
 
-\keywords{Multicriteria Problems \and Global Optimization \and Machine Learning.}
+\keywords{Multicriteria Problems \and Global Optimization \and Machine Learning \and Peano Curves.}
 \end{abstract}
 %
 %
@@ -91,7 +91,7 @@ The multicriteria optimization (MCO) problem can be formulated as the minimizati
 \label{eq:01}
   \Phi(y) = (f_1 (y),f_2 (y), \dots, f_s(y))
 \end{equation}
-where scalar functions $f_i(y)$, $1 \leq i \leq s$, are considered as the partial efficiency criteria, $y=(y_1,y_2, \dots ,y_N)$ is the vector of independent parameters belonging to the feasible domain $D \in R^N$ that is the hyperparallelepiped
+where scalar functions $f_i(y)$, $1 \leq i \leq s$, are considered as the partial efficiency criteria, $y=(y_1,y_2, \dots ,y_N)$ is the vector of independent parameters belonging to the feasible domain $D \subset R^N$ that is the hyperparallelepiped
 \begin{equation}
 \label{eq:02}
     D=\{y \in R^N : a_i \leq y_i \leq b_i, 1 \leq i \leq N\}
@@ -145,7 +145,7 @@ reflects the ``importance'' (weights) of corresponding partial criteria.
 There are various ways to construct the function $F(\lambda, y)$ \cite{Miettinen1999,Ehrgott2005,GergelKozinov2020,Marler2004}. In our study we utilized the maximum convolution 
 \begin{equation}
 \label{eq:05}
-F(\lambda, y) = \max_{1 \leq i \leq s} \left\{\lambda_i f_i (y)\right\}, y \in D, \sum_{i=1}^s {\lambda_i} = 1, 0 \leq \lambda_i \leq 1.
+F(\lambda, y) = \max_{1 \leq i \leq s} \left\{\lambda_i f_i (y)\right\}, y \in D, \sum_{i=1}^s {\lambda_i} = 1, 0 < \lambda_i \leq 1.
 \end{equation}
 
 
@@ -159,7 +159,7 @@ In the case of partial criteria positivity the global minimizer of the convoluti
 
 If all the partial criteria are Lipschitzian and at least one function $f_i(y)$, $1 \leq i \leq s$, is multiextremal, the convolution (\ref{eq:05}) will be Lipschitzian and multiextremal as well. Thus, global search algorithms must be used to solve problems (\ref{eq:04}) with convolution (\ref{eq:05}).
 
-\textbf{Dimensionality reduction.} For solving the optimization problems (\ref{eq:04}) the dimensionality reduction \cite{Gergel2019_2,Gergel2018,GergelKozinov2020} on the base of Peano curves is applied. The Peano curve $y(x)$ maps the close interval $[0,1]$ of the real axis onto the parallelepiped (\ref{eq:02}) unambiguously and continuously. It enables to replace the multidimensional problem (\ref{eq:04}) with solving the equivalent univariate problem
+\textbf{Dimensionality reduction.} For solving the optimization problems (\ref{eq:04}) the dimensionality reduction on the base of Peano curves is applied \cite{Gergel2019_2,Gergel2018,GergelKozinov2020,Lera2024,LERA2021125660}. The Peano curve $y(x)$ maps the closed interval $[0,1]$ of the real axis onto the parallelepiped (\ref{eq:02}) unambiguously and continuously. It enables to replace the multidimensional problem (\ref{eq:04}) with solving the equivalent univariate problem
 \begin{equation}
 \label{eq:07}
 \min \left\{\varphi(y), y \in D\right\} = \min\left\{ \varphi(y(x)), x \in [0,1] \right\}.
@@ -298,14 +298,14 @@ For creating the penalty term $R_{ps}(i)$ from (\ref{eq:16}) that corresponds be
 
 As part of the proposed approach, the machine learning model is built according to the rules similar to the construction of the SVC model from section \ref{ssec:41}. As before, all trial points are divided into two classes -- points of the Pareto set and points that do not belong to the Pareto set. The classifier is trained on the selected classes. Note that the classifier models of most machine learning libraries can return not only the class label, but also the probability of relevance to the class. Unlike the approach described in Subsection \ref{ssec:41} the characteristic $R_{ps}(i)$ is computed as the average of probabilities of situations when the points
 %$y_i=y(x_i)$ and $y_{i-1}=y(x_{i-1})$
-correspond to boudaries of the interval $(x_{i-1},x_{i})$ belong to the Pareto set.
+corresponding to boudaries of the interval $(x_{i-1},x_{i})$ belong to the Pareto set.
 
 A significant advantage of this approach is the possibility to easily replace both the machine learning model itself and its learning rules. In the framework of the study, several variants of building models that potentially improve the factor $R_{ps}(i)$ to beter solve the MCO problems.
 
 The first direction is to change the method of building the classifier. Changing the classifier can be useful if the Pareto set is complex, for instance, non-convex.
 For comparison the SVM models with linear kernel, polynomial kernel, and RBF function-based kernel are considered.
 
-\begin{figure}
+\begin{figure}[t!]
 \centering
 \includegraphics[width=0.8\textwidth]{fig1.png}
 \caption{Heatmap of the function $R_{ps}(i)$ in the criteria space for algorithms with different machine learning models.} 
@@ -319,7 +319,7 @@ The number of trials carried out in each experiment is indicated in parentheses 
 
 The figure shows that the penalty function with kernels other than linear describes the Pareto set well, but, may be, penalty is not sufficient to reduce the number of trials of the global search algorithm. Two modifications can be proposed to solve this problem.
 
-First, when changing the optimization problem from set (\ref{eq:07}), a new weight calculation scheme for each of two classes of trial points is proposed. In this scheme, the weights of each class are calculated inversely proportional to the ratio of the number of all points to the number of points belonging to the Pareto set.
+First, when changing the optimization problem from set (\ref{eq:07}), a new weight calculation scheme for each of the two classes of trial points is proposed. In this scheme, the weights of each class are calculated inversely proportional to the ratio of the number of all points to the number of points belonging to the Pareto set.
 
 Second, the probabilities undergo the transformation
 \begin{equation}
@@ -329,7 +329,7 @@ p'_i= \frac{ \log (p_i) - \log (p_{min})}{ \log (p_{max}) - \log (p_{min})} , 0 
 where $p_i$ is a probability of the event that the point $x_i$ belongs to the Pareto set, $p_{min}$, $p_{max}$ are minimum and maximum values of such probabilities. After transformation the function $R_{ps}(i)$ is calculated, as earlier, as the average value of probabilities of events in which the points correspond to bounaries of the interval $(x_{i-1}, x_i)$ belong to the Pareto set.
 
 Computational experiments were conducted for each method and each model in order to assess the effectiveness of using these techniques in the global search algorithm. Fig. \ref{fig:2} demonstrates the visualization of $R_{ps}(i)$ similar to Fig. \ref{fig:1}.
-\begin{figure}
+\begin{figure}[t!]
 \centering
 \includegraphics[width=0.8\textwidth]{fig2.png}
 \caption{Heatmap of the function $R_{ps}(i)$ in the criteria space for algorithms with different techniques of building models after transformation (\ref{eq:18}).} 
@@ -370,14 +370,14 @@ Computational experiments for proposed techniques which utilize probabilities of
 	
 In each series of experiments for these optimization algorithms, the coefficients $\alpha$ from (\ref{eq:16}) changed in the range $[0.1, 0.9]$. Comparison with the algorithm MGSA that does not use machine learning methods (i.e. with $\alpha = 0$ in the characteristic (\ref{eq:16})) and with the algorithm ML\_MGSA\_Dist taking into account the distance to the separating hyperplane was carried out. The comparison was made on the base of  the HV index characterizing quality of the obtained Pareto set approximation \cite{ML_MCO_2023,Evtushenko2014}. Further subsections include the results of only those calculations in which the $\alpha$ parameter provided the best quality of the solution found. Tables contain results of solving all the problems (\ref{eq:07}) with fixed accuracy $\varepsilon=0.01$ in the termination condition (\ref{eq:14}). Figures present results for a series of decreasing $\varepsilon$ which generates increasing numbers of trials.
 
-\textbf{Experiments with fixed weights of two trial classes.} The first series of experiments is aimed at comparison the algorithm ML\_MGSA\_Prob (Fixed weights) with results of running for methods MGSA and ML\_MGSA\_Dist. 
+\textbf{Experiments with fixed weights of two trial classes.} The first series of experiments is aimed at comparison of the algorithm ML\_MGSA\_Prob (Fixed weights) with results of running for methods MGSA and ML\_MGSA\_Dist. 
 
 The following parameters are indicated in Table \ref{tab:1}: the kernel of the SVM model (column 2), parameter $\alpha$ (column 3), average values of the HV-index (column 4), the average number of trials spent by the algorithm (column 5), and the coefficient of decreasing the number of trials compared to ML\_MGSA (column 6). The factors $r$ and $\varepsilon$ from (\ref{eq:10}) and (\ref{eq:14}) were the same for all the algorithms.
 
 % Please add the following required packages to your document preamble:
 % \usepackage{multirow}
 % \usepackage{graphicx}
-\begin{table}[ht]
+\begin{table}[t]
 \centering
 \caption{Results of computational experiments}
 \label{tab:1}
@@ -412,7 +412,7 @@ ML\_MGSA\_Dist                                                             & Lin
 \end{table}
 
 Fig. \ref{fig:3} shows the change of the average HV-index as a function of the number of trials.
-\begin{figure}
+\begin{figure}[t!]
 \centering
 \includegraphics[width=0.8\textwidth]{fig3.png}
 \caption{Comparison of HV-indices for the case of fixed weights.} 
@@ -423,7 +423,7 @@ Compared to MGSA, the other algorithms reduce significantly the number of iterat
 
 \textbf{Experiments with tuned weights in the course of optimization.} In this group of experiments the algorithm ML\_MGSA\_Prob (adj. weights) changed weights of trial classes before starting a new subproblem (\ref{eq:07}). Table \ref{tab:1} and Fig. \ref{fig:4} for these experiments are organized similarly to the first series of experiments.
 
-\begin{figure}
+\begin{figure}[t!]
 \centering
 \includegraphics[width=0.8\textwidth]{fig4.png}
 \caption{HV-indices comparison  in the case of adjusted weights} 
@@ -434,7 +434,7 @@ The presented data on methods using probabilities, as in the previous series of 
 
 \textbf{Experiments with adjusted weights and logarithmic probabilities.} In the third group of experiments, in addition to changing the weights during the algorithm’s running, the transformation (\ref{eq:18}) was used in techniques with probability calculation (methods ML\_MGSA\_Prob (Log Norm)). Table \ref{tab:1} and Fig. \ref{fig:5} are similar to those in the previous experiments.
 
-\begin{figure}
+\begin{figure}[t!]
 \centering
 \includegraphics[width=0.8\textwidth]{fig5.png}
 \caption{Comparison of  HV-indices for methods with probabilities (\ref{eq:18})} 
@@ -445,7 +445,7 @@ From the results of the experiment, the following conclusions can be drawn. Amon
 
 \textbf{Experiments with 4-criterial MCO problems.} In the last series of experiments, 10 MCO problems with 4 criteria were solved that form a Pareto set of complex structure. As in previous subsection, the functions of the family (\ref{eq:19}) were used as partial criteria. In the course of previous experiments, it was found that the closest result to ML\_MGSA\_Dist is given by the algorithm ML\_MGSA\_Prob (Log Norm) based on the technique (\ref{eq:18}). Taking into account this fact, we limited ourselves to comparing the results of these two algorithms. The results are presented in Table \ref{tab:1} and Fig. \ref{fig:6}
 
-\begin{figure}
+\begin{figure}[t!]
 \centering
 \includegraphics[width=0.8\textwidth]{Fig6.png}
 \caption{Efficiency comparison in the 4-critarial case} 
