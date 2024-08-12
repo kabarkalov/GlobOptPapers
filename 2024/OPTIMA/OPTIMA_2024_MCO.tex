@@ -50,7 +50,7 @@ Vladimir Grishagin\orcidID{0000-0002-2884-3670}}
 
 %
 \begin{abstract}
-Solving a multicriteria optimization problem requires finding a whole set of independent variables corresponding to non-dominated criteria values (Pareto set). The complexity of these problems increases significantly in the case when the criteria are multiextremal. The paper presents several variations of the global optimization algorithm intended for approximate solving ``black-box'' multiobjective problems with multiextremal criteria. The proposed methods are based on a combination of the information-statistical approach and machine learning procedures aimed at increasing the efficiency of constructing the Pareto set approximation. As a novelty, the paper describes a new approach to using machine learning models within the algorithm of multicriteria optimization. The effectiveness of different versions of the proposed algorithm is estimated on the base of a representative computational experiment.
+Solving a multicriteria optimization problem requires finding a whole set of independent variables corresponding to non-dominated criteria values (Pareto set). The complexity of these problems increases significantly in the case when the criteria are multiextremal. The paper presents several variations of the global optimization algorithm intended for approximate solving ``black-box'' multiobjective problems with multiextremal criteria. The proposed methods are based on a combination of the information-statistical approach and machine learning procedures aimed at increasing the efficiency of constructing the Pareto set approximation. As a novelty, the paper describes a new approach to using machine learning models within the algorithm of multicriteria optimization. Based on a representative computational experiment, the effectiveness of different versions of the proposed algorithm is estimated.
 
 \keywords{Multicriteria Problems \and Global Optimization \and Machine Learning \and Peano Curves.}
 \end{abstract}
@@ -114,7 +114,7 @@ where Lipschitz constants $L_i>0$, $1 \leq i \leq s$, are unknown a priopi.
 
 Without loss of generality, the values of partial criteria will be supposed to be positive. If a partial criterion does not satisfy this requirement, it is easy to build a new criterion by means of adding to it a sufficiently large positive constant so that replacing in the problem (\ref{eq:02a}) the initial criterion with the modified one will not change its solution. Note that such constant can be selected in the course of optimization \cite{ML_MCO_2023}.
 
-As it was mentioned above, the partial criteria contradictoriness leads to the necessity to introduce the set of non-dominated points called Pareto set as the general solution of the multicriteria problem \cite{Miettinen1999,Ehrgott2005,Pardalos2017}. Hereinafter, any point of the Pareto set will be called a \textit{partial solution} or just an \textit{efficient point}.
+As it was mentioned above, the contradictory nature of the subcriteria makes it necessary to introduce the set of non-dominated points called Pareto set as the general solution of the multicriteria problem \cite{Miettinen1999,Ehrgott2005,Pardalos2017}. Hereinafter, any point of the Pareto set will be called a \textit{partial solution} or just an \textit{efficient point}.
 
 
 \section{General computational scheme}
@@ -255,9 +255,9 @@ called \textit{Search State Matrix} (SSM).
 
 Solving new problems (\ref{eq:04}) allows one to replenish SSM with new elements and to save the additional information on the investigated problem (\ref{eq:02a}). This information can accelerate the minimization process for problems (\ref{eq:07}) and, as a consequence, for the initial multicriteria problem. 
 
-One of the ways how this can be done is connected with the modification of the starting iterations of GSA. Namely, if $P \geq 1$ problems (\ref{eq:07}) have been already solved and the matrix (\ref{eq:15}) has been formed, then as initial trial coordinates, the points $x^q$, $0 \leq q \leq K$, can be used with values $z^q = F(\lambda,y^q)$. Moreover, the computation of the convolution (\ref{eq:05}) does not require the new calculation of criteria values at these points, because these values are taken from the matrix (\ref{eq:15}). After that, one can start optimization algorithm according to the Rules 1-5. Such the scheme reduces significantly the number of criteria computations when jointly solving the family of problems (\ref{eq:04}) with convolution (\ref{eq:05}) for different weight coefficients $\lambda$ \cite{ML_MCO_2023,Gergel2018,GergelKozinov2020}.
+One way of achieving this is to modify the starting iterations of GSA. Specifically, if $P \geq 1$ problems (\ref{eq:07}) have already been solved and the matrix (\ref{eq:15}) has been formed, then the points $x^q$, $0 \leq q \leq K$, with values $z^q = F(\lambda,y^q)$ can be used as initial trial coordinates. Moreover, the computation of the convolution (\ref{eq:05}) does not require the recalculation of criteria values at these points, since these values are taken from the matrix (\ref{eq:15}). The optimization algorithm can then be started according to the Rules 1-5. This scheme significantly reduces the number of criteria computations when solving simultaneously the family of problems (\ref{eq:04}) with convolution (\ref{eq:05}) for different weight coefficients $\lambda$ \cite{ML_MCO_2023,Gergel2018,GergelKozinov2020}.
 
-The second approach also aims to further decreasing the number of trials required to find the Pareto set. It suggests to change the form of the characteristics (\ref{eq:11}) in the GSA scheme. It is proposed to use the characteristic 
+The second approach also aims to further reduce the number of trials required to find the Pareto set. It suggests to change the form of the characteristics (\ref{eq:11}) in the GSA scheme. It is proposed to use the characteristic 
 \begin{equation}
     \label{eq:16}
     R(i) = R_{gsa} (i) +  \alpha R_{ps} (i)
@@ -279,7 +279,7 @@ In the framework of this study, we propose several new ways to calculate the pen
 
 In the course of solving the MCO problem, with each change in the $\lambda$ coefficients, and therefore, the transition to a new optimization problem from (\ref{eq:04}), all obtained trial points in SSM (\ref{eq:15}) are divided into two classes. The first class includes points belonging to the Pareto set. All other trial points belong to the second class. The number of points that are not related to the Pareto domain is usually much larger, and therefore, the classes are not balanced. For the better functioning of machine learning algorithms, for each class the weights corresponding to the significance of the trial points are set if possible. Weights for classes are set at the beginning of the algorithm running. Subsequently, a separating  hyperplane is built between the two classes. To construct the hyperplane, the SVC algorithm with the linear kernel from the scikit-learn library \cite{SVM_2000,PROB_2004} is used.
 
-After the construction of the separating hyperplane, for each trial point the $d_i$ distance is calculated and normalized according to the following expression:
+After constructing the separating hyperplane, for each trial point the $d_i$ distance is calculated and normalized according to the following expression:
 \begin{equation}
     \label{eq:17}
 d'_i=
@@ -472,7 +472,7 @@ The paper proposes a new modification of the global search algorithm focused on 
 
 Acceleration of the algorithm (in terms of reducing the number of search trials required to evaluate \textcolor[rgb]{0,0,1}{the Pareto set approximation with a certain precision}) is achieved through the application of machine learning methods. Namely, when using the SVM method, trial points in the criteria space are classified (each point is/is not an efficient solution), on the basis of which a numerical estimate of the probability of belonging to the Pareto set is built. Polynomial and radial basis function kernels in SVM allows one to adequately approximate Pareto front of a complex structure. 
 
-Solving several series of MCO problems with complex multiextremal criteria has demonstrated that the proposed approach to evaluating the set of efficient solutions is promising. Further research aims to develop the proposed approach by consideration of other machine learning models (in particular, artificial neural networks) to better classify trials and approximate the Pareto set.
+Solving several series of MCO problems with complex multiextremal criteria has demonstrated the potential of the proposed approach to evaluate the set of efficient solutions. Further research aims at extending the proposed approach by considering other machine learning models (in particular, artificial neural networks) to better classify the trials and approximate the Pareto set.
 
 
 
