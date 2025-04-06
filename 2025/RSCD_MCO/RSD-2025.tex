@@ -66,25 +66,87 @@ Solving problems of multi-criteria optimization involves finding many combinatio
 \cite{Miettinen1999,Ehrgott2005,Pardalos2017,Konnov2025,Evtushenko2014,DPA02,Durillo2010,Mostaghim2007,Nebro2009,RC05,Zitzler2001,Gergel2019_2,Gergel2018,GergelKozinov2020,Marler2004,Strongin2000,Sergeyev2013,MCO_ML_2023,scikit-learn,PyTorch,ioptmco,HV,pymoo,AGP_ML}
 
 
+The problems of choosing globally optimal solutions arise when conducting a wide class of researches. To find the best options, an efficiency criterion is determined, the values   of which depend on the parameters from the permissible domain. The criterion itself can often be presented not in an analytical form, but only as a procedure for calculating its values, i.e. in the form of a ``black box'' and additionally it can be multiextremal \cite{Miettinen1999,Ehrgott2005,Pardalos2017,Strongin2000,Sergeyev2013}. For a more accurate description of the problem being solved, several (generally speaking, contradictory) optimized criteria can be taken. 
+
+Multiextremal problems of global optimization are computationally complicated because the globally optimal solution, because in the general case, to claim that the solution is globally optimal, you need to compare it with the values of the objective function at all other points in the search area. When solving such problems using the scanning methods based on random or uniform grids, the number of calculations increases exponentially with the growth of dimensionality. It is possible to solve the considered problems using more efficient algorithms that can be divided into two large classes: deterministic \cite{Miettinen1999,Ehrgott2005,Pardalos2017,Konnov2025,Evtushenko2014} and non-deterministic (meta-heuristic) methods \cite{DPA02,Durillo2010,Mostaghim2007,Nebro2009,RC05,Zitzler2001}. 
+
+Non-deterministic algorithms often attempt to mimic the behavior of living organisms or processes occurring in nature \cite{DPA02,Durillo2010,Mostaghim2007,Nebro2009,RC05,Zitzler2001}. Algorithms from this class do not guarantee finding the best solution with a given accuracy, but can show good efficiency when solving problems with not too many number of local extrema.
+
+Deterministic algorithms guarantee an estimate of the globally optimal solution with a given accuracy, but in their basic implementations they can perform redundant calculations. To reduce the number of trials in this class of algorithms, heuristics are often used that reduce the amount of computations \cite{Konnov2025,AGP_ML}. Among effective deterministic algorithms for solving global optimization problems, the information-statistical family of global search methods \cite{Strongin2000,Sergeyev2013} can be considered. Initially, these algorithms were proposed for solving scalar optimization problems, subsequently, the algorithms were successfully developed to solve multicriterial problems of global search \cite{Konnov2025,MCO_ML_2023}.
+
+
+In the publication \cite{Konnov2025}, we proposed an approach to solving multicriterial optimization problems that combines a classic global search algorithm with machine learning methods. In the framework of the approach, the problem of multicriterial optimization was reduced to solving a series of scalar optimization problems. In the process of solving scalar problems , a model based on machine learning methods was built and gradually improved that separated the points of effective and ineffective solutions in the criteria space. The constructed model made it possible to reduce the amount of calculations necessary to solve the problem with a given quality. Within the framework of this research, we propose the development of the approach for case when the algorithm is used on multi-core computing systems with shared memory.
+
+The article has the following structure. Section \ref{sec2} provides a mathematical statement of the problem to be solved. Section \ref{sec3} contains a brief description of the developed algorithm and its parallel modification. Section \ref{sec4} includes the results of computational experiments demonstrating the effectiveness of the proposed approach.
+
 \section{Problem statement}
 \label{sec2}
+
+The multicriterial optimization (MCO) problem is formulated as follows.
+\begin{equation}
+\label{eq:01}
+  \Phi(y) = (f_1 (y),f_2 (y), \dots, f_s(y))
+\end{equation}
+where $f_i(y)$, $1 \leq i \leq s$, are the criteria of efficiency, $y=(y_1,y_2,\dots,y_N)$ is the vector of varied parameters, N is the dimensionality of the problem solved, and $s$ is the number of varied  criteria. It is supposed in this statement that the criteria $f_i(y)$, $1 \leq i \leq s$ are multiextremal functions, given as a ``black box'' and satisfying the Lipschitz condition
+\begin{equation}
+\label{eq:02}
+|f_i (y') - f_i (y'')| \leq L_i \|y' - y''\| ,y',y'' \in D, 1 \leq i \leq s,
+\end{equation}
+where Lipschitz constants $L_i$, $1 \leq i \leq s$, are unknown \textit{a priory}.
+
+Moreover, it is supposed that values of partial criteria $f_i(y)$, $1 \leq i \leq s$, are non-negative and their decreasing corresponds to increasing the solution efficiency. If an initial criterion does not satisfy these requirements, it is easily to build a new criterion by means of changing the sign and adding a constant for satisfying the initial requirements. Note that the constant can be selected during optimization process \cite{Konnov2025}.
+
+It is supposed that the set of possible values of the optimized parameters $y$ is contained in the $N$-dimensional hypercube $D$:
+\begin{equation}
+\label{eq:03}
+    D=\{y \in R^N : a_i \leq y_i \leq b_i, 1 \leq i \leq N\}
+\end{equation}
+
+As a particular solution to the MCO problem, any effective option can be considered in which it is impossible to reduce the values of all criteria at once $f_i(y)$, $1 \leq i \leq s$, by selection of parameter values $y \in D$. In general case, when solving the MCO problem, it may be necessary to find the entire set of Pareto-optimal options \cite{Miettinen1999,Ehrgott2005,Pardalos2017}.
 
 
 \section{Computational scheme of the developed algorithm}
 \label{sec3}
 
+In the framework of the research, an algorithm for solving problems of multicriterial optimization with application of machine learning models has been developed. The general scheme of the algorithm is presented in Fig. \ref{fig1}. The algorithm combines elements of a deterministic global search algorithm and machine learning techniques to improve search efficiency. The following components can be pointed out in the algorithm.
+\begin{enumerate}
+	\item Block for accumulating and reusing the information about current state of the search.
+	\item Block for building the Pareto set estimation. 
+	\item Block of the global search algorithm. 
+	\item Block of machine learning for building a Pareto set estimation model. 
+	\item Block for the choice of trial points and implementation of computational experiments.
+\end{enumerate}
+
+Numerical solution of optimization problem consists in sequential carrying out trials (computations of criteria values at points of the search domain). The first block of the algorithm allows accumulating information about the trials performed and using it to solve problem (\ref{eq:01})-(\ref{eq:03}). Block 2 on the base of the accumulated information constructs an approximate solution as an estimate of the Pareto set. Block 3 allows efficient selection of trial points based on a global search algorithm. Block 4 builds a model for estimating the Pareto set. The built model is used to reduce the number of trials required to find the Pareto set with high quality and with fewer trials. The fifth block contains an algorithm that allows realizing trials in parallel. Let's take a closer look at the computing blocks.
+
 \begin{figure}
 \center
-\includegraphics[width=0.6\textwidth]{fig1.png}
+\includegraphics[width=0.7\textwidth]{fig1.png}
 \caption{Computational scheme of the algorithm for solving multicriterial optimization problems using machine learning models.} \label{fig1}
 \end{figure}
 
 
 \subsection{Block of the global search algorithm}
+\label{subsec31}
+
+The search for a globally optimal solution to problem (\ref{eq:01})-(\ref{eq:03}) consists of the following basic steps:
+\begin{enumerate}
+	\item scalarization of efficiency criteria;
+	\item dimensionality reduction;
+	\item optimization on the base of the global search algorithm.
+\end{enumerate}
+
+\textbf{Scalarization of efficiency criteria.} It is possible to find the Pareto set either solving the problem in the original formulation \cite{Evtushenko2014,DPA02,Durillo2010,Mostaghim2007,Nebro2009,RC05,Zitzler2001}, or reducing the original problem to a series of scalar problems to find effective solutions \cite{Pardalos2017,Konnov2025,Gergel2019_2,Gergel2018,GergelKozinov2020}. 
+
+In the framework of the developed approach \cite{Konnov2025}, the second option with scalarization of criteria is used. To build a good estimate of the Pareto set, a family of problems
+
+
 
 \subsection{Block for accumulating and reusing the information about current state of the search}
+\label{subsec32}
 
 \subsection{Block for building the Pareto set estimation}
+\label{subsec33}
 
 \begin{figure}
 \center
@@ -94,6 +156,7 @@ Solving problems of multi-criteria optimization involves finding many combinatio
 
 
 \subsection{Block of  building the machine learning for estimation of the Pareto set}
+\label{subsec34}
 
 \begin{figure}
 \center
@@ -109,7 +172,7 @@ Solving problems of multi-criteria optimization involves finding many combinatio
 
 
 \subsection{Block for the choice of trial points and implementation of computational experiments}
-
+\label{subsec35}
 
 \section{Results of computational experiments}
 \label{sec4}
