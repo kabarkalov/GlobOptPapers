@@ -23,6 +23,9 @@
 \usepackage{marvosym}
 \usepackage{hyperref}
 
+% добавили авторы
+\usepackage{multirow} 
+
 \def\letter{$^{\textrm{(\Letter)}}$}
 
 \begin{document}
@@ -70,14 +73,14 @@ Most artificial intelligence methods involve hyperparameters, and the choice of 
 %(рус.) Таким образом, возникает the hyperparameter optimization (HPO) problem, которая с математической точки зрения является задачей глобальной оптимизации. Типичным является случай наличия не только непрерывных, но и категориальных параметров, т.е. возникает необходимость использования методы глобальной оптимизации, способные решать задачи со смешанными параметрами.
 Thus, there arises the hyperparameter optimization (HPO) problem, which from the mathematical point of view is a global optimization problem. In this case, it is typical to have not only continuous but also categorical parameters (parameters having a prefixed set of values), i.e. there is a need to use global optimization methods capable of solving problems with mixed parameters.
 
-%(рус.) Традиционную сложность HPO problem составляет значительное время, требуемое для оценки критерия при конкретном сочетании параметров. Поэтому применение для данных задач метаэвристических алгоритмов, требующих большого числа поисковых испытаний, является ограниченным. Более перспективным здесь является использование детерминированных алгорит-мов липшицевой оптимизации [Евтушенко, Сергеев, Стронгин], которые превосходят эвристические методы по качеству работы [Сергеев]. Для методов липшицевой глобальной оптимизации предложен ряд подходов к распараллеливанию, обеспечивающих эффективную работу на суперкомпьютерных системах [Евтушенко, Жилинскас, Гергель]. 
+%(рус.) Традиционную сложность HPO problem составляет значительное время, требуемое для оценки критерия при конкретном сочетании параметров. Поэтому применение для данных задач метаэвристических алгоритмов, требующих большого числа поисковых испытаний, является ограниченным. Более перспективным здесь является использование детерминированных алгоритмов липшицевой оптимизации [Евтушенко, Сергеев, Стронгин], которые превосходят эвристические методы по качеству работы [Сергеев]. Для методов липшицевой глобальной оптимизации предложен ряд подходов к распараллеливанию, обеспечивающих эффективную работу на суперкомпьютерных системах [Евтушенко, Жилинскас, Гергель]. 
 The traditional complexity of HPO problems is due to the considerable time required to evaluate a criterion for a particular combination of parameters. Therefore, metaheuristic algorithms, which require a large number of search trials, can find only a limited use for such problems. A more promising approach is to use deterministic Lipschitz optimization algorithms \cite{Evtushenko2013,Sergeyev2017,Strongin2000}, which are superior to heuristic methods in terms of performance quality \cite{Sergeyev2018}. For Lipschitz global optimization methods, a number of parallelization approaches have been proposed to ensure efficient operation in supercomputer systems \cite{Evtushenko2009,Gegrel2021,Paulavicius2011}. 
 
 
 %(рус.) Еще одной сложностью рассматриваемого класса задач HPO является наличие таких сочетаний значений гиперпараметров, при которых в некоторых (заранее не известных) подобластях области поиска исследуемый метод в принципе не работает. С такими значениями параметров невозможно корректно провести расчет и вычислить значение критерия эффективности. Данное явление можно интерпретировать как частичную определенность критерия в области поиска. В такой постановке HPO problem существенно усложняется, т.к. область допустимых сочетаний параметров является заранее неопределенной.
 One more difficulty of the class of HPO problems being considered is the presence of such combinations of hyperparameter values for which the method under study does not work in principle in some (not known in advance) subdomains of the search domain. With such values of parameters it is impossible to perform the calculation correctly and calculate the value of the efficiency criterion. This phenomenon can be interpreted as partial definiteness of the criterion in the search domain. In such a formulation, the HPO problem becomes significantly more complicated, since the region of permissible combinations of parameters is undefined a priori.
 
-%(рус.) Данная статья продолжает развитие подхода к параллельному решению задач липшицевой глобальной оптимизации, предложенного в работах [наши работы]. Новым элементом является сочетание способов распараллеливания и предложенной в [Усова] схемы работы с частично вычислимыми функция-ми. Основная часть публикации имеет следующую структуру. В Section 2 приведена математическая постановка решаемой задачи. Section 3 содержит описание параллельного алгоритма глобального поиска. В Section 4 описан способ решения задач со смешанными (дискретными и непрерывными) па-раметрами, а также обсуждается способ работы с функциями, определенны-ми не во всей области поиска. Section 5 содержит результаты вычислитель-ных экспериментов, демонстрирующих эффективность предлагаемого под-хода при решении задачи оптимизации гиперпараметров методов прогнози-рования значений временного ряда.
+%(рус.) Данная статья продолжает развитие подхода к параллельному решению задач липшицевой глобальной оптимизации, предложенного в работах [наши работы]. Новым элементом является сочетание способов распараллеливания и предложенной в [Усова] схемы работы с частично вычислимыми функциями. Основная часть публикации имеет следующую структуру. В Section 2 приведена математическая постановка решаемой задачи. Section 3 содержит описание параллельного алгоритма глобального поиска. В Section 4 описан способ решения задач со смешанными (дискретными и непрерывными) параметрами, а также обсуждается способ работы с функциями, определенными не во всей области поиска. Section 5 содержит результаты вычислительных экспериментов, демонстрирующих эффективность предлагаемого подхода при решении задачи оптимизации гиперпараметров методов прогнозирования значений временного ряда.
 This paper continues to develop the approach to solving Lipschitz global optimization problems in parallel as proposed in [REFS ON OUR WORKS]. The new element is the combination of parallelization methods and the scheme for handling partially computable functions proposed in \cite{Usova2024}. The main part of the publication has the following structure.  Section \ref{sec:PS} presents the mathematical formulation of the problem to be solved. Section \ref{sec:PA} contains a description of the parallel global search algorithm. Section \ref{sec:MP} describes the method for solving problems with mixed (discrete and continuous) parameters, and also discusses the method for handling functions that are not defined in the entire search domain. Section \ref{sec:RCE} gives the results of computational experiments demonstrating the effectiveness of the proposed approach in solving the problem of optimizing the hyperparameters of time series forecasting methods.
 
 \section{Problem Statement}\label{sec:PS}
@@ -271,7 +274,7 @@ Applying the global search algorithm to solve problem (\ref{reduced_mixed_proble
 %(рус.) Отметим, что функция f(x), вообще говоря, может иметь разрывы в целочисленных точках x_i  = i. Так как эти точки известны заранее, их можно на первой итерации добавить в информационную базу алгоритма со значением индекса равным 0. В соответствии с правилами алгоритма, в процессе его работы не будет возникать интервалов, обе граничные точки которых имеют нулевой индекс, и правила вычисления характеристик (7) и точки нового интервала (8)-(9) будут валидными.
 Note that the function $f(x)$, in general, can have discontinuities at integer points $x_i=i$. Since these points are known in advance, they can be added to the information base of the algorithm at the first iteration with an index value equal to $0$. According to the rules of the algorithm, during its operation there will be no intervals with both boundary points having zero index, and the rules for calculating the features (\ref{characteristic}) and the points of the new interval (\ref{new_point_1})-(\ref{new_point_2}) will be valid.
 
-%(рус.) Однако в рассматриваемых задачах настройки гиперпарметров целевая функция может быть не определена в некоторых (заранее неизвестных) точ-ках области поиска. Это может приводить возникновению интервалов, у ко-торых обе граничных точки имеют нулевой индекс, т.е. значение целевой функции в них не определено. Возможный подход к обработке таких интер-валов состоит в использовании на шаге 4 алгоритма для вычисления характе-ристики вместо формулы (7) следующей формулы
+%(рус.) Однако в рассматриваемых задачах настройки гиперпарметров целевая функция может быть не определена в некоторых (заранее неизвестных) точках области поиска. Это может приводить возникновению интервалов, у которых обе граничных точки имеют нулевой индекс, т.е. значение целевой функции в них не определено. Возможный подход к обработке таких интервалов состоит в использовании на шаге 4 алгоритма для вычисления характеристики вместо формулы (7) следующей формулы
 However, in the hyperparameter tuning tasks under consideration, the objective function may be undefined in some (previously unknown) points in the search domain. This may give rise to intervals where both boundary points have a zero index, i.e. the value of the objective function is undefined in these points. A possible approach to processing such intervals is to use the following formula at step 4 of the algorithm to calculate the characteristic instead of formula (\ref{characteristic})
 
 \begin{equation}\label{characteristic_2}
@@ -296,27 +299,108 @@ x^{k+p+1} = \frac{x_t+x_{t-1}}{2}, \text{ if } v(x_{t-1}) \neq v(x_t) \text{ or 
 x^{k+p+1} = \frac{x_t+x_{t-1}}{2}-\textit{sign}{(z_t-z_{t-1})}\frac{|z_t-z_{t-1}|^N}{2r\mu^N}, \text{ if } v(x_{t-1})=v(x_t) = 1.
 \end{equation}
 
-%(рус.) Формула (14) будет применяться, если значения как минимум в одной из граничных точек интервала значения целевой функции не определены, тогда как формула (15) будет использоваться только в случае, когда значения це-левой функции вычислены в обоих точках.
+%(рус.) Формула (14) будет применяться, если значения как минимум в одной из граничных точек интервала значения целевой функции не определены, тогда как формула (15) будет использоваться только в случае, когда значения целевой функции вычислены в обоих точках.
 Formula (\ref{new_point_1_2}) will be used if the values in at least one of the boundary points of the objective function value interval are undefined, while formula (\ref{new_point_2_2}) will be used only when the values of the objective function are calculated at both points.
 
 \section{Results of computational experiments}\label{sec:RCE}
 
+%(рус.) Рассмотренные в статье методы реализованы в iOpt parallel solver, разрабатываемом в ННГУ им. Н.И. Лобачевского и предназначенном для решения многомерных задач глобальной оптимизации. 
+The methods considered in this paper are implemented in the iOpt parallel solver \cite{iOptURL} +REF!!!!!, which is being developed at Lobachevsky State University of Nizhni Novgorod  for solving multidimensional global optimization problems.
 
+%(рус.) В качестве модельной задачи нами была использована задача настройки гиперпараметров методов предсказания значений временного ряда (Time Series Forecasting). В качестве исходных данных был использован датасет montly beer prodaction [5.1], содержащий 476 valid data points. 
+We used the task of hyperparameter tuning for Time Series Forecasting methods as a model problem. The monthly beer production dataset \cite{MonthlyBeerDataset,MonthlyBeerArticle} containing 476 valid data points was used as input data. 
 
-\begin{table}
-\caption{Table captions should be placed above the tables.}\label{tab1}
-\begin{tabular}{|l|l|l|}
+%(рус.) Для решения задачи предсказания значений временного ряда мы использовали фреймворк машинного обучения FEDOT [5.2, 5.2.1] (open-source framework for automated modeling and machine learning (AutoML) problems). FEDOT поддерживает полный цикл решения задачи, включающий препроцессинг, выбор модели, настройку, кроссвалидацию и т.д. Фреймворк использует ML-модели, в основном из библиотек sklearn, statsmodels и keras, а также интегрирован с GOLEM open-source framework.
+To solve the problem of predicting time series values, we used the machine learning framework FEDOT \cite{FEDOT,nikitin2022automated} (open-source framework for automated modeling and machine learning problems). FEDOT supports the full problem solving cycle including preprocessing, model selection, tuning, cross validation, etc. The framework uses ML models, mainly from the sklearn, statsmodels and keras libraries, and is integrated with the GOLEM open-source framework.
+
+%(рус.) Построенный с использованием FEDOT pipeline включает в себя комбинацию из двух преобразований: lagged и cgru. Lagged-преобразование выполняется путем взятия значения переменной в предыдущий момент времени и включения его в модель в качестве признака в текущий момент времени. Для этого данные временного ряда сдвигаются на определенное количество шагов, которые называются лагом или временной задержкой. В качестве используемой нейронной сети будет выступать рекуррентная сеть (GRU), использующая свертку (CGRU).
+The pipeline constructed using FEDOT involves a combination of two transformations: lagged and cgru, Fig.~\ref{fig2}. Lagged transformation is performed by taking the value of a variable at a previous point in time and incorporating it into the model as a feature at the current point in time. For this purpose, the time series data is shifted by a certain number of steps, which are called  a lag  or time delay. A recurrent network (GRU) using convolution (CGRU) will serve as the neural network.
+
+\begin{figure}
+\center
+\includegraphics[width=0.5\textwidth]{fig2.png}
+\caption{Pipeline visualization.} \label{fig2}
+\end{figure}
+
+%(рус.) У lagged-преобразования имеется один параметр window_size, который изменяется от 5 до 250 с шагом 1. Поскольку этот параметр имеет большое количество значений, при оптимизации, будем рассматривать его как непрерывный (с округлением до единиц).
+The lagged transformation has one parameter $window\_size$, which varies from 5 to 250 in steps of 1. Since this parameter has a large number of values, we will consider it as continuous (rounded to units) during optimization.
+
+%(рус.) У cgru варьировались 4 дискретных параметра: cnn1_kernel_size  {4, 5}, cnn2_kernel_size  {5, 6}, cnn1_output_size  {32, 64}, cnn2_output_size  {32, 64}; и 2 непрерывных параметра: hidden_size  [20, 200], learning_rate  [0.0005, 0.005]. У остальных параметров были зафиксированы default values: batch_size = 64, num_epochs = 50, optimizer = 'adamw', loss = ‘mse’.
+For cgru, 4 discrete and 2 continuous parameters were varied:
+\begin{itemize}
+\item cnn1\_kernel\_size $\in \{4, 5\}$,
+\item cnn2\_kernel\_size $\in \{5, 6\}$, 
+\item cnn1\_output\_size $\in \{32, 64\}$, 
+\item cnn2\_output\_size $\in \{32, 64\}$;
+\item hidden\_size $\in [20, 200]$, 
+\item learning\_rate $\in [0.0005, 0.005]$.
+\end{itemize}
+
+The other parameters had default values: batch\_size = 64, num\_epochs = 50, optimizer = 'adamw', loss = 'mse'.
+
+%(рус.) Таким образом в iOpt solver передавалась задача с тремя непрерывными параметрами и четырьмя дискретными параметрами, каждый из которых принимает 2 значения (всего 16 комбинаций). При некоторых сочетаниях параметров window_size, cnn1_kernel_size, cnn1_output_size, cnn2_kernel_size и cnn2_output_size невозможно вычислить значение критерия, т.е. метод возвращает бесконечное значение функции. Такие точки рассматривались как невычислимые.
+Thus a problem with three continuous parameters and four discrete parameters,  each of them taking  2 values (16 combinations in total), was submitted to the iOpt solver. With some combinations of parameters window\_size, cnn1\_kernel\_size, cnn1\_output\_size, cnn2\_kernel\_size and cnn2\_output\_size, it is impossible to compute the criterion value, as the method returns an infinite function value. Such points were regarded as as non-computable.
+
+%(рус.) Для демонстрации эффективности работы iOpt задача также была решена при помощи известного фреймворка оптимизации гиперпараметров Optuna [5.3, 5.3.1]. Оба этих решателя были интегрированы в FEDOT и задействованы в вычислительном эксперименте.
+To demonstrate the effectiveness of iOpt, the problem was also solved using the well-known hyperparameter optimization framework Optuna \cite{OptunaURL,optuna}. Both of these solvers were integrated into FEDOT and employed in the computational experiment.
+
+%(рус.) Computations were conducted on the supercomputer “Lobachevsky” of the Nizhny Novgorod State University (operating system CentOS 7, control system SLURM, each supercomputer node had two processors Intel Xeon Silver 4310T CPU@2.30GHz (20 cores), 64Gb RAM). were used. Computations were performed using Python 3.9, FEDOT 0.7.5 [5.2, 5.2.1], iOpt  [20] and Optuna [5.3, 5.3.1].
+Calculations were performed on the ``Lobachevsky'' supercomputer of the Nizhni Novgorod State University (CentOS 7 operating system, SLURM control system, each supercomputer node had two Intel Xeon Silver 4310T processors CPU@2.30GHz (20 cores), 64Gb RAM). Data analyses were carried out using Python 3.9, FEDOT 0.7.5 \cite{FEDOT}, iOpt \cite{iOptURL} and Optuna \cite{OptunaURL}.
+
+%(рус.) Для решения поставленной задачи было выставлено ограничение на 1000 поисковых испытаний, число процессов P в параллельном алгоритме варьировалось от 1 до 20. В iOpt после 950 «глобальных» итераций глобального метода запускалось локальное уточнение с использованием Hooke-Jeeves method.
+To solve the problem, a limit of 1000 search trials was set, the number of processes P in the parallel algorithm varied from 1 to 20. In iOpt, after 950 ``global'' iterations of the global method, local refinement using the Hooke-Jeeves method was carried out.  
+
+%(рус.) Результаты проведенного эксперимента отражены в таблице 1: указано время решения задачи и значение целевой метрики, полученное с помощью iOpt и OPTUNA. Число точек, в которых не получилось вычислить критерий оптимизации, составило порядка 10\% от общего числа точек search trials. Кривые, соответствующие полученному предсказанию, приведены на Fig.2. Темная линия соответствует истинным значениям временного ряда, голубая – предсказанным значениям, полученным после использования OPTUNA, желтая линия – предсказанным значениям, полученным после использования iOpt.
+The results of the experiment are shown in Table~\ref{tab1}: the time required to solve the problem and the value of the objective metric obtained using iOpt and Optuna. The number of points where the optimization criterion could not be calculated was about 10\% of the total number of search trials. The curves corresponding to the obtained prediction are shown in Fig.~\ref{fig3}. The dark line corresponds to the true values of the time series, the blue line corresponds to the predicted values obtained after using Optuna, and the yellow line corresponds to the predicted values obtained after using iOpt.
+
+\begin{figure}
+\center
+\includegraphics[width=1\textwidth]{fig3.png}
+\caption{Prediction visualization.} \label{fig3}
+\end{figure}
+
+\begin{table}[]
+\centering
+\caption{Results of solving the problem using iOpt and Optuna.}\label{tab1}
+\begin{tabular}{|l|c|c|c|c|}
 \hline
-Heading level &  Example & Font size and style\\
+\multirow{2}{*}{P} & \multicolumn{2}{c|}{iOpt} & \multicolumn{2}{c|}{Optuna} \\
+\cline{2-5} 
+ & Solving time & Final metric & Solving time & Final metric \\
 \hline
-Title (centered) &  {\Large\bfseries Lecture Notes} & 14 point, bold\\
-1st-level heading &  {\large\bfseries 1 Introduction} & 12 point, bold\\
-2nd-level heading & {\bfseries 2.1 Printing Area} & 10 point, bold\\
-3rd-level heading & {\bfseries Run-in Heading in Bold.} Text follows & 10 point, bold\\
-4th-level heading & {\itshape Lowest Level Heading.} Text follows & 10 point, italic\\
+1 & 6574,28 & 13,56 & 9554,08 & 13,43 \\
+2 & 3579,27 & 13,97 & 5127,50 & 13,69 \\
+4 & 1998,70 & 13,62 & 2598,68 & 13,26 \\
+8 & 1331,79 & 13,20 & 1275,45 & 13,26 \\
+16 & 846,69 & 13,31 & 1148,52 & 13,39 \\
+20 & 699,94 & 13,98 & 1578,67 & 13,32 \\
 \hline
 \end{tabular}
 \end{table}
+
+%(рус.) Ключевой характеристикой параллельных алгоритмов является ускорение. Мы будем использовать традиционное понятие ускорения как отношение времени последовательного запуска ко времени решения задачи в параллельном режиме. На Fig.3 приведены графики ускорения, полученного при параллельном запуске iOpt и OPTUNA. Наглядно видно, что iOpt на большом числе процессов показывает лучшее ускорение по сравнению с OPTUNA.
+The key characteristic of parallel algorithms is speedup. We will use the traditional notion of speedup as the ratio of the time of sequential running to the time of solving the problem in the parallel mode. Fig.~\ref{fig4} and Fig.~\ref{fig5} show the graphs of speedup obtained by parallel running of iOpt and Optuna. We can clearly see that iOpt shows better speedup on a large number of processes compared to OPTUNA.
+
+\begin{figure}
+\center
+\includegraphics[width=0.8\textwidth]{fig4.png}
+\caption{Speedup as a function of the number of processes.} \label{fig4}
+\end{figure}
+
+\begin{figure}
+\center
+\includegraphics[width=0.8\textwidth]{fig5.png}
+\caption{Solving time depending on the number of processes.} \label{fig5}
+\end{figure}
+
+\section{Conclusion}
+
+%(рус.) Результаты экспериментов подтверждают, что алгоритм глобального поиска позволяет эффективно решать задачи настройки гиперпараметров методов искусственного интеллекта. Успешно обрабатываются ситуации, когда целевой критерий определен не всюду в области поиска. Параллельная программная реализация, выполненная в рамках iOpt solver, показывает хорошие ускорение и требует меньшего времени на решение задачи по сравнению с известными фреймворками для настройки гиперпараметров. 
+Our experimental results confirm that the global search algorithm can effectively solve the problems of hyperparameter tuning for AI methods.  Situations when the objective criterion is not defined everywhere in the search domain are also handled successfully. The parallel software implementation within the iOpt solver shows a good speedup and requires less time to solve the problem compared to known frameworks for hyperparameter tuning.
+
+%(рус.) Уменьшение прироста ускорения с ростом числа используемых процессов связана с необходимостью копирования большого объема данных, данная проблема будет решаться в дальнейшей работе. 
+%(рус.) Для распараллеливания вычислений использовалась библиотека multiprocess, которая хорошо себя показывает при передаче небольших объемов данных между процессами, однако при увеличении количества процессов объем данных, которые необходимо скопировать растет линейно, из-за чего наблюдаем замедление роста ускорения с увеличением числа используемых процессов. Дальнейшие исследования будут направлены на повышение ускорения и поиск более эффективного алгоритма копирования и переиспользования данных.
+To parallelize calculations in iOpt, we used the multiprocess library, which performs well when transferring small amounts of data between processes. However, when the number of parallel processes increases, the amount of data to be transferred between processes will grow linearly, which may cause the speedup to drop with the increasing number of processes being used. Further research will be geared towards  using a more efficient algorithm for copying and transferring data in iOpt in order to improve the speedup.
 
 
 \begin{credits}
