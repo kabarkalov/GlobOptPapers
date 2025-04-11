@@ -81,7 +81,7 @@ The traditional complexity of HPO problems is due to the considerable time requi
 One more difficulty of the class of HPO problems being considered is the presence of such combinations of hyperparameter values for which the method under study does not work in principle in some (not known in advance) subdomains of the search domain. With such values of parameters it is impossible to perform the calculation correctly and calculate the value of the efficiency criterion. This phenomenon can be interpreted as partial definiteness of the criterion in the search domain. In such a formulation, the HPO problem becomes significantly more complicated, since the region of permissible combinations of parameters is undefined a priori.
 
 %(рус.) Данная статья продолжает развитие подхода к параллельному решению задач липшицевой глобальной оптимизации, предложенного в работах [наши работы]. Новым элементом является сочетание способов распараллеливания и предложенной в [Усова] схемы работы с частично вычислимыми функциями. Основная часть публикации имеет следующую структуру. В Section 2 приведена математическая постановка решаемой задачи. Section 3 содержит описание параллельного алгоритма глобального поиска. В Section 4 описан способ решения задач со смешанными (дискретными и непрерывными) параметрами, а также обсуждается способ работы с функциями, определенными не во всей области поиска. Section 5 содержит результаты вычислительных экспериментов, демонстрирующих эффективность предлагаемого подхода при решении задачи оптимизации гиперпараметров методов прогнозирования значений временного ряда.
-This paper continues to develop the approach to solving Lipschitz global optimization problems in parallel as proposed in [REFS ON OUR WORKS]. The new element is the combination of parallelization methods and the scheme for handling partially computable functions proposed in \cite{Usova2024}. The main part of the publication has the following structure.  Section \ref{sec:PS} presents the mathematical formulation of the problem to be solved. Section \ref{sec:PA} contains a description of the parallel global search algorithm. Section \ref{sec:MP} describes the method for solving problems with mixed (discrete and continuous) parameters, and also discusses the method for handling functions that are not defined in the entire search domain. Section \ref{sec:RCE} gives the results of computational experiments demonstrating the effectiveness of the proposed approach in solving the problem of optimizing the hyperparameters of time series forecasting methods.
+This paper continues to develop the approach to solving Lipschitz global optimization problems in parallel \cite{Barkalov2018,Gegrel2021,Strongin2018}. The new element is the combination of parallelization methods and the scheme for handling partially computable functions proposed in \cite{Usova2024}. The main part of the publication has the following structure.  Section \ref{sec:PS} presents the mathematical formulation of the problem to be solved. Section \ref{sec:PA} contains a description of the parallel global search algorithm. Section \ref{sec:MP} describes the method for solving problems with mixed (discrete and continuous) parameters, and also discusses the method for handling functions that are not defined in the entire search domain. Section \ref{sec:RCE} gives the results of computational experiments demonstrating the effectiveness of the proposed approach in solving the problem of optimizing the hyperparameters of time series forecasting methods.
 
 \section{Problem Statement}\label{sec:PS}
 %(рус.) В начале рассмотрим задачу оптимизации в простой постановке, только с непрерывными параметрами. Пусть требуется найти минимум функции $\phi(y)$, определенной в области $D$
@@ -215,8 +215,9 @@ R(t)= \max \left\{ R(i): x_{i-1} \notin S_k, x_i \notin S_k, 2 \leq i \leq k+p\r
 x^{k+p+1} = \frac{x_t+x_{t-1}}{2}, \text{ if } v(x_{t-1}) \neq v(x_t),
 \end{equation}
 \begin{equation}\label{new_point_2} 
-x^{k+p+1} = \frac{x_t+x_{t-1}}{2}-\textit{sign}{(z_t-z_{t-1})}\frac{|z_t-z_{t-1}|^N}{2r\mu^N}, \text{ if } v(x_{t-1})=v(x_t).
+x^{k+p+1} = \frac{x_t+x_{t-1}}{2}-\frac{\textit{sign}{(z_t-z_{t-1})}}{2r} \left[ \frac{|z_t-z_{t-1}|}{\mu} \right]^N,
 \end{equation}
+if $v(x_{t-1})=v(x_t)$.
 %(рус.) Сразу после вычисления точки очередного испытания процесс-мастер добавляет ее в множество S и пересылает процессу-рабочему, который начинает проведение испытания в ней.
 Immediately after calculating the point of the next trial, the master process adds it to the set $S$ and forwards it to the worker process, which starts a trial there.
 \end{enumerate}
@@ -296,8 +297,9 @@ It is also necessary to supplement the rule for selecting a new trial point to h
 x^{k+p+1} = \frac{x_t+x_{t-1}}{2}, \text{ if } v(x_{t-1}) \neq v(x_t) \text{ or } v(x_{t-1})=v(x_t)=0,
 \end{equation}
 \begin{equation}\label{new_point_2_2} 
-x^{k+p+1} = \frac{x_t+x_{t-1}}{2}-\textit{sign}{(z_t-z_{t-1})}\frac{|z_t-z_{t-1}|^N}{2r\mu^N}, \text{ if } v(x_{t-1})=v(x_t) = 1.
+x^{k+p+1} = \frac{x_t+x_{t-1}}{2}-\frac{\textit{sign}{(z_t-z_{t-1})}}{2r} \left[ \frac{|z_t-z_{t-1}|}{\mu} \right]^N,
 \end{equation}
+if $v(x_{t-1})=v(x_t) = 1$.
 
 %(рус.) Формула (14) будет применяться, если значения как минимум в одной из граничных точек интервала значения целевой функции не определены, тогда как формула (15) будет использоваться только в случае, когда значения целевой функции вычислены в обоих точках.
 Formula (\ref{new_point_1_2}) will be used if the values in at least one of the boundary points of the objective function value interval are undefined, while formula (\ref{new_point_2_2}) will be used only when the values of the objective function are calculated at both points.
@@ -305,16 +307,16 @@ Formula (\ref{new_point_1_2}) will be used if the values in at least one of the 
 \section{Results of computational experiments}\label{sec:RCE}
 
 %(рус.) Рассмотренные в статье методы реализованы в iOpt parallel solver, разрабатываемом в ННГУ им. Н.И. Лобачевского и предназначенном для решения многомерных задач глобальной оптимизации. 
-The methods considered in this paper are implemented in the iOpt parallel solver \cite{iOptURL} +REF!!!!!, which is being developed at Lobachevsky State University of Nizhni Novgorod  for solving multidimensional global optimization problems.
+The methods considered in this paper are implemented in the iOpt parallel solver \cite{iOptURL}, which is being developed at Lobachevsky State University of Nizhni Novgorod  for solving multidimensional global optimization problems.
 
 %(рус.) В качестве модельной задачи нами была использована задача настройки гиперпараметров методов предсказания значений временного ряда (Time Series Forecasting). В качестве исходных данных был использован датасет montly beer prodaction [5.1], содержащий 476 valid data points. 
-We used the task of hyperparameter tuning for Time Series Forecasting methods as a model problem. The monthly beer production dataset \cite{MonthlyBeerDataset,MonthlyBeerArticle} containing 476 valid data points was used as input data. 
+We used the task of hyperparameter tuning for time series forecasting methods as a model problem. The monthly beer production dataset \cite{MonthlyBeerDataset,MonthlyBeerArticle} containing 476 valid data points was used as input data. 
 
 %(рус.) Для решения задачи предсказания значений временного ряда мы использовали фреймворк машинного обучения FEDOT [5.2, 5.2.1] (open-source framework for automated modeling and machine learning (AutoML) problems). FEDOT поддерживает полный цикл решения задачи, включающий препроцессинг, выбор модели, настройку, кроссвалидацию и т.д. Фреймворк использует ML-модели, в основном из библиотек sklearn, statsmodels и keras, а также интегрирован с GOLEM open-source framework.
 To solve the problem of predicting time series values, we used the machine learning framework FEDOT \cite{FEDOT,nikitin2022automated} (open-source framework for automated modeling and machine learning problems). FEDOT supports the full problem solving cycle including preprocessing, model selection, tuning, cross validation, etc. The framework uses ML models, mainly from the sklearn, statsmodels and keras libraries, and is integrated with the GOLEM open-source framework.
 
 %(рус.) Построенный с использованием FEDOT pipeline включает в себя комбинацию из двух преобразований: lagged и cgru. Lagged-преобразование выполняется путем взятия значения переменной в предыдущий момент времени и включения его в модель в качестве признака в текущий момент времени. Для этого данные временного ряда сдвигаются на определенное количество шагов, которые называются лагом или временной задержкой. В качестве используемой нейронной сети будет выступать рекуррентная сеть (GRU), использующая свертку (CGRU).
-The pipeline constructed using FEDOT involves a combination of two transformations: lagged and cgru, Fig.~\ref{fig2}. Lagged transformation is performed by taking the value of a variable at a previous point in time and incorporating it into the model as a feature at the current point in time. For this purpose, the time series data is shifted by a certain number of steps, which are called  a lag  or time delay. A recurrent network (GRU) using convolution (CGRU) will serve as the neural network.
+The pipeline constructed using FEDOT involves a combination of two transformations: \textit{lagged} and \textit{cgru}, Fig.~\ref{fig2}. Lagged transformation is performed by taking the value of a variable at a previous point in time and incorporating it into the model as a feature at the current point in time. For this purpose, the time series data is shifted by a certain number of steps, which are called  a lag  or time delay. A recurrent network (GRU) using convolution (CGRU) will serve as the neural network.
 
 \begin{figure}
 \center
@@ -326,7 +328,7 @@ The pipeline constructed using FEDOT involves a combination of two transformatio
 The lagged transformation has one parameter $window\_size$, which varies from 5 to 250 in steps of 1. Since this parameter has a large number of values, we will consider it as continuous (rounded to units) during optimization.
 
 %(рус.) У cgru варьировались 4 дискретных параметра: cnn1_kernel_size  {4, 5}, cnn2_kernel_size  {5, 6}, cnn1_output_size  {32, 64}, cnn2_output_size  {32, 64}; и 2 непрерывных параметра: hidden_size  [20, 200], learning_rate  [0.0005, 0.005]. У остальных параметров были зафиксированы default values: batch_size = 64, num_epochs = 50, optimizer = 'adamw', loss = ‘mse’.
-For cgru, 4 discrete and 2 continuous parameters were varied:
+For CGRU, 4 discrete and 2 continuous parameters were varied:
 \begin{itemize}
 \item cnn1\_kernel\_size $\in \{4, 5\}$,
 \item cnn2\_kernel\_size $\in \{5, 6\}$, 
@@ -345,7 +347,7 @@ Thus a problem with three continuous parameters and four discrete parameters,  e
 To demonstrate the effectiveness of iOpt, the problem was also solved using the well-known hyperparameter optimization framework Optuna \cite{OptunaURL,optuna}. Both of these solvers were integrated into FEDOT and employed in the computational experiment.
 
 %(рус.) Computations were conducted on the supercomputer “Lobachevsky” of the Nizhny Novgorod State University (operating system CentOS 7, control system SLURM, each supercomputer node had two processors Intel Xeon Silver 4310T CPU@2.30GHz (20 cores), 64Gb RAM). were used. Computations were performed using Python 3.9, FEDOT 0.7.5 [5.2, 5.2.1], iOpt  [20] and Optuna [5.3, 5.3.1].
-Calculations were performed on the ``Lobachevsky'' supercomputer of the Nizhni Novgorod State University (CentOS 7 operating system, SLURM control system, each supercomputer node had two Intel Xeon Silver 4310T processors CPU@2.30GHz (20 cores), 64Gb RAM). Data analyses were carried out using Python 3.9, FEDOT 0.7.5 \cite{FEDOT}, iOpt \cite{iOptURL} and Optuna \cite{OptunaURL}.
+Calculations were performed on the ``Lobachevsky'' supercomputer of the Nizhni Novgorod State University (CentOS 7 operating system, SLURM control system, each supercomputer node had two Intel Xeon Silver 4310T processors CPU@2.30GHz (20 cores), 64Gb RAM). Data analyses were carried out using Python 3.9, FEDOT 0.7.5 \cite{FEDOT}, iOpt 0.5.0 \cite{iOptURL} and Optuna 4.2.1 \cite{OptunaURL}.
 
 %(рус.) Для решения поставленной задачи было выставлено ограничение на 1000 поисковых испытаний, число процессов P в параллельном алгоритме варьировалось от 1 до 20. В iOpt после 950 «глобальных» итераций глобального метода запускалось локальное уточнение с использованием Hooke-Jeeves method.
 To solve the problem, a limit of 1000 search trials was set, the number of processes P in the parallel algorithm varied from 1 to 20. In iOpt, after 950 ``global'' iterations of the global method, local refinement using the Hooke-Jeeves method was carried out.  
@@ -359,7 +361,7 @@ The results of the experiment are shown in Table~\ref{tab1}: the time required t
 \caption{Prediction visualization.} \label{fig3}
 \end{figure}
 
-\begin{table}[]
+\begin{table}
 \centering
 \caption{Results of solving the problem using iOpt and Optuna.}\label{tab1}
 \begin{tabular}{|l|c|c|c|c|}
@@ -368,18 +370,18 @@ The results of the experiment are shown in Table~\ref{tab1}: the time required t
 \cline{2-5} 
  & Solving time & Final metric & Solving time & Final metric \\
 \hline
-1 & 6574,28 & 13,56 & 9554,08 & 13,43 \\
-2 & 3579,27 & 13,97 & 5127,50 & 13,69 \\
-4 & 1998,70 & 13,62 & 2598,68 & 13,26 \\
-8 & 1331,79 & 13,20 & 1275,45 & 13,26 \\
-16 & 846,69 & 13,31 & 1148,52 & 13,39 \\
-20 & 699,94 & 13,98 & 1578,67 & 13,32 \\
+1 & 6574.2 & 13.5 & 9554.1 & 13.4 \\
+2 & 3579.2 & 13.9 & 5127.5 & 13.6 \\
+4 & 1998.7 & 13.6 & 2598.6 & 13.2 \\
+8 & 1331.7 & 13.2 & 1275.4 & 13.2 \\
+16 & 846.6 & 13.3 & 1148.5 & 13.3 \\
+20 & 699.9 & 13.9 & 1578.6 & 13.3 \\
 \hline
 \end{tabular}
 \end{table}
 
 %(рус.) Ключевой характеристикой параллельных алгоритмов является ускорение. Мы будем использовать традиционное понятие ускорения как отношение времени последовательного запуска ко времени решения задачи в параллельном режиме. На Fig.3 приведены графики ускорения, полученного при параллельном запуске iOpt и OPTUNA. Наглядно видно, что iOpt на большом числе процессов показывает лучшее ускорение по сравнению с OPTUNA.
-The key characteristic of parallel algorithms is speedup. We will use the traditional notion of speedup as the ratio of the time of sequential running to the time of solving the problem in the parallel mode. Fig.~\ref{fig4} and Fig.~\ref{fig5} show the graphs of speedup obtained by parallel running of iOpt and Optuna. We can clearly see that iOpt shows better speedup on a large number of processes compared to OPTUNA.
+The key characteristic of parallel algorithms is speedup. We will use the traditional notion of speedup as the ratio of the time of sequential running to the time of solving the problem in the parallel mode. Fig.~\ref{fig4} and Fig.~\ref{fig5} show the graphs of speedup and time obtained by parallel running of iOpt and Optuna. We can clearly see that iOpt shows better speedup on a large number of processes compared to Optuna.
 
 \begin{figure}
 \center
