@@ -56,7 +56,7 @@ Konstantin Barkalov \orcidID{0000-0001-5273-2471}
 %(рус.) В статье рассматривается параллельный алгоритм для решения задач глобальной оптимизации с частично определенной целевой функцией вида «черный ящик». Задачи такого вида возникают в процессе выбора оптимальных значений гиперпараметров методов машинного обучения и искусственного интеллекта. Алгоритм использует схему редукции размерности на основе кривых Пеано в сочетании с асинхронной схемой распараллеливания вычислений. Для демонстрации эффективности распараллеливания проведены вычислительные эксперименты в задаче настройки гиперпараметров методов искусственного интеллекта, используемых для предсказания значений временного ряда. 
 The paper considers a parallel algorithm for solving global optimization problems with a partially defined objective function of the ``black box'' type. Such problems arise in the process of selecting optimal values of hyperparameters used in machine learning and artificial intelligence methods. The algorithm employs a dimensionality reduction scheme based on Peano curves in combination with an asynchronous scheme of parallel computing. To demonstrate the effectiveness of parallelization, computational experiments were conducted for the task of tuning the hyperparameters of artificial intelligence methods used to predict the values of a time series.
 
-\keywords{Global optimization  \and Multiextremal Functions \and Partially Defined Functions \and Hyperparameter Tuning \and  Time Series \and Artificial Intelligence.}
+\keywords{Global Optimization  \and Multiextremal Functions \and Partially Defined Functions \and Hyperparameter Tuning \and  Time Series \and Artificial Intelligence.}
 \end{abstract}
 %
 %
@@ -163,8 +163,8 @@ and assign to them the values $z_i = \phi(y(x_i)), 1 \leq i \leq k$ calculated a
 \begin{equation}\label{rule_points_index} 
 v_i=v(x_i)=
 \begin{cases}
-    0     & \quad \text{if } x_i \text{ is boundary point},\\
-    1     & \quad \text{if } x_i \text{ is internal point}.
+    0,     & \quad \text{if } x_i \text{ is boundary point},\\
+    1,     & \quad \text{if } x_i \text{ is internal point}.
 \end{cases}
 \end{equation}
 %(рус.) Точки x_0=0 и x_(k+p)=1 введены дополнительно (значения z_0 и z_(k+p) не определены) для удобства последующих обозначений.
@@ -191,7 +191,7 @@ z^* = \min \left\{ \phi(x_i): 1 \leq i \leq k \right\}.
 \end{equation}
 
 %(рус.) 4. Каждому интервалу (x_(i-1),x_i ),x_(i-1)  ∉ S_k,x_i  ∉ S_k,2≤ i≤ k+p, поставить в соответствие число R(i), которое называется характеристикой интервала и вычисляется по формуле
-\item Assign a number $R(i)$ to each interval $(x_{i-1}, x_i), x_(i-1) \notin S_k, x_i \notin S_k, 2 \leq i \leq k+p$, which is called the interval characteristic and is calculated using the formula
+\item Assign a number $R(i)$ to each interval $(x_{i-1}, x_i), x_{i-1} \notin S_k, x_i \notin S_k, 2 \leq i \leq k+p$, which is called the interval characteristic and is calculated using the formula
 \begin{equation}\label{characteristic}
 R(i)=
 \begin{cases}
@@ -273,7 +273,7 @@ we can reformulate problem (\ref{reduced_mixed_problem} ) as
 Applying the global search algorithm to solve problem (\ref{reduced_mixed_problem_2}), we will find a solution to problem (\ref{mixed_problem}). 
 
 %(рус.) Отметим, что функция f(x), вообще говоря, может иметь разрывы в целочисленных точках x_i  = i. Так как эти точки известны заранее, их можно на первой итерации добавить в информационную базу алгоритма со значением индекса равным 0. В соответствии с правилами алгоритма, в процессе его работы не будет возникать интервалов, обе граничные точки которых имеют нулевой индекс, и правила вычисления характеристик (7) и точки нового интервала (8)-(9) будут валидными.
-Note that the function $f(x)$, in general, can have discontinuities at integer points $x_i=i$. Since these points are known in advance, they can be added to the information base of the algorithm at the first iteration with an index value equal to $0$. According to the rules of the algorithm, during its operation there will be no intervals with both boundary points having zero index, and the rules for calculating the features (\ref{characteristic}) and the points of the new interval (\ref{new_point_1})-(\ref{new_point_2}) will be valid.
+Note that the function $f(x)$, in general, can have discontinuities at integer points $x_i=i$. Since these points are known in advance, they can be added to the information base of the algorithm at the first iteration with an index value equal to $0$. According to the rules of the algorithm, during its operation there will be no intervals with both boundary points having zero index, and the rules for calculating the characteristics (\ref{characteristic}) and the points of the new interval (\ref{new_point_1})-(\ref{new_point_2}) will be valid.
 
 %(рус.) Однако в рассматриваемых задачах настройки гиперпарметров целевая функция может быть не определена в некоторых (заранее неизвестных) точках области поиска. Это может приводить возникновению интервалов, у которых обе граничных точки имеют нулевой индекс, т.е. значение целевой функции в них не определено. Возможный подход к обработке таких интервалов состоит в использовании на шаге 4 алгоритма для вычисления характеристики вместо формулы (7) следующей формулы
 However, in the hyperparameter tuning tasks under consideration, the objective function may be undefined in some (previously unknown) points in the search domain. This may give rise to intervals where both boundary points have a zero index, i.e. the value of the objective function is undefined in these points. A possible approach to processing such intervals is to use the following formula at step 4 of the algorithm to calculate the characteristic instead of formula (\ref{characteristic})
@@ -297,9 +297,12 @@ It is also necessary to supplement the rule for selecting a new trial point to h
 x^{k+p+1} = \frac{x_t+x_{t-1}}{2}, \text{ if } v(x_{t-1}) \neq v(x_t) \text{ or } v(x_{t-1})=v(x_t)=0,
 \end{equation}
 \begin{equation}\label{new_point_2_2} 
-x^{k+p+1} = \frac{x_t+x_{t-1}}{2}-\frac{\textit{sign}{(z_t-z_{t-1})}}{2r} \left[ \frac{|z_t-z_{t-1}|}{\mu} \right]^N,
+\begin{split}
+x^{k+p+1} = \frac{x_t+x_{t-1}}{2}-\frac{\textit{sign}{(z_t-z_{t-1})}}{2r} \left[ \frac{|z_t-z_{t-1}|}{\mu} \right]^N, \\
+\text{if }  v(x_{t-1})=v(x_t) = 1.
+\end{split}
 \end{equation}
-if $v(x_{t-1})=v(x_t) = 1$.
+
 
 %(рус.) Формула (14) будет применяться, если значения как минимум в одной из граничных точек интервала значения целевой функции не определены, тогда как формула (15) будет использоваться только в случае, когда значения целевой функции вычислены в обоих точках.
 Formula (\ref{new_point_1_2}) will be used if the values in at least one of the boundary points of the objective function value interval are undefined, while formula (\ref{new_point_2_2}) will be used only when the values of the objective function are calculated at both points.
@@ -325,7 +328,7 @@ The pipeline constructed using FEDOT involves a combination of two transformatio
 \end{figure}
 
 %(рус.) У lagged-преобразования имеется один параметр window_size, который изменяется от 5 до 250 с шагом 1. Поскольку этот параметр имеет большое количество значений, при оптимизации, будем рассматривать его как непрерывный (с округлением до единиц).
-The lagged transformation has one parameter $window\_size$, which varies from 5 to 250 in steps of 1. Since this parameter has a large number of values, we will consider it as continuous (rounded to units) during optimization.
+The lagged transformation has one parameter window\_size, which varies from 5 to 250 in steps of 1. Since this parameter has a large number of values, we will consider it as continuous (rounded to units) during optimization.
 
 %(рус.) У cgru варьировались 4 дискретных параметра: cnn1_kernel_size  {4, 5}, cnn2_kernel_size  {5, 6}, cnn1_output_size  {32, 64}, cnn2_output_size  {32, 64}; и 2 непрерывных параметра: hidden_size  [20, 200], learning_rate  [0.0005, 0.005]. У остальных параметров были зафиксированы default values: batch_size = 64, num_epochs = 50, optimizer = 'adamw', loss = ‘mse’.
 For CGRU, 4 discrete and 2 continuous parameters were varied:
