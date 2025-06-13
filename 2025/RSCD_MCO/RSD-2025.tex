@@ -239,7 +239,7 @@ Accumulation of search information allows more accurate estimation of the Pareto
 \begin{figure}
 \center
 \includegraphics[width=0.6\textwidth]{fig2.png}
-\caption{Example of Pareto set evaluation in solving two scalar optimization problems.} \label{fig2}
+\caption{Example of Pareto set evaluation in solving two scalar optimization problems (values in the domain of criteria values).} \label{fig2}
 \end{figure}
 
 
@@ -256,12 +256,12 @@ The characteristic $R_{GSA}(i)$ from (\ref{eq:15}) is used to find the global mi
 
 To calculate the value of $R_{PS}(i)$, we propose using machine learning methods. Various algorithms for calculation of  $R_{PS}(i)$ have been proposed in \cite{Konnov2025}. All proposed methods use the following scheme. In the course of solving the MCO problem, after every changing the coefficients  $\lambda_j$, $1 \leq j \leq \tau$, and therefore, moving to a new optimization problem from (\ref{eq:06}), all obtained trial points (\ref{eq:14}) are divided into two classes. The first class includes points belonging to the Pareto set. All other trial points belong to the second class. The quantity of points that do not belong to the Pareto set, as a rule, is significantly larger; therefore, the classes are not balanced. For more efficient work of machine learning algorithms, weights corresponding to the significance of trial points are set for each class, if possible. After training the model in the selected classes, the following approaches are used for building $R_{PS}(i)$.
 \begin{enumerate}
-	\item When using the Support Vector Classification (SVC) model with a linear core, $R_{PS}(i)$ is considered on the base of the distance to the dividing hyperplane.
-	\item	When using the SVC model with an arbitrary core, $R_{PS}(i)$ RP is built according to probabilities of belonging trial points to the first class (Pareto set).
+	\item When using the Support Vector Classification (SVC) model with a linear kernel, $R_{PS}(i)$ is considered on the base of the distance to the dividing hyperplane.
+	\item	When using the SVC model with an arbitrary kernel, $R_{PS}(i)$ RP is built according to probabilities of belonging trial points to the first class (Pareto set).
 	\item Neural network models are used as a new way to evaluate $R_{PS}(i)$. The method of calculating $R_{PS}(i)$ is similar to step 2.
 \end{enumerate}
 
-In the framework of the first approach, an SVC model with a linear core is built for computation $R_{PS}(i)$. Information is extracted from the model to construct a dividing hyperplane equation between the selected point classes in the criteria value space. The characteristic $R_{PS}(i)$ of the interval $[x_{i-1},x_i ]$ is considered as the sum of the distances of the criteria values  from the points $x_{i-1}$, $x_i$ to the hyperplane. The value below the hyperplane is taken with a plus sign, and above the hyperplane  with a minus sign.
+In the framework of the first approach, an SVC model with a linear kernel is built for computation $R_{PS}(i)$. Information is extracted from the model to construct a dividing hyperplane equation between the selected point classes in the criteria value space. The characteristic $R_{PS}(i)$ of the interval $[x_{i-1},x_i ]$ is considered as the sum of the distances of the criteria values  from the points $x_{i-1}$, $x_i$ to the hyperplane. The value below the hyperplane is taken with a plus sign, and above the hyperplane  with a minus sign.
 
 In the second approach, the probability of belonging  each of the points to the Pareto region is used instead of distances. $R_{PS}(i)$ is considered as the arithmetic mean of the calculated probability values for the points $x_{i-1}$ and $x_i$. This approach is more universal, since the counting method does not depend on the selected kernel. The method of calculating $R_{PS}(i)$ is described more detailed in \cite{Konnov2025}.
 
@@ -327,7 +327,7 @@ Results of the experiments for the following algorithms are presented (see subse
 \begin{enumerate}
 	\item MGSA -- machine learning elements are not used,
 	\item MGSA Dist -- the modified algorithm with computation $R_{PS}(i)$ from (\ref{eq:15}) based on distances,
-	\item MGSA Linear SVC, MGSA Poly SVC, MGSA Rbf SVC -- the algorithm modification with computation $R_{PS}(i)$ from (\ref{eq:15}) based on probabilities with different SVC algorithm core,
+	\item MGSA Linear SVC, MGSA Poly SVC, MGSA Rbf SVC -- the algorithm modification with computation $R_{PS}(i)$ from (\ref{eq:15}) based on probabilities with different SVC algorithm kernel,
 	\item MGSA NN -- the algorithm modification with computation $R_{PS}(i)$ from (\ref{eq:15}) on the base of probabilities obtained using neural networks.
 \end{enumerate}
 	
@@ -341,7 +341,7 @@ Fig. \ref{fig5} shows the dependence of the average value of the HV index on the
 \caption{Comparison of HV index values for sequential algorithm implementation.} \label{fig5}
 \end{figure}
 
-Based on the results of experiments with sequential implementation, all approaches using machine learning models exceed the MGSA algorithm by more than two times. Modifications of the algorithm can be distinguished that demonstrate the best results both in terms of the average number of iterations and in terms of the average HV. These include approaches using SVC (Linear, Rbf cores), a distance calculation approach, and neural networks with two hidden layers. Modification with one hidden layer shows slightly worse results. Modification  MGSA Poly SVC with polynomial core showed least improvement over MGSA. It is also worth noting that the modification of the MGSA Rbf SVC algorithm in the case of low accuracy demonstrates the best quality.
+Based on the results of experiments with sequential implementation, all approaches using machine learning models exceed the MGSA algorithm by more than two times. Modifications of the algorithm can be distinguished that demonstrate the best results both in terms of the average number of iterations and in terms of the average HV. These include approaches using SVC (Linear, Rbf kernels), a distance calculation approach, and neural networks with two hidden layers. Modification with one hidden layer shows slightly worse results. Modification  MGSA Poly SVC with polynomial kernel showed least improvement over MGSA. It is also worth noting that the modification of the MGSA Rbf SVC algorithm in the case of low accuracy demonstrates the best quality.
 
 Next, consider a parallel version of the algorithm (see subsection \ref{subsec35}). Table \ref{tab:1} shows the results of the average value of the trial number per process by tasks for each of the models in dependence on the number of processes. Accuracy $\varepsilon=0.01$ was used in the experiment. The number of processes used is indicated in the first row of the table. The three best modifications of the algorithm in terms of the average number of trials per process are shown in bold.
 
