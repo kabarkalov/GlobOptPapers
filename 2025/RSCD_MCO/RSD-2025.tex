@@ -18,7 +18,7 @@
 %\usepackage{color}
 %\renewcommand\UrlFont{\color{blue}\rmfamily}
 %\urlstyle{rm}
-
+\usepackage{xcolor}
 \usepackage{amsmath}
 \usepackage{marvosym}
 \usepackage{hyperref}
@@ -119,9 +119,9 @@ In the framework of the research, an algorithm for solving problems of multicrit
 
 Numerical solution of optimization problem consists in sequential carrying out trials (computations of criteria values at points of the search domain). The first block of the algorithm allows accumulating information about the trials performed and using it to solve problem (\ref{eq:01})-(\ref{eq:03}). Block 2 on the base of the accumulated information constructs an approximate solution as an estimate of the Pareto set. Block 3 allows efficient selection of trial points based on a global search algorithm. Block 4 builds a model for estimating the Pareto set. The built model is used to reduce the number of trials required to find the Pareto set with high quality and with fewer trials. The fifth block contains an algorithm that allows realizing trials in parallel. Let's take a closer look at the computing blocks.
 
-\begin{figure}
+\begin{figure}[t]
 \center
-\includegraphics[width=0.7\textwidth]{fig1.png}
+\includegraphics[width=0.6\textwidth]{fig1.png}
 \caption{Computational scheme of the algorithm for solving multicriterial optimization problems using machine learning models.} \label{fig1}
 \end{figure}
 
@@ -143,10 +143,20 @@ In the framework of the developed approach \cite{Konnov2025}, the second option 
 \label{eq:04}
 \min {\varphi_j (y)}=F(\lambda_j,y),F(\lambda_j,y) \in \{F(\lambda_1,y),F(\lambda_2,y),\dots,F(\lambda_\tau,y)\},y\in D,
 \end{equation}
-is solved,  where $F(\lambda_j,y)$, $1 \leq j \leq \tau$, is a multiextremal function, obtained on the base of scalarization of criteria $f_i(y)$, $1 \leq i \leq s$. Here $\lambda_j=\{\lambda_{i,j}\}$, $1 \leq i \leq s$, $1 \leq j \leq \tau$, are significance indicators for each criterion, s is the number of criteria, $\tau$ is the number of scalar optimization problems. There are different ways to build functions $F(\lambda_j,y)$ \cite{Miettinen1999,Konnov2025,Marler2004}. The performed computational experiments used minimax convolution of criteria
+is solved,  where $F(\lambda_j,y)$, $1 \leq j \leq \tau$, is a multiextremal function, obtained on the base of scalarization of criteria $f_i(y)$, $1 \leq i \leq s$. Here $\lambda_j=\{\lambda_{i,j}\}$, $1 \leq i \leq s$, $1 \leq j \leq \tau$, are significance indicators for each criterion, s is the number of criteria, $\tau$ is the number of scalar optimization problems. There are different ways to build functions $F(\lambda_j,y)$ \cite{Miettinen1999,Konnov2025,Marler2004}.  
+%В рамках предлагаемого алгоритма $\tau$ фиксируеться. Множество наборов $\lambda_j$, $1 \leq j \leq \tau$, выбирается случайно с использованием генератора Соболя в множестве  возможных значений (\ref{eq:051}). 
+{\color{red} In the proposed algorithm, $\tau$ is fixed. The set of $\lambda_j$, $1 \leq j \leq \tau$, is chosen randomly using the Sobol generator\cite{Sobol2003} in the space of possible values (\ref{eq:051})}
+
+\begin{equation}
+\label{eq:051}
+\sum_{i=1}^s {\lambda_{i,j}} = 1, 0 \leq \lambda_{i,j} \leq 1.
+\end{equation}
+
+The performed computational experiments used minimax convolution of criteria
+
 \begin{equation}
 \label{eq:05}
-F(\lambda_j, y) = \max_{1 \leq i \leq s} \left(\lambda_{i,j} f_i (y)\right), y \in D, \sum_{i=1}^s {\lambda_{i,j}} = 1, 0 \leq \lambda_{i,j} \leq 1.
+F(\lambda_j, y) = \max_{1 \leq i \leq s} \left(\lambda_{i,j} f_i (y)\right), y \in D.
 \end{equation}
 
 \textbf{Dimensionality reduction.} For solving optimization problems (\ref{eq:04}) the dimensionality reduction on the base of Peano curves $y(x)$ that map unambiguously and continuously the segment $[0,1]$ to the $N$-dimensional hypercube $D$ is used \cite{Konnov2025,Gergel2019_2,GergelKozinov2020}. As a result of this reduction, multidimensional global optimization problems (\ref{eq:04}) are reduced to one-dimensional subproblems
@@ -236,9 +246,9 @@ The calculations fulfilled under items 2 and 3 are described in sections \ref{su
 
 Accumulation of search information allows more accurate estimation of the Pareto set. In solving the series of problems (\ref{eq:04}), after each trial performed or task setting change, the current Pareto set is selected on the base of all the trials executed. Thus, even when solving one optimization problem from (\ref{eq:04}), the Pareto set evaluation contains several variants of solutions, from which the researcher can choose the best variant for himself (see Fig. \ref{fig2}, blue dots). Solving additional tasks (\ref{eq:04}) makes it possible to improve the found solution (see Fig. \ref{fig2}).
 
-\begin{figure}
+\begin{figure}[t]
 \center
-\includegraphics[width=0.6\textwidth]{fig2.png}
+\includegraphics[width=0.7\textwidth]{fig2.png}
 \caption{Example of Pareto set evaluation in solving two scalar optimization problems (trial points are presented in the criteria space).} \label{fig2}
 \end{figure}
 
@@ -271,7 +281,7 @@ The third approach is based on the second one and uses new models based on fully
 	\item Variant with one hidden layer (Fig. \ref{fig3}, b).  This is a simpler option, in which the Input layer also consists of N nodes, where N is equal to the number of criteria. The next (hidden) layer contains 100 nodes. The last (output) layer also consists of 2 layers. Similar to the previous case, the activation function is ReLU, and before the output layer, the softmax function is applied.
 \end{enumerate}
 
-\begin{figure}
+\begin{figure}[t]
 \center
 \includegraphics[width=0.8\textwidth]{fig3.png}
 \caption{Neural network models used to calculate the characteristic $R_{PS}(i)$.} \label{fig3}
@@ -281,9 +291,9 @@ Fig. \ref{fig4} shows an example of built functions $R_{PS}(i)$ in the criteria 
 
 From the figure, it can be seen that the function $R_{PS}(i)$ for each of the considered variants differs in the quality of the evaluation of Pareto sets. When choosing a machine learning model, it should be taken into account that building a model with a good description of the domain may require more computing resources. An analysis of the impact of the selected model on the quality of the resulting solution is presented in Section \ref{sec4} with the results of computational experiments. Note that numerous computational experiments have shown that changing the method of calculating characteristic (\ref{eq:15}) leads to a significant increase in the efficiency of the algorithm as a whole \cite{Konnov2025,MCO_ML_2023}.
 
-\begin{figure}
+\begin{figure}[t]
 \center
-\includegraphics[width=0.6\textwidth]{fig4.png}
+\includegraphics[width=\textwidth]{fig4.png}
 \caption{Examples of Pareto set evaluation for the case of two scalar optimization problems.} \label{fig4}
 \end{figure}
 
@@ -306,7 +316,9 @@ As in the sequential algorithm, stopping and evaluating the resulting solution i
 \section{Results of computational experiments}
 \label{sec4}
 
-Computational experiments were carried out on the nodes of the Lobachevsky supercomputer of Nizhny Novgorod State University with two processors Intel Xeon Silver 4310T 2.3 GHz, 64 GB RAM. Machine learning libraries SciKit-Learn 0.24.2 \cite{scikit-learn} and PyTorch 2.5.1 \cite{PyTorch} were used in experiments. The algorithm proposed in the work was implemented in Python using the framework iOpt \cite{ioptmco}.
+Computational experiments were carried out on the nodes of the Lobachevsky supercomputer of Nizhny Novgorod State University with two processors Intel Xeon Silver 4310T 2.3 GHz, 64 GB RAM. Machine learning libraries SciKit-Learn 0.24.2 \cite{scikit-learn} and PyTorch 2.5.1 \cite{PyTorch} were used in experiments. The algorithm proposed in the work was implemented in Python using the framework iOpt \cite{ioptmco}. 
+%Сравнение предыдущей последовательной версии предлагаемого алгоритма с современными разработками можно найти в нашей статье [Konnov2025]. В этом разделе больше внимания уделено анализу эффективности параллельной реализации.
+{\color{red}  A comparison of the previous sequential version of the proposed algorithm with state-of-the-art developments can be found in our paper \cite{Konnov2025}. This section focuses more on the analysis of the efficiently of parallel implementation.}
 
 As a criterion for the quality of the found Pareto set, the indicator HV was applied. Higher value of the indicator corresponds to better solution. 
 HV index is a traditional quality metric when approximating a Pareto set \cite{Evtushenko2014,pymoo,AGP_ML}.
@@ -337,7 +349,7 @@ Fig. \ref{fig5} shows the dependence of the average value of the HV index on the
 
 
 
-\begin{figure}
+\begin{figure}[t]
 \center
 \includegraphics[width=0.8\textwidth]{fig5.png}
 \caption{Comparison of HV index values for sequential algorithm implementation.} \label{fig5}
@@ -349,7 +361,7 @@ Next, consider a parallel version of the algorithm (see subsection \ref{subsec35
 
 % Please add the following required packages to your document preamble:
 % \usepackage{graphicx}
-\begin{table}[ht]
+\begin{table}[t]
 \centering
 \caption{Average number of trials per process}
 \label{tab:1}
@@ -370,7 +382,7 @@ MGSA NN 1 layer, $\alpha$ = 0.05             & 795.16          & 446.25         
 
 According to Table \ref{tab:1}, MGSA Dist, MGSA Linear SVC and MGSA NN algorithms with two hidden layers demonstrate the best results. To analyze the quality of the resulting solution, the values   of the HV index are given in Table \ref{tab:2}. The table also shows three best modifications.
 
-\begin{table}[ht]
+\begin{table}[t]
 \centering
 \caption{Average HV Index in dependence on number of processes}
 \label{tab:2}
@@ -391,7 +403,7 @@ MGSA NN 1 layer, $\alpha$ = 0.05           & 114.77          & 114.61          &
 
 From Table \ref{tab:2} as a whole, it can be concluded that parallel modification of the algorithm does not worsen the quality of the found solution. For a more detailed productivity analysis let's plot the graph by analogy with Fig. \ref{fig5} for the case of 20 processes.
 
-\begin{figure}
+\begin{figure}[t]
 \center
 \includegraphics[width=0.8\textwidth]{fig6.png}
 \caption{Dependence of the mean value of the index HV from the trial number per process for the case of 20 processes.} \label{fig6}
@@ -404,7 +416,7 @@ Fig. \ref{fig7} shows the value of the HV index depending on the number of trial
 According to Fig. \ref{fig7}, all presented models show a significant increase in the HV index and a decrease in the trial number per process when increasing the number of processes. Approach without using machine learning methods demonstrate similar dynamics when the target accuracy is high, however, at lower values, changes in the number of counted criteria on one process become less noticeable. It is also worth noting that, unlike the basic MGSA algorithm, all modifications with machine learning elements do not lose quality when switching to a parallel implementation.
 
 
-\begin{figure}
+\begin{figure}[t]
 \center
 \includegraphics[width=0.8\textwidth]{fig7.png}
 \caption{Dependence of the HV index on the number of trials executed for different number of processes.} \label{fig7}
