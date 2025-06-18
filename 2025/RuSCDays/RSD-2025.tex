@@ -72,17 +72,11 @@ Most artificial intelligence methods involve hyperparameters, and the choice of 
 
 %(рус.) Таким образом, возникает the hyperparameter optimization (HPO) problem, которая с математической точки зрения является задачей глобальной оптимизации. Типичным является случай наличия не только непрерывных, но и категориальных параметров, т.е. возникает необходимость использования методы глобальной оптимизации, способные решать задачи со смешанными параметрами.
 Thus, there arises the hyperparameter optimization (HPO) problem, which from the mathematical point of view is a global optimization problem. In this case, it is typical to have not only continuous but also categorical parameters (parameters having a prefixed set of values), i.e. there is a need to use global optimization methods capable of solving problems with mixed parameters. 
+%new
 Such methods belonging to the class of metaheuristic and model-based algorithms are implemented in the well-known hyperparameter optimization frameworks Optuna \cite{optuna} and HyperOpt \cite{hyperopt}.
 
 %(рус.) Традиционную сложность HPO problem составляет значительное время, требуемое для оценки критерия при конкретном сочетании параметров. Поэтому применение для данных задач метаэвристических алгоритмов, требующих большого числа поисковых испытаний, является ограниченным. Более перспективным здесь является использование детерминированных алгоритмов липшицевой оптимизации [Евтушенко, Сергеев, Стронгин], которые превосходят эвристические методы по качеству работы [Сергеев]. Для методов липшицевой глобальной оптимизации предложен ряд подходов к распараллеливанию, обеспечивающих эффективную работу на суперкомпьютерных системах [Евтушенко, Жилинскас, Гергель]. 
 The traditional complexity of HPO problems is due to the considerable time required to evaluate a criterion for a particular combination of parameters. Therefore, metaheuristic algorithms, which require a large number of search trials, can find only a limited use for such problems. A more promising approach is to use deterministic Lipschitz optimization algorithms \cite{Evtushenko2013,Sergeyev2017,Strongin2000}, which are superior to heuristic methods in terms of performance quality \cite{Sergeyev2018}. For Lipschitz global optimization methods, a number of parallelization approaches have been proposed to ensure efficient operation in supercomputer systems \cite{Evtushenko2009,Gegrel2021,Paulavicius2011}. 
-
-%
-%
-% !!!!!!!!!!!!!!! TO DO:: расширить обзор смежных исследований !!!!!!!!!!!!!
-% "мало внимания обзору существующих методов и подходов для решения задачи оптимизации гиперпараметров"
-%
-%
 
 %(рус.) Еще одной сложностью рассматриваемого класса задач HPO является наличие таких сочетаний значений гиперпараметров, при которых в некоторых (заранее не известных) подобластях области поиска исследуемый метод в принципе не работает. С такими значениями параметров невозможно корректно провести расчет и вычислить значение критерия эффективности. Данное явление можно интерпретировать как частичную определенность критерия в области поиска. В такой постановке HPO problem существенно усложняется, т.к. область допустимых сочетаний параметров является заранее неопределенной.
 One more difficulty of the class of HPO problems being considered is the presence of such combinations of hyperparameter values for which the method under study does not work in principle in some (not known in advance) subdomains of the search domain. With such values of parameters it is impossible to perform the calculation correctly and calculate the value of the efficiency criterion. This phenomenon can be interpreted as partial definiteness of the criterion in the search domain. In such a formulation, the HPO problem becomes significantly more complicated, since the region of permissible combinations of parameters is undefined a priori.
@@ -142,7 +136,7 @@ Thus, performing a trial at a point $x^k \in [0,1]$ involves:
 \begin{figure}
 \center
 \includegraphics[width=0.8\textwidth]{fig1.png}
-\caption{Graph of the one-dimensional function after dimensionality reduction of multiextremal objective function.} \label{fig1}
+\caption{Graph of the one-dimensional function after dimensionality reduction of a multiextremal objective function.} \label{fig1}
 \end{figure}
 
 %(рус.) При численной реализации оптимизационных алгоритмов используется развертка, приближающая истинную кривую Пеано с заданной точностью, которая определяется желаемой точностью поиска глобального экстремума. В качестве примера на Fig. 1 приведена одномерная функция, получающаяся в результате редукции двумерной задачи. График демонстрирует сложную структуру получающейся одномерной функции.
@@ -160,14 +154,14 @@ A more productive approach to parallelization is based on changing the sequentia
 We used in our study an asynchronous global search algorithm, which implements a parallelizing scheme of the ``master/worker'' type. When describing the algorithm we will assume that we have at our disposal $p+1$ process: one master process and $p$ worker processes. The master process organizes the collection, accumulation and processing of search information (results of performed trials). Based on this information, the master calculates the points of new trials and distributes them to the worker processes. The worker processes receive the points from the master, perform new trials in these points and send their results to the master.
 
 %(рус.) На первой итерации алгоритма процесс-мастер (равномерно или случайно) выбирает p различных внутренних точек области поиска {x^1,x^2,…,x^p }, x^i∈(0,1),i=1,…,p, и рассылает точки испытаний по процессам-рабочим для выполнения испытаний в них. Правила работы процесса-мастера на любой из следующих итераций состоят в следующем. 
-At the first iteration of the algorithm, the master process selects (uniformly or randomly) $p$ different internal points of the search domain ${x^1, x^2, ..., x^p}, x^i \in (0,1), i=1, ..., p$, and distributes the trial points to the worker processes to perform trials in those points. The rules for the master process at any of the subsequent iterations are as follows. 
+At the first iteration of the algorithm, the master process selects (uniformly or randomly) $p$ different internal points of the search domain $\{x^1, x^2, ..., x^p\}, x^i \in (0,1), 1 \leq i \leq p$, and distributes the trial points to the worker processes to perform trials in those points. The rules for the master process at any of the subsequent iterations are as follows. 
 
 %(рус.) Пусть проведено k испытаний, их результаты получены и обработаны мастером, а на текущей итерации процессы-рабочие проводят испытания в точках множества S_k  = {x^(k+1),x^(k+2),…,x^(k+p) }, т.е. в этих точках испытания уже начались, но еще не завершены. Как только один из процессов-рабочих завершает проведение испытания в некоторой точке (например, x^(k+1)), он пересылает процессу-мастеру результаты испытания. Получив от рабочего процесса результаты испытания и обработав их мастер, в свою очередь, выбирает для него точку нового испытания x^(k+p+1) в соответствии со следующими правилами.
-Suppose $k$ trials have been performed, the master has received and processed their results, and during the current iteration the worker processes perform trials at the points of the set $S_k={x^{k+1}, x^{k+2},..., x^{k+p}}$, i.e. the trials have already started at these points but have not yet been completed. As soon as one of the worker processes completes a trial at some point (e.g. $x^{k+1}$), it forwards the results of the trial to the master process and the point is excluded from the set $S_k$. After receiving the trial results from the worker process and processing them, the master process in turn selects a new trial point $x^{k+p+1}$ for the worker process according to the following rules.
+Suppose $k$ trials have been performed, the master has received and processed their results, and during the current iteration the worker processes perform trials at the points of the set $W=\{x^{k+1}, x^{k+2},..., x^{k+p}\}$, i.e. the trials have already started at these points but have not yet been completed. As soon as one of the worker processes completes a trial at some point (e.g. $x^{k+1}$), it forwards the results of the trial to the master process and the point is excluded from the set $W$. After receiving the trial results from the worker process and processing them, the master process in turn selects a new trial point $x^{k+p+1}$ for the worker process according to the following rules.
 
 \begin{enumerate}
 %(рус.) 1. Перенумеровать в порядке возрастания все точки X_k  = {x^1,x^2,…,x^(k+p)  }, в которых либо проведены, либо проводятся испытания, т.е.
-\item Renumber, in ascending order, all the points $X_k={x^1,x^2,...,x^{k+p} }$ at which trials have either been carried out or are being carried out, i.e.
+\item Renumber, in ascending order, all the points $X_k=\{x^1,x^2,...,x^{k+p} \}$ at which trials have either been carried out or are being carried out, i.e.
 \[
 0 = x_1 \leq x_2 \leq ... \leq x_{k+p} = 1,
 \]
@@ -187,16 +181,16 @@ The points $x_0=0$ and $x_{k+p}=1$ are additionally introduced (the values $z_0$
 %(рус.) 2. Вычислить значения
 \item Calculate the values
 \[
-M_1= \max \left\{ \frac{|z_i - z_{i - 1}|}{(x_i - x_{i - 1})^\frac{1}{N}}: x_{i-1} \notin S_k, x_i \notin S_k, 2 \leq i \leq k+p \right\},
+M_1= \max \left\{ \frac{|z_i - z_{i - 1}|}{(x_i - x_{i - 1})^\frac{1}{N}}: x_{i-1} \notin W, x_i \notin W, 2 \leq i \leq k+p \right\},
 \]
 \[
-M_2= \max \left\{ \frac{|z_{i+1} - z_{i - 1}|}{(x_{i+1} - x_{i - 1})^\frac{1}{N}}: x_{i} \in S_k, 2 \leq i < k+p \right\},
+M_2= \max \left\{ \frac{|z_{i+1} - z_{i - 1}|}{(x_{i+1} - x_{i - 1})^\frac{1}{N}}: x_{i} \in W, 2 \leq i < k+p \right\},
 \]
 \[
 M= \max \left\{ M_1, M_2 \right\},
 \]
 %(рус.) где z_i=f(x_i ), if x_i  ∉  S_k,1≤ i≤ k+p. Значения z_i в точках x_i∈S_k являются неопределенными, т.к. испытания в этих точках еще не завершены. Если значение M получилось равным 0, то положить M=1.
-where $z_i=\phi(y(x_i))$, if $x_i \notin S_k, 1 \leq i \leq k+p$. The values $z_i$ at the points $x_i \in S_k$ are undefined because the trials at these points have not yet been completed. If the value $M$ turns out to be equal to $0$, then assume $M=1$.
+where $z_i=\phi(y(x_i))$, if $x_i \notin W, 1 \leq i \leq k+p$. The values $z_i$ at the points $x_i \in W$ are undefined because the trials at these points have not yet been completed. If the value $M$ turns out to be equal to $0$, then assume $M=1$.
 
 %(рус.) 3. Определить текущее лучшее значение целевой функции
 \item Determine the current best value of the objective function
@@ -205,7 +199,7 @@ z^* = \min \left\{ \phi(y(x_i)): 1 \leq i \leq k \right\}.
 \end{equation}
 
 %(рус.) 4. Каждому интервалу (x_(i-1),x_i ),x_(i-1)  ∉ S_k,x_i  ∉ S_k,2≤ i≤ k+p, поставить в соответствие число R(i), которое называется характеристикой интервала и вычисляется по формуле
-\item Assign a number $R(i)$ to each interval $(x_{i-1}, x_i), x_{i-1} \notin S_k, x_i \notin S_k, 2 \leq i \leq k+p$, which is called the interval characteristic and is calculated using the formula
+\item Assign a number $R(i)$ to each interval $(x_{i-1}, x_i), x_{i-1} \notin W, x_i \notin W, 2 \leq i \leq k+p$, which is called the interval characteristic and is calculated using the formula
 \begin{equation}\label{characteristic}
 R(i)=
 \begin{cases}
@@ -220,7 +214,7 @@ where $\Delta_i=(x_i-x_{i-1})^\frac{1}{N}$, and $r>1$ is the parameter of the al
 %(рус.) 5. Выбрать интервал [x_(t-1),x_t ], которому соответствует максимальная характеристика, т.е.
 \item Choose the interval $[x_{t-1}, x_t]$ to which the maximum characteristic corresponds, i.e.
 \[
-R(t)= \max \left\{ R(i): x_{i-1} \notin S_k, x_i \notin S_k, 2 \leq i \leq k+p\right\}.
+R(t)= \max \left\{ R(i): x_{i-1} \notin W, x_i \notin W, 2 \leq i \leq k+p\right\}.
 \]
 
 %(рус.) 6. Вычислить точку проведения нового испытаний x^{k+p+1} ∈ (x_(t-1),x_t ) в соответствии с формулами
@@ -233,7 +227,7 @@ x^{k+p+1} = \frac{x_t+x_{t-1}}{2}-\frac{\textit{sign}{(z_t-z_{t-1})}}{2r} \left[
 \end{equation}
 if $v(x_{t-1})=v(x_t)$.
 %(рус.) Сразу после вычисления точки очередного испытания процесс-мастер добавляет ее в множество S и пересылает процессу-рабочему, который начинает проведение испытания в ней.
-Immediately after calculating the point of the next trial, the master process adds it to the set $S$ and forwards it to the worker process, which starts a trial there.
+Immediately after calculating the point of the next trial, the master process adds it to the set $W$ and forwards it to the worker process, which starts a trial there.
 \end{enumerate}
 
 %(рус.) Работа алгоритма завершается, если в мастер-процессе выполняется одно из двух условий: Δ_t<ϵ or k+p>K_max. Выполнение первого неравенства соответствует остановке алгоритма по заданной точности поиска 0<ϵ<1, выполнение второго – по заданному числу испытаний K_max>0.
@@ -255,7 +249,7 @@ Now consider the optimization problem in a more complex setting. Let the objecti
 The optimization problem in this formulation is a mathematical model of the problem of finding the best combination of hyperparameters of artificial intelligence methods. Here, $D$ corresponds to the region of variation of continuous hyperparameters, and the set $U$ contains possible combinations of categorical hyperparameters.
 
 %(рус.) Задачу со смешанными параметрами можно свести к решению взаимосвязанного набора задач с непрерывными параметрами. Занумеруем целыми числами все различные комбинации категориальных параметров, т.е. сопоставим каждому номеру s вектор u_s. Тогда (10) можно переписать в виде 
-A problem with mixed parameters can be reduced to solving an interrelated set of problems with continuous parameters. Let us number all different combinations of categorical parameters with integers, i.e., let us assign to each number $s$ a vector $u_s$. Then (\ref{mixed_problem}) can be rewritten as 
+A problem with mixed parameters can be reduced to solving an interrelated set of problems with continuous parameters. Let us number all different combinations of categorical parameters with integers, i.e., let us assign to each number $s \in \{1, S\}$ a vector $u_s$. Then (\ref{mixed_problem}) can be rewritten as 
 
 \begin{equation}\label{mixed_problem_2} 
  \min \left\{\phi(y, u)\right\} = \min_{s \in \{1, ..., S\}} \left\{\phi(y, u_s): y \in D\right\}.
@@ -382,7 +376,7 @@ To solve the problem, a limit of 1000 search trials was set, the number of proce
 %TO DO: "значение целевой метрики" - что за метрика использовалась в качестве целевой??? F_1????????
 %
 %
-The results of the experiment are shown in Table~\ref{tab1}: the time required to solve the problem and the value of the objective metric $F_1$ obtained using iOpt and Optuna. The number of points where the optimization criterion could not be calculated was about 10\% of the total number of search trials. The curves corresponding to the obtained prediction are shown in Fig.~\ref{fig3}. The dark line corresponds to the true values of the time series, the blue line corresponds to the predicted values obtained after using Optuna, and the yellow line corresponds to the predicted values obtained after using iOpt. 
+The results of the experiment are shown in Table~\ref{tab1}: the time required to solve the problem and the value of the objective metric MSE obtained using iOpt and Optuna. The number of points where the optimization criterion could not be calculated was about 10\% of the total number of search trials. The curves corresponding to the obtained prediction are shown in Fig.~\ref{fig3}. The dark line corresponds to the true values of the time series, the blue line corresponds to the predicted values obtained after using Optuna, and the yellow line corresponds to the predicted values obtained after using iOpt. 
 
 %
 %
@@ -411,7 +405,7 @@ The results of the experiment are shown in Table~\ref{tab1}: the time required t
 \hline
 \multirow{2}{*}{P} & \multicolumn{2}{c|}{iOpt} & \multicolumn{2}{c|}{Optuna} \\
 \cline{2-5} 
- & Solving time & Final $F_1$-score & Solving time & Final $F_1$-score \\
+ & Solving time, sec. & Final MSE & Solving time, sec. & Final MSE \\
 \hline
 1 & 6574.2 & 13.5 & 9554.1 & 13.4 \\
 2 & 3579.2 & 13.9 & 5127.5 & 13.6 \\
