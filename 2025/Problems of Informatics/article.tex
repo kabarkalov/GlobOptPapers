@@ -40,29 +40,38 @@
 \begin{small}
 
 % аннотация англ.
-\colorbox{orange}{исправить в соответсвии с введением и экспериментами ->}
-The paper discusses the problem of finding a global minimum of a function that may be multiextremal, non-differentiable, given in the form of a ``black box'' and computable only in some part of the search domain. In this case, each computation of the objective function value at some point of the feasible domain may require significant computing resources. The objective function is assumed to satisfy the Lipschitz condition.
-The existence of subdomains where the objective function is undefined can be interpreted as the existence of some hidden, a priori unknown constraints of the problem. Such an effect can occur when solving applied problems due to the specific features of the optimized object or modeling method (for example, numerical instability of the method for some combination of parameters). In such subdomains, it is impossible to correctly perform numerical modeling and estimate the value of the objective function. A special case is the problem of tuning hyperparameters of artificial intelligence (AI) and machine learning (ML) methods. In these problems, the efficiency (in a given metric) of the resulting solution for different values of hyperparameters can be quite different. Moreover, the computational complexity of tuning makes the exhaustive search practically inapplicable. These features required the development of various methods for intelligent automatic tuning of hyperparameters. At the same time, the problem of existence of unacceptable combinations of hyperparameters, which was not particularly important in the case of manual tuning, has become a stumbling block for many frameworks using intelligent tuning methods.
-Our goal is to develop an algorithm in which the absence of a value of the objective function at some point should not lead to its incorrect operation. The proposed approach to solving such problems extends the information-statistical global search algorithm (GSA). This algorithm solves multidimensional problems by reducing them to one-dimensional optimization problems using space-filling curves (Peano curves).
-In this study, new rules for processing search intervals with no objective function values at their boundary points were proposed. The calculation of the characteristic of an interval with two non-computable points is based on the interval length. To minimize the number of redundant trials in subdomains where the function is not defined, we used a special method parameter $\alpha$ that regulates the number of trial points in these subdomains. The calculation of the characteristic of an interval with non-computable and computable points is performed according to the rules for working with a boundary interval. The article provides a detailed description of a modified global search algorithm for solving the class of problems under consideration.
+The article discusses  the problem of finding the best combination of hyperparameters of machine learning and artificial intelligence methods. In many cases, the efficiency (in a given metric) of the resulting solution for different values of hyperparameters can be quite different.
+В таких задачах актуальной является проблема некорректной работы исследуемых artificial intelligence (AI) and machine learning (ML) methods в некоторых (заранее неизвестных) подобластях области изменения гиперпараметров. При этом вычислительная сложность настройки делает невозможным использование ручного или полного перебора. Данные особенности определили необходимость разработки различных методов интеллектуального автоматического подбора гиперпараметров.
+С математической точки зрения такая задача может быть представлена как problem of finding a global minimum of a function, given in the form of a ``black box'' and computable only in some part of the search domain. In this case, each computation of the objective function value at some point of the feasible domain may require significant computing resources. The objective function is assumed to satisfy the Lipschitz condition. The existence of subdomains where the objective function is undefined can be interpreted as the existence of some hidden, a priori unknown constraints of the problem. 
+The authors propose an approach to solving this type of problem, , which is an extension of the information-statistical global search algorithm (GSA) and takes into account the presence of undefined values of the objective function at some points. В рамках алгоритма происходит разбиение области поиска точками испытаний и оцениваются характеристики подобластей на основе значений целевой функции, вычисленных на их границах. В случае отсутствия информации о значении функции в точке в алгоритме используется предложенная авторами оценка, учитывающая размер исследуемой подобласти. To minimize the number of redundant trials in subdomains where the function is not defined, we used a special method parameter $\alpha$ that regulates the number of trial points in areas of non-computability.
+The solution of multidimensional problems implemented through reducing them to one-dimensional optimization problems using space-filling curves (Peano curves).
+The article provides a detailed description and a diagram of the operation of the modified global search algorithm.
 The implementation of the global search algorithm for the case of a not-everywhere computable objective function (GSA-N) was based on the iOpt open source framework of intelligent optimization methods.
 To carry out the experiments, a generator of test problems with hidden constraints GKLS-HC was developed. It is based on the GKLS generator, which allows generating multi-extremal functions with specified properties (number of minima, their regions of attraction, etc.). In the GKLS-HC generator, these functions were spoiled by areas of non-computability in the form of ellipsoids (the coordinates of centers and radii were generated randomly).
 The experimental results presented in the paper, obtained on a series of GKLS-HC test problems, demonstrate the reliability of global search and the efficiency of the developed algorithm. By adjusting the parameter $\alpha$, it was possible to achieve the same speed of GSA-N operation as the basic GSA.
-The paper also considered the behavior of global optimization algorithms of the \textit{scipy.optimize} library when solving problems with non-computable domains. In this study, the differential evolution and brute force methods showed the worst results, failing to solve this type of problem at all. The DIRECT and SHGO methods, although they solved the problems, were less effective than the developed GSA-N.
-In addition, the paper presents the results of numerical experiments obtained when tuning the hyperparameters of the LinearSVC method used to solve the classification problem on the well-known Iris dataset.
+The paper also considered the behavior of global optimization algorithms of the scipy.optimize library when solving problems with non-computable domains. In this study, the differential evolution and brute force methods showed the worst results, failing to solve this type of problem at all. The DIRECT and SHGO methods, although they solved the problems, were less effective than the developed GSA-N.
+Основным результатом являются эксперименты с модельными задачами настройки гиперпараметров, в которых возникают неопределенные значения оптимизируемой метрики качества. В этих задачах существуют недопустимые сочетания гиперпараметров, при которых настраиваемый метод возвращает бесконечное значение целевой функции.
+Так была успешно проведена настройка классического алгоритма классификации LinearSVC. АГП-Н успешно решил поставленную задачу, найдя лучшее сочетание гиперпараметров по сравнению со стандартными алгоритмами из библиотеки scikit-learn.
+Также был настроен метода предсказания значений временного ряда на базе фреймворка FEDOT. В ходе этого эксперимента также было проведено сравнение АГП-Н с алгоритмами настройки из другого широко известного фреймворка Optuna. АГП-Н показал сравнимый результат (в терминах полученного значения целевой метрики), значительно обогнав Optuna по времени, затраченному на решение задачи.
 
 %Here is the text of the extended annotation in English, ranging from 4000 to 8000 characters.
-%В статье обсуждается проблема поиска глобального минимума функции, которая может быть многоэкстремальной, недифференцируемой, более того, заданной в форме «черного ящика» и вычислимой лишь в некоторой части области поиска. При этом каждое вычисление функции в некоторой точке допустимой области может требовать значительных вычислительных ресурсов. О целевой функции известно лишь что она удовлетворяет условию Липшица.
-%Наличие подобластей, в которых целевая функция является неопределенной, можно интерпретировать как наличие некоторых скрытых, заранее неизвестных ограничений задачи. Такой эффект может возникать при решении прикладных задач в силу особенностей оптимизируемого объекта или метода моделирования (например, численная нестабильность метода при определенном сочетании параметров). В таких подобластях невозможно корректно провести численное моделирование и оценить значение целевой функции. Частным случаем является задача настройки гиперпараметров методов искусственного интеллекта (ИИ) и машинного обучения (МО). Во многих случаях разница в эффективности (в заданной метрике) получаемого решения при разных значениях гиперпараметров может быть достаточно значительной. При этом вычислительная сложность настройки делает невозможным использование полного перебора. Данные особенности определили необходимость разработки различных методов интеллектуального автоматического подбора гиперпараметров. При этом проблема возникновения недопустимых комбинаций гиперпараметров, которая не имела особого значения в случае «ручной» настройки, для многих фреймворков, использующих методы интеллектуальной настройки, стала камнем преткновения.
-%Нашей целью является разработка алгоритма, в котором отсутствие значения целевой функции в некоторой точке не должно приводить к его некорректной работе. Предлагаемый подход к решению такого рода задач является расширением информационно-статистического алгоритма глобального поиска (АГП). Данный алгоритм предполагает решение многомерных задач посредством их сведения к задачам одномерной оптимизации при помощи кривых, заполняющих пространство (кривых Пеано). В рамках данного исследования были предложены новые правила обработки поисковых интервалов, в граничных точках которых отсутствуют значения целевой функции. Расчёт характеристики интервала с двумя невычислимыми точками производится, основываясь на длине интервала. Для минимизации количества избыточных испытаний в областях, в которых функция не определена, при таком подходе используется специальный параметр метода, позволяющий регулировать число точек испытаний в области невычислимости.  Расчёт характеристики интервала с невычислимой и вычислимой точками производится по правилам работы с граничным интервалом. В статье изложено подробное описание модифицированного алгоритма глобального поиска для решения исследуемого класса задач.
-%Программная реализация алгоритма глобального поиска на случай не всюду вычислимой целевой функции (АГП-Н) была выполнена на базе фреймворка методов интеллектуальной эвристической оптимизации iOpt открытым исходным кодом.
-%Для проведения экспериментов был разработан генератор задач со скрытыми ограничениями GKLSHiddenConstraint, взявший за основу генератор GKLS, позволяющий порождать задачи многоэкстремальной оптимизации с заранее известными свойствами. Данные функции были дополнены сгенерированными областями невычислимости в форме эллипсоидов (координата центры и радиусы генерировались случайно).
-%Приведенные в данной статье результаты экспериментов на серии тестовых задач GKLSHiddenConstraint демонстрируют надёжность глобального поиска и эффективность разработанного алгоритма. За счёт регулировки параметра $\alpha$ получилось добиться такой же скорости сходимости АГП-Н, как у базового АГП. 
-%Также в статье было изучено поведение алгоритмов глобальной оптимизации библиотеки \textit{scipy.optimize} при решении задач с невычислимыми областями. В рамках данного исследования методы differential\_evolution и brute показали наихудшие результаты, не справившись с решением такого вида задач совсем. Методы direct и shgo хоть и продемонстрировали хорошие результаты, оказались менее эффективны чем разработанный АГП-Н. 
-%Помимо этого в статье продемонстрированы результаты численных экспериментов с прикладной задачей настройки гиперпараметров метода LinearSVC при решении задачи классификации на известном наборе данных Iris. <РЕЗУЛЬТАТЫ>.
 
-\textbf{Keywords:} Lipschitz global optimization, multi-extremal functions, black-box functions, partially defined functions, hidden constraints, hyperparameter tuning.
-\colorbox{orange}{<-}
+%В статье рассматриваются задачи поиска наилучшего сочетания гиперпараметров методов машинного обучения и искусственного интеллекта. Во многих случаях разница в эффективности (в заданной метрике) получаемого решения при разных значениях гиперпараметров может быть достаточно значительной. 
+%В таких задачах актуальной является проблема некорректной работы исследуемых методов ИИ и МО в некоторых (заранее неизвестных) подобластях области изменения гиперпараметров. При этом вычислительная сложность настройки делает невозможным использование ручного или полного перебора. Данные особенности определили необходимость разработки различных методов интеллектуального автоматического подбора гиперпараметров.
+%С математической точки зрения такая задача может быть представлена как задача поиска глобального минимума функции, заданной в виде <<черного ящика>> и не всюду определенной в области поиска. При этом каждое вычисление функции в некоторой точке допустимой области может требовать значительных вычислительных ресурсов. О целевой функции известно лишь что она удовлетворяет условию Липшица. Существование подобластей, где целевая функция является неопределенной, можно интерпретировать как наличие некоторых скрытых, заранее неизвестных ограничений. 
+%Авторами предложен подход к решению такого рода задач, который является расширением информационно-статистического алгоритма глобального поиска (АГП) и учитывает наличие неопределенных значений целевой функции в некоторых точках. В рамках алгоритма происходит разбиение области поиска точками испытаний и оцениваются характеристики подобластей на основе значений целевой функции, вычисленных на их границах. В случае отсутствия информации о значении функции в точке в алгоритме используется предложенная авторами оценка, учитывающая размер исследуемой подобласти. Для минимизации количества избыточных испытаний в областях, в которых функция не определена, при таком подходе используется специальный параметр метода $\alpha$, позволяющий регулировать число точек испытаний в области невычислимости.
+%Решение многомерных задач осуществляется посредством их сведения к задачам одномерной оптимизации при помощи кривых, заполняющих пространство (кривых Пеано).
+%В статье изложено подробное описание и приведена схема работы модифицированного алгоритма глобального поиска. 
+%Программная реализация алгоритма глобального поиска на случай не всюду вычислимой целевой функции (АГП-Н) была выполнена на базе фреймворка методов интеллектуальной эвристической оптимизации iOpt открытым исходным кодом.
+%Для проведения численных экспериментов был разработан генератор тестовых задач со скрытыми ограничениями GKLSHiddenConstraint, взявший за основу генератор GKLS, позволяющий порождать задачи многоэкстремальной оптимизации с заранее известными свойствами. Данные функции были дополнены сгенерированными областями невычислимости в форме эллипсоидов (координата центры и радиусы генерировались случайно).
+%Полученные при проведении численных экспериментов с тестовыми функциями результаты демонстрируют надёжность и эффективность реализованного алгоритма. За счёт регулировки параметра $\alpha$ получилось добиться такой же скорости сходимости АГП-Н, как у АГП. 
+%Также в статье было исследовано поведение известных алгоритмов глобальной оптимизации библиотеки \textit{scipy.optimize} при решении задач с невычислимыми областями. В рамках данного исследования методы differential\_evolution и brute показали наихудшие результаты, не справившись с решением такого вида задач совсем. Методы direct и shgo хоть и продемонстрировали хорошие результаты, оказались менее эффективны чем разработанный АГП-Н. 
+%Основным результатом являются эксперименты с модельными задачами настройки гиперпараметров, в которых возникают неопределенные значения оптимизируемой метрики качества. В этих задачах существуют недопустимые сочетания гиперпараметров, при которых настраиваемый метод возвращает бесконечное значение целевой функции.
+%Так была успешно проведена настройка классического алгоритма классификации LinearSVC. АГП-Н успешно решил поставленную задачу, найдя лучшее сочетание гиперпараметров по сравнению со стандартными алгоритмами из библиотеки scikit-learn.
+%Также был настроен метода предсказания значений временного ряда на базе фреймворка FEDOT. В ходе этого эксперимента также было проведено сравнение АГП-Н с алгоритмами настройки из другого широко известного фреймворка Optuna. АГП-Н показал сравнимый результат (в терминах полученного значения целевой метрики), значительно обогнав Optuna по времени, затраченному на решение задачи.
+
+
+\textbf{Keywords:} machine learning, hyperparameter tuning, global optimization, black-box functions, partially defined functions.
 \newline
 \end{small}
 \newline
@@ -108,31 +117,6 @@ Liberti~L., Kucherenko~S. Comparison of deterministic and stochastic approaches 
 \item \label{rfa:enlit:Sergeyev2018}
 Sergeyev~Y.D., Kvasov~D.E., Mukhametzhanov~M.S. On the efficiency of nature-inspired metaheuristics in expensive global optimization with limited budget~// Sci. Rep. 2018. Vol.~8, No.~1. p.~435.
 
-%16
-\item \label{rfa:enlit:Sergeyev2013}
-Sergeyev~Y.D., Strongin~R.G., Lera~D. Introduction to Global Optimization Exploiting Space-Filling Curves. New York: Springer Briefs in Optimization, 2013. %DOI: 10.1007/978-1-4614-8042-6.
-
-%20
-\item \label{rfa:enlit:Strongin2000}
-Strongin~R.G., Sergeyev~Y.D. Global optimization with non-convex constraints. Sequential and parallel algorithms. Dordrecht: Kluwer Academic Publishers, 2000.
-
-%10
-\item \label{rfa:enlit:Kvasov2013}
-Kvasov~D.E., Sergeev~Ya.D. Metody lipshicevoj globalnoj optimizacii v zadachax upravleniya~// Avtomatika i telemexanika. 2013. No.~9. S.~3--19.
-
-%17
-\item \label{rfa:enlit:Sergeyev2020}
-Sergeyev~Y.D., Candelieri~A., Kvasov~D.E., Perego~R. Safe global optimization of expensive noisy black-box functions in the $\delta$-Lipschitz framework~// 
-Soft Comput. 2020. Vol.~24, No.~23. P.~17715--17735. %DOI: 10.1007/s00500-020-05030-3.
-
-%4
-\item \label{rfa:enlit:Dongarra2022}
-Dongarra~J.J. The evolution of mathematical software~// Commun. ACM. 2022. Vol.~65, No.~12. P.~66--72. %DOI: 10.1145/3554977.
-
-%5
-\item \label{rfa:enlit:Duwe2020}
-Duwe~K., et al. State of the art and future trends in data reduction for high-performance computing~// Supercomput. Front. Innov. 2020. Vol.~7, No.~1. %DOI: 10.14529/jsfi200101.
-
 %19
 \item \label{rfa:enlit:Stripinis2021}
 Stripinis~L., Paulavi{\v c}ius~R. A new {DIRECT}-{GLh} algorithm for global optimization with hidden constraints~// Optim. Lett. 2021. Vol.~15, No.~6. P.~1865--1884.
@@ -156,8 +140,22 @@ Barkalov~K.A., Strongin~R.G. Metod globalnoj optimizacii s adaptivnym poryadkom 
 Strongin~R.G., Barkalov~K.A., Bevzuk~S.A. Global optimization method with dual Lipschitz constant estimates for problems with non-convex constraints~// 
 Soft Comput. 2020. Vol.~24, No.~16. P.~11853--11865. %DOI: 10.1007/s00500-020-05078-1.
 
+
+
+%16
+\item \label{rfa:enlit:Sergeyev2013}
+Sergeyev~Y.D., Strongin~R.G., Lera~D. Introduction to Global Optimization Exploiting Space-Filling Curves. New York: Springer Briefs in Optimization, 2013. %DOI: 10.1007/978-1-4614-8042-6.
+
+%20
+\item \label{rfa:enlit:Strongin2000}
+Strongin~R.G., Sergeyev~Y.D. Global optimization with non-convex constraints. Sequential and parallel algorithms. Dordrecht: Kluwer Academic Publishers, 2000.
+
+%%10
+%\item \label{rfa:enlit:Kvasov2013}
+%Kvasov~D.E., Sergeev~Ya.D. Metody lipshicevoj globalnoj optimizacii v zadachax upravleniya~// Avtomatika i telemexanika. 2013. No.~9. S.~3--19.
 \item \label{rfa:enlit:Usova2024}
 Usova~M.A., Barkalov~K.A. An Algorithm for Finding the Global Extremum of a Partially Defined Function~// Communications in Computer and Information Science. 2024. Vol.~1914. P.~147--161. %DOI: 10.1007/978-3-031-52470-7{\_}13.
+
 
 %2
 \item \label{rfa:enlit:Barkalov2022}
@@ -168,7 +166,22 @@ Mathematics. 2022. Vol.~10, No.~19. p.~3665. %DOI: 10.3390/math10193665.
 \item \label{rfa:enlit:Gubaydullin2022}
 Gubaydullin~I.M., Enikeeva~L.V., Barkalov~K.A., Lebedev~I.G., Silenko~D.G. Kinetic modeling of isobutane alkylation with mixed c4 olefins and sulfuric acid as a catalyst using the asynchronous global optimization algorithm~// Commun. Comput. Inf. Sci. 2022. Vol.~1618. P.~293--306. %DOI: 10.1007/978-3-031-11623-0{\_}20.
 
-%новые
+\item \label{rfa:enlit:Barkalov2021}
+Barkalov K.A., Lebedev I.G., Gergel V.P. Parallel Global Search Algorithm with Local Tuning for Solving Mixed-Integer Global Optimization Problems // Lobachevskii Journal of Mathematics. Vol.~7. No.~42. 2021. P.~1492--1503.
+
+\item \label{rfa:enlit:iOptPaper}
+Sysoev~A.V., Kozinov~E.A., Barkalov~K.A., Lebedev~I.G., Karchkov~D.A., Rodionov~D.M. Frejmvork metodov intellektualnoj evristicheskoj optimizacii iOpt // V kn.: Superkompyuternye dni v Rossii: Trudy mezhdunarodnoj konferencii. 2023. S.~179--185.
+
+\item \label{rfa:enlit:iOptGithub}
+Isxodnyj kod frejmvorka iOpt -- URL: https://github.com/aimclub/iOpt (data obrashheniya: 26.01.2025).
+
+\item \label{rfa:enlit:iOptDocs}
+Dokumentaciya iOpt -- URL: https://iopt.readthedocs.io/ru/latest/ (data obrashheniya: 26.01.2025).
+
+%6
+\item \label{rfa:enlit:Gaviano2003}
+Gaviano~M., Kvasov~D.E., Lera~D., Sergeyev~Y.D. Software for generation of classes of test functions with known local and global minima for global optimization~// ACM Trans. Math. Softw. 2003. Vol.~29, No.~4. P.~469--480.
+
 \item \label{rfa:enlit:differential_evolution}
 Storn~R., Price~K., Differential Evolution - a Simple and Efficient Heuristic for Global Optimization over Continuous Spaces // Journal of Global Optimization. 1997. Vol.~11. P.~341-359.
 
@@ -184,21 +197,29 @@ Wales~D.J., Doye~J.P.K. Global Optimization by Basin-Hopping and the Lowest Ener
 \item \label{rfa:enlit:shgo}
 Endres~S.C., Sandrock~C., Focke~W.W. A simplicial homology algorithm for lipschitz optimisation // Journal of Global Optimization. 2018.
 
-\item \label{rfa:enlit:Barkalov2021}
-Barkalov K.A., Lebedev I.G., Gergel V.P. Parallel Global Search Algorithm with Local Tuning for Solving Mixed-Integer Global Optimization Problems // Lobachevskii Journal of Mathematics. Vol.~7. No.~42. 2021. P.~1492--1503.
+\item \label{rfa:enlit:nikitin2022automated}
+Filippou~K., Aifantis~G., Papakostas~G.A., Tsekouras~G.E. Structure learning and hyperparameter optimization using an automated machine learning ({AutoML}) pipeline // Information. 2023. Vol.~14, No. 4. p.~232.
 
-\item \label{rfa:enlit:iOptPaper}
-Sysoev~A.V., Kozinov~E.A., Barkalov~K.A., Lebedev~I.G., Karchkov~D.A., Rodionov~D.M. Frejmvork metodov intellektualnoj evristicheskoj optimizacii iOpt // V kn.: Superkompyuternye dni v Rossii: Trudy mezhdunarodnoj konferencii. 2023. S.~179--185.
+\item \label{rfa:enlit:MonthlyBeerArticle}
+Xu~N. Time Series Analysis on Monthly Beer Production in Australia~// Highlights in Science, Engineering and Technology. 2024. Vol.~94. P.~392--401. DOI: 10.54097/4z3krj13
 
-\item \label{rfa:enlit:iOptDocs}
-Dokumentaciya iOpt -- URL: https://iopt.readthedocs.io/ru/latest/ (data obrashheniya: 26.01.2025).
 
-\item \label{rfa:enlit:iOptGithub}
-Isxodnyj kod frejmvorka iOpt -- URL: https://github.com/aimclub/iOpt (data obrashheniya: 26.01.2025).
+%17
+%\item \label{rfa:enlit:Sergeyev2020}
+%Sergeyev~Y.D., Candelieri~A., Kvasov~D.E., Perego~R. Safe global optimization of expensive noisy black-box functions in the $\delta$-Lipschitz framework~// 
+%Soft Comput. 2020. Vol.~24, No.~23. P.~17715--17735. %DOI: 10.1007/s00500-020-05030-3.
 
-%6
-\item \label{rfa:enlit:Gaviano2003}
-Gaviano~M., Kvasov~D.E., Lera~D., Sergeyev~Y.D. Software for generation of classes of test functions with known local and global minima for global optimization~// ACM Trans. Math. Softw. 2003. Vol.~29, No.~4. P.~469--480.
+%4
+%\item \label{rfa:enlit:Dongarra2022}
+%Dongarra~J.J. The evolution of mathematical software~// Commun. ACM. 2022. Vol.~65, No.~12. P.~66--72. %DOI: 10.1145/3554977.
+
+%5
+%\item \label{rfa:enlit:Duwe2020}
+%Duwe~K., et al. State of the art and future trends in data reduction for high-performance computing~// Supercomput. Front. Innov. 2020. Vol.~7, No.~1. %DOI: 10.14529/jsfi200101.
+	
+%\item \label{rfa:enlit:FEDOT}
+%Automated modeling and machine learning framework {FEDOT} -- URL:  https://github.com/aimclub/FEDOT (data obrashheniya: 25.07.2025).
+
 
 \end{enumerate}
 
@@ -607,11 +628,11 @@ RandomizedSearchCV & 0.96 \\
 
 \subsubsection{Настройка гиперпараметров метода предсказания значений временного ряда }
 
-В качестве второй модельной задачи рассмотрим задачу настройки гиперпараметров методов предсказания значений временного ряда (time series forecasting). Предсказание значений производилось с использованием фреймворка FEDOT [\ref{nikitin2022automated}]
+В качестве второй модельной задачи рассмотрим задачу настройки гиперпараметров методов предсказания значений временного ряда (time series forecasting). Предсказание значений производилось с использованием фреймворка FEDOT [\ref{rfa:rulit:nikitin2022automated}]
 (фреймворк с открытым исходным кодом для задач автоматизированного моделирования и машинного обучения, AutoML). FEDOT поддерживает полный цикл решения задачи, включающий препроцессинг, выбор модели, настройку, кроссвалидацию и т.д. Фреймворк использует ML-модели, в основном из стандартных библиотек \textit{sklearn}, \textit{statsmodels} и \textit{keras}.
 
 Исследование проводилось на датасете \textit{montly beer production}, который содержит 476 записей. %\cite{MonthlyBeerDataset,MonthlyBeerArticle}
-Указанный датасет представлен на платформе Kaggle и часто используется для тестирования алгоритмов машинного обучения (см., например, [\ref{MonthlyBeerArticle}]).
+Указанный датасет представлен на платформе Kaggle и часто используется для тестирования алгоритмов машинного обучения (см., например, [\ref{rfa:rulit:MonthlyBeerArticle}]).
 Построенный для решения поставленной задачи в FEDOT пайплайн включает в себя комбинацию из двух преобразований: lagged и cgru. Lagged-преобразование выполняется путем взятия значения переменной в предыдущий момент времени и включения его в модель в качестве признака в текущий момент времени. Для этого данные временного ряда сдвигаются на определенное количество шагов, которые называются лагом или временной задержкой. В качестве используемой нейронной сети выступает рекуррентная сеть (GRU), использующая свертку (CGRU).
 
 %%%% КАРТИНКА ПОД ВОПРОСОМ
@@ -727,34 +748,11 @@ Liberti~L., Kucherenko~S. Comparison of deterministic and stochastic approaches 
 \item \label{rfa:rulit:Sergeyev2018}
 Sergeyev~Y.D., Kvasov~D.E., Mukhametzhanov~M.S. On the efficiency of nature-inspired metaheuristics in expensive global optimization with limited budget~// Sci. Rep. 2018. Vol.~8, No.~1. p.~435.
 
-%16
-\item \label{rfa:rulit:Sergeyev2013}
-Sergeyev~Y.D., Strongin~R.G., Lera~D. Introduction to Global Optimization Exploiting Space-Filling Curves. New York: Springer Briefs in Optimization, 2013. DOI: 10.1007/978-1-4614-8042-6.
-
-%20
-\item \label{rfa:rulit:Strongin2000}
-Strongin~R.G., Sergeyev~Y.D. Global optimization with non-convex constraints. Sequential and parallel algorithms. Dordrecht: Kluwer Academic Publishers, 2000.
-
-%10
-\item \label{rfa:rulit:Kvasov2013}
-Квасов~Д.Е., Сергеев~Я.Д. Методы липшицевой глобальной оптимизации в задачах управления~// Автоматика и телемеханика. 2013. №~9. C.~3--19.
-
-%17
-\item \label{rfa:rulit:Sergeyev2020}
-Sergeyev~Y.D., Candelieri~A., Kvasov~D.E., Perego~R. Safe global optimization of expensive noisy black-box functions in the $\delta$-Lipschitz framework~// Soft Comput. 2020. Vol.~24, No.~23. P.~17715--17735. DOI: 10.1007/s00500-020-05030-3.
-
-%4
-\item \label{rfa:rulit:Dongarra2022}
-Dongarra~J.J. The evolution of mathematical software~// Commun. ACM. 2022. Vol.~65, No.~12. P.~66--72. DOI: 10.1145/3554977.
-
-%5
-\item \label{rfa:rulit:Duwe2020}
-Duwe~K., et al. State of the art and future trends in data reduction for high-performance computing~// Supercomput. Front. Innov. 2020. Vol.~7, No.~1. DOI: 10.14529/jsfi200101.
-
 %19
 \item \label{rfa:rulit:Stripinis2021}
 Stripinis~L., Paulavi{\v c}ius~R. A new {DIRECT}-{GLh} algorithm for global optimization with hidden constraints~// Optim. Lett. 2021. Vol.~15, No.~6. P.~1865--1884.
 DOI: 10.1007/s11590-021-01726-z.
+
 
 %1
 \item \label{rfa:rulit:Audet2022}
@@ -774,9 +772,19 @@ under unknown constraints~// J. Glob. Optim. 2019. Vol.~79, No.~2. P.~281--303. 
 Strongin~R.G., Barkalov~K.A., Bevzuk~S.A. Global optimization method with dual Lipschitz constant estimates for problems with non-convex constraints~//
 Soft Comput. 2020. Vol.~24, No.~16. P.~11853--11865. DOI: 10.1007/s00500-020-05078-1.
 
+%16
+\item \label{rfa:rulit:Sergeyev2013}
+Sergeyev~Y.D., Strongin~R.G., Lera~D. Introduction to Global Optimization Exploiting Space-Filling Curves. New York: Springer Briefs in Optimization, 2013. DOI: 10.1007/978-1-4614-8042-6.
+
+%20
+\item \label{rfa:rulit:Strongin2000}
+Strongin~R.G., Sergeyev~Y.D. Global optimization with non-convex constraints. Sequential and parallel algorithms. Dordrecht: Kluwer Academic Publishers, 2000.
+
+
 \item \label{rfa:rulit:Usova2024}
 Usova~M.A., Barkalov~K.A. An Algorithm for Finding the Global Extremum of a Partially Defined Function~//
 Communications in Computer and Information Science. 2024. Vol.~1914. P.~147--161. DOI: 10.1007/978-3-031-52470-7{\_}13.
+
 
 %2
 \item \label{rfa:rulit:Barkalov2022}
@@ -788,7 +796,23 @@ Mathematics. 2022. Vol.~10, No.~19. p.~3665. DOI: 10.3390/math10193665.
 Gubaydullin~I.M., Enikeeva~L.V., Barkalov~K.A., Lebedev~I.G., Silenko~D.G. Kinetic modeling of isobutane alkylation with mixed c4 olefins and sulfuric acid as a catalyst using the asynchronous global optimization algorithm~//
 Commun. Comput. Inf. Sci. 2022. Vol.~1618. P.~293--306. DOI: 10.1007/978-3-031-11623-0{\_}20.
 
-%новые
+\item \label{rfa:rulit:Barkalov2021}
+Barkalov K.A., Lebedev I.G., Gergel V.P. Parallel Global Search Algorithm with Local Tuning for Solving Mixed-Integer Global Optimization Problems // Lobachevskii Journal of Mathematics. Vol.~7, No.~42. 2021. P.~1492--1503.
+
+\item \label{rfa:rulit:iOptPaper}
+Сысоев~А.В., Козинов~Е.А., Баркалов~К.А., Лебедев~И.Г., Карчков~Д.А., Родионов~Д.М. Фреймворк методов интеллектуальной эвристической оптимизации iOpt // В кн.: Суперкомпьютерные дни в России: Труды международной конференции. 2023. С.~179--185.
+
+\item \label{rfa:rulit:iOptGithub}
+Исходный код фреймворка iOpt -- URL: https://github.com/aimclub/iOpt (дата обращения: 26.01.2025).
+
+\item \label{rfa:rulit:iOptDocs}
+Документация iOpt -- URL: https://iopt.readthedocs.io/ru/latest/ (дата обращения: 26.01.2025).
+
+
+%6
+\item \label{rfa:rulit:Gaviano2003}
+Gaviano~M., Kvasov~D.E., Lera~D., Sergeyev~Y.D. Software for generation of classes of test functions with known local and global minima for global optimization~// ACM Trans. Math. Softw. 2003. Vol.~29, No.~4. P.~469--480.
+
 \item \label{rfa:rulit:differential_evolution}
 Storn~R., Price~K., Differential Evolution - a Simple and Efficient Heuristic for Global Optimization over Continuous Spaces //
 Journal of Global Optimization. 1997. Vol.~11. P.~341--359.
@@ -805,21 +829,33 @@ Wales~D.J., Doye~J.P.K. Global Optimization by Basin-Hopping and the Lowest Ener
 \item \label{rfa:rulit:shgo}
 Endres~S.C., Sandrock~C., Focke~W.W. A simplicial homology algorithm for lipschitz optimisation // Journal of Global Optimization. 2018.
 
-\item \label{rfa:rulit:Barkalov2021}
-Barkalov K.A., Lebedev I.G., Gergel V.P. Parallel Global Search Algorithm with Local Tuning for Solving Mixed-Integer Global Optimization Problems // Lobachevskii Journal of Mathematics. Vol.~7, No.~42. 2021. P.~1492--1503.
 
-\item \label{rfa:rulit:iOptPaper}
-Сысоев~А.В., Козинов~Е.А., Баркалов~К.А., Лебедев~И.Г., Карчков~Д.А., Родионов~Д.М. Фреймворк методов интеллектуальной эвристической оптимизации iOpt // В кн.: Суперкомпьютерные дни в России: Труды международной конференции. 2023. С.~179--185.
+\item \label{rfa:rulit:nikitin2022automated}
+Filippou~K., Aifantis~G., Papakostas~G.A., Tsekouras~G.E. Structure learning and hyperparameter optimization using an automated machine learning ({AutoML}) pipeline // Information. 2023. Vol.~14, No. 4. p.~232.
 
-\item \label{rfa:rulit:iOptGithub}
-Исходный код фреймворка iOpt -- URL: https://github.com/aimclub/iOpt (дата обращения: 26.01.2025).
+\item \label{rfa:rulit:MonthlyBeerArticle}
+Xu~N. Time Series Analysis on Monthly Beer Production in Australia~// Highlights in Science, Engineering and Technology. 2024. Vol.~94. P.~392--401. DOI: 10.54097/4z3krj13
 
-\item \label{rfa:rulit:iOptDocs}
-Документация iOpt -- URL: https://iopt.readthedocs.io/ru/latest/ (дата обращения: 26.01.2025).
 
-%6
-\item \label{rfa:rulit:Gaviano2003}
-Gaviano~M., Kvasov~D.E., Lera~D., Sergeyev~Y.D. Software for generation of classes of test functions with known local and global minima for global optimization~// ACM Trans. Math. Softw. 2003. Vol.~29, No.~4. P.~469--480.
+%10
+%\item \label{rfa:rulit:Kvasov2013}
+%Квасов~Д.Е., Сергеев~Я.Д. Методы липшицевой глобальной оптимизации в задачах управления~// Автоматика и телемеханика. 2013. №~9. C.~3--19.
+
+%17
+%\item \label{rfa:rulit:Sergeyev2020}
+%Sergeyev~Y.D., Candelieri~A., Kvasov~D.E., Perego~R. Safe global optimization of expensive noisy black-box functions in the $\delta$-Lipschitz framework~// Soft Comput. 2020. Vol.~24, No.~23. P.~17715--17735. DOI: 10.1007/s00500-020-05030-3.
+
+%4
+%\item \label{rfa:rulit:Dongarra2022}
+%Dongarra~J.J. The evolution of mathematical software~// Commun. ACM. 2022. Vol.~65, No.~12. P.~66--72. DOI: 10.1145/3554977.
+
+%5
+%\item \label{rfa:rulit:Duwe2020}
+%Duwe~K., et al. State of the art and future trends in data reduction for high-performance computing~// Supercomput. Front. Innov. 2020. Vol.~7, No.~1. DOI: 10.14529/jsfi200101.
+
+
+%\item \label{rfa:rulit:fedot}
+%Automated modeling and machine learning framework {FEDOT} -- URL:  https://github.com/aimclub/FEDOT (дата обращения: 25.07.2025).
 
 \end{enumerate}
 
