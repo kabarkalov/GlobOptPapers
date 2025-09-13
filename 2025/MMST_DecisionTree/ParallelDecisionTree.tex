@@ -29,33 +29,36 @@
 
 \begin{document}
 %
-\title{Параллельный запуск локальных методов алгоритме глобального поиска с использованием деревьев решений}
+\title{Parallel global optimization algorithm employing decision trees for launching local methods}
 %
 %\titlerunning{Abbreviated paper title}
 % If the paper title is too long for the running head, you can set
 % an abbreviated paper title here
 %
-\author{К.А. Баркалов\inst{1}\orcidID{0000-1111-2222-3333} \and
-И.Г. Лебедев\inst{2,3}\orcidID{1111-2222-3333-4444} \and
-Я.В. Селенко\inst{3}\orcidID{2222--3333-4444-5555}}
+\author{Konstantin Barkalov\orcidID{0000-0001-5273-2471} \and
+Ilya Lebedev\orcidID{0000-0002-8736-0652} \and
+Dmitry Silenko}
 %
-\authorrunning{F. Author et al.}
+\authorrunning{K. Barkalov et al.}
 % First names are abbreviated in the running head.
 % If there are more than two authors, 'et al.' is used.
 %
-\institute{Нижегородский государственный университет им. Н.И. Лобачевского, Нижний Новгород, Российская Федерация }
+\institute{Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia}
 %
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-В данной работе предлагается параллельный подход к запуску локальных методов при решении задачи глобальной оптимизации алгоритмом глобального поиска. Целевая функция задачи задана как черный ящики и от нее требуется лишь удовлетворять условию Липшица с априори неизвестной константой. В работе рассматривается метод выбора окрестности локальных экстремумов целевой функции на основе анализа накопленной поисковой информации. Проведение такого анализа с использованием методов машинного обучения позволяет принять решение о параллельном запуске локальных методов, что может ускорить сходимость алгоритма. Это предположение было подтверждено результатами численных экспериментов, демонстрирующих ускорение при решении ряда тестовых задач.
+%В данной работе разработан подход к параллельному запуску локальных методов при решении задачи глобальной оптимизации с помощью алгоритма глобального поиска. Целевая функция задачи задана как черный ящик; предполагается, что она удовлетворяет условию Липшица с априори неизвестной константой. В работе рассматривается метод выбора окрестности локальных экстремумов целевой функции на основе анализа накопленной поисковой информации. Проведение такого анализа с использованием методов машинного обучения позволяет принять решение о параллельном запуске локальных методов, что позволяет ускорить сходимость алгоритма. Это предположение было подтверждено результатами численных экспериментов, демонстрирующих ускорение при решении серии тестовых задач.
+
+This paper presents an approach for the parallel launch of local optimization methods within a global search algorithm framework, aimed at solving global optimization problems. The objective function is treated as a black-box and is assumed that it satisfies the Lipschitz condition with an unknown constant. The proposed method focuses on selecting the region of attraction of local extrema of the objective function based on the analysis of accumulated search data. Employing machine learning techniques for this analysis enables informed decisions regarding the parallel execution of local methods, leading to improved algorithm convergence. The effectiveness of this approach is validated through numerical experiments, which demonstrate accelerated performance on a set of benchmark problems.
+
 
 \keywords{
-	Глобальная оптимизация $\cdot$ 
-	Многоэкстремальные функции $\cdot$ 
-	Параллельные вычисления $\cdot$ 
-	Машинное обучение $\cdot$ 
-	Древо решений $\cdot$}
+Global optimization $\cdot$
+Multi-extremal functions $\cdot$
+Parallel computing $\cdot$
+Machine learning $\cdot$
+Decision tree $\cdot$}
 \end{abstract}
 %
 %
@@ -63,51 +66,56 @@
 
 
 
-\section{Введение}
+\section{Introduction}
 
-В настоящей работе рассматриваются параллельные алгоритмы решения многомерных задач глобальной оптимизации. Такие задачи часто возникают в тех случаях, когда необходимо подобрать значения параметров исследуемой математической модели, при которых результаты моделирования лучше всего соответствуют экспериментальным данным. Для решения задач этого класса известно множество алгоритмов: от метаэвристических, основанных на идее случайного поиска \cite{Ferreiro2013,Garcia2014,Langdon2011}, до детерминированных алгоритмов, гарантирующих сходимость к глобальному минимуму \cite{Evtushenko2009,He2008,Paulavicius2011}.
+%В настоящей работе рассматриваются параллельные алгоритмы решения многомерных задач глобальной оптимизации. Такие задачи часто возникают в тех случаях, когда необходимо подобрать значения параметров исследуемой математической модели, при которых результаты моделирования лучше всего соответствуют экспериментальным данным. Для решения задач этого класса известно множество алгоритмов: от метаэвристических, основанных на идее случайного поиска \cite{Ferreiro2013,Garcia2014,Langdon2011}, до детерминированных алгоритмов, гарантирующих сходимость к глобальному минимуму \cite{Evtushenko2009,He2008,Paulavicius2011}.
+This paper investigates parallel algorithms for solving multidimensional global optimization problems These problems commonly occur when optimizing the parameters of a mathematical model to achieve the best possible agreement between simulation results and experimental observations. Numerous algorithms have been developed to address this class of problems, varying from metaheuristic techniques based on the idea of random search \cite{Ferreiro2013,Garcia2014,Langdon2011} to deterministic algorithms designed to guarantee convergence to a global minimum \cite{Evtushenko2009,He2008,Paulavicius2011}.
 
-Поскольку в реальных задачах глобальной оптимизации каждое вычисление значения функции (далее \textit{испытание}) является операцией, требующей больших вычислительных затрат, количество таких попыток приходится сокращать. Это может быть достигнуто за счет преднамеренного выбора вариантов в ходе поиска оптимального решения, отсекая бесперспективные поисковые под области и исследуя только те, в которых можно найти решение задачи. Алгоритм глобального поиска (АГП) основан на этой идее \cite{Strongin2000}. В настоящей работе мы попытались объединить АГП и метод локальной оптимизации \cite{Nocedal, Kelley}  (метод поиска по образцу Хука-Дживса \cite{HookJeeves}), чтобы уменьшить количество выполняемых испытаний. Решение о запуске локального метода будет приниматься с использованием дерева решений.
 
-\section{Алгоритмы}\label{SecA}
+%Поскольку в реальных задачах глобальной оптимизации каждое вычисление значения функции (далее \textit{trial}) является операцией, требующей больших вычислительных затрат, количество таких попыток приходится сокращать. Это может быть достигнуто за счет преднамеренного выбора вариантов в ходе поиска оптимального решения, отсекая бесперспективные поисковые под области и исследуя только те, в которых можно найти решение задачи. Алгоритм глобального поиска (АГП) основан на этой идее \cite{Strongin2000}. В настоящей работе мы попытались объединить АГП и метод локальной оптимизации \cite{Nocedal, Kelley}  (метод поиска по образцу Хука-Дживса \cite{HookJeeves}), чтобы уменьшить количество выполняемых испытаний. Решение о запуске локального метода будет приниматься с использованием дерева решений.
+In real-world global optimization problems, each function evaluation (hereafter referred to as a \textit{trial}) is a computationally expensive operation, making it necessary to reduce the number of such trials. This may be achieved by the purposeful selection of alternatives during the course of optimization, rejecting unpromising search sub-regions and exploring only those where a solution can be found. The Global Search Algorithm (GSA) is based on this idea \cite{Strongin2000}. In this work, we attempted to combine the GSA and a local optimization method \cite{Nocedal, Kelley} (the Hooke-Jeeves pattern search method \cite{HookJeeves}) to reduce the number of trials performed. The decision to initiate the local method will be made using a decision tree.
 
-Рассмотрим задачу поиска глобального минимума функции $\varphi(y)$ на гиперинтервале $D=\{ y\in\ R^N:\ a_i\le\ y_i\le\ b_i,\ 1\le\ i\le\ n \}$. 
+\section{Problem statement and solution strategies}\label{SecA}
+
+We consider the problem of finding the global minimum of the function $\varphi(y)$ over a hyperinterval $D$, 
 \begin{equation} \label{sec:problem}   
 	\varphi(y^*) = min\{\varphi(y):y\in D\}, D = \{y \in R^N : a_i \leq y_i \leq b_i, 1 \leq i \leq N \},
 \end{equation}
-где $a,b \in R$ — заданные векторы.
+where $a,b \in R$ are given vectors.
 
-Также предположим, что функция удовлетворяет условию Липшица с \textit{априори} неизвестной константой $L$, что соответствует ограниченному изменению значений функции при ограниченном изменении аргумента.
+We assume that the function satisfies the Lipschitz condition 
 \begin{displaymath} 
-	|\varphi(y_1)-\varphi(y_2)|\leq L\parallel y_1-y_2 \parallel ,y_1,y_2 \in D, 0<L< \infty. 
+	|\varphi(y_1)-\varphi(y_2)|\leq L\parallel y_1-y_2 \parallel ,y_1,y_2 \in D, 0<L< \infty, 
 \end{displaymath}
-Это предположение можно рассматривать (применительно к реальным задачам) как отражение ограниченной мощности, порождающей изменения в моделируемой системе.
+with an a priori unknown constant $L$, which corresponds to a bounded change in the function's values for a bounded change in the argument.
+This assumption can be viewed (in the context of real-world problems) as reflecting the limited power generating changes in the simulated system.
 
-Численное решение задачи (\ref{sec:problem}) сводится к построению оценки $y_k^\ast\in D$, соответствующей некоторому понятию близости к точке $y^\ast$ (например, ${ ||y^\ast-y}_k^\ast||\le\ \varepsilon$, где $\varepsilon\geq0$ — заданная точность) на основе конечного числа $k$ вычисленных значений целевой функции. Применительно к классу рассматриваемых задач предполагается, что целевая функция $\varphi(y)$ может быть определена алгоритмически, в результате выполнения некоторой подпрограммы или библиотеки.
+The numerical solution of the problem (\ref{sec:problem}) reduces to constructing an estimate $y_k^\ast\in D$ that corresponds to some notion of proximity to a point $y^\ast$ (e.g., ${ ||y^\ast-y}_k^\ast||\le\ \varepsilon$, where $\varepsilon\geq0$ is a given accuracy) based on a finite number $k$ of computed values of the objective function. With respect to the class of problems considered, we assume that the objective function $\varphi(y)$ can be algorithmically defined through the execution of a subroutine.
 
-При решении многомерных задач применяется уменьшение размерности (т.е. сведение многомерной задачи к эквивалентной одномерной) с помощью кривых Пеано. Они позволяют свести многомерную задачу оптимизации в области $D$ к одномерной задаче минимизации в интервале $[0, 1]$.
+When solving multidimensional problems, dimensionality reduction is employed (i.e., reducing the multidimensional problem to an equivalent one-dimensional one) using Peano curves. These curves allow transforming the multidimensional optimization problem in the region $D$ into a one-dimensional minimization problem on the interval [0, 1].
 \begin{displaymath}
 	\varphi(y(x^\ast))\ =\min\{\varphi(y(x)): x\in [0,1]\},
 \end{displaymath}
-где функция $\varphi(y(x^\ast))$ удовлетворяет более общему условию Гельдера
+where function $\varphi(y(x^\ast))$ satisfies the more general Hölder condition
 \begin{displaymath}
 	\left|\varphi (y \left(x_1\right))- \varphi (y \left(x_2\right)\right )|\le\ H\left|x_1-x_2\right|^\frac{1}{N},\ x_1,\ x_2\epsilon[0,1].
 \end{displaymath} 
 
-Поэтому вместо исходной задачи минимизации функции $\varphi(y)$ в области $D$ можно рассмотреть минимизацию одномерной функции $f(x)=\varphi(y(x)) $, удовлетворяющий условию Гельдера для $ x\in [0,1]$.
+Consequently, rather than addressing the original problem of minimizing the function $\varphi(y)$ within the domain $D$, we can consider minimizing the one-dimensional function $f(x)=\varphi(y(x))$, subject to the Hölder condition for $x \in [0, 1]$.
 
 
-Чтобы определить, в какой момент лучше запускать локальный метод в рамках глобального поиска, воспользуемся алгоритмом, основанным на дереве решений. На первом этапе поиска происходит накопление поисковой информации в виде результатов выполненных испытаний. На основе результатов испытаний проводилось обучение дерева решений, позволяющего получать кусочно-постоянную аппроксимацию целевой функции и на ее основе прогнозировать поведение целевой функции. 
+%Чтобы определить, в какой момент лучше запускать локальный метод в рамках глобального поиска, воспользуемся алгоритмом, основанным на дереве решений. На первом этапе поиска происходит накопление поисковой информации в виде результатов выполненных испытаний. На основе результатов испытаний проводилось обучение дерева решений, позволяющего получать кусочно-постоянную аппроксимацию целевой функции и на ее основе прогнозировать поведение целевой функции. 
+To identify when to best launch a local method  within the framework of a global search, we employ an algorithm based on a decision tree. The first stage of the search involves accumulating search information in the form of results from performed trials. Based on these trial results, a decision tree is trained, allowing us to obtain a piecewise-constant approximation of the objective function and, consequently, to predict the behavior of the objective function.
 
-Дерево решений — это инструмент для автоматизированного анализа больших массивов данных, применяемый в машинном обучении. Его можно использовать как для решения задач классификации, так и для регрессии. В случае построения регрессии каждому листу дерева присваивается константа. Поэтому полученная аппроксимирующая функция является кусочно-постоянной. В нашем случае дерево решений строит функцию $\psi(y)$ как кусочно-постоянную аппроксимацию $\varphi(y)$ в области поиска. Обозначим значение, вычисленное деревом решений в точке $y$, как $z' = \psi(y)$.
-На рис. \ref{fig:fig2} представлен график целевой функции $\varphi(y)$; На рис. \ref{fig:fig2_2} представлена соответствующая аппроксимация $\psi(y)$, построенная с помощью дерева решений.
+%Дерево решений — это инструмент для автоматизированного анализа больших массивов данных, применяемый в машинном обучении. Его можно использовать как для решения задач классификации, так и для регрессии. В случае построения регрессии каждому листу дерева присваивается константа. Поэтому полученная аппроксимирующая функция является кусочно-постоянной. В нашем случае дерево решений строит функцию $\psi(y)$ как кусочно-постоянную аппроксимацию $\varphi(y)$ в области поиска. Обозначим значение, вычисленное деревом решений в точке $y$, как $z' = \psi(y)$.
+A decision tree is a tool for automated analysis of large datasets used in machine learning. It can be used for both classification and regression problems. In the case of regression, each leaf of the tree is assigned a constant. Therefore, the resulting approximating function is piecewise-constant. In our case, the decision tree constructs a function $\psi(y)$ as a piecewise-constant approximation of $\varphi(y)$ in the search space. Let $z' = \psi(y)$ denote the value computed by the decision tree at point $y$.
 
-
+Fig. \ref{fig:fig2} shows the graph of the objective function $\varphi(y)$; Fig. \ref{fig:fig2_2} presents the corresponding approximation $\psi(y)$ constructed using a decision tree.
 \begin{figure}
 	\begin{center}
 		\begin{minipage}[h]{0.7\linewidth}
 			\includegraphics[width=1\linewidth]{figure/fig5.png}
-			\caption{Целевая функция $\varphi(y)$ из тестового класса} %% подпись к рисунку
+			\caption{Graph of the benchmark objective function $\varphi(y)$} %% подпись к рисунку
 			\label{fig:fig2}
 		\end{minipage}
 	\end{center}
@@ -117,33 +125,32 @@
 	\begin{center}
 		\begin{minipage}[h]{0.7\linewidth}
 			\includegraphics[width=1\linewidth]{figure/fig4.png}
-			\caption{Кусочно-постоянная аппроксимация $\psi(y)$ функции $\varphi(y)$} %% подпись к рисунку
+			\caption{Graph of the piecewise-constant approximation $\psi(y)$ of the function $\varphi(y)$} %% подпись к рисунку
 			\label{fig:fig2_2}
 		\end{minipage}
 	\end{center}
 \end{figure}	
 
 
-При реализации алгоритма поиска областей притяжения локальных минимумов для построения дерева решений использовались алгоритмы из библиотеки OpenCV. OpenCV — это библиотека с открытым исходным кодом алгоритмов компьютерного зрения, обработки изображений и численных алгоритмов общего назначения. Более подробную информацию о дереве решений можно найти в \cite{Brahmbhatt2013}.
+%При реализации алгоритма поиска областей притяжения локальных минимумов для построения дерева решений использовались алгоритмы из библиотеки OpenCV. OpenCV — это библиотека с открытым исходным кодом алгоритмов компьютерного зрения, обработки изображений и численных алгоритмов общего назначения. Более подробную информацию о дереве решений можно найти в \cite{Brahmbhatt2013}.
+To implement the algorithm for identifying the regions of attraction for local minima to construct the decision tree algorithms from the OpenCV library were employed. OpenCV is an open-source library encompassing computer vision algorithms, image processing methods, and general-purpose numerical routines. Detailed information on decision trees may be found in \cite{Brahmbhatt2013}.
 
 
-
-
-После определения с помощью дерева решений области притяжения локального минимума, из ближайшей точки запускаем локальный метод. Алгоритм поиска локального минимума Хука--Дживса относится к классу методов нулевого порядка. Его правила вычисления представляют собой комбинацию исследовательского поиска (для выбора направления) и поиска в выбранном направлении \cite{Himmelblau72}.
+%После определения с помощью дерева решений области притяжения локального минимума, из точки ближайшего испытания, проведенного в этой области, запускается локальный метод. Мы использовали метод Хука--Дживса, который относится к классу методов нулевого порядка. Его правила вычисления представляют собой комбинацию исследовательского поиска (для выбора направления) и поиска в выбранном направлении \cite{Himmelblau72}.
+Having identified a basin of attraction for a local minimum using the decision tree, a local method is launched from the nearest trial point conducted within that basin. We employed the Hooke-Jeeves method, classified as a zero-order technique. Its computational rules combine an exploratory search (for direction selection) with a search along the selected direction \cite{Himmelblau72}.
 
 \begin{figure} 
 	\begin{center} 
 		\begin{minipage}[h]{0.8\linewidth} 
 			\includegraphics[width=1\linewidth]{figure/fig1.pdf} 
-			\caption{Пример итераций алгоритма Хука-Дживса} %%  подпись к рисунку 
+			\caption{An example showing the iterations of the Hooke-Jeeves method} %%  подпись к рисунку 
 			\label{fig:fig1} 
 		\end{minipage} 
 	\end{center} 
 \end{figure}	
 
 
-На рис. \ref{fig:fig1} показан пример работы алгоритма. Отображаются линии  уровня, закрашенные кружки обозначают успешные шаги, незакрашенные кружки соответствуют неудачным шагам, выполненным во время исследовательского поиска. 
-
+Fig. \ref{fig:fig1} visually demonstrates the local algorithm in action. Level lines are shown with filled circles representing successful steps and open circles indicating unsuccessful steps from the exploratory search. 
 
 
 \section{Многомерный параллельный алгоритм глобального поиска}\label{SecGSA}
