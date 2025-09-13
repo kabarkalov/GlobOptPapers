@@ -153,13 +153,18 @@ Having identified a basin of attraction for a local minimum using the decision t
 Fig. \ref{fig:fig1} visually demonstrates the local algorithm in action. Level lines are shown with filled circles representing successful steps and open circles indicating unsuccessful steps from the exploratory search. 
 
 
-\section{Многомерный параллельный алгоритм глобального поиска}\label{SecGSA}
+\section{Global search algorithm with local methods starting in parallel}\label{SecGSA}
 
-На начальном этапе мастер-процесс (пусть он имеет идентификатор $0$) параллельно запускает $p$ испытаний в $p$ разных точках $\{y\left(x^1\right),y\left(x^2\right),\ldots,y\left(x^p\right)\}$ отрезка $[0,1]$.
-Прообразами двух точек являются граничные $x^1=0,x^p=1$; остальные — внутренние точки $x^i\in\left(0,1\right),i=2,\ldots,p-1$.
+%TODO
+%Здесь нужны общие слова про параллельную программу с несколькими процессами, мастером и рабочими
 
-Теперь предположим, что алгоритм уже сделал $K\geq0$ итераций и проведено $k$ испытаний.
+At the initial stage, the master process (let it have the identifier 0) launches $p$ trials in parallel at $p$ different points $\{y\left(x^1\right),y\left(x^2\right),\ldots,y\left(x^p\right)\}$, where preimages $\{x^1,x^2,\ldots,x^p\}$ are form the interval $[0,1]$.
+Two preimages are the boundary points $x^1=0, x^p=1$; the remaining preimages are interior points $x^i\in\left(0,1\right),i=2,\ldots,p-1$.
 
+Let us now assume that the algorithm has completed $K \geq 0$ iterations and $k \geq K$ trials have been performed.
+
+%TODO
+%Здесь нужно связующее предложение
 
 \begin{enumerate}
 	
@@ -254,19 +259,19 @@ Fig. \ref{fig:fig1} visually demonstrates the local algorithm in action. Level l
 
 
 % переводить до этого раздела
-\section{Численные эксперименты}\label{SecR}
+\section{Numerical experiments}\label{SecR}
 
+%Численные эксперименты проводились на суперкомпьютере Лобачевский. Каждый узел имел по два процессора Intel Sandy Bridge E5-2660 2,2 ГГц, 64 Гб оперативной памяти.
+Numerical experiments were conducted on the Lobachevsky supercomputer. Each supercomputer node had two Intel Sandy Bridge E5-2660 2.2 GHz processors and 64 GB of RAM.
 
-Численные эксперименты проводились на суперкомпьютере Лобачевского. Каждый узел имел по два процессора Intel Sandy Bridge E5-2660 2,2 ГГц, 64 Гб оперативной памяти.
+%В экспериментах использовался генератор тестовых задач GKLS, который может генерировать задачи многоэкстремальной оптимизации с известными свойствами: точка глобального минимума, количество локальных минимумов и др.
+The GKLS test problem generator was used in the experiments. This generator can create multi-extremal optimization problems with known properties, such as the location of the global minimum, the number of local minima, etc.
 
-В экспериментах использовался генератор тестовых задач GKLS, который может генерировать задачи многоэкстремальной оптимизации с известными свойствами: точка глобального минимума, количество локальных минимумов и др.
+%Ниже представлены результаты работы синхронного параллельного алгоритма глобального поиска  с использованием дерева решений для нахождения областей притяжения локальных минимумов. Численное сравнение проводилось на двух классах функций GKLS (Simple и Hard из \cite{Sergeyev2006}) размерностей 2, 3, 4 и 5. Эти два класса отличаются размером области притяжения точки глобального минимума. Для простого класса задач радиус области притяжения в три раза больше, чем для сложного.
 
+The results below show the performance of a synchronous parallel global search algorithm using a decision tree to find basins of attraction for local minima. The numerical comparison was performed on two classes of GKLS functions (Simple and Hard from \cite{Sergeyev2006}) with dimensions 2, 3, 4, and 5. These two classes differ in the size of the basin of attraction for the global minimum. The simple class of problems has a radius of attraction that is three times larger than that of the hard class.
 
-Ниже представлены результаты работы синхронного параллельного алгоритма глобального поиска  с использованием дерева решений для нахождения областей притяжения локальных минимумов. Численное сравнение проводилось на двух классах функций GKLS (Simple и Hard из \cite{Sergeyev2006}) размерностей 2, 3, 4 и 5.
-Эти два класса отличаются размером области притяжения точки глобального минимума.
-Для простого класса задач радиус области притяжения в три раза больше, чем для сложного.
-
-Критерием остановки алгоритмов было попадание очередных пробных точек в $\varepsilon$-близость к истинному глобальному минимуму. В таблицах \ref{tab:1} \ref{tab:2} сравниваются усредненные числа итераций, выполняемых алгоритмами при решении задач, и значения ускорения времени относительно последовательного прогона. Распараллеливание выполнено по технологии MPI, эксперимент выполнен на 8, 16, 32 и 64 процессах.
+Критерием остановки алгоритмов было попадание очередных точек испытаний в $\varepsilon$-окрестность истинного глобального минимума. В таблицах \ref{tab:1} \ref{tab:2} сравниваются усредненные числа итераций, выполняемых алгоритмами при решении задач, и значения ускорения времени относительно последовательного прогона. Распараллеливание выполнено по технологии MPI, эксперимент выполнен на 8, 16, 32 и 64 процессах.
 
 
 \begin{table}[!ht]
