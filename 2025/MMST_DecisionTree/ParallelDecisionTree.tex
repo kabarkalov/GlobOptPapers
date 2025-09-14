@@ -170,46 +170,43 @@ Let us now assume that the algorithm has completed $K \geq 0$ iterations and $k 
 	
 	\item Извлекаем из множество $U$ (координат точек испытания) $c = max(p, |U|)$ координат точек испытания $y^{k+1}=y\left(x^{k+1}\right) ... y^{k+c}=y\left(x^{k+c}\right)$. Если $c < p$ то сначала вычисляем $n = p - c$ точек согласно шагам 2 - 7, иначе сразу переходим к шагу 8.	
 	
-	\item Перенумеруем (по нижними индексами) точки $x^i, 1\leq i\leq k$, а также граничные точки отрезка $[0,1]$ в порядке возрастания координаты  
+	\item Renumber (using subscripts) the points $x^i, 1\leq i\leq k$,  along with the boundary points of the interval $[0, 1]$ in increasing order of their coordinate values
 	\begin{equation} 
-		\label{agp1_sort} 	0=x_0<\ x_1<\ ...\ <x_{k+1}=1. 	
+		\label{agp1_sort} 	0=x_0<\ x_1<\ ...\ <x_{k+1}=1 	
 	\end{equation} 
-	и сопоставить их со значениями $z_i=f(x_i)$. 
+	and associate with them the values $z_i=f(x_i)$. 
 	
-	\item  Вычислить текущую нижнюю оценку $M$ неизвестной константы Гельдера $H$: 
+	\item  Compute the current lower bound $M$ of the unknown Hölder constant $H$: 
 	\begin{equation} 
 		\label{agp2_mu} 	\mu=max\left\{\frac{|z_i-z_{i-1}|}{{{(x}_i-x_{i-1})}^{1/N}},\ i=1,\ldots,k\right\},\ M=\  \left\{\begin{matrix}r\mu,\ \mu>0,\\1,\ \mu=0,\\\end{matrix}\right.\ 	
 	\end{equation} 
-	где $r>1$ — параметр алгоритма. Этот параметр управляет надежностью алгоритма: более высокие значения $r$ гарантируют гарантированное нахождение глобального минимума, выбор меньшего значения ускоряет сходимость алгоритма.
+	where $r>1$ is the method parameter. This parameter controls the reliability of the algorithm: higher values of $r$ guarantee finding the global minimum, while choosing a smaller value accelerates the convergence of the algorithm.
 	
-	\item  Для каждого интервала $(x_{i-1},x_i), 1\leq i\leq k+1,$ вычислить значение $R(i)$, называемое \textit{характеристикой} интервала, по формулам
-	
+	\item  For each interval $(x_{i-1},x_i), 1\leq i\leq k+1,$ compute a value $R(i)$, called \textit{the characteristic} of the interval, according to the following formulas:
 	\begin{equation} 
 		\label{agp3_R1} R(1)=2\Delta_1-4\dfrac{z_1}{M}, \; R(k+1)=2\Delta_{k+1}-4\dfrac{z_k}{M}, 
 	\end{equation} 
-	
 	\begin{equation} 
 		\label{agp3_Ri} R(i)=\Delta_i+\dfrac{(z_i-z_{i-1})^2}{M^2\Delta_i}-2\dfrac{z_i+z_{i-1}}{M},1<i<k+1, 
 	\end{equation} 
+	where \(\Delta_i=(x_i-x_{i-1})^\frac{1}{N}\).
 	
-	где \(\Delta_i=(x_i-x_{i-1})^\frac{1}{N}\).
-	
-	\item   Упорядочить характеристики $R\left(i\right),\ 1\leq i \leq k+1,$ в порядке не возрастания
+	\item   Sort the characteristics  $R\left(i\right),\ 1\leq i \leq k+1,$  in non-increasing order
 	\begin{equation} 
 		\label{agp4_R_sort} 	R\left(t_1\right)\geq\ R\left(t_2\right)\geq...\geq\ R\left(t_k\right)\geq\ R(t_{k+1}),\  
 	\end{equation} 
-	и выделить $n$ интервалов с индексами $t_j,\ 1\le\ j\le\ n$  с наибольшими значениями характеристик.	
+and select $n$ intervals with indices $t_j, 1 \le j \le n$, that have the largest characteristic values.	
 	
-	\item Вычислить новые координаты точки испытания $y'^{k+j}=y\left(x^{k+j}\right), \ 1\leq j\leq n$ прообразом которого является $x^{k+j}\in\left(x_{t_j-1},x_{t_j}\right)$, в соответствии с формулой
+	\item Compute the coordinates of the new trial points $y'^{k+j}=y\left(x^{k+j}\right), \ 1\leq j\leq n$, whose preimages are  $x^{k+j}\in\left(x_{t_j-1},x_{t_j}\right)$, according to the following formula:
 	\begin{equation}
 		\label{agp5_x1}
 		x^{k+1}=\frac{x_t+x_{t-1}}{2}-\mathrm{sign}\left(z_t-z_{t-1}\right)\frac{1}{2r}\left[\frac{\left|z_t-z_{t-1}\right|}{M}\right]^N.
 	\end{equation}	
 	
 	
-	\item Отправить на процесс $j, \ 1\leq j\leq n$ координату $y'^{k+1} ... y'^{k+n}$  и сообщаем процессу, что нужно произвести одиночное испытание.
+	\item Отправить на процесс $j, \ 1\leq j\leq n$ координату $y'^{k+1} ... y'^{k+n}$  и сообщить процессу, что нужно произвести одиночное испытание.
 	
-	\item Отправить на процессы $h, \ 1\leq h\leq c$ координаты точек $y^{k+1} ... y^{k+c}$ и сообщаем процессу, что нужно запустить локальный метод.
+	\item Отправить на процессы $h, \ 1\leq h\leq c$ координаты точек $y^{k+1} ... y^{k+c}$ и сообщить процессу, что нужно запустить локальный метод.
 	
 	\item Получить со всех $p$ процессов значения испытаний и добавить их в поисковую информацию.
 	
@@ -218,17 +215,17 @@ Let us now assume that the algorithm has completed $K \geq 0$ iterations and $k 
 	\item Если $k\ <\ 100 N$, перейти к шагу 1.
 	
 	
-	\item Строим дерево решений по всей накопленной поисковой информации, получаем аппроксимирующую функцию $\psi(y)$.
+	\item Build a decision tree using all the accumulated search information and obtain the approximating function $\psi(y)$.
 	
-	\item Если дерево решений используется впервые, постройте равномерную сетку
+	\item If the decision tree is being used for the first time, construct a uniform grid
 	\begin{displaymath} 
 		Y'=\{ y'\in R^N:\ a_i\le y'_i \le b_i,\ 1\le i\le N \},
 	\end{displaymath} 
-	где количество узлов сетки является параметром метода.
+	where the number of grid nodes is a parameter of the method.
 	
 	\item Вычислить кусочно постоянную аппроксимацию функции $\psi(y)$, по дереву решений : $Z' = \{ z'=  \psi(y'), y' \in Y'\}$
 	
-	\item Для всех точек $y'\in V$ найдите точки $y'_q$, ближайшие к $y'$,
+	\item Для всех точек $y'\in V$ найти точки $y'_q$, ближайшие к $y'$,
 	
 	Если ни одна точка $y'_q$ не имеет меньшего значения, чем $y'_q$, поместить $y'$ в множество $U$
 	
@@ -239,20 +236,20 @@ Let us now assume that the algorithm has completed $K \geq 0$ iterations and $k 
 	
 \end{enumerate}
 
-Следующие $p$ испытания выполняются параллельно в точках $x^{k+j},\ 1\leq j\leq p$, вычисляемых по формуле (\ref{agp5_x1}). По завершении испытаний результаты этих испытаний сохраняются в базе поисковой информации, а алгоритм переходит к вычислению новых точек испытания.
-Отметим, что, как правило, процесс испытания в прикладных оптимизационных задачах гораздо более затратный по вычислительным ресурсам по сравнению с вычислением координаты точки.
+The following $p$ trials are executed in parallel at the points$x^{k+j},\ 1\leq j\leq p$,  computed using formula  (\ref{agp5_x1}). Upon completion of these trials, their results are stored in the search information database, and the algorithm proceeds to compute new trial points. Note that, generally, the trial process in applied optimization problems is far more computationally expensive than computing the coordinates of a point.
 
-Алгоритм останавливается в том случае, если выполняется условие \(\Delta_{t_j} < \varepsilon\) хотя бы для одного значения $t_j,\ 1\le\ j\le\ p$, из (\ref{agp4_R_sort} ). Этот критерий остановки (наряду с обычным для итерационных методов критерием ограничения числа выполняемых итераций) используется в прикладных задачах оптимизации, в которых точка глобального минимума $y^*$ априори неизвестна.
+The algorithm terminates if the condition \(\Delta_{t_j} < \varepsilon\) is satisfied for at least one value of $t_j,\ 1\le\ j\le\ p$, from (\ref{agp4_R_sort} ). This stopping criterion (along with the usual criterion of limiting the number of iterations, common for iterative methods) is used in applied optimization problems where the global minimum point $y^*$ is not known a priori.
 
-При решении тестовых задач, в которых известна точка глобального минимума $y^*$, можно использовать критерий остановки и по попаданию в окрестность глобального минимума. В этом случае метод останавливается, если выполняется условие $\left\|y(x_{t_j})-\ y^\ast\right\| < \varepsilon$ для одного $t_j,\ 1\le\ j\le\ p$ из (\ref{agp4_R_sort}).
+When solving test problems where the global minimizer $y^*$ is known, a stopping criterion based on reaching a neighborhood of the global minimum can be used. In this case, the method stops if the condition $\left\|y(x_{t_j})-\ y^\ast\right\| < \varepsilon$ is satisfied for one value of $t_j,\ 1\le\ j\le\ p$ from (\ref{agp4_R_sort}).
 
-В качестве окончательной оценки глобального минимума рассматриваемой задачи берется значение 
+The values  
 \begin{equation} 
 	f_k^*=\min_{1\leq i \leq k}f(x_i), \; x_k^*=arg \min_{1\leq i \leq k}f(x_i). 
 \end{equation} 
+are taken as the final estimate of the global minimum for the problem under consideration.
 
 
-Обоснование такого способа организации вычислений см. в \cite{Strongin2000,Barkalov2016}. Модификации с учетом наличия ограничений-неравенств, а также информация о производной целевой функции представлены в \cite{Barkalov2002,Gergel1997}.
+See \cite{Strongin2000,Barkalov2016} for the justification of this computational approach. Modifications to account for inequality constraints, as well as information about the derivative of the objective function, are presented in \cite{Barkalov2002,Gergel1997}.
 
 
 
