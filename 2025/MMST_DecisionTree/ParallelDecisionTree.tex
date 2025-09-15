@@ -20,8 +20,8 @@
 %\urlstyle{rm}
 %
 
-\usepackage[utf8]{inputenc} % кодировка
-\usepackage[english, russian]{babel} % Русские и английские переносы
+%\usepackage[utf8]{inputenc} % кодировка
+\usepackage[english]{babel} % Русские и английские переносы
 \usepackage{cite}              % для корректного оформления литературы
 \usepackage{enumitem}
 \usepackage{amsmath} 
@@ -184,7 +184,7 @@ In the framework of the proposed approach, a decision tree is used to construct 
 Fig. \ref{fig:fig2} shows the graph of the objective function $\varphi(y)$; Fig. \ref{fig:fig2_2} presents the corresponding approximation $\psi(y)$ constructed using a decision tree.
 \begin{figure}
 	\begin{center}
-		\begin{minipage}[h]{0.75\linewidth}
+		\begin{minipage}[h]{0.7\linewidth}
 			\includegraphics[width=1\linewidth]{figure/fig5.png}
 			\caption{Graph of the benchmark objective function $\varphi(y)$} %% подпись к рисунку
 			\label{fig:fig2}
@@ -194,7 +194,7 @@ Fig. \ref{fig:fig2} shows the graph of the objective function $\varphi(y)$; Fig.
 
 \begin{figure}
 	\begin{center}
-		\begin{minipage}[h]{0.75\linewidth}
+		\begin{minipage}[h]{0.7\linewidth}
 			\includegraphics[width=1\linewidth]{figure/fig4.png}
 			\caption{Graph of the piecewise-constant approximation $\psi(y)$ of the function $\varphi(y)$} %% подпись к рисунку
 			\label{fig:fig2_2}
@@ -231,7 +231,7 @@ The pattern search consists of taking one step from the resulting base point alo
 
 \begin{figure} 
 	\begin{center} 
-		\begin{minipage}[h]{1.0\linewidth} 
+		\begin{minipage}[!h]{1.0\linewidth} 
 			\includegraphics[width=1\linewidth]{figure/fig1.pdf} 
 			\caption{An example showing the iterations of the Hooke-Jeeves method} %%  подпись к рисунку 
 			\label{fig:fig1} 
@@ -283,7 +283,7 @@ In each iteration, the algorithm selects several computation points and distribu
 
 \begin{enumerate}
 	
-	\item Извлекаем из множества $U$ (координат точек испытания) $c = max(p, |U|)$ координат точек испытания $y^{k+1}=y\left(x^{k+1}\right) ... y^{k+c}=y\left(x^{k+c}\right)$. Если $c < p$ то сначала вычисляем $n = p - c$ точек согласно шагам 2 - 7, иначе сразу переходим к шагу 8.	
+	\item Extract $c = \max(p, |U|)$ trial point coordinates $y^{k+1}=y\left(x^{k+1}\right) ... y^{k+c}=y\left(x^{k+c}\right)$ from the set $U$ (which contains trial point coordinates). If $c < p$, then first perform trials at $n = p - c$ points according to Steps~2--7; otherwise proceed directly to Step~8.
 	
 	\item Renumber (using subscripts) the points $x^i, 1\leq i\leq k$,  along with the boundary points of the interval $[0, 1]$ in increasing order of their coordinate values
 	\begin{equation} 
@@ -318,16 +318,17 @@ and select $n$ intervals with indices $t_j, 1 \le j \le n$, that have the larges
 		x^{k+1}=\frac{x_t+x_{t-1}}{2}-\mathrm{sign}\left(z_t-z_{t-1}\right)\frac{1}{2r}\left[\frac{\left|z_t-z_{t-1}\right|}{M}\right]^N.
 	\end{equation}	
 	
+
 	
-	\item Отправить на процесс $j, \ 1\leq j\leq n$ координату $y'^{k+1} ... y'^{k+n}$  и сообщить процессу, что нужно произвести одиночное испытание.
+	\item Send to process $j$, $1 \leq j \leq n$, the coordinates $y'^{k+1}, \dots, y'^{k+n}$ and notify the process that it needs to perform a single trial.
 	
-	\item Отправить на процессы $h, \ 1\leq h\leq c$ координаты точек $y^{k+1} ... y^{k+c}$ и сообщить процессу, что нужно запустить локальный метод.
+	\item Send to processes $h$, $1 \leq h \leq c$, the coordinates of points $y^{k+1}, \dots, y^{k+c}$ and notify the process that it needs to run a local method.
 	
-	\item Получить со всех $p$ процессов значения испытаний и добавить их в поисковую информацию.
+	\item Receive trial values from all $p$ processes and add them to the search information.
 	
-	\item Добавить точки испытаний $y'^{k+1}=y\left(x^{k+1}\right) ... y'^{k+n}=y\left(x^{k+т}\right)$ к множеству $V$.
+	\item Add the trial points $y'^{k+1}=y\left(x^{k+1}\right) , \dots, y'^{k+n}=y\left(x^{k+n}\right)$  to the set $V$.
 	
-	\item Если $k\ <\ 100 N$, перейти к шагу 1.
+	\item If $k < 100N$, go to Step~1.
 	
 	
 	\item Build a decision tree using all the accumulated search information and obtain the approximating function $\psi(y)$.
@@ -338,16 +339,16 @@ and select $n$ intervals with indices $t_j, 1 \le j \le n$, that have the larges
 	\end{displaymath} 
 	where the number of grid nodes is a parameter of the method.
 	
-	\item Вычислить кусочно постоянную аппроксимацию функции $\psi(y)$, по дереву решений : $Z' = \{ z'=  \psi(y'), y' \in Y'\}$
 	
-	\item Для всех точек $y'\in V$ найти точки $y'_q$, ближайшие к $y'$,
+	\item Compute the piecewise constant approximation of the function $\psi(y)$ using the decision tree: $Z' = \{ z' = \psi(y'), y' \in Y' \}$.
 	
-	Если ни одна точка $y'_q$ не имеет меньшего значения, чем $y'_q$, поместить $y'$ в множество $U$
+	\item For all points $y' \in V$, find the points $y'_q$ closest to $y'$.
 	
-	Очистить множество $V$.
+	If no point $y'_q$ has a value smaller than $y'$, add $y'$ to the set $U$.
 	
-	\item Проверка критериев остановки
+	Clear the set $V$.
 	
+	\item Check the stopping criteria.
 	
 \end{enumerate}
 
@@ -389,6 +390,18 @@ The results below show the performance of a synchronous parallel global search a
 
 
 Algorithms terminated when current trial point was within the $\varepsilon$-neighborhood of the true global minimum. Tables \ref{tab:1} and \ref{tab:2} show the average solution time and speedup relative to a sequential run, achieved by the algorithms when solving optimization problems. Figure \ref{fig:fig4} shows the speedup in terms of the number of iterations. Parallelization was implemented using MPI, and experiments were conducted on 1, 8, 16, 32, and 64 processes.
+
+
+\begin{figure} 
+	\begin{center} 
+		\begin{minipage}[h]{0.9\linewidth} 
+			\includegraphics[width=1\linewidth]{figure/fig6.pdf} 
+			\caption{Iteration speedup} %%  подпись к рисунку 
+			\label{fig:fig4} 
+		\end{minipage} 
+	\end{center} 
+\end{figure}	
+
 
 \begin{table}[!ht]
 	\caption{The average solution time}
@@ -455,17 +468,6 @@ Algorithms terminated when current trial point was within the $\varepsilon$-neig
 	%	\end{tabular}
 %\end{table}
 
-
-
-\begin{figure} 
-	\begin{center} 
-		\begin{minipage}[h]{0.9\linewidth} 
-			\includegraphics[width=1\linewidth]{figure/fig6.pdf} 
-			\caption{Iteration speedup} %%  подпись к рисунку 
-			\label{fig:fig4} 
-		\end{minipage} 
-	\end{center} 
-\end{figure}	
 
 
 %Как видно из приведенных данных, присутствует ускорение по времени для задач любой размерности, при этом в целом значение ускорения не линейное, но встречается и сверхлинейное ускорение. В данных задачах большое значение имеет что, как быстро алгоритм глобального поиска поставит достаточное для дерева решения количество точек в окрестности глобального минимума, после чего локальный метод быстро находит оптимум, из за этого возникает сверхлинейное ускорение. Низкое ускорение в остальных случаях, в большей степени обусловлено тем, что алгоритм оптимизации является синхронным и на некоторых итерациях происходит ожидание завершения локального поиска, также значительным оказалось влияние накладных расходов на передачу точек между процессами. 
