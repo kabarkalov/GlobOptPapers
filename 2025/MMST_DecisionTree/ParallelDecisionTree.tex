@@ -35,15 +35,15 @@
 % If the paper title is too long for the running head, you can set
 % an abbreviated paper title here
 %
-\author{Konstantin Barkalov\orcidID{0000-0001-5273-2471} \and
-Ilya Lebedev\orcidID{0000-0002-8736-0652} \and
-Dmitry Silenko\orcidID{0000-0002-2578-9699} }
+\author{Konstantin Barkalov$^{1,2}$\orcidID{0000-0001-5273-2471} \and
+Ilya Lebedev$^{1,2}$\orcidID{0000-0002-8736-0652} \and
+Dmitry Silenko$^{1,2}$\orcidID{0000-0002-2578-9699} }
 %
 \authorrunning{K. Barkalov et al.}
 % First names are abbreviated in the running head.
 % If there are more than two authors, 'et al.' is used.
 %
-\institute{Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia}
+\institute{$^1$Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia\\$^2$Research and Education Mathematics Center ``Mathematics for Future Technologies'', Nizhni Novgorod, Russia}
 %
 \maketitle              % typeset the header of the contribution
 %
@@ -69,11 +69,18 @@ Decision tree $\cdot$}
 \section{Introduction}
 
 %В настоящей работе рассматриваются параллельные алгоритмы решения многомерных задач глобальной оптимизации. Такие задачи часто возникают в тех случаях, когда необходимо подобрать значения параметров исследуемой математической модели, при которых результаты моделирования лучше всего соответствуют экспериментальным данным. Для решения задач этого класса известно множество алгоритмов: от метаэвристических, основанных на идее случайного поиска \cite{Ferreiro2013,Garcia2014,Langdon2011}, до детерминированных алгоритмов, гарантирующих сходимость к глобальному минимуму \cite{Evtushenko2009,He2008,Paulavicius2011}.
-This paper investigates parallel algorithms for solving multidimensional global optimization problems These problems commonly occur when optimizing the parameters of a mathematical model to achieve the best possible agreement between simulation results and experimental observations. Numerous algorithms have been developed to address this class of problems, varying from metaheuristic techniques based on the idea of random search \cite{Ferreiro2013,Garcia2014,Langdon2011} to deterministic algorithms designed to guarantee convergence to a global minimum \cite{Evtushenko2009,He2008,Paulavicius2011}.
+This paper investigates parallel algorithms for solving multidimensional global optimization problems These problems commonly occur when optimizing the parameters of a mathematical model to achieve the best possible agreement between simulation results and experimental observations. Numerous algorithms have been developed to address this class of problems, varying from metaheuristic and evolutionary techniques \cite{Ferreiro2013,Garcia2014,Langdon2011} to deterministic algorithms designed to guarantee convergence to a global minimizer \cite{Evtushenko2009,He2008,Paulavicius2011}.
 
 
 %Поскольку в реальных задачах глобальной оптимизации каждое вычисление значения функции (далее \textit{trial}) является операцией, требующей больших вычислительных затрат, количество таких попыток приходится сокращать. Это может быть достигнуто за счет преднамеренного выбора вариантов в ходе поиска оптимального решения, отсекая бесперспективные поисковые под области и исследуя только те, в которых можно найти решение задачи. Алгоритм глобального поиска (АГП) основан на этой идее \cite{Strongin2000}. В настоящей работе мы попытались объединить АГП и метод локальной оптимизации \cite{Nocedal, Kelley}  (метод поиска по образцу Хука-Дживса \cite{HookJeeves}), чтобы уменьшить количество выполняемых испытаний. Решение о запуске локального метода будет приниматься с использованием дерева решений.
-In real-world global optimization problems, each function evaluation (hereafter referred to as a \textit{trial}) is a computationally expensive operation, making it necessary to reduce the number of such trials. This may be achieved by the purposeful selection of alternatives during the course of optimization, rejecting unpromising search sub-regions and exploring only those where a solution can be found. The Global Search Algorithm (GSA) is based on this idea \cite{Strongin2000}. In this work, we attempted to combine the GSA and a local optimization method (the Hooke-Jeeves pattern search method \cite{Nocedal, Kelley}) to reduce the number of trials performed. The decision to run the local method will be made using a decision tree.
+In real-world global optimization problems, each function evaluation (hereafter referred to as a \textit{trial}) is a computationally expensive operation, making it necessary to reduce the number of such trials. This may be achieved by the purposeful selection of alternatives during the course of optimization, rejecting unpromising search sub-regions and exploring only those where a solution can be found. 
+%именно на такой идее основан один из эффективных детерминированных методов глобальной оптимизации - Алгоритм Глобального поиска
+This idea forms the foundation of an efficient deterministic global optimization method: the Global Search Algorithm (GSA) \cite{Strongin2000}.
+In this work, we attempted to combine the GSA and a local optimization method (the Hooke-Jeeves method \cite{Nocedal, Kelley}) to decrease the number of trials carried out. The decision to run the local method will be made using a decision tree.
+
+% Следует отметить, что и другие подходы к решению задач глобальной оптмизации используют схожие идеи, основанные на использования локального уточнения лучшего найденного решения для ускорения сходимости к точке глобального оптимума. Сказанное справедливо как для эволюционных, так и для детерминированных алгоритмов глобальной оптмизации. 
+
+It should be noted that other approaches to solving global optimization problems use similar ideas based on employing local refinement of the best-found solution to accelerate convergence to the global optimizer. This holds true for both evolutionary \cite{Kuzenkov2024} and deterministic \cite{Grishagin2025} global optimization algorithms.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -478,15 +485,30 @@ As can be seen from the presented data, there is a time speedup for problems of 
 
 \section{Conclusion} 
 
+%Первая версия заключения
+
 %На данный момент в результате проделанной работы удалось совместить алгоритм глобального поиска с эффективным локальным уточнением. В отличие от известных мультистартовых схем решение о запуске локального метода принимается с помощью дерева решений. Использование такой комбинации методов позволяет значительно ускорить работу алгоритма.
 %Параллельная версия алгоритма сохраняет свойства своего последовательного прототипа, что было подтверждено численными экспериментами по решению серии из нескольких сотен задач различной размерности. Предлагаемая схема позволяет использовать преимущества как распараллеливания, так и быстрого поиска локальных экстремумов.
 %Помимо использования деревьев решений для выявления областей притяжения локальных экстремумов многоэкстремальных функций, мы также планируем использовать методы машинного обучения для разделения переменных решаемой задачи. Во многих прикладных задачах оптимизации зависимость целевой функции от некоторых параметров бывает либо линейной, либо одномодальной. Выделение таких переменных в специальную группу и решение задачи с помощью параллельной схемы рекурсивной оптимизации \cite{Barkalov2020_1} позволяет сократить время решения задачи на порядки по сравнению с использованием глобального поиска сразу по всем переменным.
+
+%Currently, the work done has made it possible to combine a global search algorithm with effective local refinement. Unlike known multi-start schemes, the decision to launch the local method is made using a decision tree. The use of such a combination of methods significantly speeds up the algorithm.
+%The parallel version of the algorithm retains the properties of its sequential prototype, which was confirmed by numerical experiments on solving a series of several hundred problems of various dimensions. The proposed scheme allows us to exploit the advantages of both parallelization and rapid local extrema search.
+%In addition to using decision trees to identify the basins of attraction of local extrema of multimodal functions, we also plan to use machine learning methods to separate the variables of the problem being solved. In many applied optimization problems, the dependence of the objective function on some parameters is either linear or unimodal. Identifying such variables into a special group and solving the problem using a parallel recursive optimization scheme \cite{Barkalov2020_1} can reduce the solution time by orders of magnitude compared to using global search across all variables at once.
+
+
+%Вторая версия заключения
+
+%На данный момент в результате проделанной работы удалось совместить алгоритм глобального поиска с эффективным локальным уточнением. В отличие от известных мультистартовых схем решение о запуске локального метода принимается с помощью дерева решений. Использование такой комбинации методов позволяет значительно ускорить работу алгоритма.
+%Параллельная версия алгоритма сохраняет свойства своего последовательного прототипа, что было подтверждено численными экспериментами по решению серии из нескольких сотен задач различной размерности. Предлагаемая схема позволяет использовать преимущества как распараллеливания, так и быстрого поиска локальных экстремумов.
+
+%Использование методов машинного обучения в задачах глобальной оптмизации не ограничивается лишь выявлением областей притяжения локальных экстремумов. Одним из интересных свойст прикладных оптимизационных задачах большой размерности, связанных с идентификацией параметров сложных математических моделей, является унимодальный характер зависимости целевой функции от части переменных. Однако какие именно переменные влияют глобально, а какие - локально, заранее не известно. С помощью методов классификации можно выделить переменные, влияющие локально, в отдельную группу и организовать решение задачи с помощью схемы вложенной оптимизации \cite{Barkalov2020_1}. Использование локальных методов на внутреннем уровне рекурсии и глобальных - на внешнем позволяет значительно сократить общее время решения задачи по сравнению с использованием только глобального поиска.
 
 Currently, the work done has made it possible to combine a global search algorithm with effective local refinement. Unlike known multi-start schemes, the decision to launch the local method is made using a decision tree. The use of such a combination of methods significantly speeds up the algorithm.
 
 The parallel version of the algorithm retains the properties of its sequential prototype, which was confirmed by numerical experiments on solving a series of several hundred problems of various dimensions. The proposed scheme allows us to exploit the advantages of both parallelization and rapid local extrema search.
 
-In addition to using decision trees to identify the basins of attraction of local extrema of multimodal functions, we also plan to use machine learning methods to separate the variables of the problem being solved. In many applied optimization problems, the dependence of the objective function on some parameters is either linear or unimodal. Identifying such variables into a special group and solving the problem using a parallel recursive optimization scheme \cite{Barkalov2020_1} can reduce the solution time by orders of magnitude compared to using global search across all variables at once.
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
