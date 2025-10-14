@@ -350,7 +350,7 @@ In each iteration, the algorithm selects several computation points and distribu
 	\end{equation} 
 and select $n$ intervals with indices $t_j, 1 \le j \le n$, that have the largest characteristic values.	
 	
-	\item Compute the coordinates of the new trial points $y'^{k+j}=y\left(x^{k+j}\right), \ 1\leq j\leq n$, whose preimages are  $x^{k+j}\in\left(x_{t_j-1},x_{t_j}\right)$, according to the following formula:
+	\item Compute the new trial points $\overline{y}^{k+j}=y\left(x^{k+j}\right), \ 1\leq j\leq n$, whose preimages $x^{k+j}\in\left(x_{t_j-1},x_{t_j}\right)$  are calculated using the following formula:
 	\begin{equation}
 		\label{agp5_x1}
 		x^{k+j}=\frac{x_{t_j}+x_{t_j-1}}{2}-\mathrm{sign}\left(z_{t_j}-z_{t_j-1}\right)\frac{1}{2r}\left[\frac{\left|z_{t_j}-z_{t_j-1}\right|}{M}\right]^N.
@@ -358,13 +358,13 @@ and select $n$ intervals with indices $t_j, 1 \le j \le n$, that have the larges
 	
 
 	
-	\item Send to process $j$, $1 \leq j \leq n$, the coordinates of points $y'^{k+1}, \dots, y'^{k+n}$ and notify the process that it needs to perform a single trial.
+	\item Send to process $j$, $1 \leq j \leq n$, the coordinates of points $\overline{y}^{k+1}, \dots, \overline{y}^{k+n}$ and notify the process that it needs to perform a single trial.
 	
 	\item Send to processes $h$, $1 \leq h \leq c$, the coordinates of points $y^{k+1}, \dots, y^{k+c}$ and notify the process that it needs to run a local method.
 	
 	\item Receive trial results from all $p$ processes and add them to the search information.
 	
-	\item Add the trial points $y'^{k+1}=y\left(x^{k+1}\right) , \dots, y'^{k+n}=y\left(x^{k+n}\right)$  to the set $V$.
+	\item Add the trial points $\overline{y}^{k+1}=y\left(x^{k+1}\right) , \dots, \overline{y}^{k+n}=y\left(x^{k+n}\right)$  to the set $V$.
 	
 	\item If the number of trials is not large enough, namely, if $k < 100 N$, go to Step~1.
 	
@@ -375,7 +375,7 @@ and select $n$ intervals with indices $t_j, 1 \le j \le n$, that have the larges
 	%If the decision tree is being used for the first time, construct a uniform grid
 	Upon the first application of the decision tree, generate a uniform grid
 	\begin{displaymath} 
-		Y'=\{ y'\in R^N:\ a_i\le y'_i \le b_i,\ 1\le i\le N \},
+		\overline{Y}=\{ \overline{y}\in R^N:\ a_i\le \overline{y}_i \le b_i,\ 1\le i\le N \},
 	\end{displaymath} 
 	%where the number of grid nodes is a parameter of the method.
 	where the density of grid points is governed by a user-defined parameter.
@@ -383,8 +383,8 @@ and select $n$ intervals with indices $t_j, 1 \le j \le n$, that have the larges
 	
 	\item Compute the piecewise-constant approximation $\psi(y)$ of the function $\varphi(y)$ using the decision tree.% $Z' = \{ z' = \psi(y'), y' \in Y' \}$.
 	
-	\item For all points $y' \in V$, find the points $y'_q$ closest to $y'$.
-		If no point $y'_q$ has a value smaller than $y'$, add $y'$ to the set $U$.
+	\item For all points $\overline{y} \in V$, find the points $\overline{y}_q$ closest to $\overline{y}$.
+		If no point $\overline{y}_q$ has a value smaller than $\overline{y}$, add $\overline{y}$ to the set $U$.
 		Clear the set $V$.
 	
 	\item Check the stopping criteria.
@@ -408,12 +408,21 @@ When solving test problems where the global minimizer $y^*$ is known, a stopping
 
 See \cite{Strongin2000,Barkalov2016} for the justification of this computational approach. Techniques for handling inequality constraints and using objective function derivative are discussed in \cite{Barkalov2002, Gergel1997, Barkalov2023, Gegrel2021}.
 
-
-
-
-
 % переводить до этого раздела
 \section{Computational experiments}\label{SecR}
+
+The software implementation of the described algorithm is an extension of the Globalizer framework (https://github.com/OptimLLab/Globalizer). The development was carried out in C++ using the OpenCV library and MPI.
+
+The Globalizer framework is designed for solving multiextremal optimization problems on supercomputer systems. Typical areas of application of the software package include solving problems of identifying parameters of mathematical models based on experimental data, as well as optimizing parameters of artificial intelligence models and other complex systems.
+The framework is characterized by the following features:
+\begin{itemize}
+    \item operates on Windows and Linux family operating systems;
+    \item provides a standard interface in this subject area;
+    \item provides the ability to work using default algorithm parameter values that ensure a high-quality solution;
+    \item supports parallelism using MPI and OpenMP technologies;
+    \item supports the use of computing accelerators.
+\end{itemize}
+
 
 %Численные эксперименты проводились на суперкомпьютере Лобачевский. Каждый узел имел по два процессора Intel Sandy Bridge E5-2660 2,2 ГГц, 64 Гб оперативной памяти.
 The Lobachevsky supercomputer was used for the numerical experiments. Each supercomputer node featured two Intel Sandy Bridge E5-2660 2.2 GHz processors and 64 GB of RAM.
