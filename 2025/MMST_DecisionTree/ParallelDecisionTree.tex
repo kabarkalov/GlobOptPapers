@@ -37,7 +37,7 @@
 %
 \author{Konstantin Barkalov$^{1,2}$\orcidID{0000-0001-5273-2471} \and
 Ilya Lebedev$^{1,2}$\orcidID{0000-0002-8736-0652} \and
-Dmitry Silenko$^{1,2}$\orcidID{0000-0002-2578-9699} }
+Dmitry Silenko$^{1}$\orcidID{0000-0002-2578-9699} }
 %
 \authorrunning{K. Barkalov et al.}
 % First names are abbreviated in the running head.
@@ -68,15 +68,18 @@ Decision tree $\cdot$}
 
 \section{Introduction}
 
+Many decision-making problems arising in various areas of human activity can be formulated as optimization problems. With the rapidly increasing complexity of optimized objects, it is quite natural for their mathematical models to become more complex as well, which consequently complicates the search for an optimal combination of parameters. Very often, it is impossible to find such a combination analytically, making it necessary to construct numerical methods for its search.
+
 %В настоящей работе рассматриваются параллельные алгоритмы решения многомерных задач глобальной оптимизации. Такие задачи часто возникают в тех случаях, когда необходимо подобрать значения параметров исследуемой математической модели, при которых результаты моделирования лучше всего соответствуют экспериментальным данным. Для решения задач этого класса известно множество алгоритмов: от метаэвристических, основанных на идее случайного поиска \cite{Ferreiro2013,Garcia2014,Langdon2011}, до детерминированных алгоритмов, гарантирующих сходимость к глобальному минимуму \cite{Evtushenko2009,He2008,Paulavicius2011}.
-This paper investigates parallel algorithms for solving multidimensional global optimization problems These problems commonly occur when optimizing the parameters of a mathematical model to achieve the best possible agreement between simulation results and experimental observations. Numerous algorithms have been developed to address this class of problems, varying from metaheuristic and evolutionary techniques \cite{Ferreiro2013,Garcia2014,Langdon2011} to deterministic algorithms designed to guarantee convergence to a global minimizer \cite{Evtushenko2009,He2008,Paulavicius2011}.
+This paper investigates parallel algorithms for solving multidimensional global optimization problems. These problems commonly occur when optimizing the parameters of a mathematical model to achieve the best possible agreement between simulation results and experimental observations. Numerous algorithms have been developed to address this class of problems, varying from metaheuristic and evolutionary techniques \cite{Ferreiro2013,Garcia2014,Langdon2011} to deterministic algorithms designed to guarantee convergence to a global minimizer \cite{Evtushenko2009,He2008,Paulavicius2011}.
 
 
 %Поскольку в реальных задачах глобальной оптимизации каждое вычисление значения функции (далее \textit{trial}) является операцией, требующей больших вычислительных затрат, количество таких попыток приходится сокращать. Это может быть достигнуто за счет преднамеренного выбора вариантов в ходе поиска оптимального решения, отсекая бесперспективные поисковые под области и исследуя только те, в которых можно найти решение задачи. Алгоритм глобального поиска (АГП) основан на этой идее \cite{Strongin2000}. В настоящей работе мы попытались объединить АГП и метод локальной оптимизации \cite{Nocedal, Kelley}  (метод поиска по образцу Хука-Дживса \cite{HookJeeves}), чтобы уменьшить количество выполняемых испытаний. Решение о запуске локального метода будет приниматься с использованием дерева решений.
 In real-world global optimization problems, each function evaluation (hereafter referred to as a \textit{trial}) is a computationally expensive operation, making it necessary to reduce the number of such trials. This may be achieved by the purposeful selection of alternatives during the course of optimization, rejecting unpromising search sub-regions and exploring only those where a solution can be found. 
 %именно на такой идее основан один из эффективных детерминированных методов глобальной оптимизации - Алгоритм Глобального поиска
 This idea forms the foundation of an efficient deterministic global optimization method: the Global Search Algorithm (GSA) \cite{Strongin2000}.
-In this work, we attempted to combine the GSA and a local optimization method (the Hooke-Jeeves method \cite{Nocedal, Kelley}) to decrease the number of trials carried out. The decision to run the local method will be made using a decision tree.
+In this work, we attempted to combine the GSA and a local optimization method (the Hooke-Jeeves method \cite{Nocedal, Kelley}) to decrease the number of trials carried out.
+A decision tree will determine whether to run the local method.
 
 % Следует отметить, что и другие подходы к решению задач глобальной оптмизации используют схожие идеи, основанные на использования локального уточнения лучшего найденного решения для ускорения сходимости к точке глобального оптимума. Сказанное справедливо как для эволюционных, так и для детерминированных алгоритмов глобальной оптмизации. 
 
@@ -92,9 +95,9 @@ It should be noted that other approaches to solving global optimization problems
 
 Classical local optimization algorithms are designed to find a single extremum (local minimum or maximum) in the neighborhood of an initial guess. Depending on the information used about the objective function, these methods are typically classified as:
 \begin{itemize}
-	\item Zero-order methods, which use only function values;
-	\item First-order methods (gradient methods), requiring the computation of first derivatives;
-	\item Second-order methods (e.g., Newton's method), which require the computation of the matrix of second derivatives (Hessian).
+	\item zero-order methods, which use only function values;
+	\item first-order methods (gradient methods), requiring the computation of first derivatives;
+	\item second-order methods (e.g., Newton's method), which require the computation of the matrix of second derivatives (Hessian).
 \end{itemize}
 
 
@@ -123,31 +126,33 @@ Section \ref{SecR} contains the results of computational experiments conducted o
 
 \section{Problem statement and solution strategies}\label{SecA}
 
-We consider the problem of finding the global minimum of the function $\varphi(y)$ over a hyperinterval $D$, 
+The problem under consideration is to find the global minimum point of the function $\varphi(y)$ over a hyperinterval $D$, 
 \begin{equation} \label{sec:problem}   
-	\varphi(y^*) = min\{\varphi(y):y\in D\}, D = \{y \in R^N : a_i \leq y_i \leq b_i, 1 \leq i \leq N \},
+	\varphi(y^*) = \min\{\varphi(y):y\in D\}, \; D = \{y \in R^N : a_i \leq y_i \leq b_i, 1 \leq i \leq N \},
 \end{equation}
 where $a,b \in R$ are given vectors.
 
 We assume that the function satisfies the Lipschitz condition 
 \begin{displaymath} 
-	|\varphi(y_1)-\varphi(y_2)|\leq L\parallel y_1-y_2 \parallel ,y_1,y_2 \in D, 0<L< \infty, 
+	|\varphi(y_1)-\varphi(y_2)|\leq L \left\| y_1-y_2 \right\|, \; y_1,y_2 \in D, 
 \end{displaymath}
-with an a priori unknown constant $L$, which corresponds to a bounded change in the function's values for a bounded change in the argument.
-This assumption can be viewed (in the context of real-world problems) as reflecting the limited power generating changes in the simulated system.
+with a constant $L, \; 0<L< \infty$,  that is unknown a priori.
+This condition corresponds to a bounded change in the function's values for a bounded change in the argument.
+The assumption that the objective function satisfies the Lipschitz condition can be considered (in the context of applied problems) as a reflection of the bounded possible variations in the system under optimization.
 
-The numerical solution of the problem (\ref{sec:problem}) reduces to constructing an estimate $y_k^\ast\in D$ that corresponds to some notion of proximity to a point $y^\ast$ (e.g., ${ ||y^\ast-y}_k^\ast||\le\ \varepsilon$, where $\varepsilon\geq0$ is a given accuracy) based on a finite number $k$ of computed values of the objective function. With respect to the class of problems considered, we assume that the objective function $\varphi(y)$ can be algorithmically defined through the execution of a subroutine.
+Numerically solving the problem (\ref{sec:problem}) entails constructing an estimate $y^k\in D$ aligns with a specific concept of closeness to the point $y^\ast$ (e.g., $\left\|y^\ast-y^k \right\| \le\ \delta$, where $\delta\geq0$ is a given accuracy) based on a finite number $k$ of computed function values. With respect to the class of problems considered, we assume that the function $\varphi(y)$ can be algorithmically defined through the execution of a subroutine.
 
-When solving multidimensional problems, dimensionality reduction is employed (i.e., reducing the multidimensional problem to an equivalent one-dimensional one) using Peano curves. These curves allow transforming the multidimensional optimization problem in the region $D$ into a one-dimensional minimization problem on the interval [0, 1].
+The approach under consideration employs a dimensionality reduction scheme using Peano curves to solve multidimensional problems.
+These curves enable the conversion of a multidimensional optimization problem within the region $D$ into a one-dimensional minimization problem over an interval $[0,1]$,
 \begin{displaymath}
 	\varphi(y(x^\ast))\ =\min\{\varphi(y(x)): x\in [0,1]\},
 \end{displaymath}
-where function $\varphi(y(x^\ast))$ satisfies the more general Hölder condition
+where function $\varphi(y(x^\ast))$ satisfies the Hölder condition
 \begin{displaymath}
-	\left|\varphi (y \left(x_1\right))- \varphi (y \left(x_2\right)\right )|\le\ H\left|x_1-x_2\right|^\frac{1}{N},\ x_1,\ x_2\epsilon[0,1].
+	\left|\varphi (y \left(x_1\right))- \varphi (y \left(x_2\right)\right )|\le\ H\left|x_1-x_2\right|^\frac{1}{N},\ x_1, x_2\in[0,1].
 \end{displaymath} 
 
-Consequently, rather than addressing the original problem of minimizing the function $\varphi(y)$ within the domain $D$, we can consider minimizing the one-dimensional function $f(x)=\varphi(y(x))$, subject to the Hölder condition for $x \in [0, 1]$.
+Consequently, rather than addressing the original problem of minimizing the function $\varphi(y)$ within the region $D$, we can consider minimizing the one-dimensional function $f(x)=\varphi(y(x))$ for $x \in [0, 1]$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -158,7 +163,8 @@ This approach is discussed in the works \cite{Sergeyev2022, Usova2024}.
 
 
 %Чтобы определить, в какой момент лучше запускать локальный метод в рамках глобального поиска, воспользуемся алгоритмом, основанным на дереве решений. На первом этапе поиска происходит накопление поисковой информации в виде результатов выполненных испытаний. На основе результатов испытаний проводилось обучение дерева решений, позволяющего получать кусочно-постоянную аппроксимацию целевой функции и на ее основе прогнозировать поведение целевой функции. 
-To identify when to best launch a local method  within the framework of a global search, we employ an algorithm based on a decision tree  \cite{Barkalov2023_2}. The first stage of the search involves accumulating search information in the form of results from performed trials. Based on these trial results, a decision tree is trained, allowing us to obtain a piecewise-constant approximation of the objective function and, consequently, to predict the behavior of the objective function.
+To identify when to best launch a local method  within the framework of a global search, we employ an algorithm based on a decision tree  \cite{Barkalov2023_2}. The first phase of the search involves accumulating search information in the form of results from performed trials.
+Based on these trial results, a decision tree is trained to obtain a piecewise-constant approximation of the objective function for predicting its behavior.
 
 %Дерево решений — это инструмент для автоматизированного анализа больших массивов данных, применяемый в машинном обучении. Его можно использовать как для решения задач классификации, так и для регрессии. В случае построения регрессии каждому листу дерева присваивается константа. Поэтому полученная аппроксимирующая функция является кусочно-постоянной. В нашем случае дерево решений строит функцию $\psi(y)$ как кусочно-постоянную аппроксимацию $\varphi(y)$ в области поиска. Обозначим значение, вычисленное деревом решений в точке $y$, как $z' = \psi(y)$.
 %A decision tree is a tool for automated analysis of large datasets used in machine learning. It can be used for both classification and regression problems. In the case of regression, each leaf of the tree is assigned a constant. Therefore, the resulting approximating function is piecewise-constant. In our case, the decision tree constructs a function $\psi(y)$ as a piecewise-constant approximation of $\varphi(y)$ in the search space. Let $z' = \psi(y)$ denote the value computed by the decision tree at point $y$.
@@ -177,23 +183,16 @@ To identify when to best launch a local method  within the framework of a global
 
 A decision tree is a widespread and powerful machine learning tool designed to automatically identify complex dependencies in large multidimensional datasets. In the context of our research, this method is used to build an auxiliary approximating model in order to accelerate the global optimization process.
 
-From a formal point of view, the model used is a binary tree, that is, a tree structure where each internal (non-leaf) node has exactly two child nodes. This versatile tool can be used to solve two types of problems: classification and regression. In classification tasks, the result of processing an object is to assign it to one of the classes, for which each terminal node (leaf) of the tree is marked with the corresponding class label, while several leaves may contain identical labels. In regression problems, which is more relevant for our case, each sheet is assigned a certain constant (scalar) value. Thus, the final regression model is a piecewise constant function that takes fixed values in different parts of the definition area.
+From a formal point of view, the model used is a binary tree, that is, a tree structure where each internal node has exactly two child nodes. This versatile tool can be used to solve two types of problems: classification and regression. In classification tasks, the result of processing an object is to assign it to one of the classes, for which each terminal node of the tree is marked with the corresponding class label, while several leaves may contain identical labels. In regression problems, which is more relevant for our case, each sheet is assigned a certain constant (scalar) value. Thus, the final regression model is a piecewise constant function that takes fixed values in different parts of the definition area.
 
-In the framework of the proposed approach, a decision tree is used to construct an auxiliary function $\psi(y)$, which serves as a piecewise constant approximation of a given function $\varphi(y)$ within the search area under study. The value calculated by this model at any point $y$ is denoted as $z' = \psi(y)$. This approximation makes it possible to effectively evaluate the behavior of the objective function and make decisions about the further direction of computing resources in the optimization process.
+In the framework of the proposed approach, a decision tree is used to construct an auxiliary function $\psi(y)$, which serves as a piecewise-constant approximation of a given function $\varphi(y)$ within the search area under study. The value calculated by this model at any point $y$ is denoted as $z' = \psi(y)$. This approximation makes it possible to effectively evaluate the behavior of the objective function and make decisions about the further direction of computing resources in the optimization process.
+Fig. \ref{fig:fig2} shows the graph of the function $\varphi(y)$; Fig. \ref{fig:fig2_2} illustrates its approximation $\psi(y)$ constructed using a decision tree.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-Fig. \ref{fig:fig2} shows the graph of the objective function $\varphi(y)$; Fig. \ref{fig:fig2_2} presents the corresponding approximation $\psi(y)$ constructed using a decision tree.
 \begin{figure}
 	\begin{center}
 		\begin{minipage}[h]{0.7\linewidth}
 			\includegraphics[width=1\linewidth]{figure/fig5.png}
-			\caption{Graph of the benchmark objective function $\varphi(y)$} %% подпись к рисунку
+			\caption{Graph of the benchmark function $\varphi(y)$} %% подпись к рисунку
 			\label{fig:fig2}
 		\end{minipage}
 	\end{center}
@@ -220,16 +219,25 @@ Having identified a basin of attraction for a local minimum using the decision t
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Исследующий поиск определяется следующим образом: 
+%\begin{itemize}[label=$\bullet$] 
+%  \item Вначале определяется величина шага: она является различной для каждого координатного направления и может изменяться во время поиска. 
+%  \item Шаг поиска считается успешным, если значение целевой функции в новой точке не превышает значение целевой функции в исходной точке. 
+%  \item Если шаг является неуспешным, то нужно вернуться к исходной точке и сделать шаг в обратном направлении. 
+%  \item После перебора всех N координатных направлений исследовательский поиск завершается; полученная точка является базовой точкой для поиска по образцу.
+%\end{itemize}
+%Поиск по образцу состоит из выполнения одного шага от полученной базовой точки вдоль линии, соединяющей ее с предыдущей базовой точкой.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 The exploratory search is conducted as follows:
 \begin{itemize}[label=$\bullet$] 
-	\item The step size is determined (it is different for each coordinate direction and can change during the search);
-	\item A search step is considered successful if the objective function value at the new point does not exceed the value at the initial point; 
-	\item Otherwise, it is necessary to return and take a step in the opposite direction; 
-	\item After iterating through all $N$ coordinates, the exploratory search ends; the resulting point is called the base point.
+	\item Initially, a step size is determined; it can be different for each coordinate direction and can change during the search;
+	\item A search step is considered successful if the value of the objective function at the new point does not exceed the value of the objective function at the starting point; 
+	\item  If a step is unsuccessful, it is necessary to return to the starting point and take a step in the opposite direction; 
+	\item After iterating through all $N$ coordinate directions, the exploratory search is completed; the resulting point is the base point for the pattern search.
 \end{itemize}
-The pattern search consists of taking one step from the resulting base point along the line connecting it to the previous base point.
+
+Pattern search involves moving from the current base point along the line connecting it to the previous base point.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -256,20 +264,34 @@ Fig. \ref{fig:fig1} visually demonstrates the local algorithm in action. Level l
 %Здесь нужны общие слова про параллельную программу с несколькими процессами, мастером и рабочими
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 One way to organize parallel computations on a supercomputer, which has a large number of computational cores and a high thread count per core, is to use synchronous parallel function evaluation.
 
-In the proposed approach, the parallelization scheme follows a ``master-worker'' principle. The master process executes the global search algorithm, accumulates search information, calculates the Lipschitz constant for the objective function based on this information, determines new trial points, and distributes them among the worker processes. The worker processes receive the trial points from the master process, evaluate the function at those points, and send the results back to the master process.
+%In the proposed approach, the parallelization scheme follows a ``master-worker'' principle. The master process executes the global search algorithm, accumulates search information, calculates the Lipschitz constant for the objective function based on this information, determines new trial points, and distributes them among the worker processes. The worker processes receive the trial points from the master process, evaluate the function at those points, and send the results back to the master process.
+
+Our approach employs a ``master-worker'' parallelization strategy. The master process manages the global search algorithm, collects data to estimate the Lipschitz constant, computes new trial points, and assigning these points to the worker processes. The workers then evaluate the objective function at their assigned trial points and send the function values back to the master.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+For the convenience of the subsequent algorithm description, we introduce the following notation.
+\begin{itemize}
+    \item By a \textit{trial} (or conducting a trial) we mean the calculation of the objective function value $z = f(x) = \varphi(y(x))$;
+    \item By a \textit{trial point} we mean a point $y \in D$ and its preimage $x\in [0,1]$, where $y=y(x)$;
+    \item We assume that the computational system used has $p + 1$ computing devices; trials will be conducted or a local method will be launched on $p$ of these devices (``workers''), while the main steps of the algorithm will be executed on one device (``master'');
+    \item Let $U$ denote the set of trial points located in the basin of attraction of a minimum (local or global), from which a local method will be launched;
+    \item Let $V$ denote the set of trial points which will be checked for the practicability of launching a local method from them; points that pass this check are placed into set $U$;
+    \item Let $c$ is the number of points from which a local method needs to be launched at the current iteration.
+    \item Let $n$ is the number of points at which trials will be conducted at the current iteration.
+\end{itemize}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-At the initial stage, the master process (let it have the identifier 0) launches $p$ trials in parallel at $p$ different points $\{y\left(x^1\right),y\left(x^2\right),\ldots,y\left(x^p\right)\}$, where preimages $\{x^1,x^2,\ldots,x^p\}$ are form the interval $[0,1]$.
+The master process (let it have the identifier 0) initiates $p$ parallel trials, each starting at a uniquely defined point $\{y\left(x^1\right),y\left(x^2\right),\ldots,y\left(x^p\right)\}$, where preimages $\{x^1,x^2,\ldots,x^p\}$ are from the interval $[0,1]$.
 Two preimages are the boundary points $x^1=0, x^p=1$; the remaining preimages are interior points $x^i\in\left(0,1\right),i=2,\ldots,p-1$.
+The sets $U$ and $V$ are empty.
 
 Let us now assume that the algorithm has completed $K \geq 0$ iterations and $k \geq K$ trials have been performed.
 
@@ -281,7 +303,7 @@ Let us now assume that the algorithm has completed $K \geq 0$ iterations and $k 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-In each iteration, the algorithm selects several computation points and distributes them to processes in groups. MPI manages this, with process zero handling point distribution and result collection, but remaining computationally idle. Each remaining process receives a group of points, which are computed in parallel using the CPU.
+In each iteration, the algorithm selects several computation points and distributes them to processes in groups. MPI (Message Passing Interface) manages this, with process zero handling point distribution and result collection, but remaining computationally idle. Each remaining process receives a group of points, which are computed in parallel using the CPU.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -302,9 +324,11 @@ In each iteration, the algorithm selects several computation points and distribu
 	\begin{equation} 
 		\label{agp2_mu} 	\mu=max\left\{\frac{|z_i-z_{i-1}|}{{{(x}_i-x_{i-1})}^{1/N}},\ i=1,\ldots,k\right\},\ M=\  \left\{\begin{matrix}r\mu,\ \mu>0,\\1,\ \mu=0,\\\end{matrix}\right.\ 	
 	\end{equation} 
-	where $r>1$ is the method parameter. This parameter controls the reliability of the algorithm: higher values of $r$ guarantee finding the global minimum, while choosing a smaller value accelerates the convergence of the algorithm.
+	where $r>1$ is the method parameter. Reliability of the algorithm is controlled by this parameter: higher values of $r$ guarantee finding the global minimum, while choosing a smaller value accelerates the convergence of the algorithm.
 	
-	\item  For each interval $(x_{i-1},x_i), 1\leq i\leq k+1,$ compute a value $R(i)$, called \textit{the characteristic} of the interval, according to the following formulas:
+	\item  
+	%For each interval $(x_{i-1},x_i), 1\leq i\leq k+1,$ compute a value $R(i)$, called \textit{the characteristic} of the interval, according to the following formulas:
+	For every interval $(x_{i-1},x_i), 1\leq i\leq k+1,$ compute its \textit{characteristic} $R(i)$, as defined by the following formulas:
 	\begin{equation} 
 		\label{agp3_R1} R(1)=2\Delta_1-4\dfrac{z_1}{M}, \; R(k+1)=2\Delta_{k+1}-4\dfrac{z_k}{M}, 
 	\end{equation} 
@@ -319,7 +343,7 @@ In each iteration, the algorithm selects several computation points and distribu
 	\end{equation} 
 and select $n$ intervals with indices $t_j, 1 \le j \le n$, that have the largest characteristic values.	
 	
-	\item Compute the coordinates of the new trial points $y'^{k+j}=y\left(x^{k+j}\right), \ 1\leq j\leq n$, whose preimages are  $x^{k+j}\in\left(x_{t_j-1},x_{t_j}\right)$, according to the following formula:
+	\item Compute the new trial points $\overline{y}^{k+j}=y\left(x^{k+j}\right), \ 1\leq j\leq n$, whose preimages $x^{k+j}\in\left(x_{t_j-1},x_{t_j}\right)$  are calculated using the following formula:
 	\begin{equation}
 		\label{agp5_x1}
 		x^{k+j}=\frac{x_{t_j}+x_{t_j-1}}{2}-\mathrm{sign}\left(z_{t_j}-z_{t_j-1}\right)\frac{1}{2r}\left[\frac{\left|z_{t_j}-z_{t_j-1}\right|}{M}\right]^N.
@@ -327,74 +351,89 @@ and select $n$ intervals with indices $t_j, 1 \le j \le n$, that have the larges
 	
 
 	
-	\item Send to process $j$, $1 \leq j \leq n$, the coordinates of points $y'^{k+1}, \dots, y'^{k+n}$ and notify the process that it needs to perform a single trial.
+	\item Send to process $j$, $1 \leq j \leq n$, the coordinates of points $\overline{y}^{k+1}, \dots, \overline{y}^{k+n}$ and notify the process that it needs to perform a single trial.
 	
 	\item Send to processes $h$, $1 \leq h \leq c$, the coordinates of points $y^{k+1}, \dots, y^{k+c}$ and notify the process that it needs to run a local method.
 	
 	\item Receive trial results from all $p$ processes and add them to the search information.
 	
-	\item Add the trial points $y'^{k+1}=y\left(x^{k+1}\right) , \dots, y'^{k+n}=y\left(x^{k+n}\right)$  to the set $V$.
+	\item Add the trial points $\overline{y}^{k+1}=y\left(x^{k+1}\right) , \dots, \overline{y}^{k+n}=y\left(x^{k+n}\right)$  to the set $V$.
 	
-	\item If $k < 100N$, go to Step~1.
+	\item If the number of trials is not large enough, namely, if $k < 100 N$, go to Step~1.
 	
 	
-	\item Build a decision tree using all the accumulated search information and obtain the approximating function $\psi(y)$.
+	\item Build a decision tree using all the accumulated search information and obtain the approximation $\psi(y)$.
 	
-	\item If the decision tree is being used for the first time, construct a uniform grid
+	\item 
+	%If the decision tree is being used for the first time, construct a uniform grid
+	Upon the first application of the decision tree, generate a uniform grid
 	\begin{displaymath} 
-		Y'=\{ y'\in R^N:\ a_i\le y'_i \le b_i,\ 1\le i\le N \},
+		\overline{Y}=\{ \overline{y}\in R^N:\ a_i\le \overline{y}_i \le b_i,\ 1\le i\le N \},
 	\end{displaymath} 
-	where the number of grid nodes is a parameter of the method.
+	%where the number of grid nodes is a parameter of the method.
+	where the density of grid points is governed by a user-defined parameter.
 	
 	
-	\item Compute the piecewise constant approximation of the function $\psi(y)$ using the decision tree: $Z' = \{ z' = \psi(y'), y' \in Y' \}$.
+	\item Compute the piecewise-constant approximation $\psi(y)$ of the function $\varphi(y)$ using the decision tree.% $Z' = \{ z' = \psi(y'), y' \in Y' \}$.
 	
-	\item For all points $y' \in V$, find the points $y'_q$ closest to $y'$.
-		If no point $y'_q$ has a value smaller than $y'$, add $y'$ to the set $U$.
+	\item For all points $\overline{y} \in V$, find the points $\overline{y}_q$ closest to $\overline{y}$.
+		If no point $\overline{y}_q$ has a value smaller than $\overline{y}$, add $\overline{y}$ to the set $U$.
 		Clear the set $V$.
 	
 	\item Check the stopping criteria.
 	
 \end{enumerate}
 
-The following $p$ trials are executed in parallel at the points$x^{k+j},\ 1\leq j\leq p$,  computed using formula  (\ref{agp5_x1}). Upon completion of these trials, their results are stored in the search information database, and the algorithm proceeds to compute new trial points. Note that, generally, the trial process in applied optimization problems is far more computationally expensive than computing the coordinates of a point.
+The next $p$ trials are carried out in parallel at the points $x^{k+j},\ 1\leq j\leq p$,  computed using formula  (\ref{agp5_x1}). Upon completion of these trials, their results are stored in the search information database, and the algorithm proceeds to compute new trial points. Note that, generally, the trial process in applied optimization problems is far more computationally expensive than computing the coordinates of a point.
 
-The algorithm terminates if the condition \(\Delta_{t_j} < \varepsilon\) is satisfied for at least one value of $t_j,\ 1\le\ j\le\ p$, from (\ref{agp4_R_sort} ). This stopping criterion (along with the usual criterion of limiting the number of iterations, common for iterative methods) is used in applied optimization problems where the global minimum point $y^*$ is not known a priori.
-
-When solving test problems where the global minimizer $y^*$ is known, a stopping criterion based on reaching a neighborhood of the global minimum can be used. In this case, the method stops if the condition $\left\|y(x_{t_j})-\ y^\ast\right\| < \varepsilon$ is satisfied for one value of $t_j,\ 1\le\ j\le\ p$ from (\ref{agp4_R_sort}).
-
-The values  
-\begin{equation} 
-	f_k^*=\min_{1\leq i \leq k}f(x_i), \; x_k^*=arg \min_{1\leq i \leq k}f(x_i). 
-\end{equation} 
-are taken as the final estimate of the global minimum for the problem under consideration.
+The algorithm terminates if the inequality \(\Delta_{t_j} < \delta \) is true for at least one value of $t_j,\ 1\le\ j\le\ p$, from (\ref{agp4_R_sort}).
+%This stopping condition (along with the usual criterion of limiting the number of iterations, common for iterative methods) is used in applied optimization problems where the global minimizer $y^*$ is not known a priori.
+In applied optimization problems, where the global minimizer $y^*$ is typically not known in advance, this stopping condition complements the standard practice of limiting iterations.
 
 
-See \cite{Strongin2000,Barkalov2016} for the justification of this computational approach. Modifications to account for inequality constraints, as well as information about the derivative of the objective function, are presented in \cite{Barkalov2002, Gergel1997, Barkalov2023, Gegrel2021}.
+When solving test problems where the global minimizer $y^*$ is known, a stopping criterion based on reaching a neighborhood of the global minimum point can be used. In this case, the algorithm terminates if the inequality $\left\|y(x_{t_j})-\ y^\ast\right\| < \delta$ is true for one value of $t_j,\ 1\le\ j\le\ p$ from (\ref{agp4_R_sort}).
 
+%The values  
+%\begin{equation} 
+%	f_k^*=\min_{1\leq i \leq k}f(x_i), \; x_k^*=arg \min_{1\leq i \leq k}f(x_i),
+%\end{equation} 
+%are taken as the final estimate of the global minimum for the problem under consideration.
 
-
-
+See \cite{Strongin2000,Barkalov2016} for the justification of this computational approach. Techniques for handling inequality constraints and using objective function derivative are discussed in \cite{Barkalov2002, Gergel1997, Barkalov2023, Gegrel2021}.
 
 % переводить до этого раздела
-\section{Numerical experiments}\label{SecR}
+\section{Computational experiments}\label{SecR}
+
+The software implementation of the described algorithm is an extension of the Globalizer framework (https://github.com/OptimLLab/Globalizer). The development was carried out in C++ using the OpenCV library and MPI.
+
+The Globalizer framework is designed for solving multiextremal optimization problems on supercomputer systems. Typical areas of application of the software package include solving problems of identifying parameters of mathematical models based on experimental data, as well as optimizing parameters of artificial intelligence models and other complex systems.
+The framework is characterized by the following features:
+\begin{itemize}
+    \item operates on Windows and Linux family operating systems;
+    \item provides a standard interface in this subject area;
+    \item provides the ability to work using default algorithm parameter values that ensure a high-quality solution;
+    \item supports parallelism using MPI and OpenMP technologies;
+    \item supports the use of computing accelerators.
+\end{itemize}
+
 
 %Численные эксперименты проводились на суперкомпьютере Лобачевский. Каждый узел имел по два процессора Intel Sandy Bridge E5-2660 2,2 ГГц, 64 Гб оперативной памяти.
-Numerical experiments were conducted on the Lobachevsky supercomputer. Each supercomputer node had two Intel Sandy Bridge E5-2660 2.2 GHz processors and 64 GB of RAM.
-
+The Lobachevsky supercomputer was used for the numerical experiments. Each supercomputer node featured two Intel Sandy Bridge E5-2660 2.2 GHz processors and 64 GB of RAM.
 %В экспериментах использовался генератор тестовых задач GKLS, который может генерировать задачи многоэкстремальной оптимизации с известными свойствами: точка глобального минимума, количество локальных минимумов и др.
-The GKLS test problem generator was used in the experiments. This generator can create multi-extremal optimization problems with known properties, such as the location of the global minimum, the number of local minima, etc.
+The GKLS test problem generator \cite{Sergeyev2006} was used in the experiments.
+%This generator can create multi-extremal optimization problems with known properties, such as the location of the global minimum, the number of local minima, etc.
+The generator produces complex optimization problems with multiple local minima and predictable characteristics, like the global minimum's location and the number of local minima.
 
 %Ниже представлены результаты работы синхронного параллельного алгоритма глобального поиска  с использованием дерева решений для нахождения областей притяжения локальных минимумов. Численное сравнение проводилось на двух классах функций GKLS (Simple и Hard из \cite{Sergeyev2006}) размерностей 2, 3, 4 и 5. Эти два класса отличаются размером области притяжения точки глобального минимума. Для простого класса задач радиус области притяжения в три раза больше, чем для сложного.
 
-The results below show the performance of a synchronous parallel global search algorithm using a decision tree to find basins of attraction for local minima. The numerical comparison was performed on two classes of GKLS functions (Simple and Hard from \cite{Sergeyev2006}) with dimensions 2, 3, 4, and 5. These two classes differ in the size of the basin of attraction for the global minimum. The simple class of problems has a radius of attraction that is three times larger than that of the hard class.
+The following results demonstrate the performance of a synchronous parallel global search algorithm that uses decision trees to identify basins of attraction for local minima. The algorithm was tested on Simple and Hard classes of GKLS functions from \cite{Sergeyev2006} with dimensions $N=2,...,5$, which differ in the size of their global minimum's basin of attraction. The Simple class has a basin three times larger than the Hard class.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-Algorithms terminated when current trial point was within the $\varepsilon$-vicinity of the true global minimizer. Tables \ref{tab:1} and \ref{tab:2} show the average time and speedup relative to a sequential run, achieved by the algorithms when solving optimization problems. Figure \ref{fig:fig4} shows the speedup in terms of the number of iterations. Parallelization was implemented using MPI, and experiments were conducted on $P = 1, 8, 16, 32, 64$ processes.
+Algorithms terminated when current trial point was within the $\varepsilon$-vicinity of the true global minimizer. Tables \ref{tab:1} and \ref{tab:2} show the average time and speedup relative to a sequential run, achieved by the algorithms when solving optimization problems. Fig. \ref{fig:fig4} shows the speedup in terms of the number of iterations. Parallelization was implemented using MPI, and experiments were conducted on $P = 1, 8, 16, 32, 64$ processes.
 
 
 \begin{figure} 
