@@ -1,0 +1,345 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.21 of 2022/01/12
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage[T1]{fontenc}
+% T1 fonts will be used to generate the final print and online PDFs,
+% so please use T1 fonts in your manuscript whenever possible.
+% Other font encondings may result in incorrect characters.
+%
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{marvosym}
+\usepackage{hyperref}
+
+\usepackage{graphicx}
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+% If you use the hyperref package, please uncomment the following two lines
+% to display URLs in blue roman font according to Springer's eBook style:
+%\usepackage{color}
+%\renewcommand\UrlFont{\color{blue}\rmfamily}
+%\urlstyle{rm}
+%
+\begin{document}
+%
+\title{Parallel multi-criteria optimization algorithm for solving applied problems with multi-extreme black-box criteria}
+%
+\titlerunning{Solving applied problems with multi-extreme black-box criteria}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{{Sergey Konnov\orcidID{0009-0003-4590-0870} \and
+Evgeny Kozinov \Letter\orcidID{0000-0001-6776-0096} \and
+Konstantin Barkalov \orcidID{0000-0001-5273-2471}}
+}
+%
+\authorrunning{
+S. Konnov et al.
+}
+
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{Lobachevsky State University of Nizhni Novgorod, Nizhni Novgorod, Russia 
+\email{\{konstantin.barkalov,evgeny.kozinov\}@itmm.unn.ru}}
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+Solving multi-criteria optimization problems involves analyzing a large number of possible parameter combinations and searching for Pareto-optimal solutions. The algorithm considered in the paper is aimed at finding the Pareto set in problems with multi-extremal and computationally expensive criteria, represented as black-box functions, and is based on an information-statistical approach. The paper investigates the application of the implemented algorithm to a number of applied problems. As examples, the multi-criteria optimization of hyperparameters for the XGBoost machine learning model and the optimization of vehicle suspension parameters based on a two-mass vehicle model are considered. A comparison is made between the results of the proposed algorithm and the methods implemented in the well-known Optuna framework. Additionally, the efficiency of the parallel implementation of the algorithm for shared-memory computing systems is analyzed.
+
+\keywords{Multi-criteria optimization\and
+Global search\and
+Machine learning\and
+High-performance computing.}
+\end{abstract}
+%
+%
+%
+\section{Introduction}
+\label{sec1}
+
+Multicriteria optimization covers problems in which the quality of the solution is determined by several criteria at once, often conflicting with each other. Unlike single-criteria problems, in such cases it is generally impossible to identify a single best solution, since improving one objective leads to the deterioration of another. The optimization problem becomes significantly more complex when the criteria are multi-extremal and are presented as a ``black box'', i.e., their values can only be obtained as a result of numerical calculation without an explicit analytical representation \cite{Ehrgott2005,Miettinen1999,Pardalos2017,Strongin2000,Sergeyev2013}. The result of solving such problems is a set of Pareto-optimal solutions, reflecting various trade-offs between the considered criteria.
+
+To solve multi-criteria optimization problems, both deterministic \cite{MCO_ML_2023,Ehrgott2005,Evtushenko2014,Konnov2025,Miettinen1999,Pardalos2017} and non-deterministic approaches \cite{Akiba2019Optuna,Durillo2010,Deb2002,Mostaghim2007,Nebro2009,RC05,ZLT01} are used. Deterministic methods are focused on the rigorous and reproducible construction of a sequence of search trials and can provide theoretical guarantees of convergence to the global optimum; however, this is often achieved at the cost of a large number of computations. Non-deterministic methods, including evolutionary and stochastic algorithms, provide greater flexibility in exploring complex search domains and are widely used in computationally intensive problems. However, as a rule, they do not guarantee finding the global minimum. It is worth noting that a combination of deterministic algorithms with various heuristics in low dimensional problems can demonstrate a solution quality comparable to that of non-deterministic algorithms in a smaller number of trials \cite{Barkalov2026Hyperparameter}.
+
+Multi-criteria optimization algorithms are of interest not only from a theoretical perspective but also as a tool for solving a wide range of applied problems. This paper examines two problems from different fields.
+
+The first task is related to the selection of hyperparameters for a machine learning model. Hyperparameter tuning significantly affects both the quality of the model and the efficiency of its work. Traditional approaches, such as grid search, random search, and Bayesian optimization, are often primarily focused on improving a single target metric, whereas in practice it is frequently necessary to simultaneously consider, for example, accuracy and computational costs. In this case, the problem takes on a multi-criteria nature.
+
+The second problem under consideration is the multi-criteria optimization of vehicle suspension parameters based on a two-mass vehicle model. Such problems arise in suspension design, as its parameters directly impact various vehicle performance properties, which are not always improved in a coordinated manner. The model used includes the sprung mass, corresponding to the vehicle body, and the unsprung mass, corresponding to the wheel and its associated components. The variable parameters considered are suspension stiffness, suspension damping coefficient, and tire stiffness. Thus, the problem of selecting suspension parameters is also naturally formulated as a multi-criteria optimization problem.
+
+The deterministic multi-criteria optimization algorithm we implemented, based on an information-statistical approach, was described in \cite{MCO_ML_2023,Konnov2025}, and its performance on test problems was analyzed in \cite{Konnov2025_ruscd}. The goal of the current work is to analyze the application of the implemented algorithm to solving the above-mentioned applied problems. Furthermore, we plan to compare the algorithm's performance with the nondeterministic algorithm implemented in Optuna \cite{Akiba2019Optuna}, as well as to analyze the performance of a parallel implementation of the algorithm in solving these problems.
+
+The paper is structured as follows. Section \ref{sec2} presents the mathematical formulation of the problems to be solved and briefly describes the solution method. Section \ref{sec3} describes the applied optimization problems and demonstrates a method for reducing the problems to a common mathematical formulation. Section \ref{sec4} presents the results of computational experiments. The last section draws general conclusions and outlines directions for further research.
+
+
+\section{Solution method}
+\label{sec2}
+
+In general, the multi-criteria optimization (MCO) problem can be formulated as follows:
+
+\begin{equation}
+\Phi(y) = \left( f_{1}(y), f_{2}(y), \dots, f_{s}(y) \right) \rightarrow \min,\ y \in D,
+\label{eq:mco_problem}
+\end{equation}
+where $f_{i}(y)$, $i \in [1,s]$ are efficiency criteria, $y_{i},\ i \in [1,N]$ are variable parameters, $N$ -- is the dimension of the problem, $s$ is the number of criteria. Each criterion in this formulation of the problem is a multi-extremal function, defined as a "black box" and satisfying the Lipschitz condition
+
+\begin{equation}
+\left| f_{i}\left( y' \right) - f_{i}\left( y'' \right) \right| \leq L_{i}\left\| y' - y'' \right\|,\ y',y'' \in D,\ i \in [1,s],
+\label{eq:lipschitz}
+\end{equation}
+where the Lipschitz constants $L_{i},\ i \in [1,s]$ are not known in advance.
+
+The MCO algorithm we developed can be divided into two components: an optimization algorithm and a number of heuristics that improve search efficiency.
+
+The optimization algorithm is based on Strongin's method and criteria convolution \cite{Gergel2019_2,Gergel2018,GergelKozinov2020,Strongin2000}. A multi-criteria problem (\ref{eq:mco_problem}) is scalarized into a family of single-criteria problems, each differing in a set of convolution parameters. The problem dimensionality is reduced using Peano curves. During the algorithm's execution, intervals between trial points are identified at each iteration using one-dimensional coordinates. For each interval, a characteristic is calculated, which is used to decide whether to perform a new trial. The algorithm runs until the required accuracy is achieved or until the limit on the number of trials is reached.
+
+Heuristics aimed at improving search efficiency are based on the use of machine learning methods to estimate the Pareto set \cite{Konnov2025}. During the algorithm's operation, all obtained trial points are divided into two classes. The first class includes points belonging to the Pareto set, while all other points are assigned to the second class. Based on the accumulated information, a machine learning model is constructed. The resulting model allows estimating the probability of a point's membership in the Pareto set for a given combination of parameters. At the stage of selecting an interval for a new trial, the original interval characteristic is modified by adding a value obtained from the constructed model, weighted by a coefficient $\alpha$. This coefficient determines the contribution of the machine learning model to the final selection.
+
+A detailed description of the algorithm is presented in \cite{Konnov2025}. The aim of this work is to evaluate the efficiency of the developed parallel algorithm in solving applied problems.
+
+\section{Problem statement}
+\label{sec3}
+
+\subsection{Tuning hyperparameters for a machine learning model}
+\label{subsec31}
+
+The problem of tuning the hyperparameters of a machine learning model is considered as a multi-criteria optimization problem. The set of model hyperparameters serves as the variable parameters, while the criteria are represented by metrics that characterize the quality and computational efficiency of its work.
+
+This paper examines the problem of finding hyperparameter values for the XGBoost model \cite{Chen2016XGBoost}. The variable parameters are the number of trees in the ensemble and the maximum tree depth, while the model's accuracy and average inference time on the validation set are used as criteria $f_{i}(y)$ from (\ref{eq:mco_problem}). Mean average precision (mAP) can be used to evaluate the quality of the model for given hyperparameters
+
+\begin{equation}
+mAP = \frac{1}{N}\sum_{i = 1}^{N}{AP_{i}},
+\label{eq:mAP}
+\end{equation}
+where $N$ is the number of classes, $AP_{i},\ i \in [1,\ N)$ is the area under the Precision-Recall curve for class $i$.
+
+Since the criteria of accuracy and running time are conflicting, the goal is not to find a single optimal solution, but to construct a Pareto set containing compromise sets of hyperparameters. At each iteration of the multi-criteria optimization algorithm, a new trial point is selected in the hyperparameter space. For each set of hyperparameters, the model is trained, validated, and the values of the criteria are computed. Thus, the process transitions to a multi-criteria problem of searching for compromise solutions that provide a balance between the accuracy of the machine learning model and its operational speed.
+
+
+
+\subsection{Optimization of car suspension}
+\label{subsec32}
+
+The second task is to optimize the vehicle's suspension parameters based on its two-mass model \cite{Gobbi2001Suspension}. The model includes the sprung mass, corresponding to the vehicle body, and the unsprung mass, corresponding to the wheel and its associated components. The control parameters are suspension stiffness, suspension damping coefficient, and tire stiffness.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.8\textwidth]{fig1.png}
+\caption{Car suspension model}
+\label{fig:suspension_model}
+\end{figure}
+
+The dynamics of the system are described by the following system of differential equations:
+
+\begin{align}
+m_{s}\frac{d^{2}z_{s}}{dt^{2}} &= - k_{s}\left( z_{s} - z_{u} \right) - c_{s}\left( \frac{dz_{s}}{dt}-\frac{dz_{u}}{dt} \right), \label{eq:motion_sprung} \\
+m_{u}\frac{d^{2}z_{u}}{dt^{2}} &= k_{s}\left( z_{s} - z_{u} \right) + c_{s}\left( \frac{dz_{s}}{dt}-\frac{dz_{u}}{dt} \right) - k_{t}\left( z_{u} - z_{r} \right), \label{eq:motion_unsprung}
+\end{align}
+where $m_{s}$ is the sprung mass, $m_{u}$ is the unsprung mass, $z_{s}(t)$ is the vertical displacement of the car body, $z_{u}(t)$ is the vertical displacement of the unsprung mass, $z_{r}(t)$ is the road impact profile, $k_{s}$ is the suspension stiffness, $c_{s}$ is the viscous damping coefficient of the suspension, $k_{t}$ is the tire stiffness (see Fig. \ref{fig:suspension_model}).
+
+The paper examines road excitation consisting of two sections: a single bump and a subsequent wavy road segment. This allows for evaluating the suspension's behavior both under short-term disturbances and when driving on uneven surfaces. It is necessary to select the parameters $y = (k_{s},c_{s},k_{t})$ in such a way as to ensure the best compromise between the indicators of comfort, stability of contact of the wheel with the road and the magnitude of the working movements of the suspension.
+
+The following root mean square characteristics are used as optimization criteria.
+
+1) Comfort criterion
+
+\begin{equation}
+f_{1}(y) = \sqrt{\frac{1}{T}\int_{0}^{T}\left( \frac{d^{2}z_{s}(t)}{dt^{2}} \right)^{2}dt},
+\label{eq:comfort}
+\end{equation}
+
+i.e. the root mean square value of the car body acceleration.
+
+2) Road contact criterion
+
+\begin{equation}
+f_{2}(y) = \sqrt{\frac{1}{T}\int_{0}^{T}\left( z_{u}(t) - z_{r}(t) \right)^{2}dt},
+\label{eq:road_contact}
+\end{equation}
+
+i.e. the root mean square value of tire deformation.
+
+3) Suspension travel criterion
+
+\begin{equation}
+f_{3}(y) = \sqrt{\frac{1}{T}\int_{0}^{T}\left( z_{s}(t) - z_{u}(t) \right)^{2}dt},
+\label{eq:suspension_travel}
+\end{equation}
+i.e. root mean square value of the relative displacement of the sprung and unsprung masses.
+
+Since the specified criteria are contradictory, a single solution that is optimal for all criteria simultaneously, as a rule, does not exist. Therefore, the result of the solution is a set of Pareto-optimal suspension parameters, each of which corresponds to a certain compromise between ride smoothness, maintaining wheel contact with the road, and limiting suspension travel.
+
+For the numerical solution of the problem, for each set of parameters, the system of motion equations is integrated over a fixed time interval, after which the values of the criteria are calculated.
+
+\section{Computational experiments}
+\label{sec4}
+
+The computational experiments were carried out on the ``Lobachevsky'' supercomputer at Lobachevsky State University of Nizhny Novgorod equipped with two Intel Xeon Silver 4310T 2.3 GHz processors and 64 GB of RAM. The following libraries were used: SciKit-Learn 0.24.2 \cite{scikit-learn}, PyTorch 2.5.1 \cite{PyTorch}, and XGBoost 2.1.1 \cite{Chen2016XGBoost}. The MGSA algorithm was implemented in Python using the iOpt framework \cite{ioptmco}.
+
+\subsection{Search for hyperparameters of a machine learning model}
+\label{subsec41}
+
+To demonstrate the proposed approach, we considered the problem of tuning the hyperparameters of the XGBoost model for multiclass classification. The PASCAL VOC 2007 dataset \cite{Everingham2010VOC}, containing images with 20 object categories, was used. The peculiarity of the dataset is that a single image may contain objects belonging to multiple classes.
+
+The optimized hyperparameters of the model were the number and depth of trees. The range for the number and for the depth of trees was set from 20 to 300 and from 3 to 10 correspondingly. The model's quality is evaluated using the mean average precision (mAP) metric from (\ref{eq:mAP}). The second criterion is the average inference time.
+
+In the experiments, several variants of the MGSA algorithm (the basic algorithm without using machine learning models: its modifications employing Linear SVC, Poly SVC, RBF SVC models, and a fully connected neural network \cite{Konnov2025}) were compared with the hyperparameter tuning algorithm from the Optuna framework. A limit of 400 trials was set for each run.
+
+Figure \ref{fig:pareto_fronts} shows several curves corresponding to the estimates of the Pareto front obtained by the Optuna and MGSA algorithms with various machine learning models. The curve positioned further to the left and higher corresponds to better algorithm performance. Figure \ref{fig:area_under_curve} illustrates the areas under the curves from Figure \ref{fig:pareto_fronts}, bounded below by an accuracy value of 0.74 and on the right by a time value of 0.066 seconds. The larger the area under the curve, the better the result.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.8\textwidth]{fig2.png}
+\caption{Pareto fronts for different runs of the MGSA and Optuna algorithms for the hyperparameter search problem}
+\label{fig:pareto_fronts}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.8\textwidth]{fig3.png}
+\caption{Area under the curves for different runs of the MGSA and Optuna algorithms for the hyperparameter search problem}
+\label{fig:area_under_curve}
+\end{figure}
+
+The comparison results showed that the MGSA modifications using machine learning models generally provide more accurate approximations of the Pareto front compared to the basic version of the algorithm. The best results were achieved using the SVC model with the RBF kernel; the variant with the polynomial kernel also demonstrated close performance. This is confirmed both by the positioning of the Pareto fronts and by comparing the areas under them within the specified criteria region.
+
+When comparing the results of the MGSA algorithm with Optuna, it can be noted that, as seen in Figure \ref{fig:pareto_fronts}, up to a running time of approximately 0.048 seconds, Optuna on average yields worse accuracy values for the same running time, only catching up or slightly surpassing MGSA with the RBF SVC model. However, if we compare the values of the areas under the curves, the MGSA algorithm using SVC models with Poly and RBF kernels, as well as the NN model, shows better results compared to the algorithm from Optuna.
+
+The analysis of the obtained results showed that as model complexity increases, both accuracy and runtime also increase, confirming the contradictory nature of the criteria under consideration. Additionally, a saturation region was identified, beyond which further model complexity leads only to a slight accuracy gain while significantly increasing runtime. Moreover, the comparison with the Optuna demonstrated the advantage of the MGSA in terms of the obtained area of the Pareto region.
+
+\subsection{Vehicle suspension optimization problem for a "quarter-car" model}
+\label{subsec42}
+
+To verify the operability of the proposed algorithm, computational experiments on multi-criteria optimization of suspension parameters in a two-mass car model (\ref{eq:motion_sprung})--(\ref{eq:suspension_travel}) were also conducted. The adjustable parameters considered were suspension stiffness $k_s$, damping coefficient $c_s$, and tire stiffness $k_t$. The search was performed within a feasible region presented in Table~\ref{tab:feasible_region}.
+
+\begin{table}[ht]
+\centering
+\caption{Feasible region}
+\label{tab:feasible_region}
+\begin{tabular}{cccc}
+\hline
+\textbf{Parameter} & \textbf{Min} & \textbf{Max} & \textbf{Unit of measurement} \\
+\hline
+Suspension stiffness $k_s$ & 10,000 & 40,000 & N/m \\
+Viscous damping coefficient $c_s$ & 500 & 4,500 & N$\cdot$s/m \\
+Tire stiffness $k_t$ & 120,000 & 260,000 & N/m \\
+\hline
+\end{tabular}
+\end{table}
+
+The model parameters $m_s = 325$ kg and $m_u = 45$ kg, corresponding to the sprung and unsprung masses, were used in the experiments. The system dynamics were simulated over a time interval of $T = 4$ sec. with a discretization of 2000 points. The RK45 method was used for numerical integration of the system of differential equations (the \texttt{solve\_ivp} function of the SciPy library \cite{Virtanen2020SciPy} with the accuracy parameters $rtol = 10^{-6}$ and $atol = 10^{-8}$).
+
+The external excitation was defined as a combined road profile, including a single bump and a section of wavy pavement. The single bump was modeled as a cosine impulse with a height of 0.05 m., starting at time $t_0 = 0.5$ sec. and lasting for 0.18 sec. After this, in the time interval from 1.5 to 3.5 sec., a section of periodic disturbances was introduced in the form of a sinusoidal signal with an amplitude of 0.008 m. and a frequency of 7 Hz. This profile allows for evaluating the suspension behavior both when passing a single obstacle and when driving on a rough road.
+
+The following computational experiments were conducted:
+
+\begin{enumerate}
+\item A run using the Optuna framework;
+\item A run using the MGSA algorithm;
+\item A run using the MGSA algorithm with the SVC model and RBF kernel.
+\end{enumerate}
+
+For each run, the maximum possible number of trials was fixed at 200.
+
+Figure~\ref{fig:pareto_suspension} shows the points corresponding to the Pareto sets for the computational experiments performed (criteria values were normalized). Table~\ref{tab:hv_index} shows the HV index values and the number of trials corresponding to the runs.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.8\textwidth]{fig4.png}
+\caption{Non-dominated solutions obtained by running the MGSA and Optuna algorithms for the problem of tuning the parameters of a vehicle suspension model}
+\label{fig:pareto_suspension}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\caption{HV index and number of trials for different runs of MGSA and Optuna algorithms for tuning the parameters of the vehicle suspension model}
+\label{tab:hv_index}
+\begin{tabular}{ccccc}
+\hline
+ & & \textbf{Optuna}  & \textbf{MGSA} & \textbf{MGSA Rbf SVC} \\
+\hline
+HV index & & 0.4470 & 0.4428 & 0.4582\\
+\hline
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:pareto_suspension} shows that the Optuna algorithm produces the largest spread of non-dominated solutions. The HV index value for this run is higher compared to the baseline MGSA algorithm. This demonstrates that, for the current problem, MGSA is inferior to Optuna in terms of Pareto front approximation quality. However, the use of an additional classification model in MGSA, based on an SVC with an RBF kernel, allows for an improvement in search quality and yields a Pareto front that surpasses both the basic MGSA algorithm and the Optuna implementation. The found points exhibit a smaller spread compared to Optuna, while at the same time better approximating the Pareto set, which together results in a higher HV index value. The use of machine learning models in the MGSA algorithm enhances the efficiency of searching for non-dominated solutions in the problem of vehicle suspension parameter optimization.
+
+In the last series of experiments, this problem was solved using the parallel MGSA algorithm.
+
+Figure~\ref{fig:hv_vs_trials} examines the dependence of the HV index value for MGSA and MGSA RBF SVC with the parameter $\alpha = 0.15$ on the number of trials as the number of processes changes. Each curve shows how the HV value and the number of trials per process change with an increase in the required accuracy. For the experiments, accuracy values $\varepsilon \in [0.1, 0.05, 0.01]$ were selected. Tables~\ref{tab:hv_processes} and \ref{tab:iterations_processes} present the corresponding HV index values and the number of iterations per process for accuracy $\varepsilon = 0.01$.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{fig5.png}
+\caption{Dependence of the HV index on the number of trials for different numbers of processes}
+\label{fig:hv_vs_trials}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\caption{HV index values depending on the number of processes}
+\label{tab:hv_processes}
+\begin{tabular}{ccccccc}
+\hline
+\textbf{Number of processes} & \textbf{1} & \textbf{2} & \textbf{4} & \textbf{8} & \textbf{16} & \textbf{20} \\
+\hline
+MGSA & 0.4946 & 0.4916 & 0.4903 & 0.4921 & 0.4917 & 0.4941 \\
+MGSA Rbf SVC, $\alpha = 0.15$ & 0.4952 & 0.4979 & 0.4859 & 0.5011 & 0.4954 & 0.5029 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Number of iterations per process depending on the number of processes}
+\label{tab:iterations_processes}
+\begin{tabular}{ccccccc}
+\hline
+\textbf{Number of processes} & \textbf{1} & \textbf{2} & \textbf{4} & \textbf{8} & \textbf{16} & \textbf{20} \\
+\hline
+MGSA & 4659 & 2684 & 1188 & 597 & 282 & 244 \\
+MGSA Rbf SVC, $\alpha = 0.15$ & 3017 & 1050 & 272 & 507 & 86 & 161 \\
+\hline
+\end{tabular}
+\end{table}
+
+The analysis of the results presented in Tables~\ref{tab:hv_processes} and \ref{tab:iterations_processes} shows that increasing the number of processes generally has a positive effect on the efficiency of parallel computations. As the number of processes increases, the number of iterations performed by each process noticeably decreases, while the HV index value remains comparable in most cases. This indicates that parallelization allows for a reduction in the computational load on individual processes without significantly degrading the quality of the resulting solutions.
+
+The basic MGSA demonstrates fairly stable dynamics: as the number of processes increases, the HV index value changes only slightly, despite a significant reduction in the number of iterations per process. This suggests that the quality of the search is maintained as the degree of parallelism grows, confirming the efficiency of parallelization.
+
+The advantage of the algorithm using RBF SVC is even more pronounced. Despite a local decrease in the HV index value at 4 processes, an increase is already observed at 8 processes, with the best result achieved at 20 processes. At the same time, the reduction in the number of iterations per process is also preserved, indicating more efficient use of computational resources. Thus, the use of SVC with an RBF kernel not only maintains solution quality under parallel execution but, in some cases, even improves it compared to the basic MGSA.
+
+
+\section{Conclusions and future work}
+\label{sec5}
+
+The paper examines the application of a parallel multi-objective optimization algorithm to solve two practical problems: tuning the hyperparameters of the XGBoost machine learning model and optimizing the parameters of a vehicle suspension based on its two-mass model.
+
+The conducted computational experiments demonstrated that the considered multi-objective optimization algorithm effectively constructs approximations of the Pareto front for problems of different nature. For the task of tuning XGBoost hyperparameters, it was shown that modifications of the MGSA algorithm using machine learning models provide a higher-quality approximation of the Pareto set compared to the basic variant. A comparison with the algorithm from the Optuna framework also confirmed the competitiveness of the proposed approach.
+
+For the problem of optimizing vehicle suspension parameters, it was established that the use of machine learning methods within the multi-objective optimization algorithm can significantly enhance the efficiency of searching for compromise solutions in applied problems with computationally expensive criteria. A separate analysis of the parallel implementation of the algorithm demonstrated its practical effectiveness. Increasing the number of processes leads to a substantial reduction in the number of iterations performed by each process, while maintaining comparable solution quality. This allows us to conclude that the parallel implementation of the algorithm is promising for solving resource-intensive multi-objective optimization problems.
+
+As a further direction of research, it is planned to extend the algorithm implementation for use in distributed memory systems, as well as to add the capability to utilize local optimization algorithms to accelerate the search and refine the found solutions.
+
+As a direction for further research, it is planned to implement the algorithm for systems with distributed memory, as well as to add the ability to use local optimization algorithms to speed up the search and refine the solutions found.
+
+
+
+%
+% ---- Bibliography ----
+%
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted in the correct style.
+%
+\bibliographystyle{splncs04}
+\bibliography{bibliography}
+
+
+\end{document}
