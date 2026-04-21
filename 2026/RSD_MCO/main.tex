@@ -180,7 +180,7 @@ For the numerical solution of the problem, for each set of parameters, the syste
 \section{Computational experiments}
 \label{sec4}
 
-The computational experiments were carried out on the ``Lobachevsky'' supercomputer at Lobachevsky State University of Nizhny Novgorod equipped with two Intel Xeon Silver 4310T 2.3 GHz processors and 64 GB of RAM. The following libraries were used: SciKit-Learn 0.24.2 \cite{scikit-learn}, PyTorch 2.5.1 \cite{PyTorch}, and XGBoost 2.1.1 \cite{Chen2016XGBoost}. The MGSA algorithm was implemented in Python using the iOpt framework \cite{ioptmco}.
+The computational experiments were carried out on the ``Lobachevsky'' supercomputer at Lobachevsky State University of Nizhny Novgorod equipped with two Intel Xeon Silver 4310T 2.3 GHz processors and 64 GB of RAM. The following libraries were used: SciKit-Learn 0.24.2 \cite{scikit-learn}, PyTorch 2.5.1 \cite{PyTorch}, and XGBoost 2.1.1 \cite{Chen2016XGBoost}. The MGSA (Multi-criteria Global Search Algorithm) described in Section~\ref{sec2} algorithm was implemented in Python using the iOpt framework \cite{ioptmco}.
 
 \subsection{Search for hyperparameters of a machine learning model}
 \label{subsec41}
@@ -249,6 +249,8 @@ For each run, the maximum possible number of trials was fixed at 200.
 
 Figure~\ref{fig:pareto_suspension} shows the points corresponding to the Pareto sets for the computational experiments performed (criteria values were normalized). Table~\ref{tab:hv_index} shows the HV index values and the number of trials corresponding to the runs.
 
+Figure~\ref{fig:pareto_suspension} shows the points corresponding to the Pareto sets for the computational experiments performed (criteria values were normalized). To quantitatively compare the quality of the obtained Pareto set approximations, the hypervolume (HV) index was used \cite{Evtushenko2014,Konnov2025}. The HV index calculates the volume of the space dominated by the computed approximation of the Pareto set with respect to a reference point, thus reflecting both the convergence and diversity of the obtained Pareto set. A higher HV value indicates a better approximation of the true Pareto set. For each run, the maximum possible number of trials was fixed at 200. Table~\ref{tab:hv_index} shows the HV index values corresponding to the runs.
+
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.8\textwidth]{fig4.png}
@@ -262,7 +264,7 @@ Figure~\ref{fig:pareto_suspension} shows the points corresponding to the Pareto 
 \label{tab:hv_index}
 \begin{tabular}{ccccc}
 \hline
- & & \textbf{Optuna}  & \textbf{MGSA} & \textbf{MGSA Rbf SVC} \\
+ & & \textbf{Optuna}  & \textbf{MGSA} & \textbf{MGSA\_RBF\_SVC} \\
 \hline
 HV index & & 0.4470 & 0.4428 & 0.4582\\
 \hline
@@ -271,9 +273,9 @@ HV index & & 0.4470 & 0.4428 & 0.4582\\
 
 Figure~\ref{fig:pareto_suspension} shows that the Optuna algorithm produces the largest spread of non-dominated solutions. The HV index value for this run is higher compared to the baseline MGSA algorithm. This demonstrates that, for the current problem, MGSA is inferior to Optuna in terms of Pareto front approximation quality. However, the use of an additional classification model in MGSA, based on an SVC with an RBF kernel, allows for an improvement in search quality and yields a Pareto front that surpasses both the basic MGSA algorithm and the Optuna implementation. The found points exhibit a smaller spread compared to Optuna, while at the same time better approximating the Pareto set, which together results in a higher HV index value. The use of machine learning models in the MGSA algorithm enhances the efficiency of searching for non-dominated solutions in the problem of vehicle suspension parameter optimization.
 
-In the last series of experiments, this problem was solved using the parallel MGSA algorithm.
+In the final series of experiments, the problem was solved using a parallel version of the MGSA algorithm. The parallelization method consists of selecting, at each iteration, not a single interval with the highest characteristic value from GAS algorithm, but several intervals simultaneously. This enables multiple trial points to be evaluated in parallel across the available computational processes. The proposed approach reduces the overall computation time while preserving the convergence properties of the sequential algorithm \cite{Konnov2025_ruscd}.
 
-Figure~\ref{fig:hv_vs_trials} examines the dependence of the HV index value for MGSA and MGSA RBF SVC with the parameter $\alpha = 0.15$ on the number of trials as the number of processes changes. Each curve shows how the HV value and the number of trials per process change with an increase in the required accuracy. For the experiments, accuracy values $\varepsilon \in [0.1, 0.05, 0.01]$ were selected. Tables~\ref{tab:hv_processes} and \ref{tab:iterations_processes} present the corresponding HV index values and the number of iterations per process for accuracy $\varepsilon = 0.01$.
+Figure~\ref{fig:hv_vs_trials} shows the dependence of the HV index value on the number of trials for the MGSA and MGSA RBF SVC algorithms with parameter $\alpha = 0.15$. In the experiments, the accuracy $\varepsilon$ was chosen from the set $\{0.1, 0.05, 0.01\}$, and the number of processes ranged from $1$ to $20$. For each fixed combination of accuracy and number of processes, the algorithm was executed until the stopping criterion based on the required accuracy was met. The total number of trials performed and the corresponding HV index value were recorded. The resulting points are shown in Figure~\ref{fig:hv_vs_trials}, where each curve corresponds to a fixed number of processes, and the points along the curve represent different accuracy values $\varepsilon$.Tables~\ref{tab:hv_processes} and \ref{tab:iterations_processes} present the corresponding HV index values and the number of iterations per process for accuracy $\varepsilon = 0.01$.
 
 \begin{figure}[ht]
 \centering
@@ -291,7 +293,7 @@ Figure~\ref{fig:hv_vs_trials} examines the dependence of the HV index value for 
 \textbf{Number of processes} & \textbf{1} & \textbf{2} & \textbf{4} & \textbf{8} & \textbf{16} & \textbf{20} \\
 \hline
 MGSA & 0.4946 & 0.4916 & 0.4903 & 0.4921 & 0.4917 & 0.4941 \\
-MGSA Rbf SVC, $\alpha = 0.15$ & 0.4952 & 0.4979 & 0.4859 & 0.5011 & 0.4954 & 0.5029 \\
+\begin{tabular}[c]{@{}c@{}}MGSA\_RBF\_SVC,\\ $\alpha = 0.15$\end{tabular} & 0.4952 & 0.4979 & 0.4859 & 0.5011 & 0.4954 & 0.5029 \\
 \hline
 \end{tabular}
 \end{table}
@@ -305,7 +307,7 @@ MGSA Rbf SVC, $\alpha = 0.15$ & 0.4952 & 0.4979 & 0.4859 & 0.5011 & 0.4954 & 0.5
 \textbf{Number of processes} & \textbf{1} & \textbf{2} & \textbf{4} & \textbf{8} & \textbf{16} & \textbf{20} \\
 \hline
 MGSA & 4659 & 2684 & 1188 & 597 & 282 & 244 \\
-MGSA Rbf SVC, $\alpha = 0.15$ & 3017 & 1050 & 272 & 507 & 86 & 161 \\
+\begin{tabular}[c]{@{}c@{}}MGSA\_RBF\_SVC,\\ $\alpha = 0.15$\end{tabular}   & 3017 & 1050 & 272 & 507 & 86 & 161 \\
 \hline
 \end{tabular}
 \end{table}
