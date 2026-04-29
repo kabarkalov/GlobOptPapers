@@ -326,7 +326,7 @@ x^{k+1} = \frac{x_t + x_{t-1}}{2} - \frac{\operatorname{sign}(z_t - z_{t-1})}{2r
 Алгоритм завершает работу при выполнении условия $\Delta_t < \epsilon$, где $\epsilon > 0$ — заданная точность, либо при достижении максимального числа испытаний $K_{\max}$.
 
 
-Для ускорения процесса оптимизации в системе Globalizer реализованы параллельные версии алгоритма. Основная идея распараллеливания заключается в одновременном проведении нескольких испытаний на разных вычислительных устройствах (процессах или потоках) \cite{Lebedev2022} . Вычислительная схема реализует принцип «мастер-рабочие», мастер-процесс выполняет основные шаги алгоритма глобального поиска: накапливает поисковую информацию, вычисляет оценку константы Гёльдера, определяет новые пробные точки и распределяет их между рабочими процессами. Рабочие процессы получают точки испытаний от главного процесса, вычисляют значения целевой функции в этих точках и отправляют результаты мастеру.
+Для ускорения процесса оптимизации в системе Globalizer реализованы параллельные версии алгоритма. Основная идея распараллеливания заключается в одновременном проведении нескольких испытаний на разных вычислительных устройствах (процессах или потоках) \cite{Lebedev2022, Barkalov2016, globalizerSystem} . Вычислительная схема реализует принцип «мастер-рабочие», мастер-процесс выполняет основные шаги алгоритма глобального поиска: накапливает поисковую информацию, вычисляет оценку константы Гёльдера, определяет новые пробные точки и распределяет их между рабочими процессами. Рабочие процессы получают точки испытаний от главного процесса, вычисляют значения целевой функции в этих точках и отправляют результаты мастеру.
 
 В синхронной схемы вычислений переход к следующей итерации осуществляется только после завершения всех $p$ испытаний текущей итерации. Достоинством синхронной схемы является простота реализации, однако при значительном разбросе времени вычисления целевой функции в разных точках возможны простои вычислительных ресурсов.
 
@@ -417,7 +417,7 @@ x^{k+p+1} = \frac{x_t + x_{t-1}}{2} - \operatorname{sign}(z_t - z_{t-1}) \frac{1
 \end{figure}
 
 
-В таблице~\ref{tab_classification_scalability} представлены результаты масштабирования параллельных алгоритмов при оптимизации гиперпараметров модели классификации. Для каждого количества процессов указано найденное значение целевой метрики и достигнутое ускорение относительно последовательного запуска.
+В таблице~\ref{tab_classification_scalability} представлены результаты масштабирования параллельных алгоритмов при оптимизации гиперпараметров модели классификации. Для каждого количества процессов указано найденное значение целевой метрики и достигнутое ускорение относительно последовательного запуска. Размерность оптимизируемой задачи составляет 2, проводилось 320 вычислений функции при каждом запуске. Время последовательного запуска составило 683 секунды.
 
 \begin{table}[ht]
 \caption{Результаты масштабирования для задачи классификации ЭКГ}
@@ -429,18 +429,19 @@ x^{k+p+1} = \frac{x_t + x_{t-1}}{2} - \operatorname{sign}(z_t - z_{t-1}) \frac{1
 \cline{2-5}
 & Значение & Ускорение & значение & Ускорение \\
 \hline
-1 & xxx & 1.00 & xxx & 1.00 \\
-3 & xxx & xxx & xxx & xxx \\
-5 & xxx & xxx & xxx & xxx \\
-9 & xxx & xxx & xxx & xxx \\
-17 & xxx & xxx & xxx & xxx \\
+1  & 0.78 & 1.00   &  0.78 &  1.00   \\
+3  & 0.75 & 1.98   &  0.78 &  1.94   \\
+5  & 0.80 & 3.91   &  0.78 &  3.65   \\
+9  & 0.78 & 7.32   & 0.78  & 10.11   \\
+17 & 0.78 & 12.81  &  0.78 &  22.91  \\
+33 & 0.78 & 18.07  &  0.83 &  15.94  \\
+
 \hline
 \end{tabular}
 
 \end{table}
 
-Анализ полученных результатов показывает, что асинхронная схема распараллеливания демонстрирует более высокую эффективность по сравнению с синхронной схемой, особенно при увеличении числа процессов. Это объясняется тем, что время обучения нейросетевой модели может варьироваться в зависимости от конкретных значений гиперпараметров, и асинхронная схема позволяет минимизировать простои вычислительных ресурсов.
-
+Анализ полученных результатов показывает, что асинхронная схема распараллеливания демонстрирует более высокую эффективность по сравнению с синхронной схемой, особенно при увеличении числа процессов. Это объясняется тем, что время обучения нейросетевой модели может варьироваться в зависимости от конкретных значений гиперпараметров, и асинхронная схема позволяет минимизировать простои вычислительных ресурсов. При этом при разном количестве процессов мы получаем разные траектории, в которых суммарное время вычислений  значительно отличается.
 
 На втором этапе экспериментов выполнялась оптимизация гиперпараметров модели сегментации ЭКГ-сигналов на основе одномерной U-Net. Варьируемыми параметрами являлись:
 \begin{itemize}
@@ -524,11 +525,41 @@ F_1^{\mathrm{macro}} = \frac{1}{C_{\mathrm{cls}}-1}\sum_{c=1}^{C_{\mathrm{cls}}-
 
 \begin{biblio}
 
+\bibitem{optuna}
+Akiba~T., Sano~S., Yanase~T.,  Ohta~T., Koyama~M. Optuna: A Next-Generation Hyperparameter Optimization Framework // Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining. 2019. P.~2623–-2631. DOI:~\href{https://dl.acm.org/doi/10.1145/3292500.3330701}{10.1145/3292500.3330701}
+
+\bibitem{hyperopt}
+Bergstra~J., Yamins~D., Cox~D.D. Making a Science of Model Search: Hyperparameter Optimization in Hundreds of Dimensions for Vision Architectures // Proceedings of the 30th International Conference on Machine Learning. 2013. P.~115--123.
+
+\bibitem{Yang2013}
+Yang~X.-S. Engineering optimization: An introduction with metaheuristic applications. Hoboken: John Wiley \& Sons, 2013. 384~p.
+
+\bibitem{Gendreau2010}
+Gendreau~M., Potvin~J.-Y. (Eds.) Handbook of metaheuristics. 2nd ed. New York: Springer, 2010. 640~p.
+
+\bibitem{Eiben2015}
+Eiben~A.E., Smith~J.E. Introduction to evolutionary computing. 2nd ed. Berlin: Springer, 2015. 294~p.
+
+\bibitem{Kvasov2018}
+Квасов~Д.Е., Сергеев~Я.Д. Методы липшицевой глобальной оптимизации в задачах управления // АиТ. 2013. № 9. C. 3--19. DOI:~\href{https://doi.org/10.1134/S0005117913090014}{10.1134/S0005117913090014}
+%Kvasov~D.E., Mukhametzhanov~M.S. Metaheuristic vs. deterministic global optimization algorithms: The univariate case // Applied Mathematics and Computation. 2018. Vol.~318. P.~245--259. DOI:~\href{http://dx.doi.org/10.1016/j.amc.2017.05.014}{10.1016/j.amc.2017.05.014}.
+
+\bibitem{Sergeyev2006}
+Сергеев~Я.Д., Квасов~Д.Е. Диагональные методы глобальной оптимизации. М.: ФИЗМАТЛИТ, 2008. 352 с.
+%Sergeyev~Y.D., Kvasov~D.E. Global search based on efficient diagonal partitions and a set of Lipschitz constants // SIAM Journal on Optimization. 2006. Vol.~16, No.~3. P.~910--937. DOI:~\href{http://dx.doi.org/10.1137/040621132}{10.1137/040621132}.
+
+
+\bibitem{Zilinskas2008}
+Žilinskas~A. Branch and bound algorithm for multidimensional scaling with city-block metric // Journal of Global Optimization. 2008. Vol.~43, No.~2--3. P.~357--372. DOI:~\href{http://dx.doi.org/10.1007/s10898-008-9306-x}{10.1007/s10898-008-9306-x}.
+
 \bibitem{Strongin2000}
 Strongin~R.G., Sergeyev~Y.D. Global optimization with non-convex constraints. Sequential and parallel algorithms. Dordrecht: Kluwer Academic Publishers, 2000. 416~p. DOI:~\href{https://doi.org/10.1007/978-1-4615-4677-1}{10.1007/978-1-4615-4677-1}.
 
-\bibitem{Barkalov2016}
-Barkalov~K., Lebedev~I. Solving multidimensional global optimization problems using graphics accelerators // Communications in Computer and Information Science. 2016. Vol.~687. P.~224--235. DOI:~\href{http://dx.doi.org/10.1007/978-3-319-55669-7_18}{10.1007/978-3-319-55669-7\_18}.
+\bibitem{Strongin2018}
+Strongin~R., Gergel~V., Barkalov~K., Sysoyev~A. Generalized parallel computational schemes for time-consuming global optimization //  Lobachevskii Journal of Mathematics. 2018. Vol.~39, No.~4 P.~576--586. DOI:~\href{http://dx.doi.org/10.1134/S1995080218040133}{10.1134/S1995080218040133}.
+
+\bibitem{Kalyakulina2020}
+Kalyakulina~A.I., Yusipov~I.I., Moskalenko~V.A., Nikolskiy~A.V., Kozlov~K.A., Zudov~K.A., Ivanchenko~M.V. LUDB: a new open-access validation tool for electrocardiogram delineation algorithms // IEEE Access. 2020. Vol.~8. P.~186181--186190. DOI:~\href{https://doi.org/10.1109/ACCESS.2020.3029376}{10.1109/ACCESS.2020.3029376}.
 
 \bibitem{Piyavskii1972}
 Пиявский~С.А. Один алгоритм отыскания абсолютного экстремума функции // Ж. вычисл. матем. и матем. физ. 1972. T.~12, №~4. С.~888--896.
@@ -549,51 +580,32 @@ Pintér~J.D. Global optimization in action: Continuous and Lipschitz optimizatio
 \bibitem{Jones2009}
 Jones~D.R. The DIRECT global optimization algorithm // Encyclopedia of Optimization. Boston: Springer, 2009. P.~725--735. DOI:~\href{https://doi.org/10.1007/978-0-387-74759-0_128}{10.1007/978-0-387-74759-0\_128}
 
-\bibitem{Yang2013}
-Yang~X.-S. Engineering optimization: An introduction with metaheuristic applications. Hoboken: John Wiley \& Sons, 2013. 384~p.
-
-\bibitem{Gendreau2010}
-Gendreau~M., Potvin~J.-Y. (Eds.) Handbook of metaheuristics. 2nd ed. New York: Springer, 2010. 640~p.
-
-\bibitem{Eiben2015}
-Eiben~A.E., Smith~J.E. Introduction to evolutionary computing. 2nd ed. Berlin: Springer, 2015. 294~p.
-
-\bibitem{Kvasov2018}
-Квасов~Д.Е., Сергеев~Я.Д. Методы липшицевой глобальной оптимизации в задачах управления // АиТ. 2013. № 9. C. 3--19. DOI:~\href{https://doi.org/10.1134/S0005117913090014}{10.1134/S0005117913090014}
-%Kvasov~D.E., Mukhametzhanov~M.S. Metaheuristic vs. deterministic global optimization algorithms: The univariate case // Applied Mathematics and Computation. 2018. Vol.~318. P.~245--259. DOI:~\href{http://dx.doi.org/10.1016/j.amc.2017.05.014}{10.1016/j.amc.2017.05.014}.
-
-%\bibitem{Sergeyev2018} Sergeyev~Y.D., Kvasov~D.E., Mukhametzhanov~M.S. On the efficiency of nature-inspired metaheuristics in expensive global optimization with limited budget // Scientific Reports. 2018. Vol.~8, Article number:~453. DOI:~\href{http://dx.doi.org/10.1038/s41598-017-18940-4}{10.1038/s41598-017-18940-4}.
-
-\bibitem{globalizerSystem}
-Gergel~V., Barkalov~K., Sysoyev~A. A novel supercomputer software system for solving time-consuming global optimization problems // Numerical Algebra, Control \& Optimization. 2018. Vol.~8, No.~1. P.~47--62. DOI:~\href{http://dx.doi.org/10.3934/naco.2018003}{10.3934/naco.2018003}.
-
-\bibitem{Strongin2018}
-Strongin~R., Gergel~V., Barkalov~K., Sysoyev~A. Generalized parallel computational schemes for time-consuming global optimization //  Lobachevskii Journal of Mathematics. 2018. Vol.~39, No.~4 P.~576--586. DOI:~\href{http://dx.doi.org/10.1134/S1995080218040133}{10.1134/S1995080218040133}.
-
-\bibitem{Sergeyev2006}
-Сергеев~Я.Д., Квасов~Д.Е. Диагональные методы глобальной оптимизации. М.: ФИЗМАТЛИТ, 2008. 352 с.
-%Sergeyev~Y.D., Kvasov~D.E. Global search based on efficient diagonal partitions and a set of Lipschitz constants // SIAM Journal on Optimization. 2006. Vol.~16, No.~3. P.~910--937. DOI:~\href{http://dx.doi.org/10.1137/040621132}{10.1137/040621132}.
-
-\bibitem{Zilinskas2008}
-Žilinskas~A. Branch and bound algorithm for multidimensional scaling with city-block metric // Journal of Global Optimization. 2008. Vol.~43, No.~2--3. P.~357--372. DOI:~\href{http://dx.doi.org/10.1007/s10898-008-9306-x}{10.1007/s10898-008-9306-x}.
-
 \bibitem{Sergeyev2013}
 Стронгин~Р.Г., Гергель~В.П., Гришагин~В.А., Баркалов~К.А. Параллельные вычисления в задачах глобальной оптимизации. М.: Изд-во МГУ, 2013.
 %Sergeyev~Y.D., Strongin~R.G., Lera~D. Introduction to global optimization exploiting space-filling curves. New York: Springer, 2013. 148~p. DOI:~\href{http://dx.doi.org/10.1007/978-1-4614-8042-6}{10.1007/978-1-4614-8042-6}.
 
-%\bibitem{Himmelblau75} Химмельблау~Д. Прикладное нелинейное программирование. М.: Мир, 1975. 535~с.
-
 \bibitem{Lebedev2022}
 Barkalov~K., Lebedev~I., Karchkov~D. Analysis and elimination of bottlenecks in parallel algorithm for solving global optimization problems // Lecture Notes in Computer Science. 2022. Vol.~13708. P.~18--32. DOI:~\href{https://doi.org/10.1007/978-3-031-22941-1_2}{10.1007/978-3-031-22941-1\_2}.
 
-\bibitem{optuna}
-Akiba~T., Sano~S., Yanase~T.,  Ohta~T., Koyama~M. Optuna: A Next-Generation Hyperparameter Optimization Framework // Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining. 2019. P.~2623–-2631. DOI:~\href{https://dl.acm.org/doi/10.1145/3292500.3330701}{10.1145/3292500.3330701}
 
-\bibitem{hyperopt}
-Bergstra~J., Yamins~D., Cox~D.D. Making a Science of Model Search: Hyperparameter Optimization in Hundreds of Dimensions for Vision Architectures // Proceedings of the 30th International Conference on Machine Learning. 2013. P.~115--123.
+\bibitem{Barkalov2016} 
+Barkalov~K., Lebedev~I. Solving multidimensional global optimization problems using graphics accelerators // Communications in Computer and Information Science. 2016. Vol.~687. P.~224--235. DOI:~\href{http://dx.doi.org/10.1007/978-3-319-55669-7_18}{10.1007/978-3-319-55669-7\_18}.
 
-\bibitem{Kalyakulina2020}
-Kalyakulina~A.I., Yusipov~I.I., Moskalenko~V.A., Nikolskiy~A.V., Kozlov~K.A., Zudov~K.A., Ivanchenko~M.V. LUDB: a new open-access validation tool for electrocardiogram delineation algorithms // IEEE Access. 2020. Vol.~8. P.~186181--186190. DOI:~\href{https://doi.org/10.1109/ACCESS.2020.3029376}{10.1109/ACCESS.2020.3029376}.
+
+\bibitem{globalizerSystem}
+Gergel~V., Barkalov~K., Sysoyev~A. A novel supercomputer software system for solving time-consuming global optimization problems // Numerical Algebra, Control \& Optimization. 2018. Vol.~8, No.~1. P.~47--62. DOI:~\href{http://dx.doi.org/10.3934/naco.2018003}{10.3934/naco.2018003}.
+
+
+
+
+
+
+
+
+%\bibitem{Sergeyev2018} Sergeyev~Y.D., Kvasov~D.E., Mukhametzhanov~M.S. On the efficiency of nature-inspired metaheuristics in expensive global optimization with limited budget // Scientific Reports. 2018. Vol.~8, Article number:~453. DOI:~\href{http://dx.doi.org/10.1038/s41598-017-18940-4}{10.1038/s41598-017-18940-4}.
+
+
+%\bibitem{Himmelblau75} Химмельблау~Д. Прикладное нелинейное программирование. М.: Мир, 1975. 535~с.
 
 
 %\bibitem{eremin} Ерёмин~И.И. Фейеровские методы для задач выпуклой и линейной оптимизации. Челябинск: Изд-во ЮУрГУ, 2009. 200~с.
