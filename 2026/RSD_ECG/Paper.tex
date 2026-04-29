@@ -62,8 +62,7 @@
 
 Настоящая статья посвящена применению программной системы Globalizer для оптимизации гиперпараметров модели классификации и сегментации сигналов ЭКГ. В качестве базовых архитектуры классифицирующей сети выбрана адаптированная версия MobileNetV3 Small — легковесная сверточной нейронной сети. Модель предназначена для классификации 10-секундных фрагментов ЭКГ, зарегистрированных в двух отведениях с частотой дискретизации 500 Гц. Задача классификации заключается в определении ведущего ритма сердечной деятельности: синусовый ритм, синусовые вариации или другие типы ритма. Варьируемыми гиперпараметрами являются число классифицирующих нейронов в выходном слое (в диапазоне от 80 до 200) и вероятность Dropout (в диапазоне от 0.0 до 1.0). Для решения задачи сегментации сигнала ЭКГ с целью локализации моментов активации предсердий, желудочков и восстановления миокарда используется архитектура U-Net, адаптированная для анализа одномерных сигналов. В угоду потоковой обработки ЭКГ средствами данной нейросетевой модели решено сформировать обучающую и тестовую выборку из участков 12-ти канальных сигналов, длительностью 1 секунда, или 500 отсчётов, что гарантирует попадание хотябы одного кардиоцикла полностью или частично. Варьируемыми гиперпараметрами являются количество уровней архитектуры (значение глубины изменяется от 2 до 5), что позволяет параметрически изменять архитектуру сети и, как следствие, количество обучаемых параметров, а также вероятность Dropout, используемая для регуляризации и предотвращения переобучения.
 
-
-В качестве исходных данных для обучения и тестирования используется расширенный датасет LUDB [?], который содержит записи ЭКГ с метками как для задачи сегментации, так и для задачи классификации. LUDB является репрезентативной базой данных, широко применяемой в исследованиях по автоматическому анализу электрокардиограмм.
+В качестве исходных данных для обучения и тестирования используется расширенный датасет LUDB \cite{Kalyakulina2020}, который содержит записи ЭКГ с метками как для задачи сегментации, так и для задачи классификации. LUDB является репрезентативной базой данных, широко применяемой в исследованиях по автоматическому анализу электрокардиограмм.
 
 Статья имеет следующую структуру. В разделе 2 приводится постановка задачи оптимизации гиперпараметров и формальное описание используемой модели классификации ЭКГ. Раздел 3 содержит описание параллельного алгоритма глобального поиска. В разделе 4 описывается методика проведения вычислительных экспериментов, включая характеристики использованного вычислительного оборудования, параметры запуска алгоритмов и критерии сравнения. Раздел 5 посвящен анализу полученных результатов. В заключении сформулированы основные выводы и намечены направления дальнейших исследований.
 
@@ -90,7 +89,7 @@
 Важно отметить, что полученная модель в дальнейшем должна быть интегрирована в SoC микроконтроллер, для локального выделения нозологий на устройстве сбора данных без привлечения персональных компьютеров и серверных мощностей.
 
 \subsubsection{Описание данных}
-Обучающая и тестовая выборка сформирована из сигналов открытого датасета Lobachevsky University Electrocardiography Database, содержащего 200 аннотированных сигналов ЭКГ [?]. Регистрация сигнала проводилась в 12-ти стандартных отведениях с частотой дискретизации 500 Гц в течении 10 секунд.
+Обучающая и тестовая выборка сформирована из сигналов открытого датасета Lobachevsky University Electrocardiography Database, содержащего 200 аннотированных сигналов ЭКГ \cite{Kalyakulina2020}. Регистрация сигнала проводилась в 12-ти стандартных отведениях с частотой дискретизации 500 Гц в течении 10 секунд.
 
 \includegraphics[width=1\textwidth]{ECGExample.png}
 
@@ -139,7 +138,7 @@
   \item Файл с мета информацией о записи;
   \item Файл с сигналом и временными метками комплексов.
 \end{itemize}
-При формировании датасета использовалось 680 сигналов ЭКГ, локализацию сегментов в которых осуществляли врачи функционалисты, разрабатывающих первую версию базы данных Lobachevsky University Electrocardiography Database [???]. Для обучения моделей сегментации каждая запись была преобразована в набор окон фиксированной длины с покомпонентной разметкой.
+При формировании датасета использовалось 680 сигналов ЭКГ, локализацию сегментов в которых осуществляли врачи функционалисты, разрабатывающих первую версию базы данных Lobachevsky University Electrocardiography Database \cite{Kalyakulina2020}. Для обучения моделей сегментации каждая запись была преобразована в набор окон фиксированной длины с покомпонентной разметкой.
 
 
 Основные шаг в подготовке датасета:
@@ -415,8 +414,8 @@ x^{k+p+1} = \frac{x_t + x_{t-1}}{2} - \operatorname{sign}(z_t - z_{t-1}) \frac{1
 
 Для проведения экспериментов использовались две нейросетевые модели, описанные в разделе 2: модель классификации на основе MobileNetV3 Small и модель сегментации на основе одномерной U-Net. Вычислительные затраты на одну итерацию оптимизации (одно испытание) составляли:
 \begin{itemize}
-    \item для задачи классификации — обучение модели в течение 50 эпох с оценкой качества на валидационной выборке;
-    \item для задачи сегментации — обучение модели в течение 100 эпох с вычислением метрики качества.
+    \item для задачи классификации — обучение модели в течение 100 эпох с оценкой качества на валидационной выборке;
+    \item для задачи сегментации — обучение модели в течение 40 эпох с вычислением метрики качества.
 \end{itemize}
 
 Параметры запуска алгоритма глобального поиска в системе Globalizer:
@@ -446,7 +445,7 @@ x^{k+p+1} = \frac{x_t + x_{t-1}}{2} - \operatorname{sign}(z_t - z_{t-1}) \frac{1
 \end{figure}
 
 
-В таблице~\ref{tab_classification_scalability} представлены результаты масштабирования параллельных алгоритмов при оптимизации гиперпараметров модели классификации. Для каждого количества процессов указано найденное значение целевой метрици и достигнутое ускорение относительно последовательного запуска.
+В таблице~\ref{tab_classification_scalability} представлены результаты масштабирования параллельных алгоритмов при оптимизации гиперпараметров модели классификации. Для каждого количества процессов указано найденное значение целевой метрики и достигнутое ускорение относительно последовательного запуска.
 
 \begin{table}[ht]
 \caption{Результаты масштабирования для задачи классификации ЭКГ}
@@ -473,11 +472,33 @@ x^{k+p+1} = \frac{x_t + x_{t-1}}{2} - \operatorname{sign}(z_t - z_{t-1}) \frac{1
 
 На втором этапе экспериментов выполнялась оптимизация гиперпараметров модели сегментации ЭКГ-сигналов на основе одномерной U-Net. Варьируемыми параметрами являлись:
 \begin{itemize}
-    \item число базовых фильтров в сверточных слоях: $base\_filters \in [16, 64]$;
+    \item вероятность Dropout: $p \in [0.0, 1.0]$.;
     \item количество уровней энкодера/декодера: $depth \in [3, 5]$.
 \end{itemize}
 
-На рис.~\ref{fig_segmentation_surface} представлен график поверхности целевой функции для задачи сегментации. Целевой метрикой выступает F1-мера. Характер поверхности также является многоэкстремальным, что подтверждает сложность задачи выбора оптимальных гиперпараметров.
+
+
+Основной метрикой качества являлась \textbf{macro-$F_1$ без фонового класса}.
+Для каждого класса $c$ вычислялись precision и recall:
+\[
+\mathrm{Precision}_c=\frac{TP_c}{TP_c+FP_c}, \qquad
+\mathrm{Recall}_c=\frac{TP_c}{TP_c+FN_c},
+\]
+а затем $F_1$-мера:
+\[
+F_{1,c} = \frac{2\cdot \mathrm{Precision}_c\cdot \mathrm{Recall}_c}{\mathrm{Precision}_c+\mathrm{Recall}_c}.
+\]
+Здесь $TP_c, FP_c, FN_c$ --- число истинно-положительных, ложноположительных и ложноотрицательных предсказаний класса $c$,
+подсчитанных по всем отсчётам времени $t$ на всей выборке.
+
+Итоговая метрика для сравнения моделей вычислялась как среднее по классам без фона:
+\[
+F_1^{\mathrm{macro}} = \frac{1}{C_{\mathrm{cls}}-1}\sum_{c=1}^{C_{\mathrm{cls}}-1} F_{1,c}.
+\]
+
+В рамках эксперимента $F_1$ рассчитывался по \textbf{точному совпадению меток на каждом отсчёте} (без временного допуска).
+
+На рис.~\ref{fig_segmentation_surface} представлен график поверхности целевой функции для задачи сегментации. Характер поверхности также является многоэкстремальным, что подтверждает сложность задачи выбора оптимальных гиперпараметров.
 
 \begin{figure}[ht]
 \centering
@@ -548,8 +569,7 @@ Barkalov~K., Lebedev~I. Solving multidimensional global optimization problems us
 Shubert~B. A sequential method seeking the global maximum of a function // SIAM Journal on Numerical Analysis. 1972. Vol.~9, No.~3. P.~379--388.
 
 \bibitem{Evtushenko2013}
-Евтушенко~Ю.Г., Малкова~В.У., Станевичюс~А.-И.А. Параллельный поиск глобального экстремума функций многих переменных // Ж. вычисл. матем. и матем. физ. 2009. Т.~49, №~2. C.~255--269. DOI:~\href{https://doi.org/10.1134/S0005117907050062}{10.1134/S0005117907050062}.
-%Evtushenko~Yu.G., Posypkin~M.A. A deterministic approach to global box-constrained optimization // Optimization Letters. 2013. Vol.~7, No.~4. P.~819--829. DOI:~\href{http://dx.doi.org/10.1007/s11590-012-0452-1}{10.1007/s11590-012-0452-1}.
+Evtushenko~Yu.G., Posypkin~M.A. A deterministic approach to global box-constrained optimization // Optimization Letters. 2013. Vol.~7, No.~4. P.~819--829. DOI:~\href{http://dx.doi.org/10.1007/s11590-012-0452-1}{10.1007/s11590-012-0452-1}.
 
 \bibitem{Zilinskas2010}
 Žilinskas~A., Žilinskas~J. Global optimization based on a statistical model and simplicial partitioning // Computers \& Operations Research. 2010. Vol.~37, No.~10. P.~1759--1767. DOI:~\href{http://dx.doi.org/10.1016/S0898-1221(02)00206-7}{10.1016/S0898-1221(02)00206-7}.
@@ -570,8 +590,7 @@ Gendreau~M., Potvin~J.-Y. (Eds.) Handbook of metaheuristics. 2nd ed. New York: S
 Eiben~A.E., Smith~J.E. Introduction to evolutionary computing. 2nd ed. Berlin: Springer, 2015. 294~p.
 
 \bibitem{Kvasov2018}
-Квасов~Д.Е., Сергеев~Я.Д. Методы липшицевой глобальной оптимизации в задачах управления // АиТ. 2013. № 9. C. 3--19. DOI:~\href{https://doi.org/10.1134/S0005117913090014}{10.1134/S0005117913090014}
-%Kvasov~D.E., Mukhametzhanov~M.S. Metaheuristic vs. deterministic global optimization algorithms: The univariate case // Applied Mathematics and Computation. 2018. Vol.~318. P.~245--259. DOI:~\href{http://dx.doi.org/10.1016/j.amc.2017.05.014}{10.1016/j.amc.2017.05.014}.
+Kvasov~D.E., Mukhametzhanov~M.S. Metaheuristic vs. deterministic global optimization algorithms: The univariate case // Applied Mathematics and Computation. 2018. Vol.~318. P.~245--259. DOI:~\href{http://dx.doi.org/10.1016/j.amc.2017.05.014}{10.1016/j.amc.2017.05.014}.
 
 \bibitem{Sergeyev2018}
 Sergeyev~Y.D., Kvasov~D.E., Mukhametzhanov~M.S. On the efficiency of nature-inspired metaheuristics in expensive global optimization with limited budget // Scientific Reports. 2018. Vol.~8, Article number:~453. DOI:~\href{http://dx.doi.org/10.1038/s41598-017-18940-4}{10.1038/s41598-017-18940-4}.
@@ -583,21 +602,23 @@ Gergel~V., Barkalov~K., Sysoyev~A. A novel supercomputer software system for sol
 Strongin~R., Gergel~V., Barkalov~K., Sysoyev~A. Generalized parallel computational schemes for time-consuming global optimization //  Lobachevskii Journal of Mathematics. 2018. Vol.~39, No.~4 P.~576--586. DOI:~\href{http://dx.doi.org/10.1134/S1995080218040133}{10.1134/S1995080218040133}.
 
 \bibitem{Sergeyev2006}
-Сергеев~Я.Д., Квасов~Д.Е. Диагональные методы глобальной оптимизации. М.: ФИЗМАТЛИТ, 2008. 352 с.
-%Sergeyev~Y.D., Kvasov~D.E. Global search based on efficient diagonal partitions and a set of Lipschitz constants // SIAM Journal on Optimization. 2006. Vol.~16, No.~3. P.~910--937. DOI:~\href{http://dx.doi.org/10.1137/040621132}{10.1137/040621132}.
+Sergeyev~Y.D., Kvasov~D.E. Global search based on efficient diagonal partitions and a set of Lipschitz constants // SIAM Journal on Optimization. 2006. Vol.~16, No.~3. P.~910--937. DOI:~\href{http://dx.doi.org/10.1137/040621132}{10.1137/040621132}.
 
 \bibitem{Zilinskas2008}
 Žilinskas~A. Branch and bound algorithm for multidimensional scaling with city-block metric // Journal of Global Optimization. 2008. Vol.~43, No.~2--3. P.~357--372. DOI:~\href{http://dx.doi.org/10.1007/s10898-008-9306-x}{10.1007/s10898-008-9306-x}.
 
 \bibitem{Sergeyev2013}
-Стронгин~Р.Г., Гергель~В.П., Гришагин~В.А., Баркалов~К.А. Параллельные вычисления в задачах глобальной оптимизации. М.: Изд-во МГУ, 2013.
-%Sergeyev~Y.D., Strongin~R.G., Lera~D. Introduction to global optimization exploiting space-filling curves. New York: Springer, 2013. 148~p. DOI:~\href{http://dx.doi.org/10.1007/978-1-4614-8042-6}{10.1007/978-1-4614-8042-6}.
+Sergeyev~Y.D., Strongin~R.G., Lera~D. Introduction to global optimization exploiting space-filling curves. New York: Springer, 2013. 148~p. DOI:~\href{http://dx.doi.org/10.1007/978-1-4614-8042-6}{10.1007/978-1-4614-8042-6}.
 
 \bibitem{Himmelblau75}
 Химмельблау~Д. Прикладное нелинейное программирование. М.: Мир, 1975. 535~с.
 
+
 \bibitem{Lebedev2022}
 Barkalov~K., Lebedev~I., Karchkov~D. Analysis and elimination of bottlenecks in parallel algorithm for solving global optimization problems // Lecture Notes in Computer Science. 2022. Vol.~13708. P.~18--32. DOI:~\href{https://doi.org/10.1007/978-3-031-22941-1_2}{10.1007/978-3-031-22941-1\_2}.
+
+\bibitem{Kalyakulina2020}
+Kalyakulina~A.I., Yusipov~I.I., Moskalenko~V.A., Nikolskiy~A.V., Kozlov~K.A., Zudov~K.A., Ivanchenko~M.V. LUDB: a new open-access validation tool for electrocardiogram delineation algorithms // IEEE Access. 2020. Vol.~8. P.~186181--186190. DOI:~\href{https://doi.org/10.1109/ACCESS.2020.3029376}{10.1109/ACCESS.2020.3029376}.
 
 \bibitem{optuna}
 Akiba~T., Sano~S., Yanase~T.,  Ohta~T., Koyama~M. Optuna: A Next-Generation Hyperparameter Optimization Framework // Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining. 2019. P.~2623–-2631. DOI:~\href{https://dl.acm.org/doi/10.1145/3292500.3330701}{10.1145/3292500.3330701}
@@ -706,6 +727,9 @@ Himmelblau~D.M. Applied nonlinear programming. Moscow: Mir, 1975. 535~p. (in Rus
 
 \bibitem{Lebedev2022:en}
 Barkalov~K., Lebedev~I., Karchkov~D. Analysis and elimination of bottlenecks in parallel algorithm for solving global optimization problems // Lecture Notes in Computer Science. 2022. Vol.~13708. P.~18--32. DOI:~\href{https://doi.org/10.1007/978-3-031-22941-1_2}{10.1007/978-3-031-22941-1\_2}.
+
+\bibitem{Kalyakulina2020:en}
+Kalyakulina~A.I., Yusipov~I.I., Moskalenko~V.A., Nikolskiy~A.V., Kozlov~K.A., Zudov~K.A., Ivanchenko~M.V. LUDB: a new open-access validation tool for electrocardiogram delineation algorithms // IEEE Access. 2020. Vol.~8. P.~186181--186190. DOI:~\href{https://doi.org/10.1109/ACCESS.2020.3029376}{10.1109/ACCESS.2020.3029376}.
 
 \bibitem{optuna:en}
 Akiba, Takuya and Sano, Shotaro and Yanase, Toshihiko and Ohta, Takeru and Koyama, Masanori Optuna: A Next-Generation Hyperparameter Optimization Framework // Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining. 2019. P.~2623–-2631. DOI:~\href{https://dl.acm.org/doi/10.1145/3292500.3330701}{10.1145/3292500.3330701}
