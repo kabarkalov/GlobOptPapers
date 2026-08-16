@@ -1,0 +1,216 @@
+\documentclass[11pt, oneside, a4paper]{article}
+%\usepackage[cp1251]{inputenc} % кодировка
+\usepackage[utf8]{inputenc} % кодировка
+\usepackage[english, russian]{babel} % Русские и английские переносы
+\usepackage{graphicx}          % для включения графических изображений
+\usepackage{cite}              % для корректного оформления литературы
+\usepackage{enumitem}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{mathtext}
+
+
+%стилевой пакет
+\usepackage{conf2026}
+
+
+\begin{document}
+% \udk     - универсальный десятичный классификатор
+% \msc     -
+% \title   - название статьи
+% \authors - список авторов
+
+\setcounter{page}{1}
+
+\udk{519.853.4}
+
+\title{Исследование схем редукции размерности
+для алгоритма поиска нуля неотрицательной функции\footnote{Работа выполнена при финансовой поддержке Министерства образования и науки Российской Федерации, проект FSWR-2026-0007.} }
+
+
+
+\authors{А.С. Зайцев, К.А. Баркалов}
+\organizations{Нижегородский государственный университет им. Н.И. Лобачевского}
+
+
+
+\abstractru{В работе рассматривается задача поиска глобального минимума многомерной многоэкстремальной функции, принимающей неотрицательные значения и достигающей в области определения нулевого значения. Такую задачу можно интерпретировать как задачу минимизации невязки между теоретическими и экспериментальными данными. Для ускорения сходимости алгоритма поиска нуля неотрицательной многомерной функции предлагается редуцировать размерность задачи с помощью аппроксимации кривой Пеано -- неинъективной развертки. Проведены вычислительные эксперименты, подтверждающие эффективность предложенного подхода к редукции размерности в данной задаче.
+}
+
+\keywords{глобальная оптимизация, редукция размерности, кривые Пеано, поиск нуля функции.}
+
+
+% \section{название} - заголовок раздела первого уровня
+% \subsection{название} - заголовок раздела второго уровня
+% \subsubsection{название} - заголовок раздела третьего уровня
+% Не используйте уровень вложенности заголовков больше трех!
+% Каждый абзац текста в статье начинается командой \par или пустой
+% строкой.
+
+\bigskip
+
+\section{Введение}
+
+Данная работа является продолжением исследования Алгоритма Поиска Нуля (АПН) неотрицательной функции \cite{Zaitsev,Barkalov2}. Для редукции размерности АПН использует кривые Пеано \cite{Strongin1,Strongin2}, которые отображают $N$-мерную область $D$ на единичный отрезок вещественной оси. Новым элементом исследования является использование аппроксимации кривой Пеано \cite{Sergeyev}, которая для любой точки из $N$-мерной области $D$ ставит в соответствие множество точек на единичном отрезке вещественной оси. Это позволяет ускорить сходимость алгоритма к глобальному минимуму.
+
+В проведенных вычислительных экспериментах АПН, использующий разные аппроксимации кривых Пеано, сравнивается с широко известным методом глобальной оптимизации DIRECT \cite{Jones}.
+
+
+
+\section{Постановка задачи}
+Классическая задача поиска минимума многомерной многоэкстремальной функции $\phi(y)$, где $y\in R^{n} (n>1)$ в $N$-мерном гиперкубе $D$ записывается в следующем виде:
+	\[
+	\phi(y^{*})=min\{\phi(y),y\in D\}, D=\{y\in R^{n},a_{i}\leq y_{i}\leq b_{i}, i=1,...,n\} \tag{1}
+	\]
+
+Дополнительно потребуем, чтобы функция $\phi(y)$ удовлетворяла следующим условиям:
+\begin{enumerate}
+	\item $\phi(y)\geq 0, y\in D$ (неотрицательность функции);
+  \item Существует вектор $y^{*}\in D$ такой, что $\phi(y^{*})=0$ (существование нуля функции);
+	\item Функция удовлетворяет условию: \[\left|\phi(y^{'}) - \phi(y^{''}) \right| \leq L \left| y^{'} - y^{''} \right| ,y^{'},y^{''}\in D, 0<L<\infty\]
+\end{enumerate}
+
+где значение $L$ – не задано (липшицевость функции).
+
+Функцию $\phi(y)$, удовлетворяющую описанным выше условиям, будем обозначать $\psi(y)$, где $y\in R^{n}\:(n>1)$. Очевидно, что для рассматриваемой функции $\psi(y)\:(y\in D)$ задача поиска глобального минимума эквивалентна задачи поиска нуля функции (поиска корня функции).
+
+Чтобы избежать экспоненциального роста вычислений при росте размерности задачи $N$ поставленная многомерная задача редуцируется до одномерной. Для редукции размерности можно использовать кривые Пеано \cite{Strongin1,Strongin2}. Аппроксимации таких кривых (развертки) обычно обладают свойством однозначности (инъективности): любой точке (прообразу) отрезка $[0,1]$ вещественной оси соответствует единственная точка (образ) в $N$-мерной области $D$. В результате точкам, близким в области $D$, могут соответствовать расположенные далеко друг от друга  прообразы на отрезке $[0,1]$ вещественной оси. Данный эффект в некоторых случаях может негативно сказать на скорости сходимости метода оптимизации. Чтобы избежать подобного эффекта, предлагается использовать так называемую неинъективную развертку. В работе \cite{Sergeyev} предложены развертки, обладающие следующим свойством: любой точке в $N$-мерной области $D$ соответствует множество (но не более чем $2^{N}$) прообразов на отрезке $[0,1]$ вещественной оси. Таким образом исходная многомерная задача (1) сводится к одномерной задаче следующего вида:
+
+\[
+\psi(y^{*}(x))=min\{\psi(y(x)),x\in [0,1]\}\tag{2}
+\]
+
+Функция $\psi(y(x))$ удовлетворяет следующим условиям:
+
+\begin{enumerate}
+	\item $\psi(y(x))\geq 0, x\in [0,1]$ (неотрицательность функции);
+  \item Существует точка $x^{*}\in [0,1]$ такая, что $\psi(y^{*}(x))=0$ (существование нуля функции);
+	\item Функция удовлетворяет условию: \[\left|\psi(y(x^{'})) - \psi(y(x^{''})) \right| \leq H \sqrt[N]{\left| x^{'} - x^{''} \right|} ,x^{'},x^{''}\in [0,1], 0<H<\infty\]
+\end{enumerate}
+где значение $H$ – не задано. Из \cite{Strongin2} известно, что константа Гёльдера $H$ связана с константой Липшица $L$ соотношением $H=4L\sqrt{N}$ (гёльдеровость функции).
+
+Для решения редуцированной задачи применим Алгоритм Поиска Нуля (АПН) \cite{Zaitsev,Barkalov2}. Данный алгоритм специально разрабатывается для такого класса задач.
+
+\section{Описание алгоритма}
+Алгоритм поиска нуля функции $\psi(y(x))$ порождает последовательность точек ${x^{k}}$. В этих точках вычисляется значение функции $z^{k}=\psi(y(x^{k})), k= 0, 1, 2,...$ . Предполагается, что погрешность пренебрежимо мала. Первые два испытания осуществляются в граничных точках, то есть $x^{0}=0$ и $x^{1}=1$ соответственно. А выбор точек $x^{k+1}, k\geq 1$ , очередного $(k+1)$-го испытания осуществляются по следующим правилам:
+\begin{enumerate}
+	\item Перенумеруем (нижнем индексом) точки $x_{i} , 0\leq i\leq k$, в порядке возрастания значения координаты:\[0=x_{0}<x_{1}<...<x_{k}=1 \tag{3}\] 
+  \item Для каждого интервала $(x_{i}-x_{i-1}), 1\leq i\leq k$, вычислим величину:\[K(i)=\frac{z_{i}+z_{i-1}}{\Delta_{i}} \tag{4}\] где $\Delta_{i}=\sqrt[N]{x_{i}-x_{i-1}},z_{i}=\psi(y(x_{i}))$, называемую характеристикой этого интервала
+	\item Определим интервал $(x_{t}-x_{t-1})$, которому соответствует минимальная характеристика $K$:\[K(t)=min\{K(i),1\leq i\leq k\} \tag{5}\]Если минимальное значение соответствует нескольким интервалам, то в качестве значения $t$ выбирается наименьшее число, удовлетворяющее условию (3).
+	\item Определим точку $x^{k+1}$ очередного испытания следующим образом:\[x^{k+1}=\frac{x_{t}+x_{t-1}}{2}\tag{6}\]
+	\item Проведем очередное испытание в точке $x^{k+1}$:\[z^{k+1}=\psi(y(x^{k+1}))\tag{7}\] и примем $k= k+1$
+	\item Проверим условие остановки алгоритма:
+	\begin{description}
+		\item[a.] Число итераций $k$ достигло значения $k_{max}$ (исчерпание вычислительного ресурса)
+		\item[b.] Было достигнуто значение:\[\psi^{*}_{k}=min\{\psi(y(x_{i})):0\leq i\leq k\}\leq \sigma \tag{8}\]где $\sigma>0$ (предустановленная допустимая погрешность в оценке нулевого значения функции $\psi(y(x))$ )
+	\end{description}
+\end{enumerate}
+
+\section{Результаты экспериментов}
+
+В вычислительных экспериментах было проведено сравнение трех алгоритмов: АПН с кусочно-линейной разверткой, АПН с неинъективной разверткой, и метода DIRECT \cite{Jones}. Во всех методах в критерии остановки использовалось значение $\sigma=10^{-2}$; в АПН использовалась развертка с параметром построения $m=10$, а в методе DIRECT -- параметр $\epsilon=10^{-4}$.
+Сравнение проводилось путем решения 100 задач, сформированных на основе функций вида:
+\[f(y)=\sum^{14}_{i=1}(A_{i}(2i\pi y_{1})+B_{i}(2i\pi y_{2})),y\in [0,1]^{2} \tag{9}\] где значения $A_{i},B_{i}, 1\leq i\leq 14$, независимо и равномерно распределены на отрезке $[-1,1]$. Указанные функции преобразовывались к неотрицательным следующим образом:\[\phi(y)=f(y)-f^{*} \tag{10}\]где $f^{*}$ являлось известным значением в точке глобального минимума. Линии уровня одной из функций $\phi(y)$ представлены на Рис. 1; на нем же отмечены точки 55 поисковых испытаний, выполненных АПН с неинъективной разверткой (левый рисунок), и точки 232 поисковых испытаний, выполненных при решении той же задачи методом DIRECT (правый рисунок).
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\textwidth]{pic/fig1.png}
+\includegraphics[width=0.45\textwidth]{pic/fig2.png}
+\caption{График целевой функции и точек испытаний, выполненных АПН с неинъективной разверткой (слева) и DIRECT (справа)}
+\end{figure}
+
+
+%\begin{table}[h]
+%\centering
+%\caption{Результаты решения всей серии из 100 задач}
+%\begin{tabular}{|p{0.2\linewidth}|p{0.2\linewidth}|p{0.2\linewidth}|p{0.2\linewidth}|}
+%\hline
+%Алгоритм & Среднее число испытаний & Медианное число испытаний & Максимальное число испытаний \\
+%\hline
+%АПН с инъективной разверткой & 147.81 & 111 & 560\\
+%\hline
+%АПН с неинъективной разверткой & 100.39 & 84 & 460\\
+%\hline
+%DIRECT & 140.8 & 101 & 959\\
+%\hline
+%\end{tabular}
+%\end{table}
+%
+
+В результате решения всей серии из 100 задач было установлено, что среднее число поисковых испытаний, необходимое для решения задачи, составляет 140 для метода DIRECT, 147 для исходного варианта АПН с кусочно-линейной разверткой, и 100 для АПН с неинъективной разверткой. Медианное число испытаний для перечисленных методов составило 101, 111, и 84 соответственно. 
+Результаты показывают, что АПН с неинъективной разверткой требует значительно меньшего числа поисковых испытаний как по сравнению со своим прототипом, так и по сравнению с методом DIRECT.
+
+\section{Заключение}
+По результатам проведенного вычислительного эксперимента можно отметить, что тип развертки оказывает влияние на работу АПН. В большей степени это влияние сказывается на локальной фазе поиска, т.е. когда алгоритм попал в область притяжения глобального минимума. Это связано с тем, что кусочно-линейная развертка, обеспечивающая однозначное отображение единичного отрезка вещественной оси на $N$-мерную область $D$, приводит к порождению локальных минимумов, которые существуют только в редуцированной одномерной задаче. Неинъективная развертка лишена подобного эффекта, что позволяет АПН за значительно меньшее число итераций по сравнению с методом DIRECT и по сравнению со своим прототипом решать задачи минимизации многоэкстремальных функций.
+
+\begin{biblio}
+
+\bibitem{Zaitsev}
+Зайцев А. С., Баркалов К. А. Об алгоритме поиска глобального минимума для одного класса многоэкстремальных задач // Сборник трудов IV Молодёжной школы. -- Н.Новгород: Издательство ННГУ им. Н. И. Лобачевского, 2025. С. 39-42
+
+\bibitem{Barkalov2}
+Баркалов К. А., Зайцев А. С., Стронгин Р. Г. Алгоритм поиска нуля неотрицательной многоэкстремальной функции // Журнал вычислительной математики и математической физики. 2026. T. 66, №3. C. 348-360.
+
+\bibitem{Strongin1}
+Стронгин Р.Г. Численные методы в многоэкстремальных задачах (информационно статистический подход) // М.: Наука, 1978, 240 стр.
+
+\bibitem{Strongin2}
+Стронгин Р.Г. Поиск глобального оптимума // М.: Знание, 1990.
+
+%\bibitem{Barkalov1}
+%Barkalov K. A., Strongin R. G., Bevzyuk S. A. Acceleration of Global Search by Implementing Dual Estimate for Lipschitz Constant // Lecture Notes in Computer Science. 2020. Vol. 11974. P. 478-486.
+
+\bibitem{Sergeyev}
+Sergeyev D. Y., Strongin R. G., Lera D. Introduction to Global Optimization Exploiting Space-Filling Curves // Springer Briefs in Optimization, 2013.
+
+\bibitem{Jones}
+Jones D. R., Perttunen C. D., Stuckman B. E. Lipschitzian optimization without the lipschitz constant // Journal of optimization theory and application. 1993. Vol. 79, No. 1, P. 157-181.
+
+\end{biblio}
+
+\newpage
+
+\msc{90C26}
+
+\title{Investigation of dimensionality reduction schemes for an algorithm for finding the zero value of a non-negative function}
+
+
+\authors{K.A.~Barkalov, A.S.~Zaitsev}
+\organizations{Lobachevsky State University of Nizhny Novgorod}
+
+
+% abstract is contained in the  abstract environment
+\abstracten{The paper addresses the problem of finding the global minimum of a multidimensional multiextremal function that takes non-negative values and attains zero within its domain. Such a problem can be interpreted as minimizing the residual between theoretical and experimental data. To accelerate the convergence of an algorithm for locating the zero of a non-negative multidimensional function, it is proposed to reduce the dimensionality of the problem using an approximation of the Peano curve -- a non-injective evolvent. Computational experiments have been carried out confirming the effectiveness of the proposed approach to dimensionality reduction in this problem.
+}
+
+\keywordsen{global optimization, dimensionality reduction, Peano curves, zero value of a function.}
+
+\begin{biblioen}
+
+\bibitem{Zaitsev_en}
+Zaitsev A.S., Barkalov K.A. Ob algoritme poiska global'nogo minimuma dlya odnogo klassa mnogoekstremal'nyh zadach // Sbornik trudov IV Molodyozhnoj shkoly. -- N.Novgorod: Izdatel'stvo NNGU im. N. I. Lobachevskogo. 2025. P. 39-42
+
+\bibitem{Barkalov2_en}
+Barkalov, K.A, Strongin, R.G, Zaitsev, A.S An algorithm for finding a root of a nonnegative multimodal function // Computational Mathematics and Mathematical Physics. 2026. 66. 3. P. 348-360. DOI: 10.7868/S3034533226030023
+
+\bibitem{Strongin1_en}
+Strongin, R.G. Chislennye metody v mnogoekstremal'nyh zadachah (informacionno statisticheskij podhod) // M.: Nauka. 1978.
+
+\bibitem{Strongin2_en}
+Strongin, R.G. Poisk global'nogo optimuma // M.: Znanie. 1990.
+
+\bibitem{Sergeyev_en}
+Sergeyev D. Y., Strongin R. G., Lera D. Introduction to Global Optimization Exploiting Space-Filling Curves // Springer Briefs in Optimization. 2013.
+
+\bibitem{Jones_en}
+Jones D. R., Perttunen C. D., Stuckman B. E. Lipschitzian optimization without the lipschitz constant // Journal of optimization theory and application. 1993. 79. 1. P. 157-181.
+
+%\bibitem{Borisen} Borisov V.E., Yakush S.E. Application of Adaptive Hierarchical Grids to Simulation of Reacting Gas Flows, {\it Physical-Chemical Kinetics in Gas Dynamics}, 2015, vol. 16 (2) (in Russian). \\ URL: {http://chemphys.edu.ru/issues/2015-16-2/articles/544/} 
+
+%\bibitem{Zhrv1en} Zhalnin R.V., Peskova E.E., Stadnichenko O.A., Tishkin V.F. Matematicheskoye modelirovaniye dinamiki mnogokomponentnogo gaza s ispol'zovaniyem WENO skhem na primere piroliza etana // Zhurnal Srednevolzhskogo matematicheskogo obshchestva. 2016. 18. 3. P. 98-106.
+
+
+
+\end{biblioen}
+
+
+
+\end{document}
