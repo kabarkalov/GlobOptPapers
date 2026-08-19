@@ -10,14 +10,16 @@
 \LoadClass[twoside, 11pt, a4paper]{article}
 
 % --- кодировка и язык ---
-\usepackage[utf8]{inputenc}
-\usepackage[english, russian]{babel}
+\usepackage[T1,T2A]{fontenc} % загружает кодировки шрифтов, T1 для латиницы и T2A для кириллицы
+\usepackage[utf8]{inputenc} % загружает кодировку UTF-8
+\usepackage[english, main=russian]{babel} % загружает поддержку языков
 \usepackage[unicode=true,linktocpage=true]{hyperref}
 %\usepackage[none]{hyphenat}
 %\usepackage{textcomp}
 \usepackage{mmap} % Включает CMap-таблицу в русскоязычный PDF, чтобы функции поиска и копирования работали правильно
 \usepackage{array}
 \usepackage{ragged2e}
+\usepackage{translations}
 
 % --- размеры шрифтов ---
 \renewcommand{\large}{\fontsize{16pt}{19.6pt}\selectfont}{\bf} % заголовок статьи, заголовок 1
@@ -41,10 +43,15 @@
 \usepackage{enumitem, changepage, fancyvrb}
 
 % --- пробелы между ссылками на литературу ---
-\usepackage[space]{cite}
+%\usepackage[space]{cite}
 
 \usepackage{amsfonts, amsmath, amssymb, amsthm}
 %\usepackage{showframe} % показывать все поля для отладки стилей
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage{xcolor}
 
 % --- acknowledgements ---
 \newcommand\ack[1]{
@@ -73,6 +80,79 @@
 }
 \let\endenumerateparen\endoldenumerate
 
+%% --- колонтитулы ---
+%\newcommand{\ps@vestnikfirst}{
+%	% нижние колонтитулы первой страницы
+%	\renewcommand{\@oddfoot}{%
+%		\vbox{%
+%			\phantom{eee}%
+%			\hrule%
+%			\vskip 4pt%
+%			\hbox to \textwidth{%
+%				\textbf{2013, т.~2, \No~1}\hfil\thepage%
+%			}%
+%		}%
+%	}
+%	\renewcommand{\@evenfoot}{%
+%		\vbox{%
+%			\phantom{eee}%
+%			\hrule%
+%			\vskip 4pt%
+%			\hbox to \textwidth{%
+%				\thepage\hfil\textbf{Вестник ЮУрГУ. Серия <<Вычислительная математика и информатика>>}%
+%			}%
+%		}%
+%	}
+%	% верхние колонтитулы первой страницы
+%	\renewcommand{\@oddhead}{}
+%	\renewcommand{\@evenhead}{}
+%}
+%
+%\newcommand{\ps@vestnik}{
+%	\setlength{\textwidth}{161mm}% {ширина текста на странице}
+%	% нижние колонтитулы остальных страниц
+%	\renewcommand{\@oddfoot}{%
+%		\vbox{%
+%			\phantom{eee}%
+%			\hrule%
+%			\vskip 4pt%
+%			\hbox to \textwidth{%
+%				\textbf{2013, т.~2, \No~1}\hfil\thepage%
+%			}%
+%		}%
+%	}
+%	\renewcommand{\@evenfoot}{%
+%		\vbox{%
+%			\phantom{eee}%
+%			\hrule%
+%			\vskip 4pt%
+%			\hbox to \textwidth{%
+%				\thepage\hfil\textbf{Вестник ЮУрГУ. Серия <<Вычислительная математика и информатика>>}%
+%			}%
+%		}%
+%	}
+%
+%	% верхние колонтитулы остальных страниц
+%	\renewcommand{\@oddhead}{%
+%		\raisebox{0pt}[\headheight][0pt]{%
+%			\vbox{%
+%				\hbox to \textwidth{\hfil\small{\textbf{\leftmark}}\hfil}%
+%				\vskip 3pt%
+%				\hrule%
+%			}%
+%		}%
+%	}
+%	\renewcommand{\@evenhead}{%
+%		\raisebox{0pt}[\headheight][0pt]{%
+%			\vbox{%
+%				\hbox to \textwidth{\hfil\small{\textbf{\rightmark}}\hfil}%
+%				\vskip 3pt%
+%				\hrule%
+%			}%
+%		}%
+%	}
+%}
+
 % --- горизонтальная линия, которая не рисуется в начале и конце страницы
 \newcommand\rulesep{%
 	\par%
@@ -86,7 +166,12 @@
 }
 \def\getlasttwo#1#2#3#4\relax{#3#4}
 
+%\newcommand{\issuedoi}{0\issue}
+%\newcommand{\numdoi}{0\num}
+
 % --- doi ---
+%\let\@doi\@empty
+%\def\@doi{10.14529/cmse\lasttwoofyear{0}\issuedoi\numdoi}
 \newcommand{\@doi}{}
 \newcommand{\@novolume}{X}
 \newcommand{\@noissue}{Y}
@@ -95,9 +180,13 @@
 
 \newcommand{\doi}{%
 	\ifdefined\@volume 
-		\@doi{DOI:~10.14529/cmse\lasttwoofyear{0}0\@volume0\@num}\unskip 
+		%\newline \@datesattended  % Please use some 'better' setup here
+		\@doi{DOI:~10.14529/cmse\lasttwoofyear{0}0\@issue0\@num}\unskip 
 	\else
-		\@doi{DOI:~10.14529/cmse\lasttwoofyear{0}0\@novolume0\@nonum}\unskip 
+		%\let\@institutionname\relax
+		%\let\@datesattended\relax 
+		%\let\@degree\relax
+		\@doi{DOI:~10.14529/cmse\lasttwoofyear{0}0\@noissue0\@nonum}\unskip 
 	\fi
 }
 
@@ -131,6 +220,13 @@
 % --- классификация статьи ---
 \let\@classification\@empty
 \def\classify#1{
+	%\def\@classification{#1}
+	%\ifx \@classification \@empty% если пустая классификация
+	%\vspace{10pt} % то она реально пустая
+	%\else%
+	%{\large{\begin{flushleft}\textbf{\@classification}\end{flushleft}}}% иначе - пишем её
+	%\fi%
+	%{\noindent\large\bfseries#1\hfill{}\@doi\par}
 	{\noindent\large\bfseries#1\hfill{}\doi\par}
 	\vspace{6pt}
 }
@@ -155,21 +251,41 @@
 	\vspace{2pt}
 }
 
+% Формат списка организаций			#commented by Alex Porozov. This \large makes organisation so big in comparison with word's PDF.
+%\def\organizations#1{
+%	{\large\centering\it#1\par}
+%}
+
 % Формат списка организаций
 \def\organizations#1{
 	{\normalsize\centering\it#1\par}
 }
 
-% Формат списка e-mail адресов
+% Формат списка e-mail адресов #commented by Alex Porozov. This \large makes e-mails so big in comparison with word's PDF.
+%\def\emails#1{
+%	{\large\centering\it E-mail:~#1\par}
+%}
+
 \def\emails#1{
 	{\normalsize\centering\it E-mail:~#1\par}
 }
 
-% Формат даты поступления в редакцию
+% Формат даты поступления в редакцию % Формат списка e-mail адресов #commented by Alex Porozov. This \large makes redaction date so big in comparison with word's PDF.
+%\def\redactiondate#1{
+%	{\large\centering Поступила~в~редакцию:~#1\par}
+%	\vspace{16pt}
+%}
+
 \def\redactiondate#1{
 	{\normalsize\centering Поступила~в~редакцию:~#1\par}
 	\vspace{16pt}
 }
+
+% Формат даты поступления в редакцию % Формат списка e-mail адресов #commented by Alex Porozov. This \large makes redaction date so big in comparison with word's PDF.
+%\def\redactiondateen#1{
+%	{\large\centering Received:~#1\par}
+%	\vspace{16pt}
+%}
 
 \def\redactiondateen#1{
 	{\normalsize\centering Received:~#1\par}
@@ -349,13 +465,24 @@
 
 % Отступ сверху и снизу от плавающих объектов
 \setlength{\intextsep}{1em}
-\usepackage{floatrow}
-\floatsetup[table]{capposition=top}
+%\usepackage{floatrow}
+%\floatsetup[table]{capposition=top}
 
 \usepackage[labelfont=bf]{caption}
-\captionsetup[table]{labelsep = period, singlelinecheck=off}
+\captionsetup[table]{labelsep = period, justification=centering, singlelinecheck=off}
 \captionsetup[figure]{labelsep=period, 
 	justification=centering, singlelinecheck=off}
+
+
+% --- псевдокод алгоритма ---
+\captionsetup[algorithm]{labelfont=bf, labelsep=period}
+\floatname{algorithm}{Алгоритм}
+\algnewcommand\Input{\item[\textbf{Вход:}]}%
+\algnewcommand\Output{\item[\textbf{Выход:}]}%
+\algnewcommand\Locals{\item[\textbf{Данные:}]}%
+
+% --- листинг ---
+\captionsetup[lstlisting]{labelsep=period}
 
 % --- подпись к рисункам и таблицам ---
 %\abovecaptionskip=0pt
@@ -485,5 +612,272 @@
 	}{%
 	\end{thebibliography}%
 }
-
 \renewcommand{\@biblabel}[1]{#1.} % Формат списка литературы
+
+
+\usepackage[style=gost-numeric, % стиль цитирования и библиографии (по ГОСТ)
+backend=biber, % движок
+bibencoding=utf8, % кодировка bib файла
+language=auto, % получение языка из babel/polyglossia
+hyperref=auto,
+autolang=other, % многоязычная библиография
+sorting=none, % настройка сортировки списка литературы
+defernumbers=true, % нумерация проставляется после двух компиляций, зато позволяет выцеплять библиографию по ключевым словам и нумеровать не из большего списка
+maxnames=4,
+minnames=3,
+movenames=false, % не менять местами заголовок и список авторов, если авторов больше четырех
+isbn=false % показывать или нет ISBN, ISSN, ISRN
+]{biblatex}
+\usepackage{csquotes}
+
+\makeatletter
+\newcommand*{\bibnocite}[1]{%
+	\blx@xsanitizeafter{\forcsvlist\bibnocite@do}{#1}}
+
+\newcommand*{\bibnocite@do}[1]{%
+	\nocite{#1:TR}}
+\makeatother
+
+\newcommand{\bblcite}[1]{\cite{#1}\bibnocite{#1}}
+
+
+\newcommand{\addbblresources}[2]{
+	\addbibresource{#1}
+	\addbibresource{#2}
+	
+	%модификация bib файла перед тем, как им займётся biblatex
+	\DeclareSourcemap{
+		\maps[datatype=bibtex]{
+			\map[overwrite]{ % стираем ключевые слова
+				\step[fieldsource=keywords]
+				\step[fieldset=keywords,null]
+			}
+			\map[overwrite]{
+				\perdatasource{#1}
+				\step[fieldset=keywords, fieldvalue={,bibliography-ru}, append]
+			}
+			\map[overwrite]{
+				\perdatasource{#2}
+				\step[fieldset=keywords, fieldvalue={,bibliography-en}, append]
+			}
+			\map{% перекидываем значения полей language в поля langid, которыми пользуется biblatex
+				\step[fieldsource=language, fieldset=langid, origfieldval, final]
+				\step[fieldset=language, null]
+			}
+			\map[overwrite]{ % переделка формата записи даты
+				\step[fieldsource=urldate, match=\regexp{([0-9]{2})\.([0-9]{2})\.([0-9]{4})}, replace={$3-$2-$1$4}, final]
+			}
+			\map[overwrite]{% стираем значения всех полей abstract
+				\step[fieldsource=abstract]
+				\step[fieldset=abstract,null]
+			}
+		}
+	}
+}
+
+
+\newcommand{\addbblresourcesen}[2]{
+	\addbibresource{#1}
+	\addbibresource{#2}
+	
+	%модификация bib файла перед тем, как им займётся biblatex
+	\DeclareSourcemap{
+		\maps[datatype=bibtex]{
+			\map[overwrite]{ % стираем ключевые слова
+				\step[fieldsource=keywords]
+				\step[fieldset=keywords,null]
+			}
+			\map[overwrite]{
+				\perdatasource{#2}
+				\step[fieldset=keywords, fieldvalue={,bibliography-ru}, append]
+			}
+			\map[overwrite]{
+				\perdatasource{#1}
+				\step[fieldset=keywords, fieldvalue={,bibliography-en}, append]
+			}
+			\map{% перекидываем значения полей language в поля langid, которыми пользуется biblatex
+				\step[fieldsource=language, fieldset=langid, origfieldval, final]
+				\step[fieldset=language, null]
+			}
+			\map[overwrite]{ % переделка формата записи даты
+				\step[fieldsource=urldate, match=\regexp{([0-9]{2})\.([0-9]{2})\.([0-9]{4})}, replace={$3-$2-$1$4}, final]
+			}
+			\map[overwrite]{% стираем значения всех полей abstract
+				\step[fieldsource=abstract]
+				\step[fieldset=abstract,null]
+			}
+		}
+	}
+}
+
+% Убрать тире из разделителей элементов в библиографии
+\renewcommand*{\newblockpunct}{%
+	\addperiod\space\bibsentence}
+
+% Изменение точки с запятой на запятую в перечислении библиографических ссылок
+\renewcommand*{\multicitedelim}{\addcomma\space}
+
+\renewcommand*{\mkgostheading}[1]{#1} % только лишь убираем курсив с авторов
+
+% Убираем неразрывные пробелы перед двоеточием и точкой с запятой %%%
+\makeatletter
+\renewcommand*{\addcolondelim}{%
+	\begingroup%
+	\def\abx@colon{%
+		\ifdim\lastkern>\z@\unkern\fi%
+		\abx@puncthook{:}\space}%
+	\addcolon%
+	\endgroup}
+
+\renewcommand*{\addsemicolondelim}{%
+	\begingroup%
+	\def\abx@semicolon{%
+		\ifdim\lastkern>\z@\unkern\fi%
+		\abx@puncthook{;}\space}%
+	\addsemicolon%
+	\endgroup}
+\makeatother
+
+
+\DefineBibliographyStrings{english}{%
+	pages = {p\adddot},
+	urlseen = {accessed},
+	andothers = {\emph{et al.}}
+}
+
+\DefineBibliographyStrings{russian}{%
+	jourvol = {Т\adddot},
+	pages = {C\adddot},
+	urlseen = {дата обращения}
+}
+
+\renewbibmacro*{name:andothers}{%
+	\ifboolexpr{
+		test {\ifnumequal{\value{listcount}}{\value{liststop}}}
+		and
+		test \ifmorenames
+	}
+	{\ifnumgreater{\value{liststop}}{1}
+		{\finalandcomma}
+		{}%
+		\andothersdelim\bibstring{andothers}}
+	{}}
+
+\renewcommand*{\bibinitdelim}{}
+
+% print url if no doi
+\renewbibmacro*{doi+eprint+url+note}{%
+	\iffieldundef{doi}{%
+	}{
+		\printfield{note}
+		%\setunit*{\space}%
+		\printfield{doi}%
+		%\setunit*{\space}%
+		%\printfield{note}
+		\newunit\newblock%
+	}
+	\iftoggle{bbx:eprint}{%
+		\usebibmacro{eprint}%
+	}{}%
+	\newunit\newblock%
+	\iffieldundef{doi}{%
+		\usebibmacro{url+urldate+note}}%
+	{}%
+}
+
+\renewbibmacro*{url+urldate+note}{%
+	\ifboolexpr{
+		test {\ifentrytype{online}}
+		or
+		( test \ifcitation
+		and
+		togl {cbx:url}
+		)
+		or
+		( not test \ifcitation
+		and
+		togl {bbx:url}
+		)
+	}
+	{\usebibmacro{url+urldate}}
+	{}%
+	%\setunit*{\addsemicolondelim}%
+	\setunit*{\space}%
+	\printfield{note}
+}
+
+% изменение оформления серии (убраны скобки вокруг серии) у периодических изданиях 
+\renewbibmacro*{series+number}{%
+	\iffieldundef{series}
+	{}
+	{\printtext{%
+			\printfield{series}%
+			\setunit*{\addsemicolondelim}%
+			\printfield[seriesnumber]{number}}}}
+		
+
+\DeclareFieldFormat[book]{pages}{\mkpageprefixbook[bookpagination]{#1}}
+
+\makeatletter
+\blx@regimcs{%
+	\mkpageprefixbook
+}
+
+\newrobustcmd*{\blx@imc@mkpageprefixbook}[1][pagination]{%
+	\begingroup
+	\def\blx@tempa{\blx@mkpageprefixbook{page}}%
+	\iffieldundef{#1}
+	{}
+	{\iffieldequalstr{#1}{none}
+		{\def\blx@tempa{\blx@mkpageprefix@i}}
+		{\iffieldbibstring{#1}
+			{\edef\blx@tempa{\blx@mkpageprefixbook{\thefield{#1}}}}
+			{\blx@warning@entry{%
+					Unknown pagination type '\strfield{#1}'}}}}%
+	\@ifnextchar[%]
+	{\blx@tempa}
+	{\blx@tempa[\@firstofone]}}
+
+\protected\long\def\blx@mkpageprefixbook#1[#2]#3{%
+	\blx@mkpageprefix@i[{#2}]{#3}
+	\ifnumeral{#3}
+	{\bibstring{#1}\ppspace}
+	{\ifnumerals{#3}
+		{\bibstring{#1s}\ppspace}
+		{\def\pno{\bibstring{#1}}%
+			\def\ppno{\bibstring{#1s}}}}%
+}
+\makeatother
+
+
+\DeclareFieldFormat{urldate}{%
+	\mkbibparens{\bibstring{urlseen}\addcolon\space{\thefield{urlday}\adddot
+			\thefield{urlmonth}\adddot
+			\thefield{urlyear}}}}
+		
+\DeclareTextSymbolDefault{\CYRL}{T2A}
+\DeclareTextSymbolDefault{\cyri}{T2A}
+\DeclareTextSymbolDefault{\cyrt}{T2A}
+\DeclareTextSymbolDefault{\cyre}{T2A}
+\DeclareTextSymbolDefault{\cyrr}{T2A}
+\DeclareTextSymbolDefault{\cyra}{T2A}
+\DeclareTextSymbolDefault{\cyrt}{T2A}
+\DeclareTextSymbolDefault{\cyru}{T2A}
+\DeclareTextSymbolDefault{\cyrr}{T2A}
+\DeclareTextSymbolDefault{\cyra}{T2A}
+
+\newcommand{\bibtitleru}{Литература}
+\newcommand{\bibtitleen}{References}
+
+\newcommand*{\insertbiblio}{
+	\selectlanguage{english}
+	\printbibliography[title=\bibtitleru, keyword={bibliography-ru}, resetnumbers]
+	\selectlanguage{russian}
+}
+
+\newcommand*{\insertbiblioen}{
+	\selectlanguage{english}
+	\begingroup\renewbibmacro*{//}{.}
+	\printbibliography[title=\bibtitleen, keyword={bibliography-en}, resetnumbers]
+	\endgroup
+}
